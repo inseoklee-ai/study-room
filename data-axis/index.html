@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>데이터는 어디에 남는가 · 판단의 첫 번째 축</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:18px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.95rem,1.55vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .go{color:var(--gold);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.3em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:18px}
+  .part .who{margin-top:16px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px 20px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:780px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .steps{display:grid;gap:8px}
+  .st{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:11px 15px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:25px;height:25px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.78rem}
+  .st .t{font-size:clamp(.88rem,1.5vw,1.04rem)}
+
+  table{border-collapse:collapse;width:100%;font-size:clamp(.8rem,1.35vw,.96rem)}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--bg2);font-weight:750;color:var(--ink)}
+  td{color:var(--soft)}td b{color:var(--ink)}
+  tr:last-child td{border-bottom:none}
+  .tw{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:6px}
+
+  code{font-family:"SF Mono",Menlo,Consolas,monospace;background:var(--bg2);padding:2px 6px;border-radius:5px;font-size:.88em}
+  pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+    overflow:auto;max-height:56vh;font-size:clamp(.74rem,1.25vw,.9rem);line-height:1.7;
+    font-family:"SF Mono",Menlo,Consolas,monospace;color:var(--ink);margin:10px 0;white-space:pre-wrap}
+
+  /* data-path flow */
+  .flow{display:grid;gap:5px;margin:4px 0}
+  .flabel{font-weight:750;font-size:.92rem;margin-top:8px}
+  .flabel.api{color:var(--red)} .flabel.loc{color:var(--bl)}
+  .frow{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:4px}
+  .fcard{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:9px 13px;
+    text-align:center;box-shadow:var(--sh);flex:1;min-width:96px}
+  .fcard b{font-size:.9rem} .fcard small{display:block;color:var(--soft);font-size:.68rem;margin-top:1px}
+  .fcard.gold{background:linear-gradient(180deg,rgba(200,161,90,.18),transparent);border-color:var(--gold)}
+  .fcard.gold small{color:var(--gold)}
+  .fcard.blue{background:linear-gradient(180deg,rgba(58,90,140,.16),transparent);border-color:var(--bl)}
+  .fcard.blue small{color:var(--bl)}
+  .farrow{color:var(--soft);font-weight:700;flex:none}
+  .fnote{font-size:.76rem;color:var(--soft);margin-top:5px}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 15px;font-size:clamp(.86rem,1.45vw,1.0rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · LLM과 로컬 실행 (5)</span>
+    <h1 style="margin:18px 0">데이터는<br>어디에 남는가</h1>
+    <p class="sub">판단의 첫 번째 축 · 데이터 · 학습 vs 보관 · ZDR · 민감도 워크북</p>
+  </div>
+  <aside>세 축(데이터·비용·주권) 중 첫 번째, 데이터입니다. 같은 질문이라도 문장이 지나간 경로와 남는 것은 완전히 다릅니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 이번 강의의 지도</h2>
+  <div class="tw"><table>
+    <thead><tr><th>파트</th><th>내용</th><th>핵심</th></tr></thead>
+    <tbody>
+      <tr><td><b>1</b></td><td>학습 ≠ 보관</td><td>"학습 안 씀"과 "안 남음"은 <b>다른 통제 장치</b></td></tr>
+      <tr><td><b>2</b></td><td>ZDR의 진실</td><td>제로 데이터 보관은 문자 그대로 <b>0이 아니다</b></td></tr>
+      <tr><td><b>3</b></td><td>6가지 확인</td><td>데이터 판단 = <b>여섯 개의 분리된 질문</b></td></tr>
+      <tr><td><b>4</b></td><td>로컬도 안전 X</td><td>통제 지점이 <b>밖에서 안으로</b> 옮겨갈 뿐</td></tr>
+      <tr><td><b>5</b></td><td>직접 해보기</td><td>민감도 워크북 · 위험한 문장 찾기</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">🎯 핵심 한 줄: <b>어느 쪽도 자동으로 안전하지 않습니다. 통제해야 할 지점이 옮겨갈 뿐입니다.</b></div>
+  <aside>하나만 확인하고 나머지를 넘겨짚는 것이 실무에서 가장 흔한 실수입니다.</aside>
+</section>
+
+<!-- 3 도입 -->
+<section class="slide" data-part="표지">
+  <h2>🛣️ 응답은 같아도 <span class="g">지나온 길</span>이 다릅니다</h2>
+  <p>같은 질문을 API로 보냈다면 결과는 비슷했을지 몰라도, 그 문장이 지나간 <b>경로는 완전히 달랐을</b> 겁니다.</p>
+  <div class="chain">
+    <div class="cell"><small>출발</small><b>내 키보드</b></div><span class="ar">→</span>
+    <div class="cell"><small>이동</small><b>회선</b></div><span class="ar">→</span>
+    <div class="cell" style="border-color:var(--red)"><small>어느 나라·리전</small><b>남의 서버</b></div><span class="ar">→</span>
+    <div class="cell"><small>계산 후</small><b>다시 돌아옴</b></div>
+  </div>
+  <div class="hl">응답 화면은 똑같아 보이지만 <b>지나온 길이 다르고, 그 길 위에 남는 것도 다릅니다.</b> 첫 번째 축은 바로 이 <b class="g">데이터</b>입니다.</div>
+  <aside>키보드에서 출발해 회선을 타고 어느 나라 어느 리전 서버로 들어가 계산되고 돌아옵니다. 남는 것을 다음 장에서 그림으로 봅니다.</aside>
+</section>
+
+<!-- 4 그림: 같은 문장 다른 경로 -->
+<section class="slide" data-part="표지">
+  <h2>🧭 같은 문장, <span class="g">다른 경로</span></h2>
+  <p style="margin-bottom:2px"><small>응답 화면은 같아 보여도, 문장이 지나간 자리에 남는 것은 다릅니다</small></p>
+  <div class="flow">
+    <div class="flabel api">클라우드 API로 보낼 때</div>
+    <div class="frow">
+      <div class="fcard"><b>내 화면</b></div><span class="farrow">→</span>
+      <div class="fcard"><b>회선과 리전</b><small>어느 나라를 지나는가</small></div><span class="farrow">→</span>
+      <div class="fcard gold"><b>사업자 경계</b><small>여기서부터 남의 시스템</small></div><span class="farrow">→</span>
+      <div class="fcard"><b>응답</b></div>
+    </div>
+    <div class="fnote">🟡 남을 수 있는 것 · 요청 메타데이터, 입력·출력 로그, 안전 분류 결과, 청구용 사용량 기록</div>
+    <div class="flabel loc">내 노트북에서 돌릴 때</div>
+    <div class="frow">
+      <div class="fcard"><b>내 화면</b></div><span class="farrow">→</span>
+      <div class="fcard blue"><b>내 컴퓨터에서 추론</b><small>경계를 넘지 않음</small></div><span class="farrow">→</span>
+      <div class="fcard"><b>응답</b></div>
+    </div>
+    <div class="fnote">🔵 남을 수 있는 것 · 디스크에 쌓이는 프롬프트 기록, 자동 백업, 화면 캡처, 이 컴퓨터에 접근하는 사람</div>
+  </div>
+  <div class="hl">⚖️ <b>어느 쪽도 자동으로 안전하지 않습니다. 통제해야 할 지점이 옮겨갈 뿐입니다.</b></div>
+  <aside>API는 경계 밖에 남고, 로컬은 경계 안에 남습니다. 남는 종류가 다를 뿐 '안 남는' 게 아닙니다.</aside>
+</section>
+
+<!-- 5 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">"학습에 안 씀" ≠ "남지 않음"</h2>
+    <p style="margin-top:11px">한 문장이 답하는 것은 절반뿐</p>
+    <span class="who">두 개의 다른 통제 장치</span>
+  </div>
+  <aside>많은 조직이 "학습에 쓰지 않습니다" 한 줄을 근거로 도입을 승인합니다. 그런데 그 문장은 궁금한 것의 절반만 답합니다.</aside>
+</section>
+
+<!-- 6 학습 vs 보관 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔐 <span class="g">다른 통제 장치</span>, 따로 설정됩니다</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="g">"학습에 쓰지 않는다"</h3>
+      <p style="margin:0">내 문장이 <b>다음 모델의 재료</b>가 되지 않는다</p>
+    </div>
+    <div class="box">
+      <h3 class="r">"남지 않는다"</h3>
+      <p style="margin:0">내 문장이 <b>어딘가에 저장</b>되어 있지 않다</p>
+    </div>
+  </div>
+  <div class="hl">🔑 이 둘은 <b>다른 통제 장치</b>이고 실제로 <b>따로 설정</b>됩니다. "학습에 안 쓴다"는 문장은 사실이지만, "저장되지 않는다"는 <b>전혀 별개의 질문</b>입니다.</div>
+  <aside>API 문서를 열면 거의 항상 "입력·출력은 기본적으로 학습에 사용하지 않습니다"가 먼저 눈에 들어옵니다. 사실이고 중요하지만, 보관은 별도입니다.</aside>
+</section>
+
+<!-- 7 문서 확인 표 -->
+<section class="slide" data-part="PART 1">
+  <h2>📄 공식 문서에 적힌 것 <small style="color:var(--soft)">(2026년 7월 확인)</small></h2>
+  <div class="tw"><table>
+    <thead><tr><th>확인한 것</th><th>문서에 적힌 내용</th></tr></thead>
+    <tbody>
+      <tr><td><b>학습 사용</b></td><td>OpenAI: 2023-03-01 이후 API 데이터를 학습에 안 씀, 쓰려면 <b>명시적 동의</b></td></tr>
+      <tr><td><b>로그 보관</b></td><td>같은 문서 — 남용 모니터링 로그 <b>최대 30일</b>, 법이 더 긴 보관을 요구하면 예외</td></tr>
+      <tr><td><b>다른 사업자</b></td><td>Anthropic: API 입출력을 수신·생성 후 <b>30일 이내 자동 삭제</b>, 상업용은 기본 학습 안 씀</td></tr>
+      <tr><td><b>예외</b></td><td>안전 시스템이 위반 표시한 대화 <b class="r">최대 2년</b>, 신뢰·안전 분류 점수 <b class="r">최대 7년</b></td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">⚠️ "학습에 안 씀"과 "보관"이 <b>표 안에서 이미 갈라져</b> 있습니다. 그리고 예외 항목을 보면 <b>어떤 것은 몇 년씩</b> 남습니다.</div>
+  <aside>학습 사용 한 줄만 보고 보관·예외를 넘겨짚으면 안 된다는 것이 표에 그대로 드러납니다.</aside>
+</section>
+
+<!-- 8 숫자는 바뀐다 -->
+<section class="slide" data-part="PART 1">
+  <h2>📅 숫자는 <span class="g">바뀝니다</span> — 실무 규칙</h2>
+  <ul class="pts">
+    <li>검색하면 보관 기간을 <b>7일이라 적은 글, 30일이라 적은 글</b>이 뒤섞여 나옵니다</li>
+    <li>둘 다 어느 시점엔 맞았을 수 있습니다 — <b>정책이 바뀌기</b> 때문</li>
+  </ul>
+  <div class="big">요약 글이 아니라 <span class="y">공급자의 공식 문서</span>를 열고<br><span class="y">확인한 날짜</span>를 함께 적어두세요</div>
+  <div class="hl">이 노트북에 적힌 숫자도 마찬가지입니다. <b>여러분이 실제로 결정하는 날에는 다시 확인해야</b> 합니다.</div>
+  <aside>블로그 요약은 시점이 불명확합니다. 공식 문서 + 확인 날짜가 감사에서 통하는 근거입니다.</aside>
+</section>
+
+<!-- 9 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">ZDR은 문자 그대로 0이 아닙니다</h2>
+    <p style="margin-top:11px">제로 데이터 보관, 이름과 실제는 다르다</p>
+    <span class="who">신청 · 범위 · 예외</span>
+  </div>
+  <aside>ZDR(Zero Data Retention). 이름만 들으면 콘솔 토글 같지만 실제로는 그렇지 않습니다.</aside>
+</section>
+
+<!-- 10 ZDR 세 함정 -->
+<section class="slide" data-part="PART 2">
+  <h2>🚪 ZDR의 <span class="g">세 가지 진실</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>신청해서 승인받아야</b> 한다 — OpenAI는 사전 승인+추가 요건+영업팀 문의. Anthropic은 조직 단위 계약이라 <b>새 조직엔 자동으로 안 따라옴</b>. 종량제 카드 결제만으론 못 얻음</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>적용 범위에 구멍</b> — 파일 API·배치 처리·코드 실행처럼 <b>상태를 저장하는 기능</b>은 ZDR 대상 아님. 콘솔·워크벤치도 빠짐. <b class="r">특정 모델 자체가 30일 보관을 요구</b>해 ZDR이 적용 안 되기도</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>제로에도 예외</b> — 법적 요구·안전 시스템 판단 시 남을 수 있음. OpenAI: CSAM 분류기에 탐지되면 ZDR에서도 수동 검토용 보관. Anthropic: ZDR·HIPAA 계약이 있어도 플래그된 입출력 <b class="r">최대 2년</b></span></div>
+  </div>
+  <div class="hl">계약이 있어도 <b>어떤 모델·기능을 고르면 보관이 되살아납니다.</b></div>
+  <aside>ZDR은 콘솔의 토글이 아니라 협상된 계약이고, 그 계약에도 기능·모델·법·안전이라는 구멍이 있습니다.</aside>
+</section>
+
+<!-- 11 ZDR 요점 + 소비자용 챗 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧾 감사 자리에서 <span class="g">설명해야 할 것</span></h2>
+  <p>이건 사업자가 약속을 어긴다는 이야기가 아닙니다. <b>안전 의무와 법적 의무가 계약보다 위</b>에 있다는 이야기입니다.</p>
+  <div class="big">"ZDR을 켰습니다"가 아니라<br><span class="y">"이런 조건에서 이만큼 남고,<br>이런 경우엔 이렇게 남습니다"</span></div>
+  <div class="hl r" style="border-left-color:var(--red)">⚠️ <b>소비자용 챗 인터페이스(웹·앱)는 API와 정책이 다릅니다.</b> 학습 동의·보관·삭제가 별도 설계이고 ZDR 대상도 아님. 팀원이 "회사가 승인한 AI"라 여기며 <b>개인 계정 챗창에 고객 문서를 붙여 넣는</b> 것은 계약과 무관한 완전히 다른 경로.</div>
+  <aside>API 계약과 소비자용 챗은 완전히 별개입니다. 이 혼동이 실무에서 가장 위험한 데이터 유출 경로 중 하나입니다.</aside>
+</section>
+
+<!-- 12 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">그래서 무엇을 확인해야 하는가</h2>
+    <p style="margin-top:11px">데이터 판단 = 여섯 개의 분리된 질문</p>
+    <span class="who">6가지 확인 항목</span>
+  </div>
+  <aside>하나의 질문이 아닙니다. 하나만 확인하고 나머지를 넘겨짚는 것이 가장 흔한 실수입니다.</aside>
+</section>
+
+<!-- 13 6질문 표 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧭 여섯 개의 <span class="g">분리된 질문</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th>확인 항목</th><th>구체적으로 물어야 할 것</th></tr></thead>
+    <tbody>
+      <tr><td><b>학습 사용</b></td><td>기본으로 훈련에 쓰이나, 아니면 명시적 동의가 있어야 쓰이나</td></tr>
+      <tr><td><b>로그 보관</b></td><td>남용·보안·장애 대응용으로 무엇이 며칠 남나, 예외 조건은</td></tr>
+      <tr><td><b>처리 리전</b></td><td>어느 나라·리전에서 처리되나, 리전을 지정할 수 있나</td></tr>
+      <tr><td><b>하위 처리자</b></td><td>사업자가 다시 쓰는 클라우드·외부 서비스는 어디, 목록 공개되나</td></tr>
+      <tr><td><b>계약 형태</b></td><td>표준 약관인가, DPA가 붙나, 협상된 기업 계약인가</td></tr>
+      <tr><td><b>삭제와 감사</b></td><td>삭제 요청 가능한가, 감사 제출 자료 있나, 키·접근 권한은 누가</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">🔑 이 여섯을 <b>따로따로</b> 확인해야 합니다. 하나로 나머지를 덮으면 반드시 구멍이 생깁니다.</div>
+  <aside>로컬 실행은 이 목록의 상당 부분(리전·하위 처리자·보관 협상)을 없애줍니다. 하지만 전부는 아닙니다.</aside>
+</section>
+
+<!-- 14 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part">
+    <div class="pno">4</div>
+    <h2 style="margin:0">로컬도 자동으로 안전하지 않습니다</h2>
+    <p style="margin-top:11px">통제 지점이 밖에서 안으로 들어왔을 뿐</p>
+    <span class="who">안쪽을 관리할 사람은 이제 나</span>
+  </div>
+  <aside>문장이 사업자 경계를 안 넘으니 리전·하위 처리자·보관 협상은 사라집니다. 여기까지는 분명한 이점입니다.</aside>
+</section>
+
+<!-- 15 로컬 사고 지점 -->
+<section class="slide" data-part="PART 4">
+  <h2>🏠 로컬에서 <span class="r">실제 사고가 나는 곳</span></h2>
+  <p><b>이점</b>: 리전·하위 처리자·보관 협상이 사라짐. <b>그러나</b> 통제 지점이 밖→안으로 들어왔을 뿐, 관리할 사람은 이제 여러분.</p>
+  <ul class="pts">
+    <li><b>노트북 분실</b> — 모델 파일과 프롬프트 기록이 함께 유출. 디스크 암호화가 꺼져 있었다면 <b class="r">잠금화면은 무의미</b></li>
+    <li><b>인증 없이 포트 개방</b> — 사내 서버가 <b>사내망 누구에게나 열린 창구</b>가 됨</li>
+    <li><b>클라우드 백업 폴더에 로그</b> — 로컬로 옮긴 이유가 <b class="r">조용히 무효</b>가 됨</li>
+    <li><b>화면 공유·녹화</b> — 회의 중 민감한 프롬프트가 그대로 녹화</li>
+  </ul>
+  <aside>로컬은 통제 지점을 없앤 게 아니라 안으로 옮긴 것입니다. 그 안쪽을 이제 내가 지켜야 합니다.</aside>
+</section>
+
+<!-- 16 로컬도 문서로 -->
+<section class="slide" data-part="PART 4">
+  <h2>📋 로컬을 고를 때도 <span class="g">문서로 남길 것</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">누가 이 <b>장비에 접근</b>하는가</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>로그</b>는 어디에 얼마나 쌓이는가</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>백업</b>은 어디로 가는가</span></div>
+    <div class="st"><span class="n">4</span><span class="t">장비를 <b>폐기</b>할 때 디스크는 어떻게 처리하는가</span></div>
+  </div>
+  <div class="big" style="margin-top:14px">밖에 묻던 질문을<br><span class="y">이제 안에다 묻는 것</span>입니다</div>
+  <aside>로컬이라고 문서 작업이 사라지지 않습니다. 질문의 대상이 사업자에서 내 조직으로 바뀔 뿐입니다.</aside>
+</section>
+
+<!-- 17 PART 5 -->
+<section class="slide" data-part="PART 5">
+  <div class="part">
+    <div class="pno">5</div>
+    <h2 style="margin:0">직접 해보기</h2>
+    <p style="margin-top:11px">민감도 워크북 · 위험한 문장 찾기</p>
+    <span class="who">이제 여러분 차례</span>
+  </div>
+  <aside>이 표의 마지막 열이 오늘 마지막에 쓸 '결정문'의 데이터 근거 칸으로 그대로 들어갑니다.</aside>
+</section>
+
+<!-- 18 워크북 -->
+<section class="slide" data-part="PART 5">
+  <h2>📝 민감도 워크북</h2>
+  <p><small>자기 도메인 데이터로 채우세요. 예시를 흉내 내지 말고 <b>실제 다루는 문서 이름</b>을 적을 것.</small></p>
+  <div class="tw"><table>
+    <thead><tr><th>데이터 이름</th><th>들어 있을 수 있는 것</th><th>외부 API로 보낼 조건</th><th>로컬을 먼저 볼 조건</th><th>지금 판단</th></tr></thead>
+    <tbody>
+      <tr><td><small>예: 고객 상담 원문</small></td><td><small>이름·연락처·계약·불만 맥락</small></td><td><small>식별자 제거 후 전송, 보관·리전 확인</small></td><td><small>원문 보존 필요 + 식별자 제거 어려움</small></td><td><small><b class="g">로컬 우선 검토</b></small></td></tr>
+      <tr><td>____</td><td>____</td><td>____</td><td>____</td><td>____</td></tr>
+      <tr><td>____</td><td>____</td><td>____</td><td>____</td><td>____</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">🔑 <b>3열과 4열이 동시에 채워지는 행</b>이 있다면, 그 행이 가장 흥미로운 지점입니다 — 조건부로 밖에 보낼 수도, 안에서 처리할 수도 있는 데이터. <b>비용·주권을 따진 뒤 다시 돌아올 자리</b>이니 표시해두세요.</div>
+  <aside>마지막 열이 오늘의 결정문 데이터 근거 칸으로 들어갑니다. 예시 행은 참고만 하고 실제 데이터로 채우세요.</aside>
+</section>
+
+<!-- 19 위험한 문장 -->
+<section class="slide" data-part="PART 5">
+  <h2>🔍 위험한 문장 찾기</h2>
+  <p>코딩 에이전트가 사내 AI 사용 지침 초안으로 이런 문장을 냈다고 해봅시다.</p>
+  <div class="box" style="border-left:4px solid var(--red)">
+    <p style="margin:0;color:var(--ink);font-size:1.05rem">"개인정보가 포함된 문서라도 API 회사가 <b>학습에 사용하지 않는다고 명시하고 있으므로</b>, <b>그대로 전송해도</b> <b>문제없습니다</b>."</p>
+  </div>
+  <div class="hl">문법이 매끄럽고 근거도 인용했습니다. <b>그래서 더 위험합니다.</b> 이 한 문장에서 문제되는 지점 <b class="r">세 곳</b>을 찾아보세요. (다음 장에 해설)</div>
+  <aside>매끄러운 문장일수록 검토 없이 통과되기 쉽습니다. 근거 인용이 곧 올바른 결론을 뜻하지 않습니다.</aside>
+</section>
+
+<!-- 20 검토 해설 + 프롬프트 -->
+<section class="slide" data-part="PART 5">
+  <h2>💡 문제되는 <span class="g">세 곳</span></h2>
+  <div class="qa" style="margin-bottom:10px">
+    <div class="q a"><b>① "학습에 안 쓴다고 명시하므로"</b> — 근거 부족. 학습 사용은 <b>여섯 항목 중 하나</b>일 뿐(로그·리전·하위 처리자·계약·삭제가 남음). 근거 하나로 결론을 덮음</div>
+    <div class="q a"><b>② "그대로 전송해도"</b> — 가장 위험. 식별자 제거·최소 범위·문서 분리 같은 <b>선행 조치를 건너뜀</b>. 판단은 이지선다가 아니라 <b>"무엇을 얼마나 깎아 보내나"</b></div>
+    <div class="q a"><b>③ "문제없습니다"</b> — 단정도 문제. 규정·정책은 다르고 바뀜. 단정 대신 <b>확인 절차와 확인 날짜</b></div>
+  </div>
+  <pre>목적: 아래 사내 AI 사용 지침 초안에서 근거가 부족한 단정을 찾는다.
+조건: 문장마다 어떤 확인 항목이 빠졌는지 지적한다.
+      확인 항목은 학습 사용, 로그 보관, 처리 리전, 하위 처리자,
+      계약 형태, 삭제와 감사다.
+      대안 문장을 제시할 때는 확인 주체와 확인 시점을 포함한다.</pre>
+  <aside>매끄러운 근거 인용이 검토를 대신하지 않습니다. 에이전트에게 이 검토 자체를 시킬 수도 있습니다.</aside>
+</section>
+
+<!-- 21 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 6문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">"학습에 안 씀"과 "남지 않음"은 <b>다른 통제 장치</b>, 따로 설정된다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">보관 숫자는 바뀐다 → <b>공식 문서 + 확인 날짜</b>, 결정하는 날 재확인</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>ZDR도 0이 아니다</b> — 신청·승인 필요, 기능·모델 구멍, 법·안전 예외</span></div>
+    <div class="st"><span class="n">4</span><span class="t">데이터 판단 = <b>6개 분리 질문</b>(학습·로그·리전·하위처리자·계약·삭제)</span></div>
+    <div class="st"><span class="n">5</span><span class="t">로컬도 자동 안전 아님 — 분실·개방 포트·백업·화면공유. 통제가 <b>안으로 이동</b></span></div>
+    <div class="st"><span class="n">6</span><span class="t">보낸다/안 보낸다가 아니라 <b>무엇을 얼마나 깎아 보내는가</b>. 단정 대신 확인 절차·날짜</span></div>
+  </div>
+  <aside>워크북의 마지막 열이 다음(비용·주권)을 거쳐 최종 결정문으로 이어집니다.</aside>
+</section>
+
+<!-- 22 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> "학습에 쓰지 않는다"와 "남지 않는다"는 어떻게 <b>다른</b>가?</div>
+    <div class="q"><b>Q2.</b> 보관 기간 같은 정책 숫자를 다룰 때의 <b>실무 규칙</b>은?</div>
+    <div class="q"><b>Q3.</b> ZDR이 "문자 그대로 0"이 아닌 <b>이유 3가지</b>는?</div>
+    <div class="q"><b>Q4.</b> 데이터 판단의 <b>6개 확인 항목</b>은?</div>
+    <div class="q"><b>Q5.</b> 로컬이 자동으로 안전하지 <b>않은 이유</b>와 대표적인 사고 지점은?</div>
+    <div class="q"><b>Q6.</b> "그대로 전송해도 문제없습니다"에서 문제되는 <b>세 곳</b>은?</div>
+  </div>
+  <aside>Q3와 Q6이 이 강의에서 가장 실무적인 지점입니다.</aside>
+</section>
+
+<!-- 23 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 학습=내 문장이 <b>다음 모델의 재료</b>가 되느냐, 보관=내 문장이 <b>어딘가 저장</b>되느냐. 다른 통제 장치이고 따로 설정된다.</div>
+    <div class="q a"><b>A2.</b> 요약 글 말고 <b>공급자 공식 문서</b>를 열어 <b>확인한 날짜</b>를 함께 기록. 실제 결정하는 날 다시 확인(정책이 바뀌므로).</div>
+    <div class="q a"><b>A3.</b> ①신청·승인 필요(카드 결제론 안 됨) ②기능·모델에 <b>적용 구멍</b>(파일·배치·코드 실행·특정 모델) ③법·안전 <b>예외</b>(플래그 시 최대 2년 등).</div>
+    <div class="q a"><b>A4.</b> 학습 사용 · 로그 보관 · 처리 리전 · 하위 처리자 · 계약 형태 · 삭제와 감사. <b>여섯을 따로</b> 확인.</div>
+    <div class="q a"><b>A5.</b> 통제 지점이 안으로 옮겨왔을 뿐 관리는 내 몫. <b>노트북 분실·인증 없는 포트·클라우드 백업 폴더·화면 공유 녹화.</b></div>
+    <div class="q a"><b>A6.</b> ①"학습 안 씀"만으로 결론(6항목 중 하나) ②"그대로 전송"(깎는 선행 조치 생략) ③"문제없습니다" 단정(확인 절차·날짜로 대체).</div>
+  </div>
+  <aside>A6의 "무엇을 얼마나 깎아 보내는가"가 데이터 축의 핵심 사고방식입니다.</aside>
+</section>
+
+<!-- 24 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>수고하셨습니다 🙌</h1>
+    <div class="big" style="margin-top:24px">첫 번째 축 = <span class="y">데이터</span><br>보낸다/안 보낸다가 아니라<br><span class="y">무엇을 얼마나 깎아 보내는가</span></div>
+    <p class="sub" style="margin-top:22px">다음 두 축 — 비용, 그리고 주권</p>
+  </div>
+  <aside>민감도 워크북의 3열·4열이 동시에 채워진 행을, 다음에 배울 비용·주권 축으로 다시 따져보게 됩니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
