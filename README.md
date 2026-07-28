@@ -29,11 +29,15 @@
 1. AI는 어떻게 배우나
 2. 트랜스포머 — AI는 어떻게 언어를 배웠나
 3. **LLM과 로컬 실행 — 클라우드 API vs 로컬** ⬅️ 진행 중
-   - ✅ 3-①. 내 노트북에서도 LLM이 돌아갈까 — 🖥️ [웹 슬라이드](local-llm/) · 📊 [PPT](LLM_로컬실행_학습정리.pptx) · 📝 [요약](#-내-노트북에서도-llm이-돌아갈까)
-   - ✅ 3-②. 거대한 모델을 노트북에 밀어 넣기 (양자화) — 🖥️ [웹 슬라이드](quantization/)
+   - ✅ 3-①. 내 노트북에서도 LLM이 돌아갈까 — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/local-llm/) · 📊 [PPT](LLM_로컬실행_학습정리.pptx) · 📝 [요약](#-내-노트북에서도-llm이-돌아갈까)
+   - ✅ 3-②. 거대한 모델을 노트북에 밀어 넣기 (양자화) — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/quantization/)
 
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
-> 라이브 링크: **[3-①](https://inseoklee-ai.github.io/study-room/local-llm/)** · **[3-②](https://inseoklee-ai.github.io/study-room/quantization/)**
+>
+> ⚠️ **웹 슬라이드는 반드시 라이브 사이트에서 열어야 합니다.** GitHub 저장소 화면(github.com)에서 위 링크를 누르면 슬라이드가 아니라 소스 폴더로 갑니다. 아래 라이브 주소로 접속하세요:
+> - 🗺️ 커리큘럼 지도(홈): **https://inseoklee-ai.github.io/study-room/**
+> - 3-① https://inseoklee-ai.github.io/study-room/local-llm/
+> - 3-② https://inseoklee-ai.github.io/study-room/quantization/
 >
 > ℹ️ AIFFEL_LMS의 중단원 ①·②는 강의 번호가 다시 1부터 시작하는 점을 반영해 나눈 것입니다. 실제 중단원 이름을 알려주시면 채워 넣겠습니다.
 
