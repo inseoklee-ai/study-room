@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>금요일 오후에 도착한 두 개의 요청 · AI는 문서와 사진에서 무엇을 꺼낼까</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:18px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.95rem,1.55vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.3em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:18px}
+  .part .who{margin-top:16px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px 20px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .steps{display:grid;gap:8px}
+  .st{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:11px 15px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:25px;height:25px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.78rem}
+  .st .t{font-size:clamp(.88rem,1.5vw,1.04rem)}
+
+  table{border-collapse:collapse;width:100%;font-size:clamp(.8rem,1.32vw,.94rem)}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--bg2);font-weight:750;color:var(--ink)}
+  td{color:var(--soft)}td b{color:var(--ink)}
+  tr:last-child td{border-bottom:none}
+  .tw{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:6px}
+
+  code{font-family:"SF Mono",Menlo,Consolas,monospace;background:var(--bg2);padding:2px 6px;border-radius:5px;font-size:.86em}
+
+  /* photo→4 outputs pipeline */
+  .io{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;margin-top:6px}
+  .imgcard{background:var(--bg2);border:1px solid var(--line);border-radius:14px;width:130px;height:150px;
+    display:grid;place-items:center;text-align:center;color:var(--soft);font-size:.8rem;box-shadow:var(--sh);padding:8px}
+  .imgcard .ic{font-size:1.8rem;margin-bottom:6px}
+  .rows4{display:grid;gap:8px}
+  .r4{display:grid;grid-template-columns:1fr 18px 1.15fr;gap:8px;align-items:center}
+  .r4 .team{border:1px solid var(--line);border-left-width:4px;border-radius:10px;padding:8px 11px;background:var(--card)}
+  .r4 .team b{font-size:.86rem} .r4 .team small{display:block;color:var(--soft);font-size:.74rem}
+  .r4 .out{border:1px solid var(--line);border-radius:10px;padding:8px 11px;background:var(--bg2)}
+  .r4 .out b{font-size:.82rem} .r4 .out small{display:block;color:var(--soft);font-size:.72rem;font-family:"SF Mono",Menlo,monospace}
+  .r4 .ar{color:var(--soft);text-align:center;font-weight:700}
+  .t-b{border-left-color:var(--bl)!important} .t-b b{color:var(--bl)}
+  .t-g{border-left-color:var(--gr)!important} .t-g b{color:var(--gr)}
+  .t-p{border-left-color:var(--pp)!important} .t-p b{color:var(--pp)}
+  .t-o{border-left-color:var(--gold)!important} .t-o b{color:var(--gold)}
+  .out.dashed{border-style:dashed;border-color:var(--gold)}
+
+  /* human reading flow */
+  .rflow{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:8px 0 2px}
+  @media(max-width:780px){.rflow{grid-template-columns:1fr 1fr}}
+  .rf{border-radius:13px;padding:13px 11px;color:#fff;text-align:center}
+  .rf b{font-size:.98rem;display:block;margin-bottom:4px} .rf small{font-size:.72rem;opacity:.92;line-height:1.35}
+  .rf.b1{background:linear-gradient(135deg,#2f5fa0,#264b80)}
+  .rf.b2{background:linear-gradient(135deg,#6b4d8c,#503a6b)}
+  .rf.b3{background:linear-gradient(135deg,#1f7a86,#155a63)}
+  .rf.b4{background:linear-gradient(135deg,#b06a2c,#8a4f1e)}
+  .rback{text-align:center;color:var(--red);font-weight:750;font-size:.84rem;margin-top:6px}
+
+  /* receipt motif */
+  .rcpt{transform:rotate(-2.5deg);background:linear-gradient(160deg,#fbfaf7,#efe9dd);color:#3a352c;
+    border-radius:4px;padding:14px 16px;box-shadow:0 8px 22px rgba(0,0,0,.25);position:relative;overflow:hidden;
+    font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.72rem;line-height:1.75}
+  .rcpt .ln{border-bottom:1px dotted #cabfa8;display:flex;justify-content:space-between}
+  .rcpt .wavy{transform:skewY(-1.5deg);opacity:.85}
+  .rcpt .faint{opacity:.35}
+  .rcpt .glare{position:absolute;top:-10%;left:26%;width:34%;height:120%;
+    background:linear-gradient(105deg,transparent,rgba(255,255,255,.85),transparent);transform:skewX(-14deg);pointer-events:none}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 15px;font-size:clamp(.86rem,1.45vw,1.0rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 4 · AI는 문서와 사진에서 무엇을 꺼낼까 (1)</span>
+    <h1 style="margin:18px 0">금요일 오후에 도착한<br>두 개의 요청</h1>
+    <p class="sub">같은 "읽어 주세요"인데, 돌아와야 하는 답이 다르다</p>
+  </div>
+  <aside>재무팀의 계약서 PDF 한 뭉치와 옆 부서의 라인 사진 한 장. 둘 다 "읽어 주세요"로 시작하지만 받아야 할 답의 종류가 다릅니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 흐름</h2>
+  <ul class="pts">
+    <li>두 요청 — <b>계약서에서 값 뽑기</b>가 왜 어긋났나, <b>사진 한 장에 네 질문</b></li>
+    <li>둘 다 "읽기"인데 <b>받는 답이 다르다</b> (값 vs 위치·경계) → 검증도 다르다</li>
+    <li>사람은 <b>한 덩어리</b>로 하지만, 기계는 <b>하나씩 떼어 내</b> 정복했다</li>
+    <li>그래서 조각을 다시 붙일 때 <b>순차형 파이프라인</b>이 깨진다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 줄: <b>같은 파일을 넣어도 받는 답의 성격이 다르고, 답이 다르면 검증도 다릅니다.</b></div>
+  <aside>이 한 줄이 남은 시간 내내 따라옵니다. 답의 자료형이 무엇인지가 모든 것을 가릅니다.</aside>
+</section>
+
+<!-- 3 요청 1 -->
+<section class="slide" data-part="표지">
+  <h2>📄 요청 ① — 재무팀의 <span class="g">계약서 23건</span></h2>
+  <p>"각 계약서에서 <b>계약 상대방·계약 금액·계약 기간</b>만 뽑아 표로 정리해 주세요." 에이전트가 표를 냈는데 — 이상합니다.</p>
+  <ul class="pts">
+    <li>어떤 칸은 <b>비어 있고</b></li>
+    <li><code>금 삼천이백만원정 (₩32,000,000)</code> 자리에서 <code>3200000</code> — <b class="r">0이 하나 빠짐</b></li>
+    <li>"계약 금액 32,000,000" 대신 아랫줄 <b>"부가세 3,200,000"이 계약 금액으로</b> 잡힘</li>
+  </ul>
+  <div class="hl">원인: 금액이 <b>2열 표</b> 안에 있었고 왼쪽 칸이 <b>세로 병합</b>돼, 항목 이름과 값이 <b>한 줄씩 어긋났습니다.</b> 사람 눈엔 명백한 "옆 칸"이 기계 텍스트에선 어긋나 있었죠.</div>
+  <aside>사람에게는 명백한 "계약 금액 옆 칸"이, 기계가 뱉은 텍스트 순서에서는 한 줄씩 밀려 있었습니다.</aside>
+</section>
+
+<!-- 4 무엇이 실패했나 -->
+<section class="slide" data-part="표지">
+  <h2>🔎 "AI가 멍청하다"? — <span class="g">아닙니다</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="g">글자 인식은 성공</h3><p style="margin:0"><code>3 · 2 · , · 0 · 0 · 0</code> 전부 <b>정확히</b> 읽었습니다</p></div>
+    <div class="box"><h3 class="r">실패한 것은 판단</h3><p style="margin:0"><b>어느 숫자가 어느 항목에 속하는가</b> — 이 짝짓기가 틀렸습니다</p></div>
+  </div>
+  <div class="big" style="margin-top:14px">글자를 읽는 일과<br><span class="y">어느 항목에 속하는지 판단하는 일</span>은<br>완전히 다른 종류의 문제</div>
+  <aside>"AI가 멍청하다"는 반응은 실제로 벌어진 일을 흐립니다. 글자 인식과 구조 판단은 별개의 능력입니다.</aside>
+</section>
+
+<!-- 5 현실 문서 (영수증) -->
+<section class="slide" data-part="표지">
+  <h2>🧾 현실의 문서는 <span class="g">이렇게 생겼습니다</span></h2>
+  <div class="grid2" style="align-items:center">
+    <div style="display:grid;place-items:center;padding:6px">
+      <div class="rcpt" aria-hidden="true" style="width:200px">
+        <div class="glare"></div>
+        <div style="text-align:center;font-weight:700">TONY'S PIZZERIA</div>
+        <div class="ln wavy"><span>Sm Cheese</span><span>9.98</span></div>
+        <div class="ln wavy faint"><span>Pepperoni</span><span>2.89</span></div>
+        <div class="ln"><span>Iced Tea</span><span>2.89</span></div>
+        <div class="ln faint"><span>Subtotal</span><span>12.87</span></div>
+        <div class="ln"><span>Tax</span><span>0.90</span></div>
+        <div class="ln wavy"><span>Total</span><span>13.77</span></div>
+      </div>
+    </div>
+    <div>
+      <p style="margin:0 0 8px">사람은 어렵지 않게 읽지만, 기계에게는 <b>결함 하나하나가 다른 실패 원인</b>이 됩니다.</p>
+      <ul class="pts">
+        <li>종이 굴곡 → <b>글자 줄이 휨</b></li>
+        <li>조명 반사 → <b>일부 구간이 하얗게 날아감</b></li>
+        <li>구겨짐·그림자 → 글자 경계 뭉개짐</li>
+      </ul>
+    </div>
+  </div>
+  <aside>(원 강의의 구겨진 영수증 사진을 개념으로 표현했습니다.) 깨끗한 스캔을 전제로 만든 파이프라인은 현실의 이런 결함에서 무너집니다.</aside>
+</section>
+
+<!-- 6 요청 2 -->
+<section class="slide" data-part="표지">
+  <h2>📸 요청 ② — 라인 사진 <span class="g">한 장에 네 질문</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n" style="background:var(--bl)">품질</span><span class="t">3번 하우징 <b>흠집이 정확히 어느 위치</b>예요?</span></div>
+    <div class="st"><span class="n" style="background:var(--gr)">안전</span><span class="t">저 사진에 <b>안전모 안 쓴 사람 몇 명</b>이죠?</span></div>
+    <div class="st"><span class="n" style="background:var(--pp)">설비</span><span class="t">벨트 마모 <b>면적이 지난달 대비 얼마나</b> 늘었는지 숫자로</span></div>
+    <div class="st"><span class="n" style="background:var(--gold)">홍보</span><span class="t">대외 공개용으로 <b>비슷한 분위기 이미지 한 장 만들어</b> 주세요</span></div>
+  </div>
+  <div class="hl">🔑 네 질문은 <b>어려움의 정도만 다른 게 아닙니다</b> — <b class="r">답의 생김새 자체가 다릅니다.</b> 좌표 / 숫자 하나 / 면적 / 존재하지도 않는 새 이미지.</div>
+  <aside>"AI로 이 사진 좀 분석해 주세요"라는 한 문장 안에 서로 다른 네 개의 주문이 뭉쳐 있습니다.</aside>
+</section>
+
+<!-- 7 그림: 네 출력 -->
+<section class="slide" data-part="표지">
+  <h2>🖼️ 한 장의 사진, <span class="g">네 개의 다른 출력</span></h2>
+  <div class="io">
+    <div class="imgcard"><div class="ic">🏭</div>조립 라인<br>사진 1장<br><small>(같은 JPG)</small></div>
+    <div class="rows4">
+      <div class="r4"><div class="team t-b"><b>품질팀</b><small>흠집이 어디에?</small></div><div class="ar">→</div><div class="out"><b>사각형 좌표+이름+확신도</b><small>scratch,(412,208,486,261),0.83</small></div></div>
+      <div class="r4"><div class="team t-g"><b>안전팀</b><small>미착용 몇 명?</small></div><div class="ar">→</div><div class="out"><b>대상별 사각형을 센 개수</b><small>no_helmet 2, helmet 5</small></div></div>
+      <div class="r4"><div class="team t-p"><b>설비팀</b><small>마모 면적?</small></div><div class="ar">→</div><div class="out"><b>픽셀 영역 + 면적</b><small>wear_area 18,420px · +12%</small></div></div>
+      <div class="r4"><div class="team t-o"><b>홍보팀</b><small>비슷한 걸 만들어</small></div><div class="ar">→</div><div class="out dashed"><b>원본에 없던 새 이미지</b><small>사실 확인 아님 · 창작물</small></div></div>
+    </div>
+  </div>
+  <div class="hl">🔑 왼쪽 입력은 전부 같은 JPG인데, 오른쪽 결과물의 <b>종류(자료형)</b>가 다릅니다. <b>자료형이 다르면 뒤에 붙는 코드도, 검수 방법도, 책임 소재도 다릅니다.</b></div>
+  <aside>자료형 = 프로그램에서 값의 종류와 담는 방식. 좌표 묶음·정수·픽셀 지도·이미지 파일은 완전히 다른 자료형입니다.</aside>
+</section>
+
+<!-- 8 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">둘 다 "읽기"인데 받는 답이 다릅니다</h2>
+    <p style="margin-top:11px">값이냐, 위치와 경계냐</p>
+    <span class="who">답이 다르면 검증도 다르다</span>
+  </div>
+  <aside>두 장면 다 "이 파일 좀 읽어 주세요"로 시작했지만, 돌아와야 하는 답을 나란히 놓으면 종류가 다릅니다.</aside>
+</section>
+
+<!-- 9 값 vs 위치 + 검증 -->
+<section class="slide" data-part="PART 1">
+  <h2>🎯 값 vs 위치·경계, 그리고 <span class="g">검증</span></h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="g">계약서 = 값</h3>
+      <p style="margin:0"><code>32,000,000</code>, <code>2026-03-14</code>. 감사 산출물엔 그 값의 <b>페이지·좌표</b>를 근거로</p>
+      <p style="margin:8px 0 0"><b>검산 가능</b> — 단가×수량=합계? 날짜가 달력에 실재? 부가세=본체의 1/10? <b>다른 경로로 한 번 더 계산</b>해 대조</p>
+    </div>
+    <div class="box">
+      <h3 class="b">라인 사진 = 위치·경계</h3>
+      <p style="margin:0">품질팀엔 "어디", 설비팀엔 "어디까지". 여기서 <b>좌표는 재료가 아니라 결과물 그 자체</b></p>
+      <p style="margin:8px 0 0"><b>검산 우회로 없음</b> — 대신 사람이 정한 영역과 기계 영역의 <b>겹침</b>을 잼. 겹침 재는 자 + <b>합격선</b> = 업무 규칙</p>
+    </div>
+  </div>
+  <div class="hl">🔑 같은 파일을 넣어도 <b>답의 성격이 다르고, 답이 다르면 검증도 다릅니다.</b></div>
+  <aside>값은 되계산으로 검산하고, 위치는 정답 영역과의 겹침으로 검증합니다. 검증 방법이 곧 업무 규칙이 됩니다.</aside>
+</section>
+
+<!-- 10 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">사람은 이걸 한 덩어리로 해냅니다</h2>
+    <p style="margin-top:11px">삼 초 안에 서로 다른 일 여러 개가 동시에</p>
+    <span class="who">정보가 사방으로 흐른다</span>
+  </div>
+  <aside>계약서에서 금액 찾기 삼 초, 라인 사진에서 미착용자 세기 삼 초. 그 삼 초를 느리게 늘려 보면 안에 여러 일이 들어 있습니다.</aside>
+</section>
+
+<!-- 11 4가지/5가지 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧠 계약서 <span class="g">넷</span>, 사진 <span class="g">다섯</span></h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="g">문서 (넷)</h3>
+      <p style="margin:0"><b>① 글자를 알아본다</b> 검은 얼룩 → 문자<br><b>② 구조를 파악한다</b> 제목·본문·표(안 읽어도 보임)<br><b>③ 항목과 값을 잇는다</b> "계약 금액" ↔ 32,000,000<br><b>④ 뜻을 이해한다</b> 부가세 별도? 결재 한도?</p>
+    </div>
+    <div class="box">
+      <h3 class="b">사진 (다섯)</h3>
+      <p style="margin:0"><b>① 알아본다</b> 공장·사람·기계<br><b>② 짚는다</b> 미착용자는 저기<br><b>③ 경계를 긋는다</b> 마모는 여기부터 여기까지<br><b>④ 따라간다</b> (영상) 아까 그 사람<br><b>⑤ 없는 것을 그린다</b> 새것이면 이런 모습</p>
+    </div>
+  </div>
+  <div class="hl">둘 다 <b>알아보기</b>에서 시작해 <b>어디에 무엇이</b>로 넘어가고, 마지막 칸에 <b>가장 사람다운 일</b>(뜻 이해 / 없는 것 그리기)을 둡니다.</div>
+  <aside>넷과 다섯을 나란히 놓으면 구조가 닮았습니다. 그리고 사람은 이 목록을 목록으로 겪지 않습니다.</aside>
+</section>
+
+<!-- 12 그림: 사람이 문서를 읽을 때 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔄 사람이 문서를 읽을 때</h2>
+  <p style="margin-bottom:4px"><small>네 가지 일이 동시에, 서로를 도우면서 일어납니다</small></p>
+  <div class="rflow">
+    <div class="rf b1"><b>글자를 알아본다</b><small>검은 얼룩 → 문자<br>3 · 2 · , · 0</small></div>
+    <div class="rf b2"><b>구조를 파악한다</b><small>제목·본문·표<br>글자를 안 읽어도 보임</small></div>
+    <div class="rf b3"><b>항목과 값을 잇는다</b><small>계약 금액 ↔ 32,000,000<br>위치 + 양식 상식</small></div>
+    <div class="rf b4"><b>뜻을 이해한다</b><small>부가세 별도인가<br>결재 한도를 넘는가</small></div>
+  </div>
+  <div class="rback">↩ 뒤쪽의 이해가 앞쪽의 인식을 되돌아가 고쳐 줍니다</div>
+  <div class="hl">"계약 금액"이라는 <b>맥락</b>이 그 옆의 흐릿한 글자를 숫자로 복원해 줍니다. <b>정보가 사방으로 흐릅니다.</b></div>
+  <aside>사진에서도 "저건 컨베이어 벨트"라는 판단이 경계를 어디에 그을지를 미리 정해 줍니다. 단계가 서로를 돕습니다.</aside>
+</section>
+
+<!-- 13 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">기계는 그것을 하나씩 떼어 내 정복했습니다</h2>
+    <p style="margin-top:11px">뭉친 일을 조각으로 나눠 각각 풀어온 백 년</p>
+    <span class="who">그리고 다시 붙일 때 깨진다</span>
+  </div>
+  <aside>사람은 한 덩어리로 하지만 기계는 그럴 수 없었습니다. 컴퓨터에 읽히고 보이게 만들려던 역사는 조각으로 나눠 정복하는 과정이었습니다.</aside>
+</section>
+
+<!-- 14 조각들 + 파이프라인 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧩 조각으로 나뉜 연구, <span class="r">순차형 파이프라인</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="g">문서 쪽</h3><p style="margin:0">글자 인식 = <b>OCR</b><br>구조·항목값 잇기 = <b>레이아웃 분석</b><br>뜻 이해 = 오래 <b>사람의 몫</b></p></div>
+    <div class="box"><h3 class="b">사진 쪽</h3><p style="margin:0">이름표 달기 · 위치 짚기 · 경계 긋기 · 시간 따라가기 · 없는 장면 만들기 — <b>서로 다른 연구 갈래</b></p></div>
+  </div>
+  <div class="hl">도구가 여러 갈래인 건 제품 구분이 아니라 <b>연구가 걸어온 길의 흔적</b>입니다.</div>
+  <div class="hl r" style="border-left-color:var(--red)">⚠️ 문제는 조각을 <b>다시 붙일 때</b>. 순차형 파이프라인은 앞 단계 출력이 뒤 단계 입력으로 <b>한 방향</b>으로만 흐릅니다 → <b class="r">앞에서 잘못 자른 조각을 뒤가 복구하기 어렵습니다.</b> 계약서 사고가 정확히 이것.</div>
+  <aside>사람 머릿속에선 정보가 사방으로 오가지만, 순차형 파이프라인엔 되돌아가는 화살표가 없습니다.</aside>
+</section>
+
+<!-- 15 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part">
+    <div class="pno">4</div>
+    <h2 style="margin:0">오늘 갈 길 · 먼저 예측</h2>
+    <p style="margin-top:11px">내 파일을 앞에 놓고</p>
+    <span class="who">예측 → 나중에 대조</span>
+  </div>
+  <aside>먼저 문서 쪽 길을 끝까지 따라가 조립 라인이 어디서 깨지는지 보고, 사진 쪽으로 건너가 위치·경계를 나눠 보고, 다시 한 덩어리로 되돌리려는 시도를 봅니다.</aside>
+</section>
+
+<!-- 16 예측 표 -->
+<section class="slide" data-part="PART 4">
+  <h2>✍️ 먼저 <span class="g">예측해 보세요</span></h2>
+  <p>AI에게 맡기고 싶은 파일을 하나 떠올리고(진단서·급여명세서·세금계산서, 또는 현장 사진·CCTV), 세 칸을 채운 뒤 넘어갑니다. 마지막에 다시 돌아와 대조합니다.</p>
+  <div class="tw"><table>
+    <thead><tr><th>질문</th><th>내 답</th></tr></thead>
+    <tbody>
+      <tr><td>그 파일에서 받고 싶은 답은 — <b>값</b>인가, <b>위치·경계</b>인가?</td><td>____</td></tr>
+      <tr><td>글자만 정확히 읽으면 답이 나오나, 아니면 <b>어디에·어디까지</b>를 알아야 하나?</td><td>____</td></tr>
+      <tr><td>그 답이 틀렸을 때 <b>누가·언제·무엇을 보고</b> 알아차리나?</td><td>____</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">세 번째 칸이 곧 <b>검증 설계</b>입니다. 값이면 검산 규칙, 위치면 겹침 합격선을 여기에 적게 됩니다.</div>
+  <aside>지금 적은 예측을 강의 끝에서 다시 꺼내 실제 판단과 비교합니다.</aside>
+</section>
+
+<!-- 17 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 6문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">계약서 사고는 <b>글자 인식 실패가 아니라</b> "어느 값이 어느 항목인가" <b>판단 실패</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t">한 장의 사진, 네 질문 → <b>답의 생김새(자료형)</b>가 다름: 좌표·정수·면적·새 이미지</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>자료형이 다르면</b> 뒤 코드도, 검수 방법도, 책임 소재도 다르다</span></div>
+    <div class="st"><span class="n">4</span><span class="t">계약서 답 = <b>값</b>(검산 가능) · 라인 사진 답 = <b>위치·경계</b>(겹침으로 검증)</span></div>
+    <div class="st"><span class="n">5</span><span class="t">사람은 <b>한 덩어리</b>로 하며 뒤 이해가 앞 인식을 고침 — 정보가 사방으로 흐름</span></div>
+    <div class="st"><span class="n">6</span><span class="t">기계는 조각으로 <b>떼어 정복</b> — <b>순차형 파이프라인</b>은 앞의 실수를 뒤가 못 고침</span></div>
+  </div>
+  <aside>"같은 파일이라도 받는 답이 다르고, 답이 다르면 검증도 다르다"가 이 강의의 척추입니다.</aside>
+</section>
+
+<!-- 18 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 계약서에서 실제로 실패한 것은 <b>글자 인식</b>인가? 무엇이 실패했나?</div>
+    <div class="q"><b>Q2.</b> 사진 한 장에 던진 네 질문이 "어려움의 정도"만 다른 게 아니라 <b>무엇이</b> 다른가?</div>
+    <div class="q"><b>Q3.</b> 계약서 답과 라인 사진 답은 <b>어떤 종류</b>로 갈리나? 각각의 <b>검증</b> 방법은?</div>
+    <div class="q"><b>Q4.</b> 사람의 문서 읽기에서 "정보가 사방으로 흐른다"는 무슨 뜻인가?</div>
+    <div class="q"><b>Q5.</b> <b>순차형 파이프라인</b>의 구조적 약점은? 계약서 사고와 어떻게 연결되나?</div>
+  </div>
+  <aside>Q3가 이 강의의 핵심 축입니다.</aside>
+</section>
+
+<!-- 19 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 글자 인식은 <b>성공</b>(3·2·,·0·0·0 정확). 실패는 <b>"어느 숫자가 어느 항목에 속하는가"</b> 판단 — 표 병합으로 항목명과 값이 한 줄씩 어긋남.</div>
+    <div class="q a"><b>A2.</b> <b>답의 생김새(자료형)</b>가 다름 — 좌표 묶음 / 정수 하나 / 픽셀 면적 / 새 이미지. 그래서 다른 능력이고 다른 검수가 필요.</div>
+    <div class="q a"><b>A3.</b> 계약서=<b>값</b>(검산: 되계산해 대조), 라인 사진=<b>위치·경계</b>(정답 영역과의 <b>겹침</b>을 재고 합격선을 그음).</div>
+    <div class="q a"><b>A4.</b> 단계가 서로를 도움 — 구조 파악이 글자 인식을 돕고, "계약 금액" 맥락이 흐릿한 글자를 복원. <b>뒤쪽 이해가 앞쪽 인식을 되돌아가 고침.</b></div>
+    <div class="q a"><b>A5.</b> 앞→뒤 <b>한 방향</b>으로만 흘러 <b>앞에서 잘못 자른 조각을 뒤가 복구 못 함</b>. 계약서에서 레이아웃을 잘못 자르자 값 추출이 통째로 어긋난 것.</div>
+  </div>
+  <aside>A5의 "되돌아가는 화살표가 없다"가 순차형 파이프라인의 본질적 한계입니다.</aside>
+</section>
+
+<!-- 20 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>수고하셨습니다 🙌</h1>
+    <div class="big" style="margin-top:24px">"이 파일 좀 읽어 주세요" 한 문장 안에<br><span class="y">서로 다른 여러 개의 주문</span>이 뭉쳐 있다<br><small>같은 파일이라도 답이 다르고, 답이 다르면 검증도 다르다</small></div>
+    <p class="sub" style="margin-top:22px">다음 — 문서 쪽 길을 끝까지 따라가 어디서 깨지는지</p>
+  </div>
+  <aside>다음 강의에서 문서 처리 파이프라인을 끝까지 따라가며, 조립 라인이 정확히 어디서 깨지는지 봅니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
