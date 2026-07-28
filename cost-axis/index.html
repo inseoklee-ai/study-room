@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>비용은 어디서 발생하는가 · 판단의 두 번째 축</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:18px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.95rem,1.55vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.3em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:18px}
+  .part .who{margin-top:16px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px 20px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:780px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .steps{display:grid;gap:8px}
+  .st{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:11px 15px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:25px;height:25px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.78rem}
+  .st .t{font-size:clamp(.88rem,1.5vw,1.04rem)}
+
+  table{border-collapse:collapse;width:100%;font-size:clamp(.78rem,1.32vw,.94rem)}
+  th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--bg2);font-weight:750;color:var(--ink)}
+  td{color:var(--soft)}td b{color:var(--ink)}
+  tr:last-child td{border-bottom:none}
+  .tw{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:6px}
+  tr.sum td{background:var(--bg2);font-weight:750;color:var(--ink)}
+
+  code{font-family:"SF Mono",Menlo,Consolas,monospace;background:var(--bg2);padding:2px 6px;border-radius:5px;font-size:.88em}
+  pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+    overflow:auto;max-height:56vh;font-size:clamp(.74rem,1.25vw,.9rem);line-height:1.7;
+    font-family:"SF Mono",Menlo,Consolas,monospace;color:var(--ink);margin:10px 0;white-space:pre-wrap}
+  .fx{text-align:center;font-size:clamp(.9rem,1.7vw,1.2rem);font-family:"SF Mono",Menlo,monospace;
+    background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0;color:var(--ink);line-height:1.5}
+
+  /* server-room motif */
+  .room{background:linear-gradient(160deg,#0e1830,#152447);border:1px solid #23407a;border-radius:16px;
+    padding:16px;display:grid;grid-template-columns:repeat(8,1fr);gap:6px;box-shadow:var(--sh)}
+  .room i{height:16px;border-radius:3px;background:#1b325e;position:relative}
+  .room i::after{content:"";position:absolute;left:50%;top:50%;width:4px;height:4px;border-radius:50%;
+    transform:translate(-50%,-50%);background:#8fd0ff;box-shadow:0 0 6px 2px rgba(120,190,255,.8)}
+  .room i.dim::after{opacity:.25;box-shadow:none}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 15px;font-size:clamp(.86rem,1.45vw,1.0rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · LLM과 로컬 실행 (6)</span>
+    <h1 style="margin:18px 0">비용은<br>어디서 발생하는가</h1>
+    <p class="sub">판단의 두 번째 축 · 비용 · 손익분기의 함정 · 병목 찾기</p>
+  </div>
+  <aside>API 비용은 청구서에 숫자로 찍히지만, 로컬 비용은 전기요금·담당자 시간·기다림 속에 섞입니다. 청구서가 없다고 비용이 없는 건 아닙니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 이번 강의의 지도</h2>
+  <div class="tw"><table>
+    <thead><tr><th>파트</th><th>내용</th><th>핵심</th></tr></thead>
+    <tbody>
+      <tr><td><b>1</b></td><td>손익분기의 함정</td><td>남의 손익분기 숫자를 <b>인용하면 안 되는</b> 이유</td></tr>
+      <tr><td><b>2</b></td><td>내 업무 비용 구조</td><td>직접 계산하고 <b>병목</b>에 동그라미</td></tr>
+      <tr><td><b>3</b></td><td>판단 연습</td><td>"10개월이면 회수" 제안 해부</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">🎯 핵심 한 줄: <b>비용은 같은데 모양이 다릅니다.</b> API는 눈에 띄고, 로컬은 여기저기 섞여 숨습니다.</div>
+  <aside>비용 이야기가 회의에서 자주 어긋나는 건, 같은 비용이 서로 다른 모양으로 나타나기 때문입니다.</aside>
+</section>
+
+<!-- 3 도입 -->
+<section class="slide" data-part="표지">
+  <h2>💬 왜 비용 대화는 <span class="g">자꾸 어긋날까</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="r">"API 비용이 부담됩니다"</h3><p style="margin:0">매달 <b>청구서에 숫자</b>로 — 눈에 띄고, 결재선을 타고, 누군가 줄이라고 지시</p></div>
+    <div class="box"><h3 class="b">"로컬로 돌리면 공짜 아닌가요"</h3><p style="margin:0">장비 품의로 <b>한 번 크게</b> 나온 뒤 — 전기요금·담당자의 목요일 저녁·기다리는 몇 초 속에 <b>섞임</b></p></div>
+  </div>
+  <div class="hl">🔑 두 사람 다 틀리지 않았는데 대화가 진전되지 않습니다. 같은 비용이 <b>다른 모양</b>으로 나타나기 때문. <b class="r">청구서가 없다고 비용이 없는 것은 아닙니다.</b></div>
+  <aside>API 비용은 눈에 띄어 관리 대상이 되고, 로컬 비용은 여기저기 섞여 관리 사각지대가 됩니다.</aside>
+</section>
+
+<!-- 4 비용 모양 표 -->
+<section class="slide" data-part="표지">
+  <h2>📊 같은 압력, <span class="g">다른 청구서</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th>무엇이 늘 때</th><th class="r">API에서는</th><th class="b">로컬에서는</th></tr></thead>
+    <tbody>
+      <tr><td><b>처리량↑</b></td><td>요청·토큰 수에 비례해 청구액↑</td><td>대기열이 길어지고 GPU를 추가 구매</td></tr>
+      <tr><td><b>입력 문서가 길 때</b></td><td>입력 토큰 비용↑</td><td>메모리 부족 → 모델 축소 or 문서 쪼개기</td></tr>
+      <tr><td><b>출력이 길 때</b></td><td>출력 토큰 비용↑ (보통 입력보다 단가 높음)</td><td>생성 시간이 그대로 늘어남</td></tr>
+      <tr><td><b>실험 반복</b></td><td>실험 횟수만큼 그대로 과금</td><td>전기 + 담당자 시간 + 기회비용</td></tr>
+      <tr><td><b>품질이 흔들릴 때</b></td><td>재시도·평가 호출 비용</td><td>사람이 검토·수정하는 시간</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">🔑 <b>마지막 행</b>(품질이 흔들릴 때)이 실무에서 가장 자주 <b>무시되고</b>, 가장 자주 <b class="r">판단을 뒤집습니다.</b></div>
+  <aside>재작업·검토 시간은 청구서에도 안 찍히고 워크북에서도 빠지기 쉬운데, 실제로는 총액을 좌우하는 경우가 많습니다.</aside>
+</section>
+
+<!-- 5 빌리는 것 (photo concept) -->
+<section class="slide" data-part="표지">
+  <h2>🏢 API로 빌리는 건 <span class="g">모델만이 아닙니다</span></h2>
+  <div class="grid2">
+    <div class="room" aria-hidden="true">
+      <i></i><i class="dim"></i><i></i><i></i><i class="dim"></i><i></i><i></i><i class="dim"></i>
+      <i class="dim"></i><i></i><i></i><i class="dim"></i><i></i><i></i><i class="dim"></i><i></i>
+      <i></i><i></i><i class="dim"></i><i></i><i></i><i class="dim"></i><i></i><i></i>
+      <i class="dim"></i><i></i><i></i><i></i><i class="dim"></i><i></i><i></i><i class="dim"></i>
+      <i></i><i class="dim"></i><i></i><i></i><i></i><i class="dim"></i><i></i><i></i>
+    </div>
+    <div>
+      <p style="margin:0 0 8px">API를 쓸 때 함께 빌리는 것:</p>
+      <ul class="pts">
+        <li>이 방의 <b>전기</b>와 <b>냉방</b></li>
+        <li>장애에 대비한 <b>이중화</b></li>
+        <li>새벽에 <b>알람을 받고 일어나는 사람</b></li>
+      </ul>
+    </div>
+  </div>
+  <div class="hl">🔑 <b>로컬로 옮긴다는 것은, 이 방의 아주 작은 축소판을 직접 갖는다는 뜻</b>입니다. 전기·냉방·당직·이중화가 전부 내 몫이 됩니다.</div>
+  <aside>(원 강의의 데이터센터 사진을 개념으로 표현했습니다.) API 요금 안에는 인프라 운영과 사람 값이 이미 포함돼 있습니다. 로컬은 그걸 직접 떠안는 것입니다.</aside>
+</section>
+
+<!-- 6 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">손익분기 숫자를 인용하면 안 되는 이유</h2>
+    <p style="margin-top:11px">공개 분석들이 천 배씩 어긋난다</p>
+    <span class="who">전제가 다르다</span>
+  </div>
+  <aside>"몇 토큰부터 로컬이 유리한가"는 당연히 궁금하지만, 남의 숫자를 그대로 붙이면 안 됩니다.</aside>
+</section>
+
+<!-- 7 천배 차이 -->
+<section class="slide" data-part="PART 1">
+  <h2>📉 같은 질문, <span class="r">천 배 차이 나는 답</span></h2>
+  <div class="chain">
+    <div class="cell"><small>어떤 분석</small><b>하루 50만 토큰</b></div>
+    <div class="cell"><small>다른 분석</small><b>하루 1천만 토큰</b></div>
+    <div class="cell"><small>또 다른 분석</small><b>월 5억 토큰</b></div>
+  </div>
+  <p style="text-align:center">"몇 토큰부터 로컬이 유리한가"에 대한 공개 분석들 — <b class="r">천 배 가까이</b> 차이가 납니다.</p>
+  <div class="hl">🔑 계산이 틀려서가 아닙니다. <b>전제가 다르기</b> 때문입니다. 그러니 남의 손익분기 숫자를 회의 자료에 붙이는 대신, <b>자기 숫자</b>를 넣어야 합니다.</div>
+  <aside>남의 결론 숫자는 그 사람의 전제에서만 맞습니다. 전제가 다르면 결론도 천 배 달라집니다.</aside>
+</section>
+
+<!-- 8 세 전제 -->
+<section class="slide" data-part="PART 1">
+  <h2>🎚️ 결과를 가르는 <span class="g">세 가지 전제</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>무엇을 대체하는가</b> — 값싼 소형 API를 대체하면 손익분기점이 멀어짐(저렴 단가를 장비 감가로 못 따라잡음). <b>상위 모델 + 긴 문서</b>를 매일 쓰고 있었다면 훨씬 가까움</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>사람 시간을 비용으로 세는가</b> — 모니터링·업데이트·장애 대응이 월 10~20시간. 인건비를 곱하면 <b>하드웨어 감가보다 큰 항목</b>. 빼면 로컬이 이기고 넣으면 짐</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>가동률</b> — 하루 종일 vs 업무 시간에만 몇 번 → 토큰당 비용 <b>10배 넘게</b> 차이. 안 써도 감가는 진행. <b class="r">로컬 비용을 부풀리는 최대 원인은 비싼 장비가 아니라 낮은 가동률</b></span></div>
+  </div>
+  <aside>세 전제 중 특히 '사람 시간'과 '가동률'을 빼먹으면 로컬이 실제보다 훨씬 싸 보입니다.</aside>
+</section>
+
+<!-- 9 미리① 모델 장비 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧩 미리 알 것 ① — <span class="g">모델이 장비에 들어가나</span></h2>
+  <div class="fx">4비트 → 파라미터 10억 개당 약 0.5GB</div>
+  <div class="tw"><table>
+    <thead><tr><th>24GB급 소비자 GPU 한 장</th><th>결과</th></tr></thead>
+    <tbody>
+      <tr><td>가중치만 놓고</td><td>30~35B급까지</td></tr>
+      <tr><td>긴 문서 업무(KV 캐시 얹힘)</td><td><b>14B 안팎</b>으로 내려잡아야 여유</td></tr>
+      <tr><td>70B급</td><td><b class="r">4비트로도 35GB↑ → 한 장에 안 들어감</b></td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">넘치면 계산이 CPU로 넘어가 속도 급락. <b>"상위 API 모델을 로컬로 대체한다"는 계획은 비용 계산 이전에 여기서 먼저 막히는</b> 경우가 많습니다.</div>
+  <aside>비용을 따지기 전에, 대체하려는 모델이 애초에 내 장비에 들어가는지부터 확인해야 합니다.</aside>
+</section>
+
+<!-- 10 미리② 전기 -->
+<section class="slide" data-part="PART 1">
+  <h2>⚡ 미리 알 것 ② — <span class="g">전기요금은 직접 계산</span></h2>
+  <div class="fx">400W × 24시간 = 9.6kWh/일 → 월 ≈ 288kWh<br>× 150원/kWh ≈ <b>월 4만원대</b></div>
+  <ul class="pts">
+    <li>여기에 CPU·메인보드·냉방까지 더하면 실제로는 더 나옴</li>
+    <li>여러분 사무실의 <b>실제 단가·실제 가동 시간</b>으로 다시 계산 — 산수라 <b>회의에서 반박당하지 않음</b></li>
+  </ul>
+  <div class="hl">⚠️ 하드웨어 가격도 API 단가도 계속 움직입니다. 특히 <b>API 단가는 계속 내려와</b> 회수 기간이 긴 계획에 불리. 원칙은 하나 — <b>결정하는 날 공식 가격표를 열고 그날 날짜를 함께 적기.</b></div>
+  <aside>남의 전기요금 숫자를 빌릴 필요가 없습니다. 직접 계산하면 반박 불가능한 근거가 됩니다.</aside>
+</section>
+
+<!-- 11 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">내 업무의 월간 비용 구조</h2>
+    <p style="margin-top:11px">합계 두 줄이 결정문의 비용 근거가 된다</p>
+    <span class="who">워크북 · 병목 찾기</span>
+  </div>
+  <aside>오른쪽 '흔들리는 지점' 열은 회의에서 반드시 나올 질문이니 미리 답을 준비하는 셈입니다.</aside>
+</section>
+
+<!-- 12 워크북 API -->
+<section class="slide" data-part="PART 2">
+  <h2>🧮 워크북 <span class="r">(A) API 비용</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th>항목</th><th>내 숫자</th><th>이 숫자가 흔들리는 지점</th></tr></thead>
+    <tbody>
+      <tr><td>월 요청 수</td><td>____ 건</td><td>시범 수치인가, 전면 도입 후 피크 반영했나</td></tr>
+      <tr><td>요청당 평균 입력 토큰</td><td>____</td><td>실제 문서를 재봤나, 첨부·대화 이력 포함했나</td></tr>
+      <tr><td>요청당 평균 출력 토큰</td><td>____</td><td>긴 보고서 생성을 뺀 건 아닌가</td></tr>
+      <tr><td>입력 100만 토큰당 단가</td><td>____ 원 <small>(확인일 __)</small></td><td>실제 모델 단가인가, 캐싱·배치 할인 반영했나</td></tr>
+      <tr><td>출력 100만 토큰당 단가</td><td>____ 원 <small>(확인일 __)</small></td><td>출력이 입력의 몇 배인지 확인했나</td></tr>
+      <tr class="sum"><td><b>API 월비용 합계</b></td><td><b>____ 원</b></td><td></td></tr>
+    </tbody>
+  </table></div>
+  <aside>출력 단가는 보통 입력보다 높습니다. 긴 출력을 상정하지 않으면 API 비용이 실제보다 작아 보입니다.</aside>
+</section>
+
+<!-- 13 워크북 로컬 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧮 워크북 <span class="b">(B) 로컬 비용</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th>항목</th><th>내 숫자</th><th>이 숫자가 흔들리는 지점</th></tr></thead>
+    <tbody>
+      <tr><td>장비 구입가 / 감가 기간</td><td>____ 원 / __ 개월</td><td>몇 년 쓸 계획인가, 그때까지 성능이 쓸 만한가</td></tr>
+      <tr><td>월 전기요금</td><td>____ 원</td><td>실제 단가·실제 가동 시간으로 계산했나</td></tr>
+      <tr><td>월 운영 인력 시간</td><td>__ 시간 × ____ 원</td><td>담당자 시급을 실제로 곱해봤나</td></tr>
+      <tr><td>월 품질 검토 시간</td><td>__ 시간 × ____ 원</td><td>작은 모델로 바꿨을 때 늘 재작업을 넣었나</td></tr>
+      <tr class="sum"><td><b>로컬 월비용 합계</b></td><td><b>____ 원</b></td><td></td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">✍️ 다 채웠다면 <b>양쪽에서 가장 큰 항목 하나씩에 동그라미</b>를 치세요. 그것이 여러분의 <b class="g">병목</b>입니다.</div>
+  <aside>운영 인력·품질 검토 시간을 빼면 로컬이 이기고, 넣으면 지는 일이 자주 벌어집니다.</aside>
+</section>
+
+<!-- 14 병목별 대응 -->
+<section class="slide" data-part="PART 2">
+  <h2>🎯 병목이 어디냐에 따라 <span class="g">할 일이 다르다</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th>병목</th><th>먼저 할 일</th></tr></thead>
+    <tbody>
+      <tr><td><b>API · 출력 토큰</b></td><td>로컬 장비가 아니라 <b>출력 길이를 줄이는 프롬프트 설계</b>부터</td></tr>
+      <tr><td><b>API · 입력 토큰</b></td><td><b>프롬프트 캐싱</b> + 문서 사전 요약</td></tr>
+      <tr><td><b>로컬 · 운영 인력 시간</b></td><td>장비를 더 좋게 바꿔도 <b class="r">총액은 거의 안 줆</b></td></tr>
+    </tbody>
+  </table></div>
+  <ul class="pts" style="margin-top:12px">
+    <li><b>프롬프트 캐싱</b> — 매 요청마다 똑같이 들어가는 앞부분(긴 역할 지시·고정 자료)을 제공사 쪽에 잠시 보관해 두 번째 요청부터 다시 계산 안 함 → 그 구간 단가 크게↓</li>
+    <li><b>배치 처리</b> — 급하지 않은 요청을 모아 제공사가 한가할 때 돌리게 맡기고 <b>할인</b>을 받음</li>
+  </ul>
+  <aside>병목을 모르고 장비부터 사면, 정작 총액을 지배하는 항목은 그대로 남습니다.</aside>
+</section>
+
+<!-- 15 에이전트 프롬프트 -->
+<section class="slide" data-part="PART 2">
+  <h2>🤖 [프롬프트] <span class="g">비용 비교 계산기</span></h2>
+  <pre>목적: 우리 업무의 LLM 실행 위치를 비용 기준으로 비교한다.
+입력: 입력·출력 100만 토큰당 단가, 월 요청 수, 요청당 평균 입력·출력 토큰,
+      로컬 월 고정비(장비 감가, 전기, 운영 인력 시간, 품질 검토 시간).
+출력: API 월비용, 로컬 월비용, 두 값이 같아지는 월 요청 수.
+조건: 가정값은 파일 맨 위에 상수로 모아 한눈에 바꿀 수 있게 한다.
+      각 단가 옆에는 출처 URL과 확인 날짜를 주석으로 남긴다.
+      가동률을 입력받아 로컬 토큰당 비용에 반영한다.</pre>
+  <div class="hl">🔑 여러분이 할 일은 코드를 외우는 게 아니라, 나온 숫자를 보고 <b>"이 가정이 우리 업무에 맞는가"</b>를 묻는 것. <b class="r">계산기는 가정을 검증해주지 않습니다.</b></div>
+  <aside>가동률을 입력에 반드시 넣게 하는 것이 핵심입니다. 가동률을 빼면 로컬 토큰당 비용이 비현실적으로 낮게 나옵니다.</aside>
+</section>
+
+<!-- 16 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">판단 연습</h2>
+    <p style="margin-top:11px">"10개월이면 회수됩니다" — 어디를 짚을까</p>
+    <span class="who">검토자의 눈으로</span>
+  </div>
+  <aside>비용이라는 단어 하나로 결정을 밀어붙이지 않게 하는 것이 이 연습의 목적입니다.</aside>
+</section>
+
+<!-- 17 위험한 제안 -->
+<section class="slide" data-part="PART 3">
+  <h2>⚖️ 이 제안, <span class="r">어디를 짚어야 할까</span></h2>
+  <div class="box" style="border-left:4px solid var(--red)">
+    <p style="margin:0;color:var(--ink);font-size:1.05rem">"현재 월 API 비용이 <b>300만원</b>입니다. <b>3천만원</b>짜리 GPU 서버를 사면 <b>10개월</b>이면 회수됩니다. 그 뒤로는 계속 이득이니 로컬 전환을 추진하겠습니다."</p>
+  </div>
+  <div class="hl">숫자가 명확하고 결론이 깔끔합니다. <b>그래서 통과되기 쉽습니다.</b> 짚어야 할 곳이 <b class="r">여섯 군데</b> 있습니다. (다음 두 장에 해설)</div>
+  <aside>깔끔한 회수 계산일수록 빠진 항목이 숨어 있습니다. 하나씩 뜯어봅니다.</aside>
+</section>
+
+<!-- 18 검토 1 -->
+<section class="slide" data-part="PART 3">
+  <h2>💡 짚어야 할 곳 <span class="g">(1/2)</span></h2>
+  <div class="qa">
+    <div class="q a"><b>① 같은 일을 할 수 있나 (먼저)</b> — 300만원짜리가 상위 모델이면 서버 한 대로 부족할 가능성. 대체 모델을 정하고 실제 샘플로 품질 비교가 없다면, 이건 비용 비교가 아니라 <b>다른 제품으로 갈아타자</b>는 제안.</div>
+    <div class="q a"><b>② 3천만원 안에 사람이 없다</b> — 서버 가격은 시작점. 설치·모니터링·업데이트·장애 대응 시간 × 담당자 시급을 더해야. 넣으면 10개월이 대개 <b>15~20개월</b>.</div>
+    <div class="q a"><b>③ 가동률이 빠졌다</b> — 호출이 업무 시간에 몰리면 서버는 하루 대부분 논다. 놀아도 감가는 진행. <b>실제 가동 시간 기준</b> 토큰당 비용으로 봐야.</div>
+  </div>
+  <aside>①은 비용 이전의 질문입니다. 같은 품질을 못 내면 회수 계산 자체가 의미 없습니다.</aside>
+</section>
+
+<!-- 19 검토 2 -->
+<section class="slide" data-part="PART 3">
+  <h2>💡 짚어야 할 곳 <span class="g">(2/2)</span></h2>
+  <div class="qa">
+    <div class="q a"><b>④ 더 싼 방법을 먼저 써봤나</b> — 프롬프트 캐싱·배치·소형 모델 라우팅만으로 청구액이 크게 줄기도. 인프라 안 늘리는 절감이니 먼저 시도. <b>해보고도 300만원인지, 안 하고 300만원인지는 완전히 다른 이야기.</b></div>
+    <div class="q a"><b>⑤ 회수 기간 동안 상대도 움직인다</b> — API 단가는 내려오는 추세. 10개월 뒤 절반이면 회수 시점이 <b class="r">영영 안 올 수도</b>. 사용량이 3배면 훨씬 빨리 옴. → 회수 기간은 하나의 숫자가 아니라 <b>시나리오 2~3개</b>로.</div>
+    <div class="q a"><b>⑥ 그래도 로컬이 답일 수 있다</b> — 위를 다 반영했는데도 유리하면 근거 있는 판단. <b>데이터가 밖으로 못 나가는 업무라면 비용과 무관하게 로컬이 유일한 선택지.</b></div>
+  </div>
+  <aside>이 연습은 로컬을 말리는 게 아니라, "비용" 한 단어로 결정을 밀어붙이지 않게 하는 것입니다.</aside>
+</section>
+
+<!-- 20 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 6문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">비용은 같은데 <b>모양이 다르다</b> — API는 청구서, 로컬은 여기저기 섞여 숨는다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">가장 자주 무시되고 판단을 뒤집는 건 <b>품질이 흔들릴 때의 재작업·검토 시간</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t">남의 손익분기 숫자는 <b>전제</b>가 달라 천 배씩 차이 — 대체 대상·사람 시간·가동률</span></div>
+    <div class="st"><span class="n">4</span><span class="t">로컬 비용을 부풀리는 최대 원인은 비싼 장비가 아니라 <b>낮은 가동률</b></span></div>
+    <div class="st"><span class="n">5</span><span class="t">워크북으로 <b>내 숫자</b>를 넣고 양쪽 <b>병목</b>에 동그라미 — 병목별로 할 일이 다르다</span></div>
+    <div class="st"><span class="n">6</span><span class="t">회수 계산엔 <b>사람·가동률·더 싼 대안·단가 하락</b>이 들어가야. 회수는 시나리오 2~3개로</span></div>
+  </div>
+  <aside>워크북 합계 두 줄이 다음(주권)을 거쳐 최종 결정문의 비용 근거로 들어갑니다.</aside>
+</section>
+
+<!-- 21 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 비용 대화가 자주 어긋나는 이유는? API 비용과 로컬 비용은 각각 어떤 <b>모양</b>으로 나타나나?</div>
+    <div class="q"><b>Q2.</b> 비용이 늘어나는 상황 중 <b>가장 자주 무시되고 판단을 뒤집는</b> 행은?</div>
+    <div class="q"><b>Q3.</b> 손익분기 숫자가 천 배씩 차이 나는 <b>세 가지 전제</b>는?</div>
+    <div class="q"><b>Q4.</b> 로컬 비용을 부풀리는 <b>가장 큰 원인</b>은?</div>
+    <div class="q"><b>Q5.</b> 400W 카드를 24시간 한 달 돌리면 전기는 대략? (직접 계산)</div>
+    <div class="q"><b>Q6.</b> "300만원→3천만원 서버 10개월 회수" 제안에서 <b>빠진 것들</b>은?</div>
+  </div>
+  <aside>Q3와 Q6이 실무에서 가장 자주 틀리는 지점입니다.</aside>
+</section>
+
+<!-- 22 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 같은 비용이 <b>다른 모양</b>으로 나타나서. API=매달 <b>청구서 숫자</b>(눈에 띔). 로컬=장비 품의 한 번 뒤 <b>전기·담당자 시간·기다림</b>에 섞여 숨음.</div>
+    <div class="q a"><b>A2.</b> <b>품질이 흔들릴 때</b> — API는 재시도·평가 호출, 로컬은 사람이 검토·수정하는 시간. 워크북에서 빠지기 쉬운데 총액을 좌우.</div>
+    <div class="q a"><b>A3.</b> ①무엇을 대체하는가(소형 vs 상위+긴 문서) ②사람 시간을 세는가(월 10~20h) ③가동률.</div>
+    <div class="q a"><b>A4.</b> <b>낮은 가동률.</b> 안 써도 감가는 진행 → 토큰당 비용이 10배 넘게 벌어짐.</div>
+    <div class="q a"><b>A5.</b> 9.6kWh/일 × 30 ≈ <b>288kWh</b>, ×150원 ≈ <b>월 4만원대</b>(냉방·부품 더하면 더). 실제 단가·가동 시간으로 다시.</div>
+    <div class="q a"><b>A6.</b> ①같은 품질 가능한지 ②사람 비용 ③가동률 ④더 싼 대안(캐싱·배치·라우팅) ⑤API 단가 하락(시나리오화) — 데이터 반출 금지면 비용과 무관하게 로컬.</div>
+  </div>
+  <aside>A6의 여섯 항목을 다 반영하고도 로컬이 유리하면, 그때는 근거 있는 결정입니다.</aside>
+</section>
+
+<!-- 23 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>수고하셨습니다 🙌</h1>
+    <div class="big" style="margin-top:24px">두 번째 축 = <span class="y">비용</span><br>청구서가 없다고 비용이 없는 게 아니다<br><span class="y">내 숫자를 넣고, 병목을 찾아라</span></div>
+    <p class="sub" style="margin-top:22px">마지막 축 — 주권(통제권)</p>
+  </div>
+  <aside>데이터·비용을 지났으니, 이제 마지막 축인 주권(누가 통제권을 쥐는가)이 남았습니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

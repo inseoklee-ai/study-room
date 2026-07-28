@@ -34,6 +34,7 @@
    - ✅ 3-③. 이제 직접 내 컴퓨터에서 모델을 돌려봅니다 (Ollama 실습) — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/run-local/)
    - ✅ 3-④. 로컬과 API를 나란히 놓고 봅니다 — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/local-vs-api/)
    - ✅ 3-⑤. 데이터는 어디에 남는가 (판단 축 ①·데이터) — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/data-axis/)
+   - ✅ 3-⑥. 비용은 어디서 발생하는가 (판단 축 ②·비용) — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/cost-axis/)
 
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
@@ -44,6 +45,7 @@
 > - 3-③ https://inseoklee-ai.github.io/study-room/run-local/
 > - 3-④ https://inseoklee-ai.github.io/study-room/local-vs-api/
 > - 3-⑤ https://inseoklee-ai.github.io/study-room/data-axis/
+> - 3-⑥ https://inseoklee-ai.github.io/study-room/cost-axis/
 >
 > ℹ️ AIFFEL_LMS의 중단원 ①·②는 강의 번호가 다시 1부터 시작하는 점을 반영해 나눈 것입니다. 실제 중단원 이름을 알려주시면 채워 넣겠습니다.
 
