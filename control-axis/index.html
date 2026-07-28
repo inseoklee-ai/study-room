@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>통제권은 누구에게 남는가 · 판단의 세 번째 축</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:18px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.95rem,1.55vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.3em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:18px}
+  .part .who{margin-top:16px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px 20px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:780px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .three{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px}
+  @media(max-width:780px){.three{grid-template-columns:1fr}}
+  .three .c{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:16px;box-shadow:var(--sh);text-align:center}
+  .three .c .q{font-weight:800;font-size:1.02rem;color:var(--gr)}
+
+  .steps{display:grid;gap:8px}
+  .st{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:11px 15px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:25px;height:25px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.78rem}
+  .st .t{font-size:clamp(.88rem,1.5vw,1.04rem)}
+
+  table{border-collapse:collapse;width:100%;font-size:clamp(.8rem,1.32vw,.94rem)}
+  th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--bg2);font-weight:750;color:var(--ink)}
+  td{color:var(--soft)}td b{color:var(--ink)}
+  tr:last-child td{border-bottom:none}
+  .tw{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:6px}
+
+  /* timeline */
+  .tl{margin:14px 0 4px}
+  .tlrow{display:grid;grid-template-columns:repeat(4,1fr);text-align:center}
+  .tlrow.ev{font-weight:750;font-size:clamp(.78rem,1.35vw,.95rem);color:var(--ink);align-items:end}
+  .tlrow.ev div{padding:0 4px;min-height:2.6em;display:flex;align-items:flex-end;justify-content:center}
+  .tlaxis{position:relative;height:26px;display:grid;grid-template-columns:repeat(4,1fr);align-items:center;margin:4px 0}
+  .tlaxis::before{content:"";position:absolute;left:12%;right:4%;top:50%;transform:translateY(-50%);height:2px;background:var(--soft);opacity:.45}
+  .tlaxis::after{content:"";position:absolute;right:2%;top:50%;transform:translateY(-50%);border-left:8px solid var(--soft);border-top:5px solid transparent;border-bottom:5px solid transparent;opacity:.6}
+  .tlaxis .dot{justify-self:center;width:15px;height:15px;border-radius:50%;z-index:1;box-shadow:0 0 0 3px var(--bg)}
+  .tlaxis .dot.gold{background:var(--gold)} .tlaxis .dot.red{background:var(--red)}
+  .tlrow.act{font-size:clamp(.72rem,1.2vw,.86rem);color:var(--soft);align-items:start}
+  .tlrow.act div{padding:0 4px}
+  .tllegend{display:flex;gap:16px;justify-content:center;font-size:.76rem;color:var(--soft);margin-top:4px}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 15px;font-size:clamp(.86rem,1.45vw,1.0rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · LLM과 로컬 실행 (7)</span>
+    <h1 style="margin:18px 0">통제권은<br>누구에게 남는가</h1>
+    <p class="sub">판단의 세 번째 축 · 주권 · 바꾸기 · 멈추기 · 설명하기</p>
+  </div>
+  <aside>데이터는 심사에서, 비용은 첫 청구서에서 걸리지만, 통제권 문제는 대개 반년쯤 뒤 아무 일 없던 화요일 아침에 찾아옵니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 이번 강의의 지도</h2>
+  <div class="tw"><table>
+    <thead><tr><th>파트</th><th>내용</th><th>핵심</th></tr></thead>
+    <tbody>
+      <tr><td><b>1</b></td><td>누가 바꿀 수 있는가</td><td>상대가 모델을 바꾼다 → <b>회귀 테스트</b></td></tr>
+      <tr><td><b>2</b></td><td>누가 멈출 수 있는가</td><td>복구 시점을 누가 정하나 · 통제권 vs 위험</td></tr>
+      <tr><td><b>3</b></td><td>누가 설명할 수 있는가</td><td>주권 = <b>문서로 설명 가능한 정도</b></td></tr>
+      <tr><td><b>4</b></td><td>주권은 공짜가 아니다</td><td>패치·업데이트·튜닝이 안으로</td></tr>
+      <tr><td><b>5</b></td><td>규정 · 사례</td><td>확인 목록 + 같은 기능 다른 위치</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">🎯 주권은 거창한 단어지만, 실무에선 <b>세 개의 짧은 질문</b>입니다 — 누가 바꾸고, 누가 멈추고, 누가 설명하는가.</div>
+  <aside>세 축(데이터·비용·주권) 중 마지막입니다. 앞 둘보다 늦게 체감되는 만큼 미리 준비해야 합니다.</aside>
+</section>
+
+<!-- 3 도입 세 질문 -->
+<section class="slide" data-part="표지">
+  <h2>🏛️ 주권 = <span class="g">세 개의 짧은 질문</span></h2>
+  <div class="three">
+    <div class="c"><div class="q">누가 바꿀 수 있는가</div><small>모델·정책·가격</small></div>
+    <div class="c"><div class="q">누가 멈출 수 있는가</div><small>장애·복구 시점</small></div>
+    <div class="c"><div class="q">누가 설명할 수 있는가</div><small>감사·사고 조사</small></div>
+  </div>
+  <div class="hl">⏰ 이 문제는 <b>늦게 체감</b>됩니다. 데이터는 도입 심사에서, 비용은 첫 청구서에서 드러나지만, 통제권은 <b>반년쯤 뒤 아무 일 없던 화요일 아침</b>에 찾아옵니다.</div>
+  <aside>세 질문을 미리 답해두지 않으면, 문제가 실제로 터진 뒤에는 선택지가 거의 남지 않습니다.</aside>
+</section>
+
+<!-- 4 그림: 타임라인 -->
+<section class="slide" data-part="표지">
+  <h2>🕒 통제권은 <span class="g">시간축 위</span>에서 드러납니다</h2>
+  <p style="margin-bottom:2px"><small>위쪽은 <b class="r">상대가 정하는 일</b>, 아래쪽은 <b class="b">그때 우리가 해야 하는 일</b></small></p>
+  <div class="tl">
+    <div class="tlrow ev">
+      <div>모델 버전 교체</div><div>같은 프롬프트, 달라진 출력</div><div>종료 예고</div><div>종료일</div>
+    </div>
+    <div class="tlaxis">
+      <div class="dot gold"></div><div class="dot gold"></div><div class="dot red"></div><div class="dot red"></div>
+    </div>
+    <div class="tlrow act">
+      <div>회귀 테스트로 확인</div><div>평가 기준 재조정</div><div>대체 모델 검토, 예산 재산정</div><div>마이그레이션 완료</div>
+    </div>
+  </div>
+  <div class="hl">📅 예고 기간은 <b>우리가 정하는 게 아니라 상대의 정책</b>입니다. 한 제공자는 일반 공개 모델 <b>최소 6개월</b>, 특화 변형 <b>최소 3개월</b>, 프리뷰 모델은 <b>2주</b> 수준으로 공지합니다. <small>(확인 시점 2026년 7월)</small></div>
+  <aside>왼쪽 둘(교체·출력 변화)은 예고 없이 슬며시 오고, 오른쪽 둘(종료 예고·종료일)은 달력에 박혀 옵니다. 어느 쪽이든 우리가 할 일이 아래에 정해져 있습니다.</aside>
+</section>
+
+<!-- 5 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">누가 바꿀 수 있는가</h2>
+    <p style="margin-top:11px">빌려주는 쪽은 물건을 바꿀 권리가 있다</p>
+    <span class="who">폐기 일정 · 미묘한 변화</span>
+  </div>
+  <aside>API를 쓴다는 것은 남이 관리하는 모델을 빌려 쓴다는 뜻입니다.</aside>
+</section>
+
+<!-- 6 폐기 + 미묘한 변화 -->
+<section class="slide" data-part="PART 1">
+  <h2>📆 종료 일정과 <span class="g">미묘한 변화</span></h2>
+  <ul class="pts">
+    <li>추측이 아니라 <b>문서에 적힌 일정</b> — OpenAI Deprecations: 일반 공개 최소 6개월, 특화 최소 3개월, <code>preview</code>는 2주. 아래엔 실제 종료 예정일 목록. <b class="r">코드에 박은 모델 이름엔 유효기간이 있습니다.</b></li>
+    <li>더 자주 겪는 건 종료가 아니라 <b>미묘한 변화</b> — 같은 프롬프트인데 목록이 문단으로, 서술이 길어지고, 거절하던 요청을 이제 처리. 대개 <b>개선</b>입니다</li>
+    <li>그런데 그 출력을 <b>그대로 파싱해 다음 단계로 넘기던 시스템</b>이라면 — <b class="r">개선이 곧 장애</b>입니다</li>
+  </ul>
+  <div class="hl">🔑 오늘 잘 돌아가는 모델도, 내가 아무것도 안 해도 <b>상대가 바꿀 수 있습니다.</b></div>
+  <aside>종료는 예고라도 오지만, 출력 형식의 미세한 변화는 예고 없이 옵니다. 파싱에 의존하는 파이프라인이 특히 취약합니다.</aside>
+</section>
+
+<!-- 7 회귀 테스트 + 버전 고정 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧪 대응 — <span class="g">회귀 테스트</span> & 버전 고정</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3>회귀 테스트 세트</h3>
+      <p style="margin:0">실제 업무 입력 <b>20~50개</b> + 기대 출력 조건을 적어두고, <b>모델·버전을 바꿀 때마다</b> 실행. API·로컬 둘 다 필요 — 단 API는 <b class="r">내가 안 바꿔도 상대가 바꾸니 정기적으로</b></p>
+    </div>
+    <div class="box">
+      <h3 class="g">로컬의 실질 이점</h3>
+      <p style="margin:0">모델 파일을 내가 가지면 <b>버전을 고정</b>. 검증 마친 그 모델이 <b>내가 바꾸기로 할 때까지</b> 그대로 있음</p>
+    </div>
+  </div>
+  <div class="hl">🔑 규제 산업이 로컬·프라이빗을 택하는 이유는 데이터 때문만이 아닙니다 — <b>검증한 것과 운영하는 것이 같아야 한다</b>는 요구 때문인 경우도 많습니다.</div>
+  <aside>회귀 테스트는 실행 위치와 무관하게 필요합니다. API는 상대의 변경을 잡아내기 위해 '정기적으로' 돌려야 한다는 점이 다릅니다.</aside>
+</section>
+
+<!-- 8 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">누가 멈출 수 있는가</h2>
+    <p style="margin-top:11px">장애가 났을 때 할 수 있는 일의 목록</p>
+    <span class="who">통제권 vs 위험</span>
+  </div>
+  <aside>장애 시 할 수 있는 일의 목록이 실행 위치에 따라 다릅니다.</aside>
+</section>
+
+<!-- 9 멈추기 -->
+<section class="slide" data-part="PART 2">
+  <h2>⛔ 복구 시점을 <span class="g">누가 정하나</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="r">API 장애</h3><p style="margin:0">상태 페이지 새로고침, 재시도 로직 확인, 사용자 안내. <b>복구 시점은 내가 못 정함</b></p></div>
+    <div class="box"><h3 class="b">로컬 장애</h3><p style="margin:0"><b>복구 시점을 내가 정함</b>. 단, 그건 <b>내가 새벽에 일어나야</b> 한다는 뜻이기도</p></div>
+  </div>
+  <div class="hl">⚖️ 어느 쪽이 낫다 말할 수 없습니다. 관리형 가용성은 대개 소규모 팀 자체 구축보다 높음(대신 통제권 없음). 자체 운영은 통제권이 있지만 <b>행사할 사람·절차가 준비돼야</b> 의미. <b class="r">담당자 한 명의 개인 노트북 서비스는 통제권이 아니라 위험</b>입니다.</div>
+  <div class="hl">🔑 어느 쪽이든 같은 질문에 답해야 함 — 멈추면 업무는? <b>수동 대체 경로</b>는? 몇 시간까지 견디나? 두 번째 경로는 어디인가?</div>
+  <aside>통제권은 '가질 수 있다'가 아니라 '실제로 행사할 준비가 되어 있다'일 때만 통제권입니다.</aside>
+</section>
+
+<!-- 10 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">누가 설명할 수 있는가</h2>
+    <p style="margin-top:11px">감사와 사고 조사는 결국 설명을 요구한다</p>
+    <span class="who">주권의 실무적 정의</span>
+  </div>
+  <aside>이 판단은 무엇을 근거로 나왔는가, 누구의 데이터가 어디로 갔는가, 왜 이 방식이 적절한가 — 결국 설명을 요구받습니다.</aside>
+</section>
+
+<!-- 11 설명하기 -->
+<section class="slide" data-part="PART 3">
+  <h2>📋 설명의 <span class="g">재료</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="r">API를 쓸 때</h3><p style="margin:0">계약서, 데이터 처리 부속 계약(DPA), 공급자 인증 자료, 우리 쪽 <b>호출 로그·설정</b></p></div>
+    <div class="box"><h3 class="b">로컬을 쓸 때</h3><p style="margin:0">모델 파일과 그 <b>출처</b>, 실행 환경 구성, <b>접근 권한 대장</b>, 내부 로그</p></div>
+  </div>
+  <div class="hl">🔑 잘 정리된 <b>외부 계약</b>이 허술한 <b>내부 운영</b>보다 설명하기 쉬운 경우가 흔합니다. <b>로컬로 옮겼다는 사실 자체는 설명이 되지 않습니다</b> — 로컬에서 무엇을 어떻게 관리했는지가 설명입니다.</div>
+  <div class="big" style="margin-top:12px">주권 = "내가 다 가진다"가 아니라<br><span class="y">책임 소재를 문서로 설명할 수 있는 정도</span><br><small>그리고 그 문서는 사고가 난 뒤엔 쓸 수 없습니다</small></div>
+  <aside>사고 후엔 설명 문서를 소급해 만들 수 없습니다. 결정하는 그 순간에 남겨야 합니다.</aside>
+</section>
+
+<!-- 12 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part">
+    <div class="pno">4</div>
+    <h2 style="margin:0">로컬의 주권은 공짜가 아닙니다</h2>
+    <p style="margin-top:11px">통제권은 권리이면서 동시에 의무</p>
+    <span class="who">밖에 미뤄둔 일이 안으로</span>
+  </div>
+  <aside>로컬을 고르면 통제권이 따라오지만, 밖으로 미뤄뒀던 일들이 한꺼번에 안으로 들어옵니다.</aside>
+</section>
+
+<!-- 13 안으로 들어오는 일 -->
+<section class="slide" data-part="PART 4">
+  <h2>🔧 안으로 들어오는 일 <span class="g">셋</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>보안 패치</b> — 추론 서버·런타임·라이브러리에도 취약점과 업데이트가 나옴. 관리형은 누군가 알아서 했지만, 이제 <b>누가 추적하고 언제 적용할지</b> 정해야</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>모델 업데이트</b> — 버전 고정은 좋지만 2년 고정하면 <b>훨씬 나은 모델을 놓침</b>. 언제 평가·갈아탈지가 내부 일정표에</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>성능 튜닝</b> — 양자화 수준·컨텍스트 길이·동시 요청 처리가 속도·품질을 바꿈(직접 돌려봐서 감이 있을 것)</span></div>
+  </div>
+  <div class="hl">🔑 통제권을 가진다는 것은 이 일들을 <b>직접 떠안는다</b>는 뜻입니다.</div>
+  <aside>버전 고정의 이점(검증=운영)과 대가(더 나은 모델을 놓침)는 동전의 양면입니다.</aside>
+</section>
+
+<!-- 14 정리표 -->
+<section class="slide" data-part="PART 4">
+  <h2>📊 통제권을 <span class="g">한 표</span>로</h2>
+  <div class="tw"><table>
+    <thead><tr><th>질문</th><th class="r">클라우드 API</th><th class="b">로컬 · 내부 실행</th></tr></thead>
+    <tbody>
+      <tr><td><b>모델을 바꾸는 주체</b></td><td>제공자가 버전·정책·가격을 바꿈</td><td>우리가 고정하거나 바꿈</td></tr>
+      <tr><td><b>장애 복구의 주체</b></td><td>제공자·네트워크에 달림</td><td>우리 운영 역량에 달림</td></tr>
+      <tr><td><b>보안 패치의 주체</b></td><td>제공자가 처리</td><td>우리가 추적·적용</td></tr>
+      <tr><td><b>감사 때 내미는 것</b></td><td>계약·인증 자료·호출 로그·설정</td><td>모델 출처·실행 환경·접근 권한 대장·내부 로그</td></tr>
+      <tr><td><b>오프라인·폐쇄망</b></td><td>불가능</td><td><b>가능 — 이 요구가 있으면 사실상 유일한 선택지</b></td></tr>
+    </tbody>
+  </table></div>
+  <aside>마지막 행(폐쇄망)은 데이터·비용·주권을 다 떠나 로컬이 유일한 선택지가 되는 조건입니다.</aside>
+</section>
+
+<!-- 15 규정 -->
+<section class="slide" data-part="PART 5">
+  <h2>📜 확인해야 할 <span class="g">규정 목록</span> <small style="color:var(--soft)">(판단 아님, 확인)</small></h2>
+  <ul class="pts">
+    <li>국내 개인정보보호법의 <b>국외 이전</b>은 물리적 전송만이 아니라 <b>해외에서의 조회·처리위탁·보관</b>까지 포괄 → 해외 리전 API 호출이 이 범위에 들어올 수 있음</li>
+    <li>개인정보위: 생성형 AI 개인정보 처리 안내서 발표, 2026 업무계획에 <b>국외이전 영향평가제</b>와 M&A 시 <b>국외이전 사전심사제</b> 신설 방향</li>
+    <li>의료·금융·법률처럼 <b>개별법이 겹치는</b> 영역이면 규정이 더 붙음</li>
+  </ul>
+  <div class="hl">🔑 지금 이 규정들을 해석할 필요는 없습니다. 대신 결정문에 <b>"이 항목은 법무·정보보호 담당자와 확인 필요"</b>라고 명시하세요. <b>확인하지 않은 것을 확인하지 않았다고 적는 것도 실무 능력</b>입니다.</div>
+  <aside>규정은 매년 바뀌고 도메인마다 다릅니다. 엔지니어의 몫은 해석이 아니라, 확인이 필요한 지점을 문서에 정확히 표시하는 것입니다.</aside>
+</section>
+
+<!-- 16 사례 표 -->
+<section class="slide" data-part="PART 5">
+  <h2>🔬 같은 기능("문서 요약"), <span class="g">다른 결론</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th>도메인</th><th>업무</th><th>1차 선택</th><th>이유</th></tr></thead>
+    <tbody>
+      <tr><td>법률</td><td>공개 판례 요약</td><td class="g"><b>API</b></td><td>공개 자료라 데이터 축 느슨, 긴 문서 이해력은 상위 모델이 유리</td></tr>
+      <tr><td>병원</td><td>환자 상담 기록 요약</td><td class="b"><b>로컬·프라이빗</b></td><td>원문에 민감정보 밀집, 별도 승인 절차 필요</td></tr>
+      <tr><td>제조</td><td>설비 장애 로그 분류</td><td class="b"><b>내부 실행</b></td><td>공정·영업비밀이 섞이고 폐쇄망 요구가 많음</td></tr>
+      <tr><td>교육</td><td>학생 상담 메모 분류</td><td><b>강한 통제 아래</b></td><td>미성년자 정보·상담 맥락 민감, 어느 쪽이든 근거 문서 필요</td></tr>
+      <tr><td>마케팅</td><td>공개 리뷰 트렌드 요약</td><td class="g"><b>API</b></td><td>공개 데이터 중심이라 속도·품질이 곧 성과</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">🔑 이 표를 외우지 마세요. 같은 병원도 공개 논문 요약은 API가 자연스럽고, 같은 마케팅도 미공개 가격 정책이면 달라집니다. <b>도메인이 결론을 정하지 않습니다 — 그 업무의 데이터·비용·통제 요구가 정합니다.</b></div>
+  <aside>결론을 도메인 이름에 붙이면 틀립니다. 항상 그 업무가 실제로 다루는 데이터·비용·통제 요구로 되돌아가야 합니다.</aside>
+</section>
+
+<!-- 17 자문 -->
+<section class="slide" data-part="PART 5">
+  <h2>🤔 자문 — <span class="g">정반대 결론</span> 두 개</h2>
+  <p>여러분 도메인에서 <b>정반대 결론</b>이 나오는 업무 두 개를 찾아 적어보세요. 정반대여야 판단 기준이 실제로 작동하는지 확인됩니다.</p>
+  <div class="tw"><table>
+    <thead><tr><th>구분</th><th>업무 이름</th><th>그렇게 판단한 근거</th></tr></thead>
+    <tbody>
+      <tr><td><b class="g">API가 더 나은 업무</b></td><td>____</td><td>____</td></tr>
+      <tr><td><b class="b">로컬을 먼저 봐야 하는 업무</b></td><td>____</td><td>____</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">근거 칸에는 <b>데이터·비용·통제</b> 중 무엇이 결정적이었는지를 적으세요. 그게 세 축을 실제로 써먹는 연습입니다.</div>
+  <aside>같은 도메인 안에서 정반대 결론이 나온다면, 여러분은 도메인이 아니라 데이터·비용·통제로 판단하고 있다는 증거입니다.</aside>
+</section>
+
+<!-- 18 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 6문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">주권 = 세 질문: <b>누가 바꾸고, 누가 멈추고, 누가 설명하는가</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t">상대는 모델을 바꾼다(종료·미묘한 변화) → <b>회귀 테스트</b>. 로컬은 <b>버전 고정</b> 가능</span></div>
+    <div class="st"><span class="n">3</span><span class="t">통제권은 <b>행사할 사람·절차</b>가 있어야 통제권 — 개인 노트북 서비스는 위험</span></div>
+    <div class="st"><span class="n">4</span><span class="t">주권 = "다 가진다"가 아니라 <b>책임을 문서로 설명할 수 있는 정도</b> (사고 전에 써둘 것)</span></div>
+    <div class="st"><span class="n">5</span><span class="t">로컬 주권은 공짜가 아님 — <b>패치·업데이트·튜닝</b>이 전부 내 몫</span></div>
+    <div class="st"><span class="n">6</span><span class="t"><b>도메인이 결론을 정하지 않는다</b> — 데이터·비용·통제 요구가 정한다</span></div>
+  </div>
+  <aside>세 축(데이터·비용·주권)을 다 지났습니다. 다음은 이 셋을 하나의 결정문으로 합치는 일입니다.</aside>
+</section>
+
+<!-- 19 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 주권을 실무의 <b>세 짧은 질문</b>으로 바꾸면?</div>
+    <div class="q"><b>Q2.</b> API에서 '종료'보다 더 자주 겪는 통제권 문제는? 대응책은?</div>
+    <div class="q"><b>Q3.</b> 규제 산업이 로컬·프라이빗을 택하는, <b>데이터 외의 이유</b>는?</div>
+    <div class="q"><b>Q4.</b> "담당자 개인 노트북 서비스"가 통제권이 아니라 <b>위험</b>인 이유는?</div>
+    <div class="q"><b>Q5.</b> 주권의 <b>실무적 정의</b>는? (그리고 그 문서는 언제 써야 하나)</div>
+    <div class="q"><b>Q6.</b> "도메인이 결론을 정하지 않는다"는 무슨 뜻인가?</div>
+  </div>
+  <aside>Q5가 이 강의의 한 문장 요약입니다.</aside>
+</section>
+
+<!-- 20 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 누가 <b>바꿀</b> 수 있는가(모델·정책·가격) · 누가 <b>멈출</b> 수 있는가(장애·복구) · 누가 <b>설명할</b> 수 있는가(감사).</div>
+    <div class="q a"><b>A2.</b> <b>출력의 미묘한 변화</b>(형식·길이·거절 정책). 파싱 파이프라인엔 개선이 곧 장애. 대응 = <b>회귀 테스트 세트</b>를 정기적으로.</div>
+    <div class="q a"><b>A3.</b> <b>검증한 것과 운영하는 것이 같아야 한다</b>는 요구. 버전을 고정해 내가 바꿀 때까지 그대로 둘 수 있음.</div>
+    <div class="q a"><b>A4.</b> 통제권은 <b>실제로 행사할 사람과 절차</b>가 있어야 의미. 준비 없이 한 사람에게 의존하면 통제권이 아니라 위험이 됨.</div>
+    <div class="q a"><b>A5.</b> "다 가진다"가 아니라 <b>책임 소재를 문서로 설명할 수 있는 정도</b>. 그 문서는 <b>사고가 난 뒤엔 쓸 수 없다</b>(결정 시점에 남긴다).</div>
+    <div class="q a"><b>A6.</b> 같은 도메인이라도 그 업무가 다루는 <b>데이터·비용·통제 요구</b>에 따라 결론이 갈린다는 뜻. 도메인 이름에 결론을 붙이면 틀린다.</div>
+  </div>
+  <aside>A3(검증=운영)와 A5(설명 가능성)가 주권 축의 두 기둥입니다.</aside>
+</section>
+
+<!-- 21 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>수고하셨습니다 🙌</h1>
+    <div class="big" style="margin-top:24px">세 번째 축 = <span class="y">주권</span><br>누가 바꾸고 · 멈추고 · 설명하는가<br><span class="y">데이터 · 비용 · 주권, 세 축이 모였다</span></div>
+    <p class="sub" style="margin-top:22px">다음 — 세 축을 하나의 결정문으로</p>
+  </div>
+  <aside>데이터·비용·주권을 모두 지났습니다. 이제 이 셋을 옆에 놓고 실제 워크로드의 실행 위치를 정하는 결정문을 씁니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
