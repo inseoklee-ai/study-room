@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>내 노트북에서도 LLM이 돌아갈까 · 학습과 추론 그리고 양자화</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.4rem,3.2vw,2.15rem);font-weight:800;letter-spacing:-.015em;margin-bottom:20px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.95rem,1.55vw,1.12rem);color:var(--soft);margin-bottom:13px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.3em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:34px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:12px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.95rem,1.62vw,1.15rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:19px 22px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+  @media(max-width:780px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:15px 19px;margin-top:17px;font-size:clamp(.92rem,1.55vw,1.07rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:26px 28px;text-align:center;font-size:clamp(1.05rem,2.2vw,1.55rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;margin:16px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:86px}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:2px}
+  .cell b{font-size:.93rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700}
+
+  .qk{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:8px}
+  @media(max-width:780px){.qk{grid-template-columns:1fr}}
+  .qk .c{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px;box-shadow:var(--sh);text-align:center}
+  .qk .c .l{font-size:1.85rem;font-weight:800;color:var(--gr);line-height:1.1}
+  .qk .c .n{font-weight:750;margin:6px 0 4px;font-size:.98rem}
+  .qk .c small{color:var(--soft);font-size:.83rem;line-height:1.45;display:block}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.55vw,1.06rem)}
+
+  table{border-collapse:collapse;width:100%;font-size:clamp(.84rem,1.45vw,1rem)}
+  th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--bg2);font-weight:750;color:var(--ink)}
+  td{color:var(--soft)}td b{color:var(--ink)}
+  tr:last-child td{border-bottom:none}
+  .tw{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:6px}
+
+  code{font-family:"SF Mono",Menlo,Consolas,monospace;background:var(--bg2);padding:2px 6px;border-radius:5px;font-size:.9em}
+  pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:15px 18px;
+    overflow-x:auto;font-size:clamp(.78rem,1.35vw,.96rem);line-height:1.75;
+    font-family:"SF Mono",Menlo,Consolas,monospace;color:var(--ink);margin:12px 0}
+  .fx{text-align:center;font-size:clamp(1rem,2.1vw,1.45rem);font-family:"SF Mono",Menlo,monospace;
+    background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:20px;margin:14px 0;color:var(--ink)}
+
+  /* memory bars */
+  .bars{display:grid;gap:10px;margin:10px 0}
+  .brow{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center}
+  .brow .bl{font-size:.86rem;color:var(--soft);text-align:right}
+  .brow .bt{background:var(--bg2);border:1px solid var(--line);border-radius:9px;overflow:hidden;height:34px;position:relative}
+  .brow .fill{height:100%;display:flex;align-items:center;padding:0 12px;color:#fff;font-weight:750;font-size:.9rem;white-space:nowrap}
+  .fill.train{background:linear-gradient(135deg,var(--red),#8a4632)}
+  .fill.infer{background:linear-gradient(135deg,var(--gr),var(--gr2))}
+
+  .qa{display:grid;gap:10px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:12px 16px;font-size:clamp(.88rem,1.5vw,1.03rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">AIFFEL · LLM 학습노트</span>
+    <h1 style="margin:18px 0">내 노트북에서도<br>LLM이 돌아갈까?</h1>
+    <p class="sub">학습과 추론의 차이 · 로컬 LLM의 메모리 벽 · 양자화로 가는 길</p>
+  </div>
+  <aside>수백만 달러짜리 모델과 60만 원짜리 그래픽카드 — 둘 다 사실이라는 모순에서 출발합니다. 이 모순을 풀면 오늘 배울 모든 것이 자연스럽게 이어집니다.</aside>
+</section>
+
+<!-- 2 오늘의 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 지도 — 4개 단원</h2>
+  <div class="tw"><table>
+    <thead><tr><th>단원</th><th>내용</th><th>핵심 한 줄</th></tr></thead>
+    <tbody>
+      <tr><td><b>1</b></td><td>모순처럼 보이는 질문</td><td>수백만 달러 vs <b>60만 원</b>, 둘 다 사실</td></tr>
+      <tr><td><b>2</b></td><td>학습 ≠ 추론</td><td>만드는 일과 쓰는 일은 <b>비용 구조</b>가 다르다</td></tr>
+      <tr><td><b>3</b></td><td>그래도 남는 벽 하나</td><td>파라미터 <b>전체를 메모리</b>에 올려야 한다</td></tr>
+      <tr><td><b>4</b></td><td>오늘 갈 길</td><td>양자화 → 실행 → 한계 → <b>판단 3축</b></td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">🎯 끝나면 이 질문에 답할 수 있습니다 — <b>"왜 학습은 데이터센터의 일이고, 추론은 노트북의 일이 될 수 있나?"</b></div>
+  <aside>지금 외울 필요는 없고, 오른쪽 '핵심 한 줄'만 눈에 담아두세요. 마지막에 이 표로 다시 돌아옵니다.</aside>
+</section>
+
+<!-- 3 30초 복습 -->
+<section class="slide" data-part="표지">
+  <h2>📌 30초 복습 — 앞 시간에 배운 것</h2>
+  <p>지난 시간, 우리는 LLM이 <b>어떻게 만들어지는지</b>를 따라왔습니다.</p>
+  <div class="chain">
+    <div class="cell"><small>데이터</small><b>토큰 수조 개</b></div><span class="ar">→</span>
+    <div class="cell"><small>예측</small><b>다음 토큰</b></div><span class="ar">→</span>
+    <div class="cell"><small>오차 측정</small><b>정답과 비교</b></div><span class="ar">→</span>
+    <div class="cell" style="border-color:var(--gr)"><small>조정</small><b class="g">파라미터 갱신</b></div>
+  </div>
+  <ul class="pts">
+    <li>사전학습에는 <b>GPU 수천 대가 몇 달씩</b> 붙어 있어야 합니다</li>
+    <li>비용은 <b class="r">수백만 달러</b> 단위 — 데이터센터의 일이죠</li>
+  </ul>
+  <div class="hl">🤔 그런데 커뮤니티에는 "어제 <b>맥북에서 모델 하나 돌려봤는데</b>"라는 사람이 태연히 있습니다. 어떻게?</div>
+  <aside>학습은 데이터를 넣고 → 예측하고 → 오차를 재고 → 그 오차를 거슬러 파라미터를 조금씩 조정하는 과정을 수조 개 토큰에 반복하는 일입니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="단원 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">모순처럼 보이는 질문</h2>
+    <p style="margin-top:11px">둘 중 하나는 거짓말 같지만, 둘 다 사실이다</p>
+    <span class="who">도입 · 문제 제기</span>
+  </div>
+  <aside>이 모순처럼 보이는 지점을 풀고 나면 오늘의 모든 내용이 하나로 이어집니다.</aside>
+</section>
+
+<!-- 5 대담한 질문 -->
+<section class="slide" data-part="단원 1">
+  <h2>💥 이상한 일이 벌어지고 있습니다</h2>
+  <div class="big">"수백만 달러짜리 물건이<br>어떻게 <span class="y">60만 원짜리 그래픽카드</span><br>안으로 들어간 걸까?"</div>
+  <div class="grid2" style="margin-top:18px">
+    <div class="box">
+      <h3 class="r">🏭 모델을 만드는 쪽</h3>
+      <p style="margin:0"><b>수백만 달러</b><br><small>GPU 수천 대가 몇 달씩 = 사전학습의 세계</small></p>
+    </div>
+    <div class="box">
+      <h3 class="g">💻 모델을 쓰는 쪽</h3>
+      <p style="margin:0"><b>60만 원</b><br><small>게임용 그래픽카드 한 장으로 30B 모델을 굴리기도</small></p>
+    </div>
+  </div>
+  <aside>개발자 커뮤니티를 조금만 둘러보면 게임용 그래픽카드 하나로 30B짜리 모델을 굴리는 사람도 있습니다. 둘 중 하나는 거짓말처럼 들리지만, 둘 다 사실입니다.</aside>
+</section>
+
+<!-- 6 열쇠 하나 -->
+<section class="slide" data-part="단원 1">
+  <h2>🔑 열쇠는 <span class="g">딱 하나</span></h2>
+  <div class="big">모델을 <span class="y">만드는 일</span>과<br>모델을 <span class="y">쓰는 일</span>은<br>비용 구조가 <span class="y">완전히 다르다</span></div>
+  <ul class="pts" style="margin-top:18px">
+    <li>같은 모델이라도 '학습'과 '추론'은 <b>필요한 자원이 다른 일</b></li>
+    <li>이 하나를 이해하면 앞의 모순이 <b class="g">모순이 아니게 됩니다</b></li>
+  </ul>
+  <div class="hl">➡️ 그래서 먼저 <b>학습과 추론이 각각 무슨 일인지</b>부터 뜯어봅니다. (단원 2)</div>
+  <aside>"학습은 비싸고 추론은 싸다"가 아니라, 애초에 필요한 메모리 항목의 개수가 다르다는 게 핵심입니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="단원 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">학습과 추론은 애초에 다른 일</h2>
+    <p style="margin-top:11px">GPU 메모리에 무엇을 올려야 하는가</p>
+    <span class="who">핵심 개념 · 메모리 해부</span>
+  </div>
+  <aside>여기가 오늘의 심장입니다. 학습이 메모리에 무엇을 얹는지, 추론은 그중 무엇만 필요한지를 숫자로 확인합니다.</aside>
+</section>
+
+<!-- 8 학습에 필요한 것 -->
+<section class="slide" data-part="단원 2">
+  <h2>🏗️ 학습 = 모델을 <span class="r">만드는</span> 일</h2>
+  <p>학습에서 GPU 메모리에 올라가야 하는 건 <b>파라미터만이 아닙니다.</b></p>
+  <ul class="pts">
+    <li><b>순전파</b> — 입력을 층층이 통과시켜 답을 내는 앞 방향 계산</li>
+    <li><b>활성값</b> — 오차를 되짚으려면 순전파 중 각 층의 <b>중간 결과값을 전부</b> 붙들고 있어야 함</li>
+    <li><b>그래디언트(기울기)</b> — "이 값을 바꾸면 오차가 얼마나 변하나"를 파라미터마다 기록</li>
+    <li><b>옵티마이저(Adam)</b> — 파라미터마다 '어느 방향으로 밀려왔나 + 얼마나 들쭉날쭉했나' <b>2개 기록</b>을 보관</li>
+    <li><b>혼합 정밀도</b> — 속도를 위해 FP16으로 계산하되, 반올림에 갱신이 사라지는 걸 막으려 <b>FP32 사본</b>을 따로 보관</li>
+  </ul>
+  <div class="hl">💡 <b>FP16 = 16비트(2바이트), FP32 = 32비트(4바이트).</b> 자릿수가 많을수록 정확하지만 자리를 더 차지합니다.</div>
+  <aside>혼합 정밀도(mixed precision): 계산 대부분은 빠른 FP16으로, 미세한 갱신이 반올림에 먹혀 사라지지 않게 FP32 마스터 사본을 하나 더 둡니다.</aside>
+</section>
+
+<!-- 9 추론에 필요한 것 -->
+<section class="slide" data-part="단원 2">
+  <h2>💻 추론 = 만든 모델을 <span class="g">쓰는</span> 일</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="r">학습이 하던 일들…</h3>
+      <p style="margin:0"><small>오차 측정 · 역전파 · 그래디언트 · 옵티마이저 상태 · 활성값 보관</small></p>
+    </div>
+    <div class="box" style="display:grid;place-items:center">
+      <div style="text-align:center">
+        <h3 class="g">추론이 하는 일</h3>
+        <p style="margin:0"><b>정해진 숫자로<br>행렬곱 한 번 → 다음 토큰</b></p>
+      </div>
+    </div>
+  </div>
+  <ul class="pts" style="margin-top:16px">
+    <li>파라미터는 <b>이미 정해졌고</b>, 우리는 그걸 <b>조정하지 않습니다</b></li>
+    <li>오차를 잴 일도, 거슬러 올라갈 일도, 옵티마이저 상태를 들 일도 <b class="r">없습니다</b></li>
+  </ul>
+  <div class="hl">🔑 추론은 학습 메모리 항목 중 <b>딱 '첫 줄'(가중치)만</b> 필요합니다.</div>
+  <aside>남이 수백만 달러를 들여 정해 놓은 숫자 뭉치를 받아서, 우리는 그걸 '읽기만' 하면 됩니다.</aside>
+</section>
+
+<!-- 10 메모리 해부 표 -->
+<section class="slide" data-part="단원 2">
+  <h2>🧮 파라미터 <span class="g">1개</span>를 감당하는 데 드는 바이트</h2>
+  <div class="tw"><table>
+    <thead><tr><th>구분</th><th>구성</th><th>파라미터당</th><th>7B 모델 기준</th></tr></thead>
+    <tbody>
+      <tr><td><b class="r">학습</b></td><td>FP16 2B + FP32 마스터 4B + Adam 8B + 그래디언트 4B <small>(+활성값 별도)</small></td><td><b class="r">18바이트+</b></td><td><b class="r">126GB↑</b></td></tr>
+      <tr><td><b class="g">추론</b></td><td>FP16 가중치 2B <small>(+ KV cache)</small></td><td><b class="g">2바이트대</b></td><td><b class="g">14GB 남짓</b></td></tr>
+    </tbody>
+  </table></div>
+  <div class="bars">
+    <div class="brow"><div class="bl">학습 126GB↑</div><div class="bt"><div class="fill train" style="width:100%">약 9배</div></div></div>
+    <div class="brow"><div class="bl">추론 14GB</div><div class="bt"><div class="fill infer" style="width:11%"></div></div></div>
+  </div>
+  <div class="hl">🔑 같은 모델인데 메모리 요구가 <b>아홉 배 가까이</b> 차이 — 그래서 <b>학습은 데이터센터, 추론은 노트북</b>의 일이 됩니다.</div>
+  <aside>허깅페이스가 정리한 학습 메모리 해부 기준입니다. 가중치 6B(FP16 2 + FP32 4) + Adam 8B + 그래디언트 4B = 18B, 여기에 배치·시퀀스 길이에 따라 부풀어 오르는 활성값이 얹힙니다.</aside>
+</section>
+
+<!-- 11 PART 2 정리 -->
+<section class="slide" data-part="단원 2">
+  <h2>✅ 단원 2 정리</h2>
+  <div class="tw"><table>
+    <tbody>
+      <tr><td><b>학습</b></td><td>가중치 + 활성값 + 그래디언트 + 옵티마이저 상태까지 메모리에 → <b class="r">파라미터당 18바이트+</b></td></tr>
+      <tr><td><b>추론</b></td><td>정해진 파라미터로 행렬곱만 → <b class="g">파라미터당 2바이트대</b> ('첫 줄'만 필요)</td></tr>
+      <tr><td><b>결론</b></td><td>7B 기준 <b>126GB vs 14GB</b>, 약 <b>9배</b> 차이 — 추론이 노트북의 일이 될 수 있는 이유</td></tr>
+    </tbody>
+  </table></div>
+  <aside>여기까지가 모순의 해소입니다. 다음은 "그래도 추론이 공짜는 아니다"라는 이야기.</aside>
+</section>
+
+<!-- 12 PART 3 -->
+<section class="slide" data-part="단원 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">그래도 벽은 하나 남는다</h2>
+    <p style="margin-top:11px">추론이 싸다고 공짜라는 뜻은 아니다</p>
+    <span class="who">한계 · 메모리 벽</span>
+  </div>
+  <aside>추론의 비용은 학습보다 훨씬 작지만, 넘어야 할 벽이 딱 하나 남습니다.</aside>
+</section>
+
+<!-- 13 남은 벽 -->
+<section class="slide" data-part="단원 3">
+  <h2>🧱 넘어야 할 벽 — <span class="g">파라미터를 전부 메모리에</span></h2>
+  <ul class="pts">
+    <li>토큰 하나를 만들려면 <b>모든 층을 처음부터 끝까지</b> 통과해야 함</li>
+    <li>각 층의 <b>가중치 행렬이 그때마다 필요</b>합니다</li>
+    <li>일부만 올리고 나머지를 디스크에서 읽어오면? 토큰마다 <b class="r">수 GB를 긁어와야 해</b> 실용적인 속도가 안 납니다</li>
+  </ul>
+  <div class="fx">7,000,000,000개 × 2바이트(FP16) ≈ <b>14GB</b></div>
+  <div class="hl">그래서 계산은 아주 단순해집니다 — <b>모델을 통째로 올릴 메모리가 있느냐 없느냐.</b></div>
+  <aside>타협이 어려운 조건입니다. 원리적으로는 일부만 올릴 수 있지만, 토큰 하나 만들 때마다 디스크에서 수 GB를 읽으면 속도가 실용적이지 않습니다.</aside>
+</section>
+
+<!-- 14 숫자로 보기 -->
+<section class="slide" data-part="단원 3">
+  <h2>📏 그래서 숫자가 <span class="g">전부를 결정</span>합니다</h2>
+  <div class="tw"><table>
+    <thead><tr><th>모델</th><th>FP16 메모리</th><th>노트북에서?</th></tr></thead>
+    <tbody>
+      <tr><td><b>7B</b></td><td>약 14GB</td><td>16GB 카드에 겨우</td></tr>
+      <tr><td><b>Llama 3.1 8B</b></td><td>14.96GB <small>(측정값)</small></td><td>다른 것 올릴 자리 없음</td></tr>
+      <tr><td><b>70B</b></td><td><b class="r">140GB</b></td><td><b class="r">아예 다른 세계</b></td></tr>
+      <tr><td><b>노트북 GPU</b></td><td><b>8 ~ 16GB 뿐</b></td><td>—</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">⚠️ 14.96GB 파일은 16GB 카드에도 <b>겨우</b> 들어갑니다. <b class="g">이 벽을 어떻게 넘었는지가 다음 이야기.</b></div>
+  <aside>라마(Llama)는 메타가 가중치를 공개한 계열이라 파일 크기가 그대로 알려져 있어 기준으로 삼기 좋습니다. Llama 3.1 8B의 FP16 파일은 14.96GB로 측정됩니다.</aside>
+</section>
+
+<!-- 15 PART 4 -->
+<section class="slide" data-part="단원 4">
+  <div class="part">
+    <div class="pno">4</div>
+    <h2 style="margin:0">오늘 우리가 갈 길</h2>
+    <p style="margin-top:11px">양자화에서 시작해 '판단 기준'으로 끝난다</p>
+    <span class="who">로드맵</span>
+  </div>
+  <aside>오늘 강의는 하나의 흐름으로 이어집니다. 벽을 넘는 기술에서 출발해, 마지막엔 스스로 판단하는 감각으로 바뀝니다.</aside>
+</section>
+
+<!-- 16 로드맵 -->
+<section class="slide" data-part="단원 4">
+  <h2>🧭 오늘의 흐름 — <span class="g">4단계</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>양자화</b> — 14GB를 4GB대로 줄이는 기술. 왜 줄여도 멀쩡한지, 얼마나 줄일 수 있는지, 무엇을 잃는지를 <b>숫자로 확인</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>직접 실행</b> — 도구를 설치하고 모델을 받아, 내 기계에서 <b>토큰이 나오는 것</b>을 눈으로 확인</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>한계 체험</b> — 속도는 어떤지, 품질이 어디서 무너지는지, 컨텍스트를 늘리면 무슨 일이 벌어지는지 <b>몸으로</b></span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>판단 기준</b> — 로컬 vs API를 3축으로: ① 데이터가 어디까지 나가도 되나 ② 비용 역전점 ③ 인프라 의존도</span></div>
+  </div>
+  <div class="hl">🔑 마지막엔 "내 에이전트의 이 부분은 <b>로컬</b>에서, 저 부분은 <b>API</b>로"를 스스로 결정하게 됩니다.</div>
+  <aside>양자화 → 실행 → 한계 → 판단. 감각을 판단 기준으로 바꾸는 것이 이 강의의 최종 목표입니다.</aside>
+</section>
+
+<!-- 17 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 6문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">모델을 <b>만드는 일(학습)</b>과 <b>쓰는 일(추론)</b>은 비용 구조가 완전히 다르다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">학습은 파라미터당 <b class="r">18바이트+</b> (가중치·그래디언트·옵티마이저·활성값)</span></div>
+    <div class="st"><span class="n">3</span><span class="t">추론은 파라미터당 <b class="g">2바이트대</b> — 정해진 숫자로 행렬곱만 하면 되니까</span></div>
+    <div class="st"><span class="n">4</span><span class="t">7B 기준 <b>126GB vs 14GB</b>, 약 <b>9배</b> — 그래서 추론은 노트북의 일이 될 수 있다</span></div>
+    <div class="st"><span class="n">5</span><span class="t">단, 추론에도 벽 하나: <b>전체 파라미터를 메모리에</b> (7B≈14GB, 70B≈140GB)</span></div>
+    <div class="st"><span class="n">6</span><span class="t">노트북 GPU는 <b>8~16GB뿐</b> → 이 벽을 넘는 기술이 <b class="g">양자화</b>, 그것이 출발점</span></div>
+  </div>
+  <aside>이 6문장이 오늘 내용의 전부입니다. 캡처해두고 복습하세요.</aside>
+</section>
+
+<!-- 18 이해도 확인 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 같은 모델인데 학습은 데이터센터에서, 추론은 노트북에서 가능한 <b>이유</b>는?</div>
+    <div class="q"><b>Q2.</b> 혼합 정밀도 학습에서 파라미터 1개당 메모리는 <b>총 몇 바이트</b>이고, 어떤 항목으로 구성되나?</div>
+    <div class="q"><b>Q3.</b> 추론 시 파라미터 1개당 필요한 바이트는? <b>7B 모델</b>이면 대략 몇 GB?</div>
+    <div class="q"><b>Q4.</b> 추론에서도 넘어야 하는 '<b>벽</b>' 하나는? 왜 디스크에서 조금씩 읽는 방식은 안 되나?</div>
+    <div class="q"><b>Q5.</b> 로컬 실행 vs API 사용을 결정하는 <b>3가지 축</b>은?</div>
+  </div>
+  <div class="hl">💡 다음 장에 정답이 있습니다. 먼저 스스로 답해 보세요!</div>
+  <aside>Q2와 Q3의 숫자(18바이트 / 2바이트, 126GB / 14GB)가 오늘의 핵심 수치입니다.</aside>
+</section>
+
+<!-- 19 정답 & 해설 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 학습과 추론의 <b>비용 구조가 다르기 때문.</b> 학습은 파라미터를 조정하려고 활성값·그래디언트·옵티마이저 상태까지 메모리에 얹지만, 추론은 정해진 파라미터로 행렬곱만 한다.</div>
+    <div class="q a"><b>A2.</b> <b>총 18바이트+</b> = FP16 2B + FP32 마스터 4B(가중치 6B) + Adam 8B + 그래디언트 4B. 여기에 활성값이 별도로 얹힌다.</div>
+    <div class="q a"><b>A3.</b> <b>2바이트대(FP16 가중치).</b> 7B × 2B ≈ <b>14GB</b> (Llama 3.1 8B은 14.96GB로 측정).</div>
+    <div class="q a"><b>A4.</b> <b>전체 파라미터를 메모리에 올려야 한다는 것.</b> 토큰마다 모든 층의 가중치가 필요한데, 디스크에서 매번 수 GB를 읽으면 실용 속도가 안 나오기 때문.</div>
+    <div class="q a"><b>A5.</b> ① 데이터가 어디까지 나가도 되나 ② 비용이 어느 지점에서 역전되나 ③ 남의 인프라에 얼마나 의존해도 되나.</div>
+  </div>
+  <aside>A2·A3의 숫자를 정확히 말할 수 있으면 오늘 핵심은 잡은 것입니다.</aside>
+</section>
+
+<!-- 20 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>수고하셨습니다 🙌</h1>
+    <div class="big" style="margin-top:26px">학습은 <span class="y">데이터센터</span>의 일<br>추론은 <span class="y">노트북</span>의 일<br><br>그 벽을 넘는 열쇠가 <span class="y">양자화</span></div>
+    <p class="sub" style="margin-top:24px">다음 이야기 — 14GB를 4GB대로 줄이는 법</p>
+  </div>
+  <aside>다음 강의에서 양자화를 다룹니다. 오늘 배운 '메모리 벽'이 왜 중요한지 기억한 채로 이어가면 됩니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
