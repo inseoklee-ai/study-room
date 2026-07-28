@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>로컬과 API를 나란히 놓고 봅니다 · 세 갈래와 판단의 축</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;
+    --bl:#7fa3d0;--bl2:#5f83b0;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:18px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.95rem,1.55vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.3em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:18px}
+  .part .who{margin-top:16px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px 20px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:780px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .steps{display:grid;gap:8px}
+  .st{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:11px 15px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:25px;height:25px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.78rem}
+  .st .t{font-size:clamp(.88rem,1.5vw,1.04rem)}
+
+  table{border-collapse:collapse;width:100%;font-size:clamp(.78rem,1.3vw,.94rem)}
+  th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--bg2);font-weight:750;color:var(--ink)}
+  td{color:var(--soft)}td b{color:var(--ink)}
+  tr:last-child td{border-bottom:none}
+  .tw{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:6px}
+  th.api{color:var(--red)} th.mng{color:var(--bl)} th.loc{color:var(--gr)}
+
+  code{font-family:"SF Mono",Menlo,Consolas,monospace;background:var(--bg2);padding:2px 6px;border-radius:5px;font-size:.88em}
+  .fx{text-align:center;font-size:clamp(.9rem,1.7vw,1.2rem);font-family:"SF Mono",Menlo,monospace;
+    background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0;color:var(--ink);line-height:1.5}
+
+  /* three-path diagram */
+  .paths{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:8px}
+  @media(max-width:820px){.paths{grid-template-columns:1fr}}
+  .path{border:1px solid var(--line);border-radius:16px;padding:14px 14px 16px;text-align:center;box-shadow:var(--sh)}
+  .path.loc{background:linear-gradient(180deg,rgba(63,107,95,.10),transparent)}
+  .path.mng{background:linear-gradient(180deg,rgba(58,90,140,.10),transparent)}
+  .path.api{background:linear-gradient(180deg,rgba(166,90,63,.10),transparent)}
+  .path .ph{font-weight:800;font-size:.98rem;margin-bottom:11px}
+  .path.loc .ph{color:var(--gr)} .path.mng .ph{color:var(--bl)} .path.api .ph{color:var(--red)}
+  .dbox{background:var(--card);border:1.5px solid var(--line);border-radius:9px;padding:9px;font-weight:700;font-size:.9rem}
+  .barrow{font-size:1.1rem;line-height:1;margin:6px 0 4px}
+  .path.loc .barrow{color:var(--gr)}
+  .bound{border-top:2px dashed var(--soft);position:relative;margin:12px 4px 6px}
+  .bound small{position:absolute;right:0;top:-9px;background:var(--bg);padding:0 5px;font-size:.66rem;color:var(--soft)}
+  .mbox{border-radius:9px;padding:10px;color:#fff;font-weight:750;font-size:.92rem;line-height:1.35}
+  .mbox small{display:block;font-weight:400;opacity:.9;font-size:.75rem;margin-top:2px}
+  .path.loc .mbox{background:linear-gradient(135deg,var(--gr),var(--gr2))}
+  .path.mng .mbox{background:linear-gradient(135deg,var(--bl),var(--bl2))}
+  .path.api .mbox{background:linear-gradient(135deg,var(--red),#8a4632)}
+  .pnote{margin-top:10px;font-size:.78rem;color:var(--soft);line-height:1.5}
+  .pnote b{display:block}
+
+  /* two-gap ladder */
+  .ladder{display:grid;gap:6px;justify-items:center;margin-top:6px}
+  .lrow{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 16px;text-align:center;width:100%;max-width:640px;box-shadow:var(--sh)}
+  .lrow b{font-size:1rem} .lrow small{color:var(--soft)}
+  .lgap{color:var(--gold);font-weight:750;font-size:.85rem}
+  .lgap.big{color:var(--red)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 15px;font-size:clamp(.86rem,1.45vw,1.0rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · LLM과 로컬 실행 (4)</span>
+    <h1 style="margin:18px 0">로컬과 API를<br>나란히 놓고 봅니다</h1>
+    <p class="sub">세 갈래 · 품질 격차의 두 겹 · 데이터가 흐르는 길 · 판단의 세 축</p>
+  </div>
+  <aside>직접 돌려봤으니 이제 비교할 자격이 생겼습니다. "놀라움"과 "의심" 두 감정을 판단으로 바꾸는 시간입니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 이번 강의의 지도</h2>
+  <div class="tw"><table>
+    <thead><tr><th>파트</th><th>내용</th><th>핵심</th></tr></thead>
+    <tbody>
+      <tr><td><b>1</b></td><td>갈래는 셋</td><td>로컬 · <b>관리형 프라이빗</b> · 공개 클라우드 API</td></tr>
+      <tr><td><b>2</b></td><td>한 표에 놓으면</td><td>모델·비용·데이터·로그·주의점 비교</td></tr>
+      <tr><td><b>3</b></td><td>품질 격차</td><td>격차는 <b>두 겹</b>이다</td></tr>
+      <tr><td><b>4</b></td><td>데이터가 흐르는 길</td><td>이름 말고 <b>4가지 질문</b>으로</td></tr>
+      <tr><td><b>5</b></td><td>질문이 바뀐다</td><td>데이터 · 비용 · 주권 세 축</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">🎯 끝나면 "로컬이냐 클라우드냐"가 아니라 <b>"이 워크로드는 어느 경계를 넘어도 되는가"</b>를 물을 수 있습니다.</div>
+  <aside>답이 항상 "경우에 따라 다르다"로 끝나는 질문은 좋은 질문이 아닙니다. 이번 강의는 질문 자체를 바꿉니다.</aside>
+</section>
+
+<!-- 3 도입 -->
+<section class="slide" data-part="표지">
+  <h2>🎭 두 감정을 <span class="g">판단</span>으로</h2>
+  <div class="grid2">
+    <div class="box"><h3 class="g">"정말 내 컴퓨터에서 도네"</h3><p style="margin:0">— 놀라움</p></div>
+    <div class="box"><h3 class="r">"근데 이걸로 일을 시킬 수 있나"</h3><p style="margin:0">— 의심</p></div>
+  </div>
+  <ul class="pts" style="margin-top:14px">
+    <li>둘 다 정확한 반응. 판단으로 바꾸려면 <b>선택지를 제대로 늘어놓아야</b> 합니다</li>
+    <li>많은 사람이 <b>"로컬이냐 API냐"</b> 두 갈래로 시작 → 규제 산업에서 가장 많이 쓰는 <b class="b">세 번째 갈래</b>가 통째로 빠짐</li>
+  </ul>
+  <div class="hl">🔑 세 번째 = <b class="b">관리형 프라이빗 배포</b>. 남의 데이터센터를 쓰되, <b>어디서 처리되고 무엇이 남는지를 계약으로 못 박아</b> 두는 방식.</div>
+  <aside>이름이 낯설 뿐 하는 일은 단순합니다. 다음 절에서 셋을 나란히 놓고 봅니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">갈래는 둘이 아니라 셋입니다</h2>
+    <p style="margin-top:11px">데이터가 어느 경계를 넘는지로 나뉜다</p>
+    <span class="who">세 가지 선택지</span>
+  </div>
+  <aside>이름이 아니라 데이터가 어느 경계를 넘는지를 봅니다.</aside>
+</section>
+
+<!-- 5 세 갈래 소개 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔀 세 갈래</h2>
+  <div class="steps">
+    <div class="st"><span class="n" style="background:var(--red)">①</span><span class="t"><b class="r">공개 클라우드 API</b> — 제공사 공용 인프라에 HTTP 요청. 키 발급만으로 <b>최고 성능 모델</b>, 하드웨어 0대</span></div>
+    <div class="st"><span class="n" style="background:var(--bl)">②</span><span class="t"><b class="b">관리형 프라이빗 배포</b> — 사업자 인프라 위 <b>조직 전용 환경</b>. MS Foundry·Amazon Bedrock·Google Vertex AI. 리전 고정 + 학습에 안 씀 보장 + 사설 연결</span></div>
+    <div class="st"><span class="n">③</span><span class="t"><b class="g">로컬 · 온프레미스</b> — 방금 해본 그것(또는 서버실 버전). 데이터가 조직 경계를 <b>물리적으로 안 넘음</b></span></div>
+  </div>
+  <div class="hl">②는 물리적으로는 남의 데이터센터지만, <b>처리 리전이 계약으로 고정</b>되고, 프롬프트·응답이 <b>학습에 안 쓰인다는 게 문서로 보장</b>됩니다.</div>
+  <aside>공개 API는 시작이 가장 빠르고, 관리형은 규제 산업에서, 로컬은 데이터가 절대 나가면 안 될 때 쓰입니다.</aside>
+</section>
+
+<!-- 6 그림: 같은 질문 다른 경로 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧭 같은 질문, <span class="g">다른 경로</span></h2>
+  <p style="margin-bottom:6px"><small>이름이 아니라 데이터가 어느 경계를 넘는지를 봅니다</small></p>
+  <div class="paths">
+    <div class="path loc">
+      <div class="ph">로컬 · 온프레미스</div>
+      <div class="dbox">내 데이터</div>
+      <div class="barrow">↓</div>
+      <div class="mbox">모델이 도는 곳<small>내 장비 안</small></div>
+      <div class="pnote"><b class="g">넘는 경계 없음</b>전기와 하드웨어가 비용</div>
+    </div>
+    <div class="path mng">
+      <div class="ph">관리형 프라이빗 배포</div>
+      <div class="dbox">내 데이터</div>
+      <div class="bound"><small>계약으로 그은 선</small></div>
+      <div class="mbox">모델이 도는 곳<small>지정한 리전의 전용 환경</small></div>
+      <div class="pnote"><b class="b">조직 경계는 넘지만 통제 가능</b>토큰 요금 + 관리 비용</div>
+    </div>
+    <div class="path api">
+      <div class="ph">공개 클라우드 API</div>
+      <div class="dbox">내 데이터</div>
+      <div class="bound"><small>공용 인프라 경계</small></div>
+      <div class="mbox">모델이 도는 곳<small>제공사 공용 인프라</small></div>
+      <div class="pnote"><b class="r">약관과 정책이 유일한 통제 수단</b>쓴 만큼만 비용</div>
+    </div>
+  </div>
+  <aside>세로 화살표는 데이터가 넘는 경계입니다. 로컬은 경계가 없고, 관리형은 계약선을 넘고, 공개 API는 공용 인프라 경계를 넘습니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">세 갈래를 한 표에 놓으면</h2>
+    <p style="margin-top:11px">그리고 근거 문서를 확인하는 습관</p>
+    <span class="who">비교표</span>
+  </div>
+  <aside>표의 몇 칸은 근거 문서를 확인해 두는 편이 좋습니다.</aside>
+</section>
+
+<!-- 8 비교표 (1) -->
+<section class="slide" data-part="PART 2">
+  <h2>📊 세 갈래 비교 <small style="color:var(--soft)">(1/2)</small></h2>
+  <div class="tw"><table>
+    <thead><tr><th></th><th class="api">공개 클라우드 API</th><th class="mng">관리형 프라이빗</th><th class="loc">로컬 · 온프레미스</th></tr></thead>
+    <tbody>
+      <tr><td><b>쓸 수 있는 모델</b></td><td>그 시점 최고 성능을 가장 먼저</td><td>사업자 카탈로그 중에서</td><td>공개 가중치 중 내 하드웨어에 맞는 것</td></tr>
+      <tr><td><b>시작 시간</b></td><td>키 발급 후 몇 분</td><td>며칠~몇 주(계약·리전·권한)</td><td>설치는 몇 분, 하드웨어 조달은 별개</td></tr>
+      <tr><td><b>비용의 모양</b></td><td>토큰당 종량제, 트래픽에 정비례</td><td>종량제 + 관리 비용</td><td>초기 투자 큼, 이후 한계비용은 전기값</td></tr>
+      <tr><td><b>데이터가 가는 곳</b></td><td>제공사 공용 인프라</td><td>지정한 리전의 전용 환경</td><td>내 장비 밖으로 안 나감</td></tr>
+    </tbody>
+  </table></div>
+  <aside>비용의 모양이 셋 다 다릅니다 — 종량제 / 종량제+관리 / 초기투자 후 전기값.</aside>
+</section>
+
+<!-- 9 비교표 (2) -->
+<section class="slide" data-part="PART 2">
+  <h2>📊 세 갈래 비교 <small style="color:var(--soft)">(2/2)</small></h2>
+  <div class="tw"><table>
+    <thead><tr><th></th><th class="api">공개 클라우드 API</th><th class="mng">관리형 프라이빗</th><th class="loc">로컬 · 온프레미스</th></tr></thead>
+    <tbody>
+      <tr><td><b>학습 사용</b></td><td>주요 제공사는 기본적으로 안 씀</td><td>계약으로 명시</td><td>해당 없음</td></tr>
+      <tr><td><b>남는 로그</b></td><td>오남용 모니터링용 보존 기간 존재</td><td>보존 끄는 옵션 협의 가능</td><td>내가 안 남기면 없음</td></tr>
+      <tr><td><b>어울리는 상황</b></td><td>최고 품질 필요 + 민감도 낮음 + 트래픽 들쭉날쭉</td><td>규제 산업 + 민감 데이터 + 프런티어 품질 필요</td><td>반출 금지 · 오프라인 · 대량 반복 단가↓</td></tr>
+      <tr><td><b>주의점</b></td><td>리전·로그 보존·스테이트풀 저장 확인</td><td>"관리형"=자동 안전 아님, 배포 유형별 처리 리전 다름</td><td>업데이트·패치·가동률이 전부 내 몫</td></tr>
+    </tbody>
+  </table></div>
+  <aside>주의점 열이 특히 중요합니다. "관리형"이라는 단어가 자동으로 안전을 뜻하지 않습니다.</aside>
+</section>
+
+<!-- 10 근거 문서 -->
+<section class="slide" data-part="PART 2">
+  <h2>📄 근거 문서를 <span class="g">읽는 것이 엔지니어의 일</span></h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="r">공개 API</h3>
+      <p style="margin:0"><b>OpenAI</b>: API 데이터 학습에 안 씀(기본), 오남용 로그 기본 30일, 승인 고객엔 <b>ZDR</b>(무보존).<br><b>Anthropic</b>: API 입출력 30일 내 삭제·학습에 안 씀(상용 기본).</p>
+    </div>
+    <div class="box">
+      <h3 class="b">관리형</h3>
+      <p style="margin:0"><b>MS Foundry</b>: 학습·재학습에 안 씀, 서드파티 모델엔 프롬프트 공유도 안 함. 단 <b>Global 배포는 처리 리전이 유동</b>(Standard·DataZone은 지정 지역).<br><b>Amazon Bedrock</b>: 리전별 제공사 전용 계정, 제공사는 프롬프트·응답 접근 불가.</p>
+    </div>
+  </div>
+  <div class="hl">🔑 교훈은 정책 문구를 외우는 게 아니라, <b>이런 문서가 존재하고 그걸 읽는 것이 엔지니어의 일</b>이라는 사실. 무엇을 고르든 <b>근거로 누군가에게 설명해야 하는 자리</b>에 서게 됩니다.</div>
+  <aside>무료 소비자용 서비스와 상용 API의 약관은 완전히 별개의 계약입니다. 이 구분이 자주 혼동됩니다.</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">품질 격차는 아직 남아 있습니다</h2>
+    <p style="margin-top:11px">옹호론은 양쪽 다 과장한다 — 숫자를 보자</p>
+    <span class="who">두 겹의 격차</span>
+  </div>
+  <aside>로컬 옹호 글도 클라우드 옹호 글도 이 지점에서 과장합니다. 숫자를 보고 판단합시다.</aside>
+</section>
+
+<!-- 12 Epoch 수치 -->
+<section class="slide" data-part="PART 3">
+  <h2>📉 Epoch AI — <span class="g">공개 vs 비공개 격차</span></h2>
+  <div class="big">최상위 공개 가중치 모델은<br>최상위 비공개 모델보다 <span class="y">평균 약 4개월</span> 뒤<br><small>2026년 1~5월 · ECI 약 8점 (2025년 10월엔 약 3개월, 조금 벌어짐)</small></div>
+  <ul class="pts" style="margin-top:14px">
+    <li>단서 ① 공개 모델은 <b>공개 벤치마크에 최적화</b>되는 경향 → 비공개 벤치에선 더 나쁨</li>
+    <li>단서 ② 선도 연구소가 <b>최강 모델을 항상 공개하진 않음</b> → 실제 격차는 측정치보다 클 수 있음</li>
+    <li>작업별로 다름: <b class="g">코딩</b>(검증 가능 정답)은 거의 따라붙음, <b class="r">다단계 추론·긴 에이전트</b>는 차이 뚜렷</li>
+  </ul>
+  <aside>크기별 최신 순위는 Artificial Analysis 같은 곳에서 계속 갱신되니, 판단할 일이 생기면 그때의 숫자를 직접 확인하세요.</aside>
+</section>
+
+<!-- 13 두 겹 격차 -->
+<section class="slide" data-part="PART 3">
+  <h2>🪜 훨씬 중요한 함정 — <span class="r">격차는 두 겹</span></h2>
+  <p>비교에 나오는 "최상위 공개 가중치 모델"은 <b>여러분 노트북에서 돌지 않습니다.</b> 수천억 파라미터 MoE라 4비트로도 수십~수백 GB.</p>
+  <div class="ladder">
+    <div class="lrow"><b>프런티어 비공개 모델</b></div>
+    <div class="lgap">↕ 약 3~5개월치 성능 차이</div>
+    <div class="lrow"><b>최상위 공개 가중치 모델</b><br><small>수백 GB · 서버 필요</small></div>
+    <div class="lgap big">↕ 이쪽이 훨씬 큰 차이</div>
+    <div class="lrow"><b>내 노트북에서 도는 공개 모델</b><br><small>수 GB</small></div>
+  </div>
+  <div class="hl">🔑 두 겹을 구분 안 하면 — "오픈이 프런티어를 따라잡았다" 헤드라인을 읽고 <b>노트북에서 같은 성능을 기대하다 실망</b>. 반대로 로컬에 실망해 "오픈은 멀었다"는 결론도 틀림. 여러분이 만난 건 최전선이 아니라 <b>하드웨어에 맞춰 잘라낸 조각</b>.</div>
+  <aside>"4개월"은 최상위 공개 모델의 이야기이고, 노트북 모델과 프런티어의 실제 격차는 그보다 훨씬 큽니다.</aside>
+</section>
+
+<!-- 14 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part">
+    <div class="pno">4</div>
+    <h2 style="margin:0">이름에 속지 말고, 데이터가 흐르는 길을</h2>
+    <p style="margin-top:11px">도구 이름은 실행 위치를 알려주지 않는다</p>
+    <span class="who">4가지 질문</span>
+  </div>
+  <aside>세 갈래를 배웠으니, 실제로 도구를 고를 때 벌어지는 일을 이야기합니다.</aside>
+</section>
+
+<!-- 15 이름 != 위치 -->
+<section class="slide" data-part="PART 4">
+  <h2>🎭 이름 ≠ <span class="g">실행 위치</span></h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="r">방향 ① 로컬인 줄 알았는데</h3>
+      <p style="margin:0"><code>ollama run qwen3.5:9b</code> vs <code>...gpt-oss:120b-cloud</code> — 화면상 <b>거의 구별 안 됨</b>인데 <code>-cloud</code>는 프롬프트가 <b class="r">데이터센터로 전송</b>. "보관 안 함"은 정책이지 물리적 격리가 아님</p>
+    </div>
+    <div class="box">
+      <h3 class="b">방향 ② API면 학습에 들어간다?</h3>
+      <p style="margin:0">상용 기본 약관을 읽으면 <b>사실 아님</b>. 주요 제공사는 상용 API를 학습에 안 씀 + 무보존 옵션. <b>무료 소비자용 ≠ 상용 API</b> 약관</p>
+    </div>
+  </div>
+  <div class="hl">🔑 판단 기준은 <b>제품 이름이 아니라</b> 데이터가 실제로 흐르는 길입니다.</div>
+  <aside>Ollama는 "로컬 도구"로 알려졌지만 -cloud 태그 하나로 데이터 흐름이 완전히 달라집니다. 이름은 흐름을 보장하지 않습니다.</aside>
+</section>
+
+<!-- 16 4가지 질문 -->
+<section class="slide" data-part="PART 4">
+  <h2>❓ 도구가 바뀌어도 <span class="g">똑같이 유효한 4가지 질문</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">내가 입력한 문자열이 실제로 <b>어느 물리적 위치의 서버</b>까지 이동하는가</span></div>
+    <div class="st"><span class="n">2</span><span class="t">그 서버에서 문자열이 <b>얼마나 오래 저장</b>되는가, 저장을 <b>끌 수 있는가</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t">저장된 것을 <b>누가 볼 수 있는가</b> — 자동 시스템만인가, 사람이 볼 조건이 있는가</span></div>
+    <div class="st"><span class="n">4</span><span class="t">그 답변들이 <b>문서·계약으로 확인 가능</b>한가, 아니면 마케팅 문구인가</span></div>
+  </div>
+  <div class="hl">답을 확인하는 곳은 대부분 <b>제공사의 데이터 처리 문서</b>입니다. 목차 구조를 눈에 익혀 두면 새 서비스에서도 <b>같은 자리에서 같은 정보</b>를 찾게 됩니다.</div>
+  <aside>이 네 질문은 도구가 바뀌어도 그대로 씁니다. 새 서비스를 만나면 이 질문지를 꺼내세요.</aside>
+</section>
+
+<!-- 17 PART 5 -->
+<section class="slide" data-part="PART 5">
+  <div class="part">
+    <div class="pno">5</div>
+    <h2 style="margin:0">여기까지 오면 질문이 바뀝니다</h2>
+    <p style="margin-top:11px">"로컬이 좋은가 클라우드가 좋은가"는 틀린 질문</p>
+    <span class="who">데이터 · 비용 · 주권</span>
+  </div>
+  <aside>답이 항상 "경우에 따라 다르다"로 끝나는 질문은 좋은 질문이 아닙니다.</aside>
+</section>
+
+<!-- 18 질문이 바뀐다 -->
+<section class="slide" data-part="PART 5">
+  <h2>🔄 좋은 질문은 <span class="g">세 축</span>으로 생겼습니다</h2>
+  <div class="grid3">
+    <div class="box"><h3 class="g">데이터</h3><p style="margin:0"><small>이 워크로드의 데이터는 <b>어느 경계를 넘어도 되는가</b></small></p></div>
+    <div class="box"><h3 class="b">비용</h3><p style="margin:0"><small>이 <b>호출량</b>에서는 어느 쪽 <b>비용 구조</b>가 유리한가</small></p></div>
+    <div class="box"><h3 class="r">주권</h3><p style="margin:0"><small>이 시스템의 <b>통제권을 누가</b> 쥐고 있어야 하는가</small></p></div>
+  </div>
+  <div class="hl">🔑 로컬은 복잡한 추론에서 흔들리고 컨텍스트·형식에서 한계가 있고, 클라우드는 그 문제가 없는 대신 <b>데이터가 손을 떠나고 트래픽에 비례해 청구서가 자랍니다.</b> 그래서 <b>"어느 쪽이 좋은가"가 아니라 "이 워크로드는 어디로"</b>가 옳은 질문.</div>
+  <div class="hl">➡️ 다음 섹션: 이 세 축을 <b>계산 가능한 형태</b>로 바꿔 실행 위치를 결정하는 판단 틀. <b>오늘 채운 기기 사양서를 옆에 놓고</b> 오세요 — 그 숫자가 계산의 입력값.</div>
+  <aside>세 축은 데이터·비용·주권. 다음 섹션에서 각각을 계산 가능한 형태로 바꿉니다.</aside>
+</section>
+
+<!-- 19 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 6문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">갈래는 둘이 아니라 <b>셋</b>: 공개 API · <b class="b">관리형 프라이빗</b> · 로컬</span></div>
+    <div class="st"><span class="n">2</span><span class="t">관리형은 남의 데이터센터지만 <b>리전 고정·무학습·사설 연결을 계약으로</b> 보장</span></div>
+    <div class="st"><span class="n">3</span><span class="t">"상용 API는 데이터를 학습에 쓴다"는 <b>오해</b> — 무료 소비자용과 상용 약관은 별개</span></div>
+    <div class="st"><span class="n">4</span><span class="t">품질 격차는 <b>두 겹</b>: 프런티어↔최상위 공개(수백GB)↔내 노트북(수GB)</span></div>
+    <div class="st"><span class="n">5</span><span class="t">도구 이름이 실행 위치를 안 알려줌 → <b>4가지 질문</b>(위치·보존·열람·문서)으로 판단</span></div>
+    <div class="st"><span class="n">6</span><span class="t">옳은 질문은 <b>데이터 · 비용 · 주권</b> 세 축 — "어느 쪽이 좋은가"가 아니라 "이 워크로드는 어디로"</span></div>
+  </div>
+  <aside>이 6문장이 다음 섹션(계산 가능한 판단 틀)의 출발점입니다.</aside>
+</section>
+
+<!-- 20 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> "로컬이냐 API냐" 두 갈래로 보면 빠지는 <b>세 번째 갈래</b>는? 그 핵심 특징은?</div>
+    <div class="q"><b>Q2.</b> 세 갈래에서 <b>데이터가 가는 곳</b>은 각각 어디인가?</div>
+    <div class="q"><b>Q3.</b> "API를 쓰면 우리 데이터가 학습에 들어간다"는 맞나? <b>무료 소비자용과 상용 API</b>의 차이는?</div>
+    <div class="q"><b>Q4.</b> 품질 격차가 <b>"두 겹"</b>이라는 게 무슨 뜻인가? 왜 노트북 모델로 프런티어를 기대하면 안 되나?</div>
+    <div class="q"><b>Q5.</b> 도구 이름이 실행 위치를 안 알려주는 예(Ollama)는? 데이터 흐름을 판단하는 <b>4가지 질문</b>은?</div>
+    <div class="q"><b>Q6.</b> 이제 "좋은 질문"은 어떤 모양이며, 어떤 <b>3축</b>에 대응하는가?</div>
+  </div>
+  <aside>Q4와 Q6이 이 강의의 두 핵심입니다.</aside>
+</section>
+
+<!-- 21 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> <b>관리형 프라이빗 배포</b>. 사업자 인프라에 조직 전용 환경을 열되, <b>처리 리전·무학습·사설 연결을 계약/문서로</b> 못 박음(MS Foundry·Bedrock·Vertex).</div>
+    <div class="q a"><b>A2.</b> 공개 API → <b>제공사 공용 인프라</b> · 관리형 → <b>지정한 리전의 전용 환경</b> · 로컬 → <b>내 장비 밖으로 안 나감</b>.</div>
+    <div class="q a"><b>A3.</b> <b>아님.</b> 주요 제공사는 상용 API를 학습에 안 씀(+무보존 옵션). 학습에 쓰이는 오해는 <b>무료 소비자용 서비스</b>와 혼동한 것 — 둘은 별개 계약.</div>
+    <div class="q a"><b>A4.</b> ①프런티어 비공개 ↔ 최상위 공개(약 3~5개월) ②최상위 공개(수백GB) ↔ <b>내 노트북 모델(수GB)</b>은 <b>훨씬 큰 차이</b>. 노트북서 돈 건 최전선이 아니라 잘라낸 조각.</div>
+    <div class="q a"><b>A5.</b> <code>-cloud</code> 태그(같은 명령·화면인데 데이터센터로 전송). 4질문: ①어느 물리적 위치로 이동 ②얼마나 저장·끌 수 있나 ③누가 열람 ④문서·계약으로 확인되나.</div>
+    <div class="q a"><b>A6.</b> "이 워크로드는 어디로?" — ①데이터가 넘어도 되는 경계(<b>데이터</b>) ②호출량 대비 비용 구조(<b>비용</b>) ③통제권은 누가(<b>주권</b>).</div>
+  </div>
+  <aside>A3의 "무료 vs 상용 약관은 별개"가 실무에서 가장 자주 틀리는 지점입니다.</aside>
+</section>
+
+<!-- 22 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>수고하셨습니다 🙌</h1>
+    <div class="big" style="margin-top:24px">갈래는 <span class="y">셋</span>, 판단의 축도 <span class="y">셋</span><br>데이터 · 비용 · 주권<br><br>이름이 아니라 <span class="y">데이터가 흐르는 길</span>을 본다</div>
+    <p class="sub" style="margin-top:22px">다음 — 세 축을 계산 가능한 판단 틀로 (기기 사양서를 옆에)</p>
+  </div>
+  <aside>오늘 채운 기기 사양서의 숫자들이 다음 섹션에서 실행 위치를 결정하는 계산의 입력값이 됩니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
