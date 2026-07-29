@@ -41,6 +41,7 @@
    - ✅ 3-⑧. 내 도메인의 실행 위치 결정문 (단원 종합) — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/decision-doc/)
 4. **AI는 문서와 사진에서 무엇을 꺼낼까** ⬅️ 진행 중
    - ✅ 4-①. 금요일 오후에 도착한 두 개의 요청 — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/two-requests/)
+   - ✅ 4-②. 글자를 꺼내는 길, OCR 조립 라인 — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/ocr-pipeline/)
 
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
@@ -55,6 +56,7 @@
 > - 3-⑦ https://inseoklee-ai.github.io/study-room/control-axis/
 > - 3-⑧ https://inseoklee-ai.github.io/study-room/decision-doc/
 > - 4-① https://inseoklee-ai.github.io/study-room/two-requests/
+> - 4-② https://inseoklee-ai.github.io/study-room/ocr-pipeline/
 >
 > ℹ️ AIFFEL_LMS의 중단원 ①·②는 강의 번호가 다시 1부터 시작하는 점을 반영해 나눈 것입니다. 실제 중단원 이름을 알려주시면 채워 넣겠습니다.
 
