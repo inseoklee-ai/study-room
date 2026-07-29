@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>찾아내기와 경계 긋기 · 객체 탐지와 이미지 분할</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:9px}
+  p{font-size:clamp(.94rem,1.5vw,1.08rem);color:var(--soft);margin-bottom:11px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.3em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:18px}
+  .part .who{margin-top:16px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:10px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.9rem,1.5vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 19px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:13px 17px;margin-top:13px;font-size:clamp(.88rem,1.45vw,1.03rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:22px 24px;text-align:center;font-size:clamp(1rem,2vw,1.42rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .steps{display:grid;gap:8px}
+  .st{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:10px 14px;box-shadow:var(--sh)}
+  .st .n{flex:none;min-width:24px;height:24px;padding:0 6px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.76rem}
+  .st .t{font-size:clamp(.86rem,1.45vw,1.02rem)}
+
+  table{border-collapse:collapse;width:100%;font-size:clamp(.78rem,1.3vw,.92rem)}
+  th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--bg2);font-weight:750;color:var(--ink)}
+  td{color:var(--soft)}td b{color:var(--ink)}
+  tr:last-child td{border-bottom:none}
+  .tw{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:6px}
+
+  code{font-family:"SF Mono",Menlo,Consolas,monospace;background:var(--bg2);padding:2px 6px;border-radius:5px;font-size:.86em}
+  pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:13px 15px;
+    overflow:auto;max-height:52vh;font-size:clamp(.74rem,1.2vw,.88rem);line-height:1.7;
+    font-family:"SF Mono",Menlo,Consolas,monospace;color:var(--ink);margin:10px 0;white-space:pre-wrap}
+
+  /* pastel flow cells (2단계/1단계) */
+  .line2{display:flex;gap:6px;align-items:stretch;flex-wrap:wrap;margin:6px 0}
+  .pcell{flex:1;min-width:120px;border-radius:12px;padding:10px 11px;text-align:center;border:1px solid}
+  .pcell b{display:block;font-size:.88rem;color:var(--ink)} .pcell small{color:var(--soft);font-size:.7rem;line-height:1.3;display:block;margin-top:2px}
+  .pc-b{background:rgba(58,90,140,.13);border-color:var(--bl)}
+  .pc-g{background:rgba(63,107,95,.14);border-color:var(--gr)}
+  .pc-a{background:rgba(200,161,90,.18);border-color:var(--gold)}
+  .pc-p{background:rgba(107,77,140,.15);border-color:var(--pp)}
+  .pc-r{background:rgba(166,90,63,.13);border-color:var(--red)}
+  .pca{align-self:center;color:var(--soft);font-weight:800}
+
+  /* IoU diagram */
+  .iou{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+  .ioubox{position:relative;width:240px;height:170px;flex:none;margin:auto}
+  .ioubox .r1{position:absolute;left:6px;top:14px;width:170px;height:120px;border:2.5px solid var(--bl);border-radius:3px}
+  .ioubox .r2{position:absolute;left:64px;top:34px;width:170px;height:120px;border:2.5px solid var(--red);border-radius:3px}
+  .ioubox .ov{position:absolute;left:64px;top:34px;width:112px;height:100px;background:rgba(107,77,140,.28)}
+  .ioubox .l{position:absolute;font-size:.68rem;font-weight:700}
+  .ioucalc{font-family:"SF Mono",Menlo,monospace;font-size:clamp(.74rem,1.3vw,.9rem);line-height:1.7;color:var(--ink)}
+  .ioures{background:var(--bg2);border:1px solid var(--gold);border-radius:10px;padding:8px 12px;margin-top:8px;font-weight:800;text-align:center}
+
+  /* segmentation-3 */
+  .seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:820px){.seg3{grid-template-columns:1fr}}
+  .segc{border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--sh);background:var(--card)}
+  .scene{height:96px;position:relative;background:linear-gradient(180deg,#bcd3e8 0 45%,#d8cdb4 45% 100%)}
+  .scene .bar{position:absolute;bottom:14px;width:16px;height:52px;border-radius:5px}
+  .segcap{padding:9px 11px;text-align:center}
+  .segcap b{font-size:.92rem} .segcap small{display:block;color:var(--soft);font-size:.72rem;line-height:1.4;margin-top:2px}
+
+  /* detection mock */
+  .scenebox{position:relative;height:150px;background:linear-gradient(160deg,#d9d2c4,#c7bca8);border-radius:12px;overflow:hidden}
+  .db{position:absolute;border:2px solid;border-radius:2px;font-size:.6rem;font-weight:800;padding:0 3px}
+  /* mask before/after */
+  .maskrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .orig{height:150px;border-radius:12px;position:relative;overflow:hidden;background:linear-gradient(180deg,#efe7d8 0 62%,#cdb98f 62% 100%)}
+  .orig .lap{position:absolute;left:22%;bottom:38px;width:56%;height:64px;background:#2b2b2b;border-radius:4px 4px 0 0}
+  .orig .gls{position:absolute;left:47%;bottom:20px;width:12%;height:70px;background:rgba(150,190,220,.75);border-radius:3px}
+  .mask{height:150px;border-radius:12px;position:relative;overflow:hidden;background:#fff}
+  .mask .desk{position:absolute;left:0;bottom:0;width:100%;height:38%;background:#e6d21e}
+  .mask .lap{position:absolute;left:18%;bottom:30px;width:62%;height:82px;background:#000;border-radius:4px}
+  .mask .gls{position:absolute;left:46%;bottom:8px;width:13%;height:96px;background:#1f1fe0;border-radius:3px}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 15px;font-size:clamp(.85rem,1.4vw,1.0rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 4 · AI는 문서와 사진에서 무엇을 꺼낼까 (3)</span>
+    <h1 style="margin:18px 0">찾아내기와<br>경계 긋기</h1>
+    <p class="sub">객체 탐지(박스)와 이미지 분할(마스크) · 무엇을·어디를·어디까지</p>
+  </div>
+  <aside>사진 분석에서는 위치와 경계 자체가 최종 답인 경우가 많습니다. "흠집이 어디"엔 사각형이, "마모가 어디까지"엔 픽셀 마스크가 필요합니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 흐름</h2>
+  <ul class="pts">
+    <li><b>객체 탐지</b> — 개수도 위치도 미리 모르는 답. R-CNN(2단계) → YOLO(1단계)</li>
+    <li>탐지 결과 읽기 — <b>label·box·score</b>, 신뢰도의 함정, <b>IoU</b>와 임계값</li>
+    <li><b>이미지 분할</b> — 박스로 못 푸는 질문, 시맨틱/인스턴스/파놉틱, 마스크의 책임</li>
+    <li>두 자를 한 문장으로 — 탐지는 임계값, 분할은 경계 정의</li>
+  </ul>
+  <div class="hl">🎯 한 줄: <b>박스는 "여기를 보세요"라는 위치 후보, 마스크는 "이 픽셀은 대상"이라는 선언.</b> 둘은 정밀도의 계단이 아니라 <b>다른 질문·다른 책임</b>입니다.</div>
+  <aside>글자 영역을 찾던 기술이 일반 물체를 찾는 기술로 어떻게 이어졌는지부터 봅니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">사진 어디에 무엇이 있는가 — 객체 탐지</h2>
+    <p style="margin-top:11px">개수가 정해지지 않은 답을, 위치까지 붙여서</p>
+    <span class="who">R-CNN → YOLO</span>
+  </div>
+  <aside>"이건 무슨 사진인가"는 이미지 전체에 이름표 하나. "무엇이 어디에 있나"는 답이 몇 개인지조차 미리 알 수 없습니다.</aside>
+</section>
+
+<!-- 4 분류 vs 탐지 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔍 분류 vs <span class="g">탐지</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>"무슨 사진인가"</h3><p style="margin:0">이미지 전체에 <b>이름표 하나</b>면 끝 (분류)</p></div>
+    <div class="box"><h3 class="g">"무엇이 어디에 있나"</h3><p style="margin:0">답이 <b>몇 개인지 미리 모름</b> + <b>위치까지</b> = <b>객체 탐지</b></p></div>
+  </div>
+  <ul class="pts" style="margin-top:12px">
+    <li>초기: 작은 <b>창을 곳곳에 옮겨 가며</b> 반복 분류 → 분류기를 수천 번, 가려지거나 기울면 놓침</li>
+    <li>이후 <b>YOLO</b> 같은 모델이 이미지 <b>한 번의 처리</b>로 여러 박스·클래스를 함께 예측해 이 반복을 줄임</li>
+  </ul>
+  <aside>창고에 파렛트가 3개일 수도 17개일 수도, 카메라 한 프레임에 작업자가 0명일 수도 있습니다. 개수가 열린 문제입니다.</aside>
+</section>
+
+<!-- 5 R-CNN 계보 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧬 R-CNN 계열 — <span class="g">병목이 옮겨간 역사</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">R-CNN</span><span class="t">2013 — "물체일 법한" 영역 <b>2천 개</b>를 먼저 뽑아 각각 CNN에 (VOC2012 mAP 53.3%). <b class="r">한 장에 수십 초</b>(2천 개를 따로 통과)</span></div>
+    <div class="st"><span class="n">Fast</span><span class="t">2015 — CNN을 <b>한 번만</b> 통과해 특징맵, 후보는 그 위에서 잘라 씀(RoI 풀링). 추론 <b>146배↑</b>. 산 것은 정확도가 아니라 <b>시간</b> → 데이터를 더 부어 정확도를 삼</span></div>
+    <div class="st"><span class="n">Faster</span><span class="t">2015 — 후보 뽑기마저 신경망(<b>RPN</b>)으로. 위치마다 <b>앵커</b> 9개(3크기×3비율). 후보 뽑기가 사실상 공짜 → 초당 5장</span></div>
+  </div>
+  <div class="hl">🔑 속도가 빨라질 때마다 <b>병목이 다음 단계로 옮겨갔고</b>, 그때마다 그 단계를 신경망 안으로 끌어들였습니다.</div>
+  <aside>Fast R-CNN의 교훈: 학습 한 바퀴가 84시간→9.5시간으로 줄자 비로소 데이터를 더 부어 정확도를 사는 길이 열렸습니다.</aside>
+</section>
+
+<!-- 6 그림1 2단계 vs 1단계 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔀 2단계 vs <span class="g">1단계</span> — 결국 출력은 같다</h2>
+  <p style="margin-bottom:2px"><b>2단계 (R-CNN 계열)</b></p>
+  <div class="line2">
+    <div class="pcell pc-b"><b>입력 이미지</b><small>픽셀 격자</small></div><span class="pca">▸</span>
+    <div class="pcell pc-g"><b>후보 영역 제안</b><small>수백~수천 · SS/RPN</small></div><span class="pca">▸</span>
+    <div class="pcell pc-a"><b>후보마다 분류</b><small>+ 박스 좌표 보정</small></div><span class="pca">▸</span>
+    <div class="pcell pc-p"><b>박스+클래스</b><small>+ 신뢰도</small></div>
+  </div>
+  <p style="margin:2px 0 8px"><small>위치 오차는 작지만 단계가 나뉘어 느린 경향.</small></p>
+  <p style="margin-bottom:2px"><b>1단계 (YOLO 계열)</b></p>
+  <div class="line2">
+    <div class="pcell pc-b"><b>입력 이미지</b><small>픽셀 격자</small></div><span class="pca">▸</span>
+    <div class="pcell pc-r"><b>격자 칸마다 박스·클래스·점수를 한 번에</b><small>제안 단계가 신경망 안으로 흡수</small></div><span class="pca">▸</span>
+    <div class="pcell pc-p"><b>박스+클래스</b><small>+ 신뢰도</small></div>
+  </div>
+  <div class="hl">🔑 어느 계보를 쓰든 <b>손에 들어오는 출력은 같은 형태</b>. 도메인 전문가는 계보를 외울 필요 없이 <b>그 출력이 무슨 뜻인지·어디까지 믿는지</b>를 알면 됩니다.</div>
+  <aside>1단계는 한 번의 통과로 빠르지만 초기 계열은 위치 오차와 밀집 장면 누락이 늘기도 했습니다.</aside>
+</section>
+
+<!-- 7 YOLO 계보 & 책임 -->
+<section class="slide" data-part="PART 1">
+  <h2>🏷️ YOLO의 <span class="g">계보</span>와 사용 책임</h2>
+  <ul class="pts">
+    <li>최초 YOLO(2016) = Redmon·Divvala·Girshick·Farhadi, 공식 구현 <b>Darknet</b>. 실습의 <b>Ultralytics</b>는 이후 세대를 묶은 <b>별도 구현 생태계</b>(회사, CEO Glenn Jocher) — <b class="r">숫자가 크다고 같은 제품 최신 버전 아님</b></li>
+    <li>공통 뼈대: <b>Backbone</b>(특징 추출) → <b>Neck</b>(작은/큰 물체 함께) → <b>Head</b>(답 생성)</li>
+    <li>detection·segmentation·pose = <b>메뉴 이름이 아니라 마지막 head가 다름</b> — 같은 특징에서 다른 자료형의 답(박스/마스크/관절점)</li>
+  </ul>
+  <div class="hl">⚖️ Redmon은 군사 표적화·사생활 침해 위험을 문제 삼아 2020년 연구를 떠남. <b>"모델을 쉽게 실행할 수 있다"와 "사람을 촬영·판정해도 된다"는 별개.</b> 누가·무슨 목적으로·동의했는지·오탐 피해·이의 통로를 물어야.</li>
+  <aside>도구를 잘 쓴다는 건 실행 명령을 아는 데서 끝나지 않습니다 — 누가 만들었고 누가 영향을 받는지까지 설명할 수 있어야 합니다.</aside>
+</section>
+
+<!-- 8 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">탐지 결과는 세 숫자 묶음으로 온다</h2>
+    <p style="margin-top:11px">label · box · score, 그리고 모델이 안 주는 네 번째 줄</p>
+    <span class="who">신뢰도의 함정</span>
+  </div>
+  <aside>탐지 모델이 사진 한 장에 내놓는 답은 목록이고, 각 항목은 세 가지로 이루어집니다.</aside>
+</section>
+
+<!-- 9 세 숫자 + 신뢰도 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔢 label · box · <span class="g">score</span></h2>
+  <pre>label: person           ← 무엇인가 (클래스)
+box:   x1, y1, x2, y2   ← 어디인가 (좌표)
+score: 0.87             ← 얼마나 확신하는가 (신뢰도)</pre>
+  <ul class="pts">
+    <li><b class="r">0.87을 "87% 확률로 사람"으로 읽으면 안 됨</b> — 학습 패턴과 이 영역이 얼마나 맞아떨어지는지의 <b>내부 점수</b>(0~1). 데이터와 현장이 다르면 부풀거나 쪼그라듦</li>
+    <li><code>0.91</code>인데 안전모가 화면 밖으로 밀렸을 수도, <code>0.48</code> 흐린 박스가 위험 구역 사람을 가리킬 수도 → <b>점수만으로 버리거나 믿지 말 것</b></li>
+  </ul>
+  <div class="hl">🔑 그래서 실무엔 <b>모델이 주지 않는 네 번째 줄</b>이 필요합니다 — <code>decision: 이 결과로 무슨 조치를 할 것인가?</code></div>
+  <aside>신뢰도는 정답 확률이 아니라 모델 내부의 적합도 요약입니다. 조치는 사람이 정합니다.</aside>
+</section>
+
+<!-- 10 그림2 탐지 결과 mock -->
+<section class="slide" data-part="PART 2">
+  <h2>🖼️ 실제 탐지 결과는 <span class="g">이렇게</span> 생겼습니다</h2>
+  <div class="scenebox">
+    <div class="db" style="left:8%;top:14%;width:52%;height:66%;border-color:#3a7bd5;color:#3a7bd5">laptop</div>
+    <div class="db" style="left:40%;top:6%;width:12%;height:52%;border-color:#4caf50;color:#4caf50">bottle</div>
+    <div class="db" style="left:30%;top:24%;width:16%;height:40%;border-color:#e57ea0;color:#e57ea0">vase</div>
+    <div class="db" style="left:54%;top:30%;width:12%;height:24%;border-color:#c04ac0;color:#c04ac0">mouse</div>
+    <div class="db" style="left:66%;top:10%;width:30%;height:82%;border-color:#c9b23a;color:#8a7a10">chair</div>
+    <div class="db" style="left:70%;top:34%;width:18%;height:40%;border-color:#3a3ad5;color:#3a3ad5">handbag</div>
+  </div>
+  <ul class="pts" style="margin-top:10px">
+    <li>박스는 윤곽이 아니라 <b>직사각형 근사</b> — 둥근 물체에도 네모, 그 안에 배경이 함께 들어옴 · 물건이 겹치면 <b>박스도 겹침</b></li>
+    <li><b>학습에 없던 범주</b>는 또렷이 찍혀도 목록에 안 나옴 · 신뢰도 숫자가 안 보이는 건 <b>만든 사람이 안 그린 것</b>(시각화는 보여주기로 한 것만)</li>
+  </ul>
+  <div class="hl">🔑 <b>박스는 "여기를 보세요"라는 위치 후보이지 "이만큼입니다"라는 계측값이 아닙니다.</b> 박스 면적으로 결함 크기·재고량을 환산하는 순간 근거가 흔들립니다.</div>
+  <aside>(원 강의의 YOLOv3·COCO 탐지 결과 사진을 개념으로 표현했습니다.)</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">겹침을 재는 자 IoU, 그리고 임계값</h2>
+    <p style="margin-top:11px">측정값과 판정은 다르다</p>
+    <span class="who">문턱은 사람이 정한다</span>
+  </div>
+  <aside>박스를 받았으면 맞았는지 따져야 하는데, 몇 픽셀 어긋나도 오답이라 하면 전부 오답이 되고 대충 겹쳐도 정답이라 하면 성능표가 무의미해집니다.</aside>
+</section>
+
+<!-- 12 그림3 IoU -->
+<section class="slide" data-part="PART 3">
+  <h2>📐 IoU = <span class="g">겹친 넓이 ÷ 합친 넓이</span></h2>
+  <div class="iou">
+    <div class="ioubox">
+      <div class="r1"></div><div class="r2"></div><div class="ov"></div>
+      <span class="l b" style="left:6px;top:0">예측 200×130</span>
+      <span class="l r" style="right:0;bottom:-2px">정답 200×130</span>
+      <span class="l p" style="left:88px;top:76px">겹침 160×112</span>
+    </div>
+    <div>
+      <div class="ioucalc">겹친 = 160×112 = 17,920<br>예측 = 200×130 = 26,000<br>정답 = 200×130 = 26,000<br>합집합 = 26,000+26,000−17,920 = 34,080</div>
+      <div class="ioures">IoU = 17,920 / 34,080 ≈ 0.53</div>
+      <p style="margin:8px 0 0"><small>통과 기준 0.5면 간신히 정답, 0.75면 오답으로 채점.</small></p>
+    </div>
+  </div>
+  <div class="hl">완전히 포개지면 1, 안 닿으면 0. 분모는 두 넓이를 더한 뒤 <b>겹친 부분을 한 번 빼</b>야(두 번 세지 않게).</div>
+  <aside>IoU = Intersection over Union, 교집합 대 합집합 비율입니다.</aside>
+</section>
+
+<!-- 13 IoU는 측정값 + mAP -->
+<section class="slide" data-part="PART 3">
+  <h2>🎚️ IoU는 <span class="g">측정값이지 판정이 아닙니다</span></h2>
+  <ul class="pts">
+    <li>몇 점부터 맞았다고 볼지는 <b>사람이 정함</b> — KITTI는 차량 0.70, 보행자·자전거 0.50. 대략 위치만 필요하면 0.3도 충분</li>
+    <li>같은 예측이라도 <b>문턱을 어디 두느냐에 따라 성적표가 뒤집힘</b> → 남의 성능표는 점수보다 <b>어떤 문턱에서 쟀는가</b>를 먼저 확인</li>
+    <li><b>mAP</b>(클래스별 AP의 평균) 주의 — <b>평균의 평균</b>이라, 20개 중 가장 중요한 1개를 놓쳐도 높게 나옴. 도입 검토엔 전체 mAP보다 <b>놓치면 안 되는 클래스의 재현율</b></li>
+  </ul>
+  <div class="hl"><code>mAP@0.5</code>와 <code>mAP@0.5:0.95</code>(0.05 간격 평균)는 다른 숫자 — 같은 모델도 앞이 뒤보다 한참 높은 게 정상.</div>
+  <aside>NMS(겹친 박스 중 대표만 남김)의 임계값을 낮추면 붙어 선 두 사람을 하나로 합치고, 높이면 중복이 살아 개수가 부풀 수 있습니다.</aside>
+</section>
+
+<!-- 14 임계값 = 정책 -->
+<section class="slide" data-part="PART 3">
+  <h2>🚦 신뢰도 임계값은 <span class="g">기술 설정이 아니라 정책</span></h2>
+  <p>점수가 이 선보다 낮은 후보를 제외. 대상이 있는데 빠지면 <b>미탐</b>, 없는데 남으면 <b>오탐</b>. 코드론 <code>conf=0.25</code> 한 줄이지만 <b>어떤 실수에 더 큰 비용을 치를지</b> 고르는 결정.</p>
+  <div class="tw"><table>
+    <thead><tr><th>업무</th><th>놓쳤을 때</th><th>헛짚었을 때</th><th>시작 방향</th></tr></thead>
+    <tbody>
+      <tr><td>화재·안전장비 감지</td><td class="r">사고 위험 큼</td><td>확인 업무↑</td><td><b>낮은 선</b></td></tr>
+      <tr><td>자동 결제·문서 승인</td><td>매출 누락·지연</td><td class="r">잘못된 청구·승인</td><td><b>높은 선</b></td></tr>
+      <tr><td>통계용 개체 수</td><td>과소 집계</td><td>과대 집계</td><td>양쪽 비용 함께</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">🔑 높은 선 위는 자동 처리, 낮은 선 아래는 제외, 그 <b>사이(회색지대)는 사람에게</b>. 단 회색지대엔 맞는·틀린 후보가 섞여 있어 <b>정답 라벨과 대조</b>해야 합니다.</div>
+  <aside>"총 오류는 그대로이고 종류만 바뀐다"고 단정하면 안 됩니다. 임계값에 따라 오탐+미탐 합계도 달라질 수 있습니다.</aside>
+</section>
+
+<!-- 15 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part">
+    <div class="pno">4</div>
+    <h2 style="margin:0">박스로 답할 수 없는 질문 — 분할</h2>
+    <p style="margin-top:11px">픽셀 하나하나에 라벨을 붙인다</p>
+    <span class="who">마스크의 세계</span>
+  </div>
+  <aside>박스는 편리하지만(숫자 넷·빠른 라벨링·가벼운 계산) 도저히 답할 수 없는 질문이 세 종류 있습니다.</aside>
+</section>
+
+<!-- 16 박스로 못 푸는 3질문 -->
+<section class="slide" data-part="PART 4">
+  <h2>📦 박스로 <span class="r">못 푸는</span> 세 질문 → <span class="g">분할</span></h2>
+  <div class="grid3">
+    <div class="box"><h3>① 넓이</h3><p style="margin:0"><small>병변·침수 면적·마모 면적. 대각선 균열에 박스 씌우면 <b>90%가 멀쩡한 부분</b></small></p></div>
+    <div class="box"><h3>② 불규칙 형태</h3><p style="margin:0"><small>가지·머리카락·번진 자국. 직사각형으로 감싸면 <b>정보 대부분 사라짐</b></small></p></div>
+    <div class="box"><h3>③ 겹친 것 갈라내기</h3><p style="margin:0"><small>붙어 쌓인 부품 5개는 박스가 <b>거의 같은 자리에 5겹</b></small></p></div>
+  </div>
+  <div class="hl">🔑 <b>이미지 분할</b> = 박스가 아니라 <b>픽셀 하나하나에 라벨</b>. 200만 화소면 200만 번의 판단. 출력은 원본 크기의 <b>마스크</b>(각 픽셀이 어느 대상인지).</div>
+  <aside>"벨트 마모 면적을 지난달과 견주라"는 요청이 정확히 ①에 걸립니다. 박스 면적은 대상 면적이 아닙니다.</aside>
+</section>
+
+<!-- 17 그림4 분할 3종 -->
+<section class="slide" data-part="PART 4">
+  <h2>🎨 같은 장면, <span class="g">다른 질문</span> — 세 가지 분할</h2>
+  <div class="seg3">
+    <div class="segc">
+      <div class="scene"><span class="bar" style="left:20%;background:#7a4fd0"></span><span class="bar" style="left:45%;background:#7a4fd0;height:60px"></span><span class="bar" style="left:70%;background:#7a4fd0"></span></div>
+      <div class="segcap"><b>시맨틱 분할</b><small>모든 픽셀에 종류 라벨 · 사람 셋이 한 덩어리 · <b class="r">개수를 셀 수 없음</b></small></div>
+    </div>
+    <div class="segc">
+      <div class="scene" style="background:linear-gradient(180deg,#e6e6e6 0 45%,#e6e6e6 100%)"><span class="bar" style="left:20%;background:#c0455a"></span><span class="bar" style="left:45%;background:#1f8f86;height:60px"></span><span class="bar" style="left:70%;background:#d99a2b"></span></div>
+      <div class="segcap"><b>인스턴스 분할</b><small>개체마다 다른 라벨 · 개수·개별 면적 가능 · <b class="r">배경은 다루지 않음</b></small></div>
+    </div>
+    <div class="segc">
+      <div class="scene"><span class="bar" style="left:20%;background:#c0455a"></span><span class="bar" style="left:45%;background:#1f8f86;height:60px"></span><span class="bar" style="left:70%;background:#d99a2b"></span></div>
+      <div class="segcap"><b>파놉틱 분할</b><small>둘을 합친 형태 · 빈 픽셀 없이 전부 해석 · <b class="r">라벨링 비용 최대</b></small></div>
+    </div>
+  </div>
+  <div class="hl">🔑 "작물 면적?"=시맨틱, "몇 포기·각각 얼마나?"=인스턴스, "화면 전체 해석해 주행 판단"=파놉틱. <b>필요보다 한 단계 높은 걸 고르면 라벨링 비용이 몇 배로.</b></div>
+  <aside>가르는 기준은 하나 — 같은 종류를 뭉뚱그리는가, 아니면 개체를 세는가.</aside>
+</section>
+
+<!-- 18 그림5/6 마스크 -->
+<section class="slide" data-part="PART 4">
+  <h2>🖌️ 마스크의 선명함 = <span class="r">강제된 결정</span></h2>
+  <div class="maskrow">
+    <div><div class="orig"><div class="lap"></div><div class="gls"></div></div><p style="margin:5px 0 0;text-align:center"><small>원본 — 유리는 뒤가 비치고 경계가 애매</small></p></div>
+    <div><div class="mask"><div class="desk"></div><div class="lap"></div><div class="gls"></div></div><p style="margin:5px 0 0;text-align:center"><small>마스크 — 모든 픽셀이 한 색으로 딱 떨어짐</small></p></div>
+  </div>
+  <div class="hl">🔑 원본에선 사람 눈에도 어디까지가 컵인지 애매한데, 마스크엔 애매한 곳이 하나도 없습니다. <b>마스크의 선명함은 실제 세계의 선명함이 아니라 누군가 강제로 내린 결정</b>입니다. 모델은 그 선택을 사람에게서 배웁니다.</div>
+  <div class="hl r" style="border-left-color:var(--red)">⚠️ 박스는 대충 그려져 "후보구나" 의심하게 되는데, <b>매끈한 마스크는 "정확하겠지" 하고 검증을 건너뛰게</b> 만듭니다.</div>
+  <aside>(원 강의의 CC0 사진과 그 시맨틱 분할 마스크를 개념으로 재현했습니다.) 사람마다 다르게 칠한 자리는 모델이 그 불일치까지 평균해 배웁니다.</aside>
+</section>
+
+<!-- 19 인코더-디코더 + 정밀도 값 + SAM -->
+<section class="slide" data-part="PART 4">
+  <h2>⬇️⬆️ 내려갔다 올라오기, 그리고 <span class="g">값</span></h2>
+  <ul class="pts">
+    <li>대표 구조: 해상도를 <b>줄이며 "무엇인가"</b>를 찾고, 다시 <b>키우며 "어디까지인가"</b>를 픽셀 지도로. 줄일 때 잃은 경계는 <b>스킵 연결</b>로 보완 (인코더·디코더 / FCN·U-Net·Mask R-CNN)</li>
+    <li>분할은 더 좋은 게 아니라 <b>더 비싼</b> 기술 — ① <b>라벨링 비용</b>(마스크는 윤곽 따라 수십 점) ② <b>계산량</b> ③ <b>경계 부근 불확실성</b>(논쟁은 늘 가장자리에서, 하필 중요한 게 거기)</li>
+    <li><b>SAM</b>(Meta, 2023): <b>점·박스로 지시</b>하면 마스크 후보 제안 → 라벨링 초안을 빠르게. SAM 2(영상 추적)·SAM 3(명사구·예시로 개념 지정). 체크포인트·버전 기록 필수</li>
+  </ul>
+  <aside>SAM의 마스크는 경계를 줄 뿐 대상의 의미를 자동 확정하진 않고, 의료·산업·위성처럼 분포가 다르면 성능을 별도 확인해야 합니다.</aside>
+</section>
+
+<!-- 20 마스크는 주장 + 채점 -->
+<section class="slide" data-part="PART 4">
+  <h2>🧾 마스크는 <span class="g">픽셀 단위의 주장</span>입니다</h2>
+  <p>200만 개의 선언이 한꺼번에 나오고, 어느 것도 "잘 모르겠다"고 하지 않습니다. 이 차이가 책임의 무게를 바꿉니다.</p>
+  <div class="hl r" style="border-left-color:var(--red)">⚠️ 가장 위험한 조합 = <b>마스크 넓이를 돈·판정으로 환산</b>. 경계를 평균 2px 바깥으로 잡으면 8,000px 손상이 <b>10% 과대 산정</b>. 월 3천 건에 일괄 적용되면 <b>한 방향으로 쏠린 체계적 편향</b>.</div>
+  <div class="hl">🔑 그래서 숫자 환산 업무엔 둘이 필수 — <b>사람 값과 정기 대조</b> + <b>경계 오차의 방향·크기 보정값</b>. (겹침 평균 0.9라는 사실만으론 편향을 못 봄 — 평균은 방향을 지움)</div>
+  <p style="margin:8px 0 0"><small>채점: 마스크 <b>IoU</b> vs <b>Dice</b>(=2×겹침/합, 항상 IoU≥와 다름 — 섞어 비교 금지) · <b>픽셀 정확도</b>는 희소 대상서 무의미(전부 배경이라 해도 99%) · <b>경계 IoU</b>는 윤곽 띠만 재 면적·치수 업무에 더 정직</small></p>
+  <aside>Dice가 항상 IoU보다 크거나 같게 나오는 구조라, 다른 팀 성능표와 비교할 때 '어느 지표를 썼는가'를 가장 먼저 봐야 합니다.</aside>
+</section>
+
+<!-- 21 경계 정의서 -->
+<section class="slide" data-part="PART 4">
+  <h2>📏 경계 기준은 모델이 아니라 <span class="g">업무가 정합니다</span></h2>
+  <p>균열 한 줄 + 실금 + 얼룩. 어디까지 균열로 칠할까? 숙련 검사자 둘도 답이 갈립니다. 기준 없이 라벨링하면 A는 실금 포함, B는 제외 → 모델은 <b class="r">두 기준을 평균한 어중간한 마스크</b>를 학습. <b>데이터를 더 모아도 기준이 없으면 모순만 늘어납니다.</b></p>
+  <div class="big">분할 프로젝트의 첫 문서는<br>모델 비교표가 아니라 <span class="y">경계 정의서</span></div>
+  <div class="hl">🔑 기준에 <b>형용사를 쓰지 말 것</b> — "심한 부식"❌ → "손톱으로 긁어 요철이 느껴지는 범위"✅, "큰 균열"❌ → "폭 1mm 이상"✅. 그리고 이 문서를 쓸 수 있는 사람은 <b>모델을 아는 사람이 아니라 업무를 아는 사람</b>.</div>
+  <aside>사람마다 다르게 읽히는 말이 기준에 들어가면 그 애매함이 라벨에 스며들어 결과로 되돌아옵니다.</aside>
+</section>
+
+<!-- 22 PART 5 -->
+<section class="slide" data-part="PART 5">
+  <div class="part">
+    <div class="pno">5</div>
+    <h2 style="margin:0">두 자를 한 문장으로</h2>
+    <p style="margin-top:11px">정밀도의 계단이 아니라 다른 질문·다른 책임</p>
+    <span class="who">탐지 vs 분할</span>
+  </div>
+  <aside>탐지와 분할은 서로 다른 질문에 답하는 도구이고, 각자 다른 종류의 책임을 집니다.</aside>
+</section>
+
+<!-- 23 탐지 vs 분할 -->
+<section class="slide" data-part="PART 5">
+  <h2>⚖️ 탐지 vs 분할</h2>
+  <div class="grid2">
+    <div class="box"><h3 class="g">탐지 = "여기를 보세요"</h3><p style="margin:0">빠른 <b>위치 후보</b>, 판정은 사람·규칙. 핵심 결정 = <b>임계값</b>(어떤 실수를 감수할지의 정책). 검증 = <b>IoU</b>, 문턱 정하기가 곧 판단</p></div>
+    <div class="box"><h3 class="b">분할 = "여기까지가 대상"</h3><p style="margin:0">픽셀 단위 <b>선언</b> → 넓이·판정·금액이 됨. 핵심 결정 = <b>경계 정의</b>(도메인 전문가가 씀). 검증 = <b>가장자리 겹침 + 오차 방향</b>까지</p></div>
+  </div>
+  <div class="hl">🔑 공통점 — 글자를 꺼내는 길도, 위치·경계를 받는 길도 <b>받을 답의 모양이 미리 정해져 있습니다</b>(문자열/박스/픽셀 지도). 모양이 정해져 있어서 <b>자를 댈 수 있었습니다.</b></div>
+  <div class="hl">➡️ 그런데 <b>미리 정한 클래스·규칙으로 질문의 의미 범위를 다 담을 수 없을 때는?</b> 질문의 범위가 열려 있어도 <b>운영 출력은 JSON처럼 고정</b>할 수 있습니다. (다음 이야기)</div>
+  <aside>다음 강의에서 "열린 질문 + 고정된 출력"이라는 다음 단계로 넘어갑니다.</aside>
+</section>
+
+<!-- 24 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 7문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">객체 탐지 = <b>개수·위치가 미리 안 정해진 답</b>. R-CNN(2단계) → YOLO(1단계), 출력은 같음</span></div>
+    <div class="st"><span class="n">2</span><span class="t">탐지 결과 = <b>label·box·score</b>. 신뢰도는 <b>정답 확률이 아님</b>. 박스는 위치 후보이지 계측값이 아님</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>IoU</b>=겹침÷합집합. <b>측정값이지 판정이 아님</b> — 문턱은 사람이 정함</span></div>
+    <div class="st"><span class="n">4</span><span class="t">신뢰도 <b>임계값 = 정책</b>(미탐 vs 오탐 중 무엇을 감수할지). 회색지대는 사람에게</span></div>
+    <div class="st"><span class="n">5</span><span class="t">박스로 못 푸는 넓이·불규칙·겹침 → <b>분할(마스크)</b>. 시맨틱/인스턴스/파놉틱은 다른 과제</span></div>
+    <div class="st"><span class="n">6</span><span class="t">마스크의 <b>선명함은 강제된 결정</b> — 넓이→금액 환산은 <b>체계적 편향</b> 위험</span></div>
+    <div class="st"><span class="n">7</span><span class="t">분할의 첫 문서는 <b>경계 정의서</b>(형용사 금지) — 업무를 아는 사람이 쓴다</span></div>
+  </div>
+  <aside>탐지의 핵심은 임계값, 분할의 핵심은 경계 정의. 둘 다 결정은 모델이 아니라 사람·업무의 몫입니다.</aside>
+</section>
+
+<!-- 25 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> <b>분류와 탐지</b>의 차이는? 탐지 답의 특징(개수·위치)은?</div>
+    <div class="q"><b>Q2.</b> 2단계(R-CNN)와 1단계(YOLO)의 트레이드오프는? 두 계보의 <b>최종 출력</b>은?</div>
+    <div class="q"><b>Q3.</b> 신뢰도 <b>0.87을 "정답 확률"로 읽으면 안 되는</b> 이유는? 박스는 계측값인가?</div>
+    <div class="q"><b>Q4.</b> <b>IoU</b>란? IoU는 판정인가 측정값인가? 신뢰도 임계값이 "정책"인 이유는?</div>
+    <div class="q"><b>Q5.</b> 박스로 <b>못 푸는 세 질문</b>은? 시맨틱/인스턴스/파놉틱의 차이는?</div>
+    <div class="q"><b>Q6.</b> 마스크의 "<b>강제된 선명함</b>"과 넓이→금액 환산의 위험은? 경계 정의서는 누가 쓰나?</div>
+  </div>
+  <aside>Q3·Q4(탐지의 책임)와 Q6(분할의 책임)이 이 강의의 두 축입니다.</aside>
+</section>
+
+<!-- 26 정답 1 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설 <small style="color:var(--soft)">(1/2)</small></h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 분류=이미지 전체에 이름표 하나. 탐지=<b>무엇이 어디에</b>. 탐지 답은 <b>개수가 미리 안 정해지고 위치까지</b> 붙는다.</div>
+    <div class="q a"><b>A2.</b> 2단계는 후보를 먼저 뽑아 분류 → 위치 오차 작지만 느림. 1단계는 한 번에 예측 → 빠르지만 위치오차·밀집 누락. <b>최종 출력은 박스+클래스+신뢰도로 동일.</b></div>
+    <div class="q a"><b>A3.</b> 0.87은 확률이 아니라 <b>학습 패턴과의 적합도 내부 점수</b>. 데이터/현장이 다르면 부풀거나 쪼그라듦. <b>박스는 위치 후보이지 계측값이 아님.</b></div>
+  </div>
+  <aside>A2의 "출력이 같다"가 도메인 전문가에게 중요합니다 — 계보를 외울 필요 없이 출력의 뜻만 알면 됩니다.</aside>
+</section>
+
+<!-- 27 정답 2 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설 <small style="color:var(--soft)">(2/2)</small></h2>
+  <div class="qa">
+    <div class="q a"><b>A4.</b> IoU = 겹친 넓이 ÷ 합집합. <b>측정값</b>이고 몇 점부터 정답인지 <b>문턱은 사람이</b> 정함. 임계값은 <b>미탐 vs 오탐 중 무엇을 감수할지</b> 고르는 업무 정책이라 '정책'.</div>
+    <div class="q a"><b>A5.</b> ①넓이 ②불규칙 형태 ③겹친 것 갈라내기. 시맨틱=종류만(개수 X), 인스턴스=개체별(배경 X), 파놉틱=둘을 합쳐 전 픽셀.</div>
+    <div class="q a"><b>A6.</b> 마스크의 매끈함은 실제가 아니라 <b>사람이 강제로 내린 선택</b> → 검증을 건너뛰게 만듦. 넓이→금액은 경계 오차가 <b>한 방향으로 쏠린 체계적 편향</b>. 경계 정의서는 <b>업무를 아는 사람</b>이 형용사 없이 쓴다.</div>
+  </div>
+  <aside>A6의 "평균은 방향을 지운다"가 핵심 — 겹침 평균이 높아도 편향은 숨어 있을 수 있습니다.</aside>
+</section>
+
+<!-- 28 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>수고하셨습니다 🙌</h1>
+    <div class="big" style="margin-top:24px">박스는 <span class="y">"여기를 보세요"</span><br>마스크는 <span class="y">"여기까지가 대상"</span><br><small>탐지의 핵심은 임계값, 분할의 핵심은 경계 정의</small></div>
+    <p class="sub" style="margin-top:22px">다음 — 열린 질문, 그래도 고정된 출력(JSON)</p>
+  </div>
+  <aside>받을 답의 모양이 정해져 있어 자를 댈 수 있었습니다. 다음은 미리 정한 클래스로 담기 어려운 열린 질문을, 그래도 고정된 출력으로 다루는 이야기입니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
