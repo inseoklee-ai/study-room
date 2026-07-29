@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YOLO로 탐지·분할·포즈 결과 만들기 · 사진 실습</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:15px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:9px}
+  p{font-size:clamp(.94rem,1.5vw,1.08rem);color:var(--soft);margin-bottom:10px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.3em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:18px}
+  .part .who{margin-top:16px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:9px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.9rem,1.5vw,1.08rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px 18px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:12px 16px;margin-top:12px;font-size:clamp(.86rem,1.42vw,1.0rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:22px 24px;text-align:center;font-size:clamp(1rem,2vw,1.42rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .steps{display:grid;gap:7px}
+  .st{display:flex;gap:11px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:10px 14px;box-shadow:var(--sh)}
+  .st .n{flex:none;min-width:24px;height:24px;padding:0 6px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.76rem}
+  .st .t{font-size:clamp(.85rem,1.42vw,1.0rem)}
+
+  .qk{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+  @media(max-width:780px){.qk{grid-template-columns:1fr}}
+  .qk .c{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:14px;box-shadow:var(--sh);text-align:center}
+  .qk .c .l{font-size:1.05rem;font-weight:800;color:var(--gr)}
+  .qk .c .n{font-weight:750;margin:5px 0 3px;font-size:.9rem}
+  .qk .c small{color:var(--soft);font-size:.76rem;line-height:1.4;display:block}
+
+  table{border-collapse:collapse;width:100%;font-size:clamp(.77rem,1.28vw,.91rem)}
+  th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--bg2);font-weight:750;color:var(--ink)}
+  td{color:var(--soft)}td b{color:var(--ink)}
+  tr:last-child td{border-bottom:none}
+  .tw{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:6px}
+
+  code{font-family:"SF Mono",Menlo,Consolas,monospace;background:var(--bg2);padding:2px 6px;border-radius:5px;font-size:.85em}
+  pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:13px 15px;
+    overflow:auto;max-height:56vh;font-size:clamp(.72rem,1.16vw,.85rem);line-height:1.6;
+    font-family:"SF Mono",Menlo,Consolas,monospace;color:var(--ink);margin:9px 0;white-space:pre}
+  pre.wrap{white-space:pre-wrap}
+  .plabel{font-size:.72rem;color:var(--gold);font-weight:800;letter-spacing:.1em;margin-bottom:2px}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 15px;font-size:clamp(.85rem,1.4vw,1.0rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 4 · AI는 문서와 사진에서 무엇을 꺼낼까 (7·실습)</span>
+    <h1 style="margin:18px 0">YOLO로 탐지·분할·포즈<br>결과 만들기</h1>
+    <p class="sub">같은 사진, 세 head, 세 자료형 (박스·마스크·관절점)</p>
+  </div>
+  <aside>같은 사진에서 세 종류의 결과를 만듭니다. 모델을 구현하지 않고 Ultralytics 사전학습 가중치를 가져다 쓰며, 세 head가 만든 자료형의 차이를 확인합니다.</aside>
+</section>
+
+<!-- 2 지도 + 시간표 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 30분 실습 흐름</h2>
+  <div class="tw"><table>
+    <thead><tr><th>시간</th><th>우선할 일</th><th>통과선</th></tr></thead>
+    <tbody>
+      <tr><td>0~5분</td><td>세 가중치 실행 또는 정적 대체 결과 열기</td><td>세 자료형의 이미지·JSON</td></tr>
+      <tr><td>5~12분</td><td>박스·마스크·관절점 비교</td><td>서로 대신 못 하는 이유 한 줄</td></tr>
+      <tr><td>12~22분</td><td>기존 실행 함수를 Gradio에 연결</td><td>직접 추론 또는 읽기 전용 앱</td></tr>
+      <tr><td>22~30분</td><td>임계값 세 값 관찰 + 사용 책임 카드</td><td>관찰 기록·사람이 쓴 카드</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">🔑 <b>직접 추론이 5분 안에 안 끝나면 준비된 결과로 넘어감.</b> 설치 해결보다 <b>앱 조립·결과 차이·사용 조건 판단</b>을 우선.</div>
+  <aside>시작 조건: ultralytics·gradio가 설치되고 세 가중치가 models/yolo에 배치된 상태. 코딩 에이전트에게 실행·저장·화면 구성을 맡깁니다.</aside>
+</section>
+
+<!-- 3 환경 + 가중치 -->
+<section class="slide" data-part="표지">
+  <h2>🔧 환경 전환과 <span class="g">고정된 가중치</span></h2>
+  <pre class="wrap">deactivate                                  # 문서 실습 환경이 켜져 있으면 끄고
+source .venv-day15-yolo/bin/activate
+python -c "import sys; print(sys.executable)"  # 끝이 .venv-day15-yolo/bin/python인지 확인</pre>
+  <ul class="pts">
+    <li>YOLO26 경량 가중치 <b>3종</b>: <code>yolo26n.pt</code> · <code>yolo26n-seg.pt</code> · <code>yolo26n-pose.pt</code> (CPU에서 다루기 쉬움)</li>
+    <li>'최신'이라고 수업 중 계속 바꾸지 않음 — 교사가 검증한 <b><code>ultralytics==8.4.108</code></b> 환경과 세 가중치를 <b>수업 버전으로 잠금</b></li>
+  </ul>
+  <div class="hl">OCR용과 YOLO용 환경을 나눈 이유 — 두 도구가 요구하는 패키지 조합이 다를 수 있어서.</div>
+  <aside>버전을 잠그는 이유: 같은 이름의 도구라도 버전이 바뀌면 결과·인터페이스가 달라져, 비교와 재현이 흔들리기 때문입니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">Ultralytics YOLO — 무엇을 가져다 쓰나</h2>
+    <p style="margin-top:11px">세 작업, 세 head, 세 자료형</p>
+    <span class="who">사전학습 추론</span>
+  </div>
+  <aside>Ultralytics 패키지는 입력·가중치 다운로드·추론·결과 객체·시각화·내보내기를 하나의 인터페이스로 묶습니다. YOLO("...pt")로 불러와 predict를 실행합니다.</aside>
+</section>
+
+<!-- 5 세 작업 표 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧩 같은 패키지, <span class="g">다른 head</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th>작업</th><th>head가 내는 결과</th><th>화면</th><th>어울리는 질문</th></tr></thead>
+    <tbody>
+      <tr><td><b class="b">Detection</b></td><td>클래스·박스·점수</td><td>사각형</td><td>무엇이 어디에 몇 개인가</td></tr>
+      <tr><td><b class="g">Instance seg</b></td><td>박스 + 개체별 마스크</td><td>대상 윤곽</td><td>각 대상이 어디까지인가</td></tr>
+      <tr><td><b class="p">Pose</b></td><td>사람 박스 + 관절 keypoint</td><td>점·연결선</td><td>신체 부위가 어떤 자세인가</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">세 모델은 COCO 같은 공개 데이터의 <b>범용 클래스·사람 관절</b>을 미리 학습한 가중치 — <b class="r">공장 결함·특수 부품·회사만의 자세 기준을 자동으로 알지는 못함.</b></div>
+  <aside>같은 YOLO 패키지를 호출해도 가중치·head·학습 라벨·출력 자료형이 다릅니다.</aside>
+</section>
+
+<!-- 6 라이선스 + 입력조건 -->
+<section class="slide" data-part="PART 1">
+  <h2>⚖️ 라이선스와 <span class="g">고정된 입력 조건</span></h2>
+  <div class="hl r" style="border-left-color:var(--red)">Ultralytics는 <b>AGPL-3.0 + Enterprise 이중 라이선스</b>. 수업용 로컬 체험을 넘어 <b>조직의 비공개 제품·서비스에 포함</b>하려면 배포 형태와 라이선스 조건을 먼저 검토.</div>
+  <div class="grid2" style="margin-top:12px">
+    <div class="box"><h3>입력</h3><p style="margin:0"><code>input/bus.jpg</code> — 사람 여러 명 + 버스처럼 큰 윤곽. Ultralytics 공개 예제의 수업용 사본(출처·해시 기록)</p></div>
+    <div class="box"><h3 class="g">공통 조건</h3><p style="margin:0">같은 bus.jpg · <b>imgsz 640</b> · <b>conf 0.25</b> · <b>device CPU</b> · 학습·미세조정·내보내기 <b>안 함</b></p></div>
+  </div>
+  <div class="hl">🔑 공통 조건을 맞춰도 <b>작업별 head와 학습 목표가 달라 출력은 달라집니다.</b></div>
+  <aside>도구를 가져다 쓰는 편리함과 사용 권리는 별개 문제입니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">세 작업을 한 번에 실행하고 읽기</h2>
+    <p style="margin-top:11px">정규화 JSON + 시각화, 둘 다 저장</p>
+    <span class="who">자료형으로 읽기</span>
+  </div>
+  <aside>한 작업이 실패해도 나머지는 실행합니다. 시각화와 원시 결과를 모두 저장합니다.</aside>
+</section>
+
+<!-- 8 명령 프롬프트 -->
+<section class="slide" data-part="PART 2">
+  <h2>🤖 세 작업을 <span class="g">한 번에 맡기기</span></h2>
+  <pre>input/bus.jpg에 준비된 사전학습 모델 세 개를 실행.
+환경은 uv만(pip·conda·전역 금지), 없으면 다운로드 말고 오류 기록.
+모델: yolo26n.pt(detect) · yolo26n-seg.pt(segment) · yolo26n-pose.pt(pose)
+공통: device=cpu, imgsz=640, conf=0.25 · train/fine-tune/export 안 함 · ultralytics 버전 기록
+
+정규화 JSON:
+{ "task":"detect|segment|pose", "model":"...", "image_size":640,
+  "confidence_threshold":0.25,
+  "items":[{ "class_id":0, "class_name":"person", "confidence":0.91,
+    "bbox_xyxy_pixels":[x1,y1,x2,y2],
+    "polygon_xy_pixels":null, "keypoints_xyc_pixels":null }] }
+segment는 polygon을, pose는 keypoints를 채우고 나머지는 null.
+
+저장: outputs/yolo/{detect,segment,pose}/result.jpg + raw.json
+     summary.json(작업별 검출 수·클래스별 수·평균 신뢰도)
+     run_manifest.json(입력·가중치 SHA-256, 모델명, 버전, imgsz·conf·device, 시간, 네트워크 여부)
+한 작업이 실패해도 나머지는 실행. 실패는 failure_log.md에.</pre>
+  <div class="hl">🔑 채팅의 "완료"가 통과선이 아님 — <code>raw.json</code>과 시각화 이미지를 <b>직접 열어</b> 확인.</div>
+  <aside>정규화 JSON 스키마를 미리 정해 두면 세 작업의 결과를 같은 형식으로 비교하고 다음 코드에 바로 넘길 수 있습니다.</aside>
+</section>
+
+<!-- 9 결과 자료형 -->
+<section class="slide" data-part="PART 2">
+  <h2>📦 결과 객체를 <span class="g">자료형으로</span> 읽기</h2>
+  <div class="qk">
+    <div class="c"><div class="l">Detection</div><small>class + confidence + <b>[x1,y1,x2,y2]</b></small></div>
+    <div class="c"><div class="l">Segmentation</div><small>박스 + <b>다각형/마스크</b> 정보</small></div>
+    <div class="c"><div class="l">Pose</div><small>사람별 박스 + <b>관절점 x,y</b> (+가시성·점수)</small></div>
+  </div>
+  <div class="hl">🔑 <b>시각화가 그럴듯해도 원시 결과가 없으면 다음 코드에서 쓸 수 없고</b>, 원시 배열만 있고 그림이 없으면 사람이 빠르게 검수하기 어렵습니다. <b>그래서 둘 다 저장</b>합니다.</div>
+  <aside>자료형이 다르면 다음 단계 코드도 다릅니다 — 좌표 4개, 다각형, 관절점 배열은 각각 다르게 다뤄야 합니다.</aside>
+</section>
+
+<!-- 10 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">앱과 임계값, 서로 대신 못 하는 세 작업</h2>
+    <p style="margin-top:11px">임계값 민감도 관찰(교차검증 아님)</p>
+    <span class="who">Gradio</span>
+  </div>
+  <aside>세 실행 함수를 재사용해 Gradio 앱을 만들고, 같은 사진에서 임계값을 바꿔 결과 수 변화를 관찰합니다.</aside>
+</section>
+
+<!-- 11 앱 + 임계값 -->
+<section class="slide" data-part="PART 3">
+  <h2>🎚️ 임계값 손잡이를 붙인 <span class="g">작은 앱</span></h2>
+  <pre>세 YOLO 실행 함수를 재사용해 Gradio 앱. models/yolo 세 파일만, 없으면 다운로드 X.
+- 이미지 업로드 · Detect/Segment/Pose 탭 · confidence 슬라이더 0.05~0.90 · 실행 버튼
+- 결과 이미지·객체 수 · 원시 JSON 다운로드 · 모델명·버전·imgsz·conf 표시
+- 오류 시 빈 성공 화면 대신 오류 메시지
+apps/yolo/app.py, .venv-day15-yolo/bin/python apps/yolo/app.py로 실행.</pre>
+  <div class="hl">임계값 0.15·0.25·0.60으로 바꿔 결과 수 변화를 기록 — <b class="r">정답 라벨 없이 어느 값이 더 정확하다고 단정하지 않음.</b> 교차 검증이 아니라 <b>임계값 민감도 관찰</b>.</div>
+  <div class="hl">실패로 대체 결과를 쓰면 <code>fallback/outputs/yolo/thresholds</code>의 0.15·0.25·0.60 폴더를 읽는 <b>읽기 전용 모드</b>(업로드·임의 임계값 비활성, <code>fallback_used=true</code> 표시).</div>
+  <aside>Gradio는 입력·출력 컴포넌트를 미리 갖춘 오픈소스 UI 도구로, 화면을 처음부터 만들지 않고 결과 연결에 집중하게 해 줍니다.</aside>
+</section>
+
+<!-- 12 서로 대신 못함 -->
+<section class="slide" data-part="PART 3">
+  <h2>🚫 세 작업은 <span class="r">서로 대신할 수 없습니다</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th>관찰</th><th>이유</th></tr></thead>
+    <tbody>
+      <tr><td>Detection 박스가 몸 주변 <b>배경까지 포함</b></td><td>박스 좌표를 맞히도록 학습했기 때문</td></tr>
+      <tr><td>Segmentation이 사람·버스 <b>윤곽을 각각 칠함</b></td><td>개체별 마스크 손실과 head가 있기 때문</td></tr>
+      <tr><td>Pose가 버스에는 <b>관절점을 안 만듦</b></td><td>기본 pose 가중치의 keypoint 정의가 <b>사람 몸</b> 대상이기 때문</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">🔑 <b>"YOLO가 이미지를 이해한다"는 한 문장으로 세 결과를 뭉치지 마세요.</b> 같은 패키지를 호출했어도 <b>가중치·head·학습 라벨·출력 자료형이 다릅니다.</b></div>
+  <aside>박스로는 넓이를, 마스크로는 개수 세기를, 포즈로는 자세를 각각의 방식대로만 답할 수 있습니다.</aside>
+</section>
+
+<!-- 13 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part">
+    <div class="pno">4</div>
+    <h2 style="margin:0">학습·실패·사용 책임</h2>
+    <p style="margin-top:11px">가져다 쓴 모델의 책임도 결과로 남긴다</p>
+    <span class="who">사전학습 추론의 경계</span>
+  </div>
+  <aside>오늘 사용한 것은 사전학습 추론입니다. 이미 COCO로 학습된 가중치를 새 사진에 적용했습니다.</aside>
+</section>
+
+<!-- 14 학습 어디에 -->
+<section class="slide" data-part="PART 4">
+  <h2>🎓 학습은 <span class="g">어디에 끼어드나</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th>방식</th><th>언제 생각하나</th><th>필요한 것</th></tr></thead>
+    <tbody>
+      <tr><td><b>사전학습 추론</b></td><td>기존 클래스·출력이 업무에 맞음</td><td>입력과 실행 환경</td></tr>
+      <tr><td><b>Fine-tuning</b></td><td>같은 실패 반복 + 회사 고유 대상</td><td>권리 확인 이미지·일관 라벨·train/val 분리</td></tr>
+      <tr><td><b>From scratch</b></td><td>기존 시각 특징까지 안 맞는 특수 영역</td><td>매우 많은 데이터·연산·전문성</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">YOLO 학습엔 이미지·라벨뿐 아니라 <code>data.yaml</code>(학습·검증 경로, 클래스 이름)이 필요. Detection=박스, segment=다각형, pose=keypoint 라벨이라 <b>작업을 바꾸면 라벨 비용도 바뀜.</b> 이번 실습에선 <b class="r">학습을 실행하지 않고 판단 기준만</b> 소개.</div>
+  <aside>사전학습 클래스에 없는 대상을 계속 놓치면 권리가 확인된 이미지·라벨을 모아 fine-tuning을 검토할 수 있습니다.</aside>
+</section>
+
+<!-- 15 실패를 결과로 -->
+<section class="slide" data-part="PART 4">
+  <h2>🧯 실패를 <span class="g">결과로 남깁니다</span></h2>
+  <ul class="pts">
+    <li>로컬 가중치 없음 → 다운로드·모델 전환 없이 <b>오류 기록</b> · CUDA·MPS 오류 → <b>CPU 고정</b></li>
+    <li>Pose 0건 → <b>모델을 조용히 바꾸지 말고</b> 입력·임계값 기록 · 마스크 이상 → 탐지 박스와 나란히 저장해 어느 head 차이인지</li>
+    <li>세 모델 실행 불가/앱 안 열림 → <code>fallback/outputs/yolo/thresholds</code> <b>읽기 전용 모드</b>로 전환</li>
+  </ul>
+  <div class="hl">🔑 모든 실패는 <code>failure_log.md</code>에, 대체 사용 시 <code>fallback_used=true</code>. 통과 = <b>직접 추론 모드와 읽기 전용 fallback 모드 중 하나가 실행</b>되면 됨. <b class="r">설치 성공보다 중요한 건 실패 지점을 재현 가능하게 남기는 것.</b></div>
+  <aside>대체 결과 사용은 실패가 아닙니다. 숨기거나 조용히 다른 모델로 바꾸는 것이 문제입니다.</aside>
+</section>
+
+<!-- 16 사용 책임 카드 -->
+<section class="slide" data-part="PART 4">
+  <h2>🪪 가져다 쓴 모델의 <span class="g">사용 책임</span>도 결과</h2>
+  <p>학교 출입 안전 · 체육 자세 분석 · 분리수거 품목 탐지 · 과학실 안전 장비 중 하나를 고르고, <b>답은 사람이</b> 정합니다.</p>
+  <div class="plabel">▼ 빈 양식 프롬프트 (use_case_card.md)</div>
+  <pre class="wrap">아래 항목의 빈 양식만 만들어 줘. 내 답을 추정하거나 대신 채우지 않는다.
+- 탐지 목적과 영향을 받는 사람
+- 촬영 대상의 고지·동의 방식
+- 이미지·위치 기록의 보관 장소·기간
+- 가장 위험한 오탐과 미탐
+- 사람이 검토하고 이의를 제기할 통로
+실험으로 판단할 수 없는 항목은 미확인으로 남긴다.</pre>
+  <div class="hl">🔑 <b class="r">버스 예제의 결과가 잘 나온 것과, 실제 사람을 촬영·판정해도 된다는 것은 전혀 다른 결론.</b> 이 카드는 Joseph Redmon의 문제 제기를 실습의 선택 기준으로 되돌리는 장치.</div>
+  <aside>도구를 잘 실행하는 것과 그 도구를 사람에게 써도 되는지는 분리해서 판단해야 합니다.</aside>
+</section>
+
+<!-- 17 제출물 -->
+<section class="slide" data-part="PART 4">
+  <h2>📤 사진 실습 <span class="g">제출물</span></h2>
+  <ul class="pts">
+    <li>detection·segmentation·pose <b>결과 이미지 각 1장</b> + 작업별 원시 JSON + <code>summary.json</code></li>
+    <li>모델명·버전·입력 해시·실행시간이 든 <b>manifest</b> · 임계값 3개에서 관찰한 변화</li>
+    <li>직접 추론 또는 읽기 전용 fallback으로 실행되는 <code>apps/yolo/app.py</code> · <code>use_case_card.md</code></li>
+    <li>세 작업 중 업무 하나를 골라 <b>"왜 이 자료형이 필요한가"</b>를 두 문장으로</li>
+  </ul>
+  <div class="hl">필수 제출 뒤 시간이 남으면 옆 사람 앱에 <b>처음 보는 사진 한 장</b>을 넣고 — 보기 좋은 결과보다 <b>처음 드러난 실패 하나</b>를 발표.</div>
+  <aside>이 실습으로 단원 4(AI는 문서와 사진에서 무엇을 꺼낼까)의 문서·사진 두 실습이 모두 끝납니다.</aside>
+</section>
+
+<!-- 18 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 6문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">같은 사진·같은 패키지라도 <b>세 head(det·seg·pose)</b>는 <b>세 자료형</b>을 낸다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">공통 조건(사진·imgsz·conf·CPU)을 맞춰도 <b>head·학습 목표가 달라 출력이 다름</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>시각화 + 원시 JSON 둘 다 저장</b> — 그림은 검수용, 원시는 다음 코드용</span></div>
+    <div class="st"><span class="n">4</span><span class="t">임계값 0.15·0.25·0.60은 <b>민감도 관찰</b>(정답 없이 교차검증 아님)</span></div>
+    <div class="st"><span class="n">5</span><span class="t">세 작업은 서로 대신 못 함 — "YOLO가 이해한다"로 <b>뭉치지 말 것</b></span></div>
+    <div class="st"><span class="n">6</span><span class="t">가져다 쓴 모델의 <b>사용 책임(use_case_card)</b>도 결과 — 잘 돈다 ≠ 사람에게 써도 된다</span></div>
+  </div>
+  <aside>사전학습 추론의 편리함과, 그것을 실제 사람에게 적용할 책임은 분리해서 남깁니다.</aside>
+</section>
+
+<!-- 19 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 이 실습의 목표는? 세 작업(head)과 각 <b>자료형</b>은?</div>
+    <div class="q"><b>Q2.</b> 공통 조건(같은 사진·imgsz·conf·CPU)을 맞춰도 <b>출력이 다른</b> 이유는?</div>
+    <div class="q"><b>Q3.</b> 시각화 이미지와 원시 JSON을 <b>둘 다 저장</b>하는 이유는?</div>
+    <div class="q"><b>Q4.</b> 임계값 0.15·0.25·0.60을 바꿔보는 것은 무엇이고, <b>무엇이 아닌가</b>?</div>
+    <div class="q"><b>Q5.</b> Pose가 버스엔 관절점을 안 만드는 이유? "YOLO가 이해한다"로 뭉치면 안 되는 이유는?</div>
+    <div class="q"><b>Q6.</b> <b>사용 책임 카드</b>가 필요한 이유? "버스 예제 성공"이 뜻하지 <b>않는</b> 것은?</div>
+  </div>
+  <aside>Q5(자료형 차이)와 Q6(사용 책임)이 이 실습의 두 핵심입니다.</aside>
+</section>
+
+<!-- 20 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 같은 사진에서 <b>세 자료형</b>을 만들어 차이를 확인. Detection=클래스·박스·점수, Segmentation=개체별 마스크(윤곽), Pose=사람 관절 keypoint.</div>
+    <div class="q a"><b>A2.</b> <b>작업별 head와 학습 목표가 다르기</b> 때문. 같은 입력이라도 박스·마스크·관절점은 서로 다른 손실로 학습됐다.</div>
+    <div class="q a"><b>A3.</b> <b>시각화는 사람 검수용</b>, <b>원시 JSON은 다음 코드용</b>. 그림만 있으면 파이프라인에 못 쓰고, 배열만 있으면 빠른 검수가 어렵다.</div>
+    <div class="q a"><b>A4.</b> <b>임계값 민감도 관찰</b>(결과 수가 어떻게 변하는지). 정답 라벨이 없으니 <b>어느 값이 더 정확하다는 교차검증은 아님.</b></div>
+    <div class="q a"><b>A5.</b> 기본 pose 가중치의 keypoint 정의가 <b>사람 몸</b> 대상이라 버스엔 관절점이 없음. 같은 패키지라도 <b>가중치·head·라벨·자료형이 달라</b> 한 문장으로 뭉치면 안 됨.</div>
+    <div class="q a"><b>A6.</b> 도구 실행과 사람에게 쓰는 책임은 별개라서. <b>"버스 예제가 잘 나온 것"이 "실제 사람을 촬영·판정해도 된다"를 뜻하지 않음</b>(목적·동의·보관·오탐·이의 통로를 사람이 정함).</div>
+  </div>
+  <aside>A6이 Redmon의 문제 제기를 실습으로 되돌리는 지점입니다.</aside>
+</section>
+
+<!-- 21 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>수고하셨습니다 🙌</h1>
+    <div class="big" style="margin-top:24px">같은 사진, 세 head, <span class="y">세 자료형</span><br>박스 · 마스크 · 관절점은 서로 대신 못 한다<br><small>그리고 잘 돈다 ≠ 사람에게 써도 된다</small></div>
+    <p class="sub" style="margin-top:22px">단원 4 — 문서·사진 두 실습 완료</p>
+  </div>
+  <aside>단원 4(AI는 문서와 사진에서 무엇을 꺼낼까)의 문서(OCR)·사진(YOLO) 실습을 모두 마쳤습니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
