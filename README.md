@@ -45,6 +45,7 @@
    - ✅ 4-③. 찾아내기와 경계 긋기 (객체 탐지·이미지 분할) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/detect-segment/) · 📊 [PPT](detect-segment/detect-segment.pptx)
    - ✅ 4-④. 이미지와 언어를 함께 보는 모델 (VLM) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/vlm/) · 📊 [PPT](vlm/vlm.pptx)
    - ✅ 4-⑤. 도구를 외우지 말고 AI로 선택하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/ai-tool-choice/) · 📊 [PPT](ai-tool-choice/ai-tool-choice.pptx)
+   - ✅ 4-⑥. 같은 PDF를 네 가지 눈으로 읽기 (OCR 비교 실습) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/ocr-lab/) · 📊 [PPT](ocr-lab/ocr-lab.pptx)
 
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
@@ -63,6 +64,7 @@
 > - 4-③ https://inseoklee-ai.github.io/study-room/detect-segment/
 > - 4-④ https://inseoklee-ai.github.io/study-room/vlm/
 > - 4-⑤ https://inseoklee-ai.github.io/study-room/ai-tool-choice/
+> - 4-⑥ https://inseoklee-ai.github.io/study-room/ocr-lab/
 >
 > 📊 **PPT**: 각 강의 폴더의 `<폴더명>.pptx` (예: `vlm/vlm.pptx`). GitHub 저장소나 라이브 사이트에서 내려받아 PowerPoint로 열 수 있습니다.
 >

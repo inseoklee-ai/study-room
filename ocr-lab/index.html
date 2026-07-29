@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>같은 PDF를 네 가지 눈으로 읽기 · OCR 비교 실습</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:15px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:9px}
+  p{font-size:clamp(.94rem,1.5vw,1.08rem);color:var(--soft);margin-bottom:10px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.3em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:18px}
+  .part .who{margin-top:16px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:9px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.9rem,1.5vw,1.08rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px 18px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:12px 16px;margin-top:12px;font-size:clamp(.86rem,1.42vw,1.0rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:22px 24px;text-align:center;font-size:clamp(1rem,2vw,1.42rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .steps{display:grid;gap:7px}
+  .st{display:flex;gap:11px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:10px 14px;box-shadow:var(--sh)}
+  .st .n{flex:none;min-width:24px;height:24px;padding:0 6px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.76rem}
+  .st .t{font-size:clamp(.85rem,1.42vw,1.0rem)}
+
+  .qk{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  @media(max-width:780px){.qk{grid-template-columns:1fr 1fr}}
+  .qk .c{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px;box-shadow:var(--sh);text-align:center}
+  .qk .c .l{font-size:1.2rem;font-weight:800;color:var(--gr)}
+  .qk .c .n{font-weight:750;margin:4px 0 3px;font-size:.86rem}
+  .qk .c small{color:var(--soft);font-size:.74rem;line-height:1.35;display:block}
+
+  table{border-collapse:collapse;width:100%;font-size:clamp(.76rem,1.28vw,.9rem)}
+  th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--bg2);font-weight:750;color:var(--ink)}
+  td{color:var(--soft)}td b{color:var(--ink)}
+  tr:last-child td{border-bottom:none}
+  .tw{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:6px}
+
+  code{font-family:"SF Mono",Menlo,Consolas,monospace;background:var(--bg2);padding:2px 6px;border-radius:5px;font-size:.85em}
+  pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:13px 15px;
+    overflow:auto;max-height:56vh;font-size:clamp(.72rem,1.18vw,.85rem);line-height:1.65;
+    font-family:"SF Mono",Menlo,Consolas,monospace;color:var(--ink);margin:9px 0;white-space:pre-wrap}
+  .plabel{font-size:.72rem;color:var(--gold);font-weight:800;letter-spacing:.1em;margin-bottom:2px}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 15px;font-size:clamp(.85rem,1.4vw,1.0rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 4 · AI는 문서와 사진에서 무엇을 꺼낼까 (6·실습)</span>
+    <h1 style="margin:18px 0">같은 PDF를<br>네 가지 눈으로 읽기</h1>
+    <p class="sub">Tesseract · PaddleOCR · PaddleOCR-VL · 범용 VLM 비교</p>
+  </div>
+  <aside>OCR 엔진을 직접 구현하는 게 아니라, 이미 만들어진 기능을 코딩 에이전트에게 연결하게 하고 같은 페이지가 도구에 따라 어떻게 다른 결과가 되는지 비교합니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 실습 목표</h2>
+  <div class="qk">
+    <div class="c"><div class="l">1</div><div class="n">Tesseract</div><small>오래된 계보의 가벼운 로컬 OCR 기준선</small></div>
+    <div class="c"><div class="l">2</div><div class="n">PaddleOCR</div><small>탐지·인식을 나눈 현대식 오픈소스 OCR</small></div>
+    <div class="c"><div class="l">3</div><div class="n">PaddleOCR-VL</div><small>표·수식·읽기 순서를 함께 복원하는 문서 VLM</small></div>
+    <div class="c"><div class="l">4</div><div class="n">Claude / ChatGPT</div><small>문서 외 질문도 처리하는 범용 멀티모달</small></div>
+  </div>
+  <div class="hl">🎯 <b>"어느 모델이 최고인가"를 세 페이지로 결론 내리지 않습니다.</b> 각 도구가 <b>어떤 자료형</b>을 주고, <b>어떤 실패를 눈에 보이게</b> 남기며, <b>데이터가 어디서 처리</b>되는지를 관찰합니다.</div>
+  <aside>세 페이지로 제품 순위를 정하는 실습이 아닙니다. 관찰이 목적입니다.</aside>
+</section>
+
+<!-- 3 흐름 + 사전준비 -->
+<section class="slide" data-part="표지">
+  <h2>⏱️ 실습 흐름과 <span class="g">시작 조건</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th>시간</th><th>사람이 정할 것</th><th>AI에게 맡길 것</th><th>통과 조건</th></tr></thead>
+    <tbody>
+      <tr><td>0~5분</td><td>입력 PDF·필수 2쪽</td><td>폴더·패키지·캐시 점검</td><td>입력 해시·페이지 PNG</td></tr>
+      <tr><td>5~20분</td><td>한국어 모델·출력 계약</td><td>Tesseract·PaddleOCR 실행</td><td>텍스트·좌표·오버레이</td></tr>
+      <tr><td>20~35분</td><td>추정 금지 규칙</td><td>PaddleOCR-VL·범용 VLM</td><td>페이지별 Markdown</td></tr>
+      <tr><td>35~50분</td><td>기준값 6개</td><td>결과 비교표</td><td>exact·partial·missing·invented</td></tr>
+      <tr><td>50~60분</td><td>화면에서 볼 항목</td><td>Gradio 화면 조립</td><td>app.py 실행</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">운영자가 <b>환경을 미리 고정</b>(requirements-ocr, Tesseract 5 kor·eng, PP-OCRv5·PaddleOCR-VL-1.6 가중치, GPU, 교사용 결과). <b class="r">준비가 안 됐으면 수업 중 즉흥 업그레이드 금지</b> — 실패 경로는 기록하고 fallback으로 이어감.</div>
+  <aside>설치부터 시작하지 않도록 운영자가 리허설한 환경을 고정합니다. 학생은 실행·비교·화면 제작에 집중합니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">가상환경 — 프로젝트별 Python 도구 상자</h2>
+    <p style="margin-top:11px">uv로 들어가고 나오기만</p>
+    <span class="who">환경 충돌 방지</span>
+  </div>
+  <aside>패키지를 컴퓨터 전체에 설치하면 한 실습의 버전이 다른 실습을 망가뜨릴 수 있습니다. 가상환경은 프로젝트 전용 폴더에 Python·패키지를 따로 둡니다.</aside>
+</section>
+
+<!-- 5 uv activate -->
+<section class="slide" data-part="PART 1">
+  <h2>📦 <span class="g">uv</span> 가상환경 — 학생은 들어가고 나오기만</h2>
+  <p>이 수업은 Astral의 <code>uv</code>를 사용. <code>uv venv</code>(환경 생성)·<code>uv pip install</code>(패키지)은 <b>뜻만 알아두고 실행하지 않음</b> — 운영자가 <code>requirements-*.txt</code>로 미리 준비.</p>
+  <pre># 문서 실습 시작
+source .venv-day15-ocr/bin/activate
+python -c "import sys; print(sys.executable)"   # 경로 끝이 .venv-day15-ocr/bin/python인지 확인
+deactivate                                        # 끝나면 나오기(삭제 아님)
+
+# YOLO 실습 시작
+source .venv-day15-yolo/bin/activate</pre>
+  <div class="hl"><code>activate</code>=현재 터미널의 <code>python</code>이 그 도구 상자를 가리키게 함, <code>deactivate</code>=나올 뿐 삭제 아님. <b class="r">패키지가 없으면 새로 설치하지 말고 오류를 기록</b>해 대체 결과로 넘어감.</div>
+  <aside>OCR용과 YOLO용 환경을 나눈 이유는 두 도구가 요구하는 패키지 조합이 다를 수 있기 때문입니다.</aside>
+</section>
+
+<!-- 6 uv 프롬프트 + PDF -->
+<section class="slide" data-part="PART 1">
+  <h2>🤖 에이전트에 <span class="g">uv만</span> 쓰게 + 준비된 PDF</h2>
+  <div class="plabel">▼ 환경 관련 지시에 붙이는 조건</div>
+  <pre>Python 환경을 다룰 때는 uv만 사용해 줘.
+pip, pip3, python -m venv, Conda, 전역 설치는 쓰지 않는다.
+현재 활성화된 수업용 가상환경과 고정된 requirements를 바꾸지 않는다.
+패키지가 없으면 새로 설치하지 말고 정확한 오류를 기록한다.</pre>
+  <ul class="pts">
+    <li>기본 입력: 3쪽 이미지형 PDF → <code>input/day15_sample.pdf</code> — 1쪽 정비 지시서(항목·값·합계표), 2쪽 모의평가형(두 단·수식·선택지), 3쪽 시설 점검표(병합 셀·도장 겹침)</li>
+    <li><b class="r">공개 링크 ≠ 재배포 권리</b> — 외부 자료는 개인별 다운로드·수업 안에서만, 저장소엔 복사본 X. <b>파일명·다운로드 날짜·SHA-256만</b> 기록</li>
+  </ul>
+  <aside>지시하지 않으면 에이전트는 익숙한 pip·전역 설치를 고를 수 있어, 환경 관련 작업엔 위 조건을 명시합니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">네 개의 명령</h2>
+    <p style="margin-top:11px">동일 프롬프트가 아니라 동일 산출 계약</p>
+    <span class="who">로컬 OCR → 문서 VLM → 범용 VLM → 비교표</span>
+  </div>
+  <aside>일반 OCR은 자연어 프롬프트를 받지 않으므로 "모든 모델에 동일 프롬프트"가 아니라 동일 입력·동일 산출 계약을 맞춥니다.</aside>
+</section>
+
+<!-- 8 명령1 -->
+<section class="slide" data-part="PART 2">
+  <h2>① 로컬 OCR <span class="g">두 종류</span> 연결</h2>
+  <div class="plabel">▼ 명령 1 (요지)</div>
+  <pre>input/day15_sample.pdf의 1~2쪽을 로컬에서 처리.
+환경 명령은 uv만, 패키지/모델은 바꾸지 않는다.
+- 두 페이지를 200dpi PNG로 한 번 변환, 같은 PNG를 두 OCR에 넣는다
+- Tesseract 5: kor+eng · PaddleOCR: 한국어 PP-OCRv5 인식 모델
+- 실제 선택된 탐지·인식 모델 이름을 기록
+저장: input_pages/page_0N.png · tesseract/page_NN.tsv,.txt,_overlay.png
+      paddleocr/page_NN_raw.json,.txt,_overlay.png · run_manifest.json
+manifest: 패키지 버전·모델 이름·입력 SHA-256·실행 명령·시간·네트워크 사용 여부
+가중치가 없으면 설치 말고 failure_log.md에 명령·오류 기록,
+운영자 fallback이 있으면 그 경로를 manifest에 표시하고 계속.</pre>
+  <div class="hl">🔑 채팅창에 <b>"완료"가 나온 것은 통과 조건이 아닙니다.</b> 두 OCR의 원시 결과와 <b>서로 다른 이름의 오버레이 파일을 직접 열어</b> 확인.</div>
+  <aside>같은 PNG를 두 OCR에 넣어야 공정합니다. 오버레이(박스 그린 이미지)를 눈으로 확인하는 것이 핵심입니다.</aside>
+</section>
+
+<!-- 9 명령2 -->
+<section class="slide" data-part="PART 2">
+  <h2>② 문서 전용 VLM을 <span class="g">같은 입력</span>에</h2>
+  <p>기본 경로 = <b>PaddleOCR-VL-1.6 전체 파이프라인을 준비된 GPU에서 직접 실행</b>. 호스팅 추론 API로 임의 전환하지 않음.</p>
+  <div class="plabel">▼ 명령 2 산출 계약 (요지)</div>
+  <pre>input_pages의 두 PNG를 PaddleOCR-VL-1.6 전체 문서 파싱 파이프라인으로 처리.
+준비된 GPU에서 직접 실행, 호스팅 API/다른 모델로 바꾸지 않는다.
+- 페이지별 Markdown · 표는 Markdown표 또는 구조화 JSON
+- 수식은 가능하면 LaTeX · 읽을 수 없는 곳은 [UNCLEAR]
+- 원문에 없는 설명·요약·값 보정 금지 · 각 페이지 ## Page N
+저장: paddleocr_vl/raw/ (원시), result.md (정규화)
+manifest에 레이아웃 분석·VLM 인식 모델명·버전·시간·장치 추가.
+5분 내 첫 페이지 없으면 오류 기록 후 운영자 fallback으로 계속.</pre>
+  <div class="hl">⚠️ <b>구성요소 하나만 호출한 결과 ≠ 레이아웃 분석 포함 전체 파이프라인 결과.</b> 실행 기록에 "전체 파이프라인"인지 "구성요소 직접 호출"인지 반드시 적음.</div>
+  <aside>같은 모델 이름이라도 전체 파이프라인과 부분 호출은 결과가 다를 수 있어 무엇을 돌렸는지 기록해야 합니다.</aside>
+</section>
+
+<!-- 10 명령3 -->
+<section class="slide" data-part="PART 2">
+  <h2>③ Claude / ChatGPT에 <span class="g">같은 계약</span></h2>
+  <p>둘 다 제품명 아래 실제 모델·전처리가 바뀔 수 있고 내부가 다 공개돼 있지 않음. <b>접근 가능한 한 서비스만 필수</b>(다른 서비스는 확장). 새 대화에 두 페이지 PNG 첨부.</p>
+  <div class="plabel">▼ 명령 3</div>
+  <pre>첨부한 두 페이지를 페이지별 Markdown으로 전사해 주세요.
+1. 표는 행과 열 관계를 유지 · 2. 수식은 LaTeX
+3. 읽을 수 없는 곳은 [UNCLEAR]
+4. 요약·추정·맞춤법 보정·금액 재계산 금지 · 5. 각 페이지 ## Page N
+6. 마지막에 확실하지 않았던 위치만 페이지 번호와 함께 목록으로</pre>
+  <div class="hl">응답을 <code>general_vlm/result.md</code>에, <code>run_info.json</code>에 서비스명·화면 표시 모델명·실행일·입력 파일명·프롬프트 기록. <b class="r">앱의 비공개 전처리를 고정할 수 없으므로 정밀 벤치마크가 아니라 출력 성격 관찰.</b></div>
+  <aside>범용 VLM은 문서 전용 OCR에서 출발한 게 아니라, 범용 언어 모델에 시각 입력을 연결해 문서도 다루게 된 계열입니다.</aside>
+</section>
+
+<!-- 11 명령4 -->
+<section class="slide" data-part="PART 2">
+  <h2>④ <span class="g">기준값</span>과 대조해 표로</h2>
+  <div class="grid2" style="align-items:start">
+    <div>
+      <div class="plabel">▼ 명령 4 (요지)</div>
+      <pre>네 갈래 결과를 읽어 comparison.md 생성.
+없는 경로만 fallback에서 읽고 fallback_used=true 표시.
+기준값 6개를 행, 도구를 열로.
+exact/partial/missing/invented/unclear 중 하나로 표시.
+각 판정 옆 원문 페이지·출력 경로.
+처리시간·로컬/외부 전송 여부도 표에.
+tool_choice.md의 선택 기준이 있으면
+'상담 기준으로 다시 보기' 섹션 추가.</pre>
+    </div>
+    <div class="box">
+      <h3>기준값 6개</h3>
+      <p style="margin:0;font-size:.86rem">① 문서번호 WO-2026-0715<br>② 차량번호 12가 3456<br>③ 작업 행 3개(엔진오일 68,000 등)<br>④ 공급가 103,000·부가세 10,300·합계 113,300<br>⑤ 2쪽 읽기 순서(좌 설명·F=ma → 우 12번)<br>⑥ 수식 F=ma / 답 ③</p>
+    </div>
+  </div>
+  <div class="hl">🔑 기준값이 있으므로 <b>"그럴듯해 보인다"가 아니라 무엇이 달라졌는지를 같은 자로</b> 비교. 원문 보고 정답을 다시 만들지 말고 제공된 기준값만 사용.</div>
+  <aside>invented(원문에 없는데 지어낸 값)를 별도로 표시하게 하는 것이 환각을 눈에 보이게 만드는 핵심입니다.</aside>
+</section>
+
+<!-- 12 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">결과 읽기 · 공정성 · 데이터 경로</h2>
+    <p style="margin-top:11px">한 도구가 모든 열에서 이길 필요는 없다</p>
+    <span class="who">관찰과 기록</span>
+  </div>
+  <aside>표가 나오면 그때부터 진짜입니다. 네 가지 질문으로 관찰하고, 예상과 다르면 예상이 아니라 결과를 기록합니다.</aside>
+</section>
+
+<!-- 13 4가지 질문 + 한 도구 -->
+<section class="slide" data-part="PART 3">
+  <h2>👀 결과를 볼 때 묻는 <span class="g">네 가지</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th>질문</th><th>확인 방법</th></tr></thead>
+    <tbody>
+      <tr><td><b>글자를 얼마나 보존?</b></td><td>숫자·기호·띄어쓰기와 <code>[UNCLEAR]</code> 위치를 원문과 대조</td></tr>
+      <tr><td><b>구조를 얼마나 보존?</b></td><td>표 행 정렬, 두 단 읽기 순서, 병합 셀 관계 확인</td></tr>
+      <tr><td><b>근거를 되짚을 수 있나?</b></td><td>페이지·좌표·원시 결과에서 출처를 찾을 수 있는지</td></tr>
+      <tr><td><b>빈자리를 메웠나?</b></td><td>원문에 없는 요약·단위·재계산 값이 생겼는지</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">🔑 <b>한 도구가 모든 열에서 이길 필요 없음</b> — Tesseract는 좌표·빠른 로컬, PaddleOCR는 한국어 글자 영역, 문서 VLM은 표·수식 구조, 범용 VLM은 질문 대응에서 편할 수 있음. <b class="r">예상과 다르면 예상이 아니라 결과를 기록.</b></div>
+  <aside>이 네 질문이 comparison 표의 판정 근거이자, 도구 선택의 실제 기준이 됩니다.</aside>
+</section>
+
+<!-- 14 fallback + 공정성 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧯 5분 안에 안 나오면, 그리고 <span class="g">공정성</span></h2>
+  <ul class="pts">
+    <li>경로별 제한 — 로컬 의존성 없음/GPU·가중치 문제/서비스 접근 불가 → <b>5분 뒤 중단하고 fallback 결과</b> 사용. 교사용도 없으면 <code>not_run</code></li>
+    <li><b class="g">대체 결과 사용은 실패가 아님</b> — <b class="r">사용 사실을 숨기거나 다른 모델로 조용히 바꾸는 것</b>이 문제. 비교표·manifest에 <code>fallback_used=true</code></li>
+  </ul>
+  <div class="hl">⚖️ 비교가 공정하려면 — 같은 원본의 같은 PNG · 동일 <b>산출 계약</b>(동일 프롬프트 아님) · 앱 화면과 API 결과를 <b>한 숫자로 섞어 "모델 성능"이라 부르지 않음</b> · 모델명·실행일·전처리·해시 기록 · 세 페이지로 순위 단정 금지. 그래서 표 제목은 <b>"정확도 순위"가 아니라 "이 입력에서 관찰한 차이"</b>.</div>
+  <aside>각 서비스의 비공개 전처리 차이는 조건을 지켜도 남습니다. 그래서 순위가 아니라 관찰입니다.</aside>
+</section>
+
+<!-- 15 Gradio -->
+<section class="slide" data-part="PART 3">
+  <h2>🖥️ 10분 제작 — <span class="g">한 화면에</span> (Gradio)</h2>
+  <div class="plabel">▼ Gradio 앱 (요지)</div>
+  <pre>기존 outputs를 읽어 한 화면에서 비교하는 Gradio 앱. 새 추론은 하지 않는다.
+- 왼쪽: 원본 페이지 · 오른쪽 탭: Tesseract/PaddleOCR/PaddleOCR-VL/General VLM
+- 좌표 있는 결과는 원본 위에 박스 오버레이 · Markdown은 페이지별 표시
+- 기준값 6개 판정 표 · 비교표 CSV 다운로드 · 사용 모델·버전·로컬/외부 표시
+- outputs에 없는 경로는 fallback에서 읽고 '대체 결과'라고 표시
+apps/ocr/app.py에 만들고 .venv-day15-ocr/bin/python apps/ocr/app.py로 실행.</pre>
+  <div class="hl"><b>Gradio</b>는 입력·출력 컴포넌트를 미리 갖춘 오픈소스 Python UI 도구 — 화면 프레임워크를 처음부터 만들지 않고 <b>모델 결과 연결에 집중</b>. 바이브코딩 실습에 적합.</div>
+  <aside>새 모델 추론은 하지 않고 이미 만든 outputs만 읽어 보여주는 것이 원칙입니다.</aside>
+</section>
+
+<!-- 16 데이터 경로 -->
+<section class="slide" data-part="PART 3">
+  <h2>📍 데이터가 <span class="g">어디로 갔는지도 결과</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th>경로</th><th>기본 실행 위치</th><th>확인할 것</th></tr></thead>
+    <tbody>
+      <tr><td>Tesseract</td><td>로컬</td><td>언어 데이터 파일·라이선스</td></tr>
+      <tr><td>PaddleOCR</td><td>로컬 실행 가능</td><td>모델 다운로드 출처·선택 가중치</td></tr>
+      <tr><td>PaddleOCR-VL</td><td>로컬·호스팅 모두 가능</td><td>실제 사용 경로·GPU·토큰·서버 위치</td></tr>
+      <tr><td>Claude·ChatGPT 앱</td><td class="r">외부 서비스</td><td>업로드 가능 자료인지·보존/학습 설정·조직 정책</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">🔑 <b>공개 모델이라고 자동으로 로컬 처리가 아님</b> — 호스팅 API를 호출했다면 <b class="r">외부 전송</b>. 반대로 상용 서비스라고 모든 조직의 데이터 정책이 같은 것도 아님. 수업은 공개 자료만, 업무 자료엔 <b>조직 계약·정책을 먼저</b>.</aside>
+  <aside>실행 위치는 성능만큼 중요한 결과입니다. "어디서 처리됐나"를 항상 기록합니다.</aside>
+</section>
+
+<!-- 17 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part">
+    <div class="pno">4</div>
+    <h2 style="margin:0">체크포인트 · 되돌아보기 · 제출</h2>
+    <p style="margin-top:11px">감상 대신, 다음 작업으로 이어지는 한 문장</p>
+    <span class="who">마무리</span>
+  </div>
+  <aside>다음 파일이 실제로 존재하면 문서 실습을 마칩니다.</aside>
+</section>
+
+<!-- 18 체크포인트 + 되돌아보기 -->
+<section class="slide" data-part="PART 4">
+  <h2>✅ 체크포인트 &amp; <span class="g">되돌아보기</span></h2>
+  <ul class="pts">
+    <li>동일 1~2쪽 PNG+SHA · 두 OCR 원시·텍스트·좌표 시각화 · PaddleOCR-VL Markdown · 범용 VLM 결과+모델·실행일 · <code>comparison.md</code> · 실패/[UNCLEAR] 사례 1개 · 데이터 경로 기록 · Gradio 화면</li>
+  </ul>
+  <div class="box">
+    <h3>되돌아보기 3문</h3>
+    <p style="margin:0;font-size:.9rem">① OCR이 좌표를 주는데도 <b>문서 VLM이 필요한</b> 경우는?<br>② 문서 VLM이 표를 잘 복원해도 <b>전용 OCR 좌표를 함께 보존</b>할 이유는?<br>③ 범용 VLM 답이 가장 편했다면, 그 편리함과 <b>함께 관리할 것</b>은?</p>
+  </div>
+  <div class="hl">답은 도구 이름이 아니라 <b>입력·출력 자료형·근거·실패 조건</b>으로 적습니다. "결과가 좋았다" 대신 <b>"어떤 출력이 어떤 다음 작업에 바로 연결되는가"</b>를 한 문장으로.</div>
+  <aside>제출: outputs/ocr 폴더, comparison.md, 실행되는 apps/ocr/app.py. 모든 모델이 성공할 필요는 없고, 실패 경로엔 명령·모델명·오류·대체 사용 여부가 있어야 합니다.</aside>
+</section>
+
+<!-- 19 제출 4줄 -->
+<section class="slide" data-part="PART 4">
+  <h2>📤 마지막에 채우는 <span class="g">네 줄</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>글자와 좌표</b>가 필요할 때 고를 도구: ____</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>표·수식·읽기 순서</b>가 중요할 때 고를 도구: ____</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>자연어 질문</b>을 빠르게 시험할 때 고를 도구: ____</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>사람이 반드시 원문을 다시 볼</b> 조건: ____</span></div>
+  </div>
+  <div class="hl">🔑 확장 과제 — 짝과 어려운 페이지 한 장을 바꿔 <b>두 경로만</b> 재실행. 처음 나타난 실패를 <code>new_failure.md</code>에 한 문장으로 적고 <b>어느 기술 단계</b>인지 추정("글자는 읽었지만 열 순서를 섞음 → 인식보다 레이아웃 조립 문제").</div>
+  <aside>도구를 더 많이 돌리는 게 목적이 아니라, 기본 PDF에서 안 보였던 실패를 찾는 것이 목적입니다.</aside>
+</section>
+
+<!-- 20 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 6문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">목표는 구현이 아니라 <b>같은 페이지를 네 도구로 비교</b>(자료형·실패 가시성·데이터 경로)</span></div>
+    <div class="st"><span class="n">2</span><span class="t">OCR은 프롬프트를 안 받으니 <b>동일 프롬프트가 아니라 동일 산출 계약</b>을 맞춘다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>가상환경(uv)</b>은 프로젝트별 도구 상자 — 학생은 activate/deactivate만, 없으면 오류 기록</span></div>
+    <div class="st"><span class="n">4</span><span class="t">"완료" 채팅은 통과 아님 — <b>기준값 6개로 exact/partial/missing/invented</b> 대조</span></div>
+    <div class="st"><span class="n">5</span><span class="t"><b>fallback 사용은 실패 아님</b> — 숨기거나 조용히 바꾸는 게 문제. <code>fallback_used=true</code></span></div>
+    <div class="st"><span class="n">6</span><span class="t"><b>데이터 경로도 결과</b> — 공개 모델도 호스팅 호출이면 외부 전송</span></div>
+  </div>
+  <aside>표 제목은 "정확도 순위"가 아니라 "이 입력에서 관찰한 차이"입니다.</aside>
+</section>
+
+<!-- 21 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 이 실습의 목표는? 비교하는 <b>네 갈래</b>는?</div>
+    <div class="q"><b>Q2.</b> "동일 프롬프트"가 아니라 <b>"동일 산출 계약"</b>을 맞추는 이유는?</div>
+    <div class="q"><b>Q3.</b> 가상환경이 필요한 이유? uv에서 <b>학생이 하는 일</b>은?</div>
+    <div class="q"><b>Q4.</b> 채팅창의 <b>"완료"가 통과 조건이 아닌</b> 이유? 기준값으로 대조하는 이유는?</div>
+    <div class="q"><b>Q5.</b> <b>fallback(대체 결과)</b> 사용은 실패인가? 진짜 문제는 무엇인가?</div>
+    <div class="q"><b>Q6.</b> "데이터가 어디로 갔는지도 결과"의 의미는? 공개 모델이면 자동 로컬인가?</div>
+  </div>
+  <aside>Q2·Q5·Q6이 이 실습이 지키려는 원칙입니다.</aside>
+</section>
+
+<!-- 22 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> OCR 구현이 아니라 <b>이미 만든 기능을 연결해 같은 페이지를 비교</b>. 네 갈래 = Tesseract · PaddleOCR · PaddleOCR-VL · Claude/ChatGPT(범용).</div>
+    <div class="q a"><b>A2.</b> <b>일반 OCR은 자연어 프롬프트를 받지 않기</b> 때문. 그래서 같은 입력 PNG + 같은 출력 형식(계약)을 맞춘다.</div>
+    <div class="q a"><b>A3.</b> 실습마다 필요한 패키지 버전이 충돌하지 않게 <b>프로젝트별로 격리</b>하려고. 학생은 만들지 않고 <b>activate/deactivate만</b>, 없으면 설치 말고 오류 기록.</div>
+    <div class="q a"><b>A4.</b> 원시 결과·오버레이를 <b>직접 열어 확인</b>해야 하기 때문. 기준값이 있어야 "그럴듯함"이 아니라 <b>무엇이 달라졌는지 같은 자로</b> 비교(invented=환각까지 표시).</div>
+    <div class="q a"><b>A5.</b> <b>실패가 아니다.</b> 진짜 문제는 <b>사용 사실을 숨기거나 다른 모델로 조용히 바꾸는 것</b>. 그래서 <code>fallback_used=true</code>를 남긴다.</div>
+    <div class="q a"><b>A6.</b> 실행 위치가 성능만큼 중요한 결과라는 뜻. <b>공개 모델이라도 호스팅 API를 호출하면 외부 전송</b>이고, 상용이라고 조직 정책이 같지도 않다.</div>
+  </div>
+  <aside>A5·A6이 감사 가능한 시스템의 기본 태도입니다.</aside>
+</section>
+
+<!-- 23 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>수고하셨습니다 🙌</h1>
+    <div class="big" style="margin-top:24px">"어느 모델이 최고"가 아니라<br><span class="y">이 입력에서 관찰한 차이</span><br><small>같은 PNG · 같은 산출 계약 · 기준값 · 데이터 경로 기록</small></div>
+    <p class="sub" style="margin-top:22px">다음 — 사진(YOLO) 실습</p>
+  </div>
+  <aside>모든 학생이 PDF 실습과 사진 실습을 모두 수행합니다. 다음은 YOLO로 사진을 다루는 실습입니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
