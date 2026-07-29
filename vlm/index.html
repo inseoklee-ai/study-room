@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이미지와 언어를 함께 보는 모델 · VLM</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:18px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.95rem,1.55vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.3em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:18px}
+  .part .who{margin-top:16px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px 20px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .steps{display:grid;gap:8px}
+  .st{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:11px 15px;box-shadow:var(--sh)}
+  .st .n{flex:none;min-width:25px;height:25px;padding:0 6px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.78rem}
+  .st .t{font-size:clamp(.88rem,1.5vw,1.04rem)}
+
+  table{border-collapse:collapse;width:100%;font-size:clamp(.8rem,1.32vw,.94rem)}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--bg2);font-weight:750;color:var(--ink)}
+  td{color:var(--soft)}td b{color:var(--ink)}
+  tr:last-child td{border-bottom:none}
+  .tw{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:6px}
+
+  code{font-family:"SF Mono",Menlo,Consolas,monospace;background:var(--bg2);padding:2px 6px;border-radius:5px;font-size:.86em}
+
+  /* connection flow */
+  .line2{display:flex;gap:6px;align-items:stretch;flex-wrap:wrap;margin:8px 0}
+  .pcell{flex:1;min-width:150px;border-radius:14px;padding:14px 12px;text-align:center;border:1px solid}
+  .pcell b{display:block;font-size:1rem;color:var(--ink)} .pcell small{color:var(--soft);font-size:.76rem;line-height:1.35;display:block;margin-top:3px}
+  .pc-b{background:rgba(58,90,140,.13);border-color:var(--bl)}
+  .pc-g{background:rgba(63,107,95,.14);border-color:var(--gr)}
+  .pc-p{background:rgba(107,77,140,.15);border-color:var(--pp)}
+  .pc-a{background:rgba(200,161,90,.18);border-color:var(--gold)}
+  .pca{align-self:center;color:var(--soft);font-weight:800;font-size:1.1rem}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 15px;font-size:clamp(.86rem,1.45vw,1.0rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 4 · AI는 문서와 사진에서 무엇을 꺼낼까 (4)</span>
+    <h1 style="margin:18px 0">이미지와 언어를<br>함께 보는 모델</h1>
+    <p class="sub">VLM · 열린 질문, 고정된 출력 · 형식과 내용은 다르다</p>
+  </div>
+  <aside>"갑이 누구인가"에 문서엔 "발주자"라고만 적혀 있을 수 있습니다. 글자를 읽는 것만으로는 부족하고 문맥을 해석해야 합니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 흐름</h2>
+  <ul class="pts">
+    <li><b>VLM</b>이란 — 이미지 단서와 언어 요구를 <b>함께 해석</b>하는 모델</li>
+    <li>그림을 언어 모델이 다룰 표현으로 — <b>패치·비전 인코더·연결 모듈</b></li>
+    <li><b>문서 전용 VLM</b>은 무엇을 더 보나 (PaddleOCR-VL)</li>
+    <li>말로 답한다 = <b>틀려도 말이 될 수 있다</b> → 외부 정거장을 만든다</li>
+  </ul>
+  <div class="hl">🎯 한 줄: 질문의 의미 범위는 열려 있어도 답은 문장·Markdown·<b>JSON</b>으로 고정할 수 있습니다. 단 <b class="r">형식을 지켰다 ≠ 내용이 맞다.</b></div>
+  <aside>앞 강의들은 받을 답의 모양이 정해져 있었습니다(문자열·박스·픽셀). VLM은 열린 질문을 다루되 출력 형식은 고정합니다.</aside>
+</section>
+
+<!-- 3 도입 VLM -->
+<section class="slide" data-part="표지">
+  <h2>🤔 두 질문에 공통으로 필요한 것</h2>
+  <div class="grid2">
+    <div class="box"><h3>"갑이 누구입니까"</h3><p style="margin:0">문서엔 "갑" 대신 <b>"발주자"</b>. 글자 인식만으론 부족, <b>계약 문맥 해석</b> 필요</p></div>
+    <div class="box"><h3>"위험해 보이는 곳?"</h3><p style="margin:0">적재물·열린 배전반·물기… <b>후보 목록을 질문 전에 못 정함</b></p></div>
+  </div>
+  <div class="big" style="margin-top:14px">필요한 건 출력 형식의 자유가 아니라<br><span class="y">이미지 단서 + 언어 요구를 함께 해석</span>하는 능력</div>
+  <div class="hl">이런 모델이 <b class="p">VLM</b>(Vision-Language Model, 시각-언어 모델). 답은 문장·Markdown·JSON으로 요구 가능 — 단 <b>형식 준수와 내용 정확은 별개</b>.</div>
+  <aside>출력 형식을 자유롭게 두는 게 핵심이 아닙니다. 시각과 언어를 함께 해석하는 능력이 핵심입니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">그림을 언어 모델이 다룰 표현으로</h2>
+    <p style="margin-top:11px">패치 · 비전 인코더 · 연결 모듈</p>
+    <span class="who">시각을 언어 옆에 놓기</span>
+  </div>
+  <aside>언어 모델은 입력을 토큰과 숫자 벡터로 바꿔 처리합니다. VLM은 이미지도 작은 영역의 특징 벡터로 바꿔 연결합니다.</aside>
+</section>
+
+<!-- 5 연결 방식 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔗 이미지 특징을 언어에 <span class="g">연결하는 세 방식</span></h2>
+  <p>이미지의 작은 영역 = <b>패치</b>, 패치에서 특징을 만드는 신경망 = <b>비전 인코더</b>. 연결 방식은 한 가지가 아닙니다.</p>
+  <div class="tw"><table>
+    <thead><tr><th>방식</th><th>시각 정보가 언어와 만나는 법</th></tr></thead>
+    <tbody>
+      <tr><td><b>Projector·concat</b></td><td>이미지 특징을 언어 토큰 크기로 바꿔 <b>같은 입력 줄에 붙임</b> (단순·널리 쓰임)</td></tr>
+      <tr><td><b>Cross-attention</b></td><td>언어 토큰이 별도 이미지 특징을 <b>필요한 순간에 참고</b> (두 흐름 분리)</td></tr>
+      <tr><td><b>Q-Former 다리</b></td><td>소수의 학습된 질의가 이미지에서 <b>필요한 특징만 뽑아</b> 전달 (압축 다리)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">⚠️ "모든 VLM이 한 줄에 넣어 동일한 self-attention으로 처리한다"는 <b>지나친 일반화</b>. 공통점은 <b>시각 특징과 언어 요구가 모델 내부에서 정보를 주고받는다</b>는 것뿐.</div>
+  <aside>연결 방식은 구현마다 다릅니다. 목적만 같습니다 — 시각 단서와 언어 요구를 함께 사용하는 것.</aside>
+</section>
+
+<!-- 6 그림 연결 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧩 이미지를 언어 모델이 <span class="g">쓸 수 있는 정보로</span></h2>
+  <div class="line2">
+    <div class="pcell pc-b"><b>문서·사진</b><small>픽셀</small></div><span class="pca">→</span>
+    <div class="pcell pc-g"><b>비전 인코더</b><small>시각 특징</small></div><span class="pca">→</span>
+    <div class="pcell pc-p"><b>연결 모듈</b><small>projector · cross-attention · Q-Former 등</small></div><span class="pca">→</span>
+    <div class="pcell pc-a"><b>언어 모델</b><small>질문과 함께 해석</small></div>
+  </div>
+  <div class="hl">🔑 구현마다 연결 방식은 달라도 <b>시각 단서와 언어 요구를 함께 사용한다는 목적은 같습니다.</b></div>
+  <aside>픽셀 → 시각 특징 → 연결 → 언어 모델이 질문과 함께 해석. 이 네 정거장이 VLM의 뼈대입니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">문서 전용 VLM은 무엇을 더 보려 하는가</h2>
+    <p style="margin-top:11px">읽는 순서 · 표 셀 · 수식 · 차트</p>
+    <span class="who">PaddleOCR-VL</span>
+  </div>
+  <aside>범용 VLM은 사진·도표·화면·문서를 폭넓게 다룹니다. 문서 전용 VLM은 문서에 반복되는 구조에 학습과 출력을 집중합니다.</aside>
+</section>
+
+<!-- 8 문서 전용 VLM -->
+<section class="slide" data-part="PART 2">
+  <h2>📑 범용 vs <span class="g">문서 전용</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>범용 VLM</h3><p style="margin:0">사진·도표·화면·문서를 <b>폭넓게</b></p></div>
+    <div class="box"><h3 class="g">문서 전용 VLM</h3><p style="margin:0"><b>읽는 순서·제목/본문·표 셀·수식·차트</b>에 학습·출력 집중</p></div>
+  </div>
+  <ul class="pts" style="margin-top:12px">
+    <li><b>PaddleOCR-VL</b> — 문서 파싱용 VLM 계열. 초기 0.9B는 NaViT 동적 해상도 비전 인코더 + ERNIE 언어 모델 → 텍스트·표·수식·차트를 <b>Markdown/구조화</b>로 복원. 실제론 <b>레이아웃 분석 + VLM 인식</b>을 함께</li>
+  </ul>
+  <div class="hl">🔑 "기존 OCR보다 무조건 우수한 하나의 모델"이 아님 — <b>좌표 대량 문자 인식</b>엔 전용 OCR이 더 단순·빠르고, <b>복잡한 표·수식 읽기 순서 보존</b>엔 문서 VLM이 유리. 그래서 <b>같은 페이지를 두 방식으로 돌려 차이를 직접</b> 봐야.</div>
+  <aside>도구 선택은 우열이 아니라 작업 성격에 달렸습니다. 좌표가 필요하면 OCR, 구조·순서가 중요하면 문서 VLM.</aside>
+</section>
+
+<!-- 9 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">말로 답한다 = 틀려도 말이 될 수 있다</h2>
+    <p style="margin-top:11px">환각 · 좌표 대조 · 재현성 ≠ 정확성</p>
+    <span class="who">생성형의 특성</span>
+  </div>
+  <aside>생성형 VLM은 앞 토큰과 입력을 바탕으로 다음 토큰 분포를 계산해 답을 이어 갑니다.</aside>
+</section>
+
+<!-- 10 환각/좌표/재현성 -->
+<section class="slide" data-part="PART 3">
+  <h2>🌀 환각 · 좌표 · <span class="g">재현성 ≠ 정확성</span></h2>
+  <ul class="pts">
+    <li><b>환각</b> — 잘 안 보이는 자리에서 멈추지 않고 <b>문맥상 그럴듯한 값을 채움</b> → 원문에 없는 내용이 자연스럽게 섞임(따로 확인)</li>
+    <li><b>좌표</b> — OCR은 검출 영역·인식 문자열에 묶여 <b>오류 위치를 되짚기 쉬움</b>. VLM도 상자 출력은 되지만 <b>필드마다 일관된 근거 좌표가 기본 보장은 아님</b> → 좌표 받았다고 믿지 말고 원문과 대조</li>
+    <li><b>재현성 ≠ 정확성</b> — <b>같은 오답을 두 번</b> 낼 수 있음. 반복 실행 비교는 <b>흔들리는 필드를 찾는 도구</b>일 뿐 정답 검증을 대신하지 않음</li>
+  </ul>
+  <div class="hl">🔑 "형식을 지켰다"와 "내용이 맞다"가 다르듯, "같은 답이 나온다"와 "맞는 답이다"도 다릅니다.</div>
+  <aside>재현성은 안정성이지 정확성이 아닙니다. 두 번 같아도 둘 다 틀릴 수 있습니다.</aside>
+</section>
+
+<!-- 11 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part">
+    <div class="pno">4</div>
+    <h2 style="margin:0">내부 정거장이 밖에서 안 보일 때</h2>
+    <p style="margin-top:11px">그래서 외부에 새 정거장을 만든다</p>
+    <span class="who">검증 절차</span>
+  </div>
+  <aside>전통 OCR은 중간 산출물을 꺼내 보기 쉽지만, VLM은 API 결과만으론 "못 읽음/표 오해/질문 오해"를 분리하기 어렵습니다.</aside>
+</section>
+
+<!-- 12 외부 정거장 -->
+<section class="slide" data-part="PART 4">
+  <h2>🛠️ 외부에 만드는 <span class="g">다섯 정거장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>원본 페이지와 해시</b>를 보존</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>요약·추정·보정을 금지</b>, 판독 불가는 <code>[UNCLEAR]</code>로 표시</span></div>
+    <div class="st"><span class="n">3</span><span class="t">페이지별 <b>원시 결과와 정규화 결과를 둘 다</b> 저장</span></div>
+    <div class="st"><span class="n">4</span><span class="t">사람이 미리 적은 <b>확인점과 대조</b></span></div>
+    <div class="st"><span class="n">5</span><span class="t"><b>실행일·모델·버전·프롬프트·데이터 전송 위치</b>를 기록</span></div>
+  </div>
+  <div class="hl">🔑 뒤 실습은 <b>모델 순위를 정하는 대회가 아니라</b>, 서로 다른 도구에 이 <b>외부 정거장을 붙여 보는</b> 과정입니다.</div>
+  <aside>VLM은 내부 단계(비전 인코더·연결 모듈)가 보이지 않으니, 검증을 밖에서 만들어 붙입니다.</aside>
+</section>
+
+<!-- 13 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 6문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>VLM</b> = 이미지 단서와 언어 요구를 <b>함께 해석</b>. 열린 질문도 다룸</span></div>
+    <div class="st"><span class="n">2</span><span class="t">답은 문장·Markdown·JSON으로 고정 가능 — 단 <b>형식 준수 ≠ 내용 정확</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t">구조: 픽셀 → <b>비전 인코더</b> → <b>연결 모듈</b>(projector/cross-attn/Q-Former) → 언어 모델</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>문서 전용 VLM</b>(PaddleOCR-VL)은 구조·읽기 순서에 강점 — OCR과 우열이 아니라 용도 차이</span></div>
+    <div class="st"><span class="n">5</span><span class="t">생성형은 <b>환각</b>·좌표 근거 불확실·<b>재현성 ≠ 정확성</b> → 원문 대조 필수</span></div>
+    <div class="st"><span class="n">6</span><span class="t">내부가 안 보이니 <b>외부 정거장 5단계</b>(원본 보존·[UNCLEAR]·원시+정규화·확인점·기록)를 붙인다</span></div>
+  </div>
+  <aside>VLM의 힘은 열린 질문 해석이고, 그 대가는 검증을 밖에서 설계해야 한다는 것입니다.</aside>
+</section>
+
+<!-- 14 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> <b>VLM</b>이 하는 일을 한 문장으로? "출력 형식의 자유"가 핵심이 아닌 이유는?</div>
+    <div class="q"><b>Q2.</b> 이미지를 언어 모델에 <b>연결하는 세 방식</b>과 그 공통점은?</div>
+    <div class="q"><b>Q3.</b> <b>문서 전용 VLM</b>은 무엇에 집중하나? OCR과 우열 관계인가?</div>
+    <div class="q"><b>Q4.</b> "말로 답한다 = 틀려도 말이 된다"는 무슨 뜻? <b>재현성과 정확성</b>은 어떻게 다른가?</div>
+    <div class="q"><b>Q5.</b> VLM에 <b>외부 정거장</b>이 필요한 이유와, 그 다섯 단계는?</div>
+  </div>
+  <aside>Q4가 이 강의에서 가장 실무적인 함정입니다.</aside>
+</section>
+
+<!-- 15 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 이미지 단서와 언어로 표현된 요구를 <b>함께 해석</b>하는 것. 형식은 JSON 등으로 고정할 수 있으니, 핵심은 형식 자유가 아니라 <b>시각+언어 공동 해석</b>이다.</div>
+    <div class="q a"><b>A2.</b> Projector·concat / Cross-attention / Q-Former 다리. 공통점 = <b>시각 특징과 언어 요구가 모델 내부에서 정보를 주고받는다.</b></div>
+    <div class="q a"><b>A3.</b> 읽는 순서·제목/본문·표 셀·수식·차트에 집중. <b>우열이 아니라 용도 차이</b> — 좌표 대량 인식은 OCR, 복잡한 표·순서는 문서 VLM.</div>
+    <div class="q a"><b>A4.</b> 생성형은 안 보이는 자리도 그럴듯하게 채워 <b>환각</b>이 섞임. <b>재현성</b>(같은 답이 나옴)은 안정성일 뿐, <b>정확성</b>(원문에 맞음)과 별개 — 같은 오답도 두 번 나온다.</div>
+    <div class="q a"><b>A5.</b> 내부 단계가 API 결과만으론 안 보여 오류 종류를 분리 못 하므로. ①원본+해시 ②[UNCLEAR]·보정 금지 ③원시+정규화 ④확인점 대조 ⑤실행 기록.</div>
+  </div>
+  <aside>A4가 VLM 도입에서 가장 자주 놓치는 지점입니다 — 그럴듯함과 맞음은 다릅니다.</aside>
+</section>
+
+<!-- 16 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>수고하셨습니다 🙌</h1>
+    <div class="big" style="margin-top:24px">VLM은 <span class="y">열린 질문</span>을 다루되<br>출력은 <span class="y">고정</span>할 수 있다<br><small>형식 준수 ≠ 내용 정확 · 재현성 ≠ 정확성</small></div>
+    <p class="sub" style="margin-top:22px">그래서 검증은 밖에서 설계한다</p>
+  </div>
+  <aside>다음 실습에서는 서로 다른 도구에 외부 정거장을 붙여, 같은 페이지의 출력 차이를 직접 확인합니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

@@ -69,6 +69,12 @@
   .lesson .meta{margin-left:auto;display:flex;gap:6px;align-items:center}
   a.lesson{transition:border-color .15s, transform .1s}
   a.lesson:hover{border-color:var(--gr);transform:translateX(2px)}
+  .lesson .open{display:flex;align-items:center;gap:12px;flex:1;min-width:0;text-decoration:none;color:inherit}
+  .lesson:hover{border-color:var(--gr)}
+  .lesson .open:hover .t{color:var(--gr)}
+  .lesson .dl{font-size:.7rem;color:var(--gr);border:1px solid var(--gr);border-radius:10px;
+    padding:2px 8px;text-decoration:none;font-weight:800;white-space:nowrap}
+  .lesson .dl:hover{background:var(--gr);color:#fff}
 
   .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
     padding:6px 13px;font-size:.75rem;cursor:pointer}
@@ -90,8 +96,9 @@
 
 <div class="prog">
   <span class="chip">대단원 <b>3</b></span>
-  <span class="chip">완료한 강의 <b>11</b></span>
-  <span class="chip">웹 슬라이드 <b>11</b>개</span>
+  <span class="chip">완료한 강의 <b>12</b></span>
+  <span class="chip">웹 슬라이드 <b>12</b>개</span>
+  <span class="chip">📊 PPT <b>12</b>개</span>
   <span class="chip">"LLM과 로컬 실행" <b>완결</b> 🎓</span>
 </div>
 
@@ -138,21 +145,22 @@
 
     <div class="row"><span class="n">3</span><span class="t">LLM과 로컬 실행 — 클라우드 API vs 로컬</span><span class="meta"><span class="done">✓ 완결 (8/8)</span></span></div>
     <div class="lessons">
-      <a class="lesson" href="local-llm/"><span class="ln">1</span><span class="t">내 노트북에서도 LLM이 돌아갈까</span><span class="meta"><span class="pj">PPT</span><span class="done">✓ 완료</span></span></a>
-      <a class="lesson" href="quantization/"><span class="ln">2</span><span class="t">거대한 모델을 노트북에 밀어 넣기 (양자화)</span><span class="meta"><span class="done">✓ 완료</span></span></a>
-      <a class="lesson" href="run-local/"><span class="ln">3</span><span class="t">이제 직접 내 컴퓨터에서 모델을 돌려봅니다 (Ollama 실습)</span><span class="meta"><span class="done">✓ 완료</span></span></a>
-      <a class="lesson" href="local-vs-api/"><span class="ln">4</span><span class="t">로컬과 API를 나란히 놓고 봅니다</span><span class="meta"><span class="done">✓ 완료</span></span></a>
-      <a class="lesson" href="data-axis/"><span class="ln">5</span><span class="t">데이터는 어디에 남는가 (판단 축 ①·데이터)</span><span class="meta"><span class="done">✓ 완료</span></span></a>
-      <a class="lesson" href="cost-axis/"><span class="ln">6</span><span class="t">비용은 어디서 발생하는가 (판단 축 ②·비용)</span><span class="meta"><span class="done">✓ 완료</span></span></a>
-      <a class="lesson" href="control-axis/"><span class="ln">7</span><span class="t">통제권은 누구에게 남는가 (판단 축 ③·주권)</span><span class="meta"><span class="done">✓ 완료</span></span></a>
-      <a class="lesson" href="decision-doc/"><span class="ln">8</span><span class="t">내 도메인의 실행 위치 결정문 (단원 종합)</span><span class="meta"><span class="done">✓ 완료</span></span></a>
+      <div class="lesson"><a class="open" href="local-llm/"><span class="ln">1</span><span class="t">내 노트북에서도 LLM이 돌아갈까</span></a><span class="meta"><a class="dl" href="LLM_로컬실행_학습정리.pptx">📊 PPT</a><span class="done">✓ 완료</span></span></div>
+      <div class="lesson"><a class="open" href="quantization/"><span class="ln">2</span><span class="t">거대한 모델을 노트북에 밀어 넣기 (양자화)</span></a><span class="meta"><a class="dl" href="quantization/quantization.pptx">📊 PPT</a><span class="done">✓ 완료</span></span></div>
+      <div class="lesson"><a class="open" href="run-local/"><span class="ln">3</span><span class="t">이제 직접 내 컴퓨터에서 모델을 돌려봅니다 (Ollama 실습)</span></a><span class="meta"><a class="dl" href="run-local/run-local.pptx">📊 PPT</a><span class="done">✓ 완료</span></span></div>
+      <div class="lesson"><a class="open" href="local-vs-api/"><span class="ln">4</span><span class="t">로컬과 API를 나란히 놓고 봅니다</span></a><span class="meta"><a class="dl" href="local-vs-api/local-vs-api.pptx">📊 PPT</a><span class="done">✓ 완료</span></span></div>
+      <div class="lesson"><a class="open" href="data-axis/"><span class="ln">5</span><span class="t">데이터는 어디에 남는가 (판단 축 ①·데이터)</span></a><span class="meta"><a class="dl" href="data-axis/data-axis.pptx">📊 PPT</a><span class="done">✓ 완료</span></span></div>
+      <div class="lesson"><a class="open" href="cost-axis/"><span class="ln">6</span><span class="t">비용은 어디서 발생하는가 (판단 축 ②·비용)</span></a><span class="meta"><a class="dl" href="cost-axis/cost-axis.pptx">📊 PPT</a><span class="done">✓ 완료</span></span></div>
+      <div class="lesson"><a class="open" href="control-axis/"><span class="ln">7</span><span class="t">통제권은 누구에게 남는가 (판단 축 ③·주권)</span></a><span class="meta"><a class="dl" href="control-axis/control-axis.pptx">📊 PPT</a><span class="done">✓ 완료</span></span></div>
+      <div class="lesson"><a class="open" href="decision-doc/"><span class="ln">8</span><span class="t">내 도메인의 실행 위치 결정문 (단원 종합)</span></a><span class="meta"><a class="dl" href="decision-doc/decision-doc.pptx">📊 PPT</a><span class="done">✓ 완료</span></span></div>
     </div>
 
     <div class="row"><span class="n">4</span><span class="t">AI는 문서와 사진에서 무엇을 꺼낼까</span><span class="meta"><span class="done">진행 중</span></span></div>
     <div class="lessons">
-      <a class="lesson" href="two-requests/"><span class="ln">1</span><span class="t">금요일 오후에 도착한 두 개의 요청</span><span class="meta"><span class="done">✓ 완료</span></span></a>
-      <a class="lesson" href="ocr-pipeline/"><span class="ln">2</span><span class="t">글자를 꺼내는 길, OCR 조립 라인</span><span class="meta"><span class="done">✓ 완료</span></span></a>
-      <a class="lesson" href="detect-segment/"><span class="ln">3</span><span class="t">찾아내기와 경계 긋기 (객체 탐지·이미지 분할)</span><span class="meta"><span class="done">✓ 완료</span></span></a>
+      <div class="lesson"><a class="open" href="two-requests/"><span class="ln">1</span><span class="t">금요일 오후에 도착한 두 개의 요청</span></a><span class="meta"><a class="dl" href="two-requests/two-requests.pptx">📊 PPT</a><span class="done">✓ 완료</span></span></div>
+      <div class="lesson"><a class="open" href="ocr-pipeline/"><span class="ln">2</span><span class="t">글자를 꺼내는 길, OCR 조립 라인</span></a><span class="meta"><a class="dl" href="ocr-pipeline/ocr-pipeline.pptx">📊 PPT</a><span class="done">✓ 완료</span></span></div>
+      <div class="lesson"><a class="open" href="detect-segment/"><span class="ln">3</span><span class="t">찾아내기와 경계 긋기 (객체 탐지·이미지 분할)</span></a><span class="meta"><a class="dl" href="detect-segment/detect-segment.pptx">📊 PPT</a><span class="done">✓ 완료</span></span></div>
+      <div class="lesson"><a class="open" href="vlm/"><span class="ln">4</span><span class="t">이미지와 언어를 함께 보는 모델 (VLM)</span></a><span class="meta"><a class="dl" href="vlm/vlm.pptx">📊 PPT</a><span class="done">✓ 완료</span></span></div>
     </div>
 
   </div>

@@ -32,17 +32,18 @@
 2. 트랜스포머 — AI는 어떻게 언어를 배웠나
 3. **LLM과 로컬 실행 — 클라우드 API vs 로컬** ✅ 완결 (8/8)
    - ✅ 3-①. 내 노트북에서도 LLM이 돌아갈까 — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/local-llm/) · 📊 [PPT](LLM_로컬실행_학습정리.pptx) · 📝 [요약](#-내-노트북에서도-llm이-돌아갈까)
-   - ✅ 3-②. 거대한 모델을 노트북에 밀어 넣기 (양자화) — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/quantization/)
-   - ✅ 3-③. 이제 직접 내 컴퓨터에서 모델을 돌려봅니다 (Ollama 실습) — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/run-local/)
-   - ✅ 3-④. 로컬과 API를 나란히 놓고 봅니다 — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/local-vs-api/)
-   - ✅ 3-⑤. 데이터는 어디에 남는가 (판단 축 ①·데이터) — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/data-axis/)
-   - ✅ 3-⑥. 비용은 어디서 발생하는가 (판단 축 ②·비용) — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/cost-axis/)
-   - ✅ 3-⑦. 통제권은 누구에게 남는가 (판단 축 ③·주권) — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/control-axis/)
-   - ✅ 3-⑧. 내 도메인의 실행 위치 결정문 (단원 종합) — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/decision-doc/)
+   - ✅ 3-②. 거대한 모델을 노트북에 밀어 넣기 (양자화) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/quantization/) · 📊 [PPT](quantization/quantization.pptx)
+   - ✅ 3-③. 이제 직접 내 컴퓨터에서 모델을 돌려봅니다 (Ollama 실습) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/run-local/) · 📊 [PPT](run-local/run-local.pptx)
+   - ✅ 3-④. 로컬과 API를 나란히 놓고 봅니다 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/local-vs-api/) · 📊 [PPT](local-vs-api/local-vs-api.pptx)
+   - ✅ 3-⑤. 데이터는 어디에 남는가 (판단 축 ①·데이터) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/data-axis/) · 📊 [PPT](data-axis/data-axis.pptx)
+   - ✅ 3-⑥. 비용은 어디서 발생하는가 (판단 축 ②·비용) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/cost-axis/) · 📊 [PPT](cost-axis/cost-axis.pptx)
+   - ✅ 3-⑦. 통제권은 누구에게 남는가 (판단 축 ③·주권) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/control-axis/) · 📊 [PPT](control-axis/control-axis.pptx)
+   - ✅ 3-⑧. 내 도메인의 실행 위치 결정문 (단원 종합) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/decision-doc/) · 📊 [PPT](decision-doc/decision-doc.pptx)
 4. **AI는 문서와 사진에서 무엇을 꺼낼까** ⬅️ 진행 중
-   - ✅ 4-①. 금요일 오후에 도착한 두 개의 요청 — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/two-requests/)
-   - ✅ 4-②. 글자를 꺼내는 길, OCR 조립 라인 — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/ocr-pipeline/)
-   - ✅ 4-③. 찾아내기와 경계 긋기 (객체 탐지·이미지 분할) — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/detect-segment/)
+   - ✅ 4-①. 금요일 오후에 도착한 두 개의 요청 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/two-requests/) · 📊 [PPT](two-requests/two-requests.pptx)
+   - ✅ 4-②. 글자를 꺼내는 길, OCR 조립 라인 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/ocr-pipeline/) · 📊 [PPT](ocr-pipeline/ocr-pipeline.pptx)
+   - ✅ 4-③. 찾아내기와 경계 긋기 (객체 탐지·이미지 분할) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/detect-segment/) · 📊 [PPT](detect-segment/detect-segment.pptx)
+   - ✅ 4-④. 이미지와 언어를 함께 보는 모델 (VLM) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/vlm/) · 📊 [PPT](vlm/vlm.pptx)
 
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
@@ -59,6 +60,9 @@
 > - 4-① https://inseoklee-ai.github.io/study-room/two-requests/
 > - 4-② https://inseoklee-ai.github.io/study-room/ocr-pipeline/
 > - 4-③ https://inseoklee-ai.github.io/study-room/detect-segment/
+> - 4-④ https://inseoklee-ai.github.io/study-room/vlm/
+>
+> 📊 **PPT**: 각 강의 폴더의 `<폴더명>.pptx` (예: `vlm/vlm.pptx`). GitHub 저장소나 라이브 사이트에서 내려받아 PowerPoint로 열 수 있습니다.
 >
 > ℹ️ AIFFEL_LMS의 중단원 ①·②는 강의 번호가 다시 1부터 시작하는 점을 반영해 나눈 것입니다. 실제 중단원 이름을 알려주시면 채워 넣겠습니다.
 
