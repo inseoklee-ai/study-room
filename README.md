@@ -48,6 +48,17 @@
    - ✅ 4-⑥. 같은 PDF를 네 가지 눈으로 읽기 (OCR 비교 실습) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/ocr-lab/) · 📊 [PPT](ocr-lab/ocr-lab.pptx)
    - ✅ 4-⑦. YOLO로 탐지·분할·포즈 결과 만들기 (사진 실습) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/yolo-lab/) · 📊 [PPT](yolo-lab/yolo-lab.pptx)
    - ✅ 4-⑧. 넘긴 것은 노동, 남은 것은 결정 (단원 정리) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/docimg-wrapup/) · 📊 [PPT](docimg-wrapup/docimg-wrapup.pptx)
+5. **[프로젝트] 이미지 생성 어플리케이션 만들기** ⬅️ 준비 중 (0/9)
+   - ⬜ 5-①. 같은 모델인데 결과가 갈립니다
+   - ⬜ 5-②. 노이즈에서 되돌린다는 발상
+   - ⬜ 5-③. 브라우저만으로 첫 장을 뽑습니다
+   - ⬜ 5-④. 프롬프트를 쓰는 법
+   - ⬜ 5-⑤. 코드로 불러 자동화에 끼웁니다
+   - ⬜ 5-⑥. 무엇으로 만들 것인가
+   - ⬜ 5-⑦. 동영상도 만들 수 있을까?
+   - ⬜ 5-⑧. [과제] 원하는 포즈로 만들기
+   - ⬜ 5-⑨. 만드는 일에는 만든 사람이 남습니다
+   - 📦 프로젝트 제출
 
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
