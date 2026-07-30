@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>넘긴 것은 노동, 남은 것은 결정 · 단원 4 정리</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:15px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:9px}
+  p{font-size:clamp(.94rem,1.5vw,1.08rem);color:var(--soft);margin-bottom:10px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.3em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:18px}
+  .part .who{margin-top:16px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:9px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.9rem,1.5vw,1.08rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px 18px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:12px 16px;margin-top:12px;font-size:clamp(.86rem,1.42vw,1.0rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:22px 24px;text-align:center;font-size:clamp(1rem,2vw,1.42rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .steps{display:grid;gap:7px}
+  .st{display:flex;gap:11px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:10px 14px;box-shadow:var(--sh)}
+  .st .n{flex:none;min-width:24px;height:24px;padding:0 6px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.76rem}
+  .st .t{font-size:clamp(.85rem,1.42vw,1.0rem)}
+
+  table{border-collapse:collapse;width:100%;font-size:clamp(.74rem,1.24vw,.88rem)}
+  th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--bg2);font-weight:750;color:var(--ink)}
+  td{color:var(--soft)}td b{color:var(--ink)}
+  tr:last-child td{border-bottom:none}
+  .tw{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:6px}
+
+  code{font-family:"SF Mono",Menlo,Consolas,monospace;background:var(--bg2);padding:2px 6px;border-radius:5px;font-size:.85em}
+
+  .links{columns:2;column-gap:22px;font-size:.82rem}
+  @media(max-width:680px){.links{columns:1}}
+  .links .grp{break-inside:avoid;margin-bottom:9px}
+  .links .grp h4{font-size:.78rem;color:var(--gr);font-weight:800;margin-bottom:3px}
+  .links .grp div{color:var(--soft);padding-left:10px;position:relative;line-height:1.5}
+  .links .grp div::before{content:"·";position:absolute;left:0;color:var(--gold)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 15px;font-size:clamp(.85rem,1.4vw,1.0rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 4 · AI는 문서와 사진에서 무엇을 꺼낼까 (8·정리)</span>
+    <h1 style="margin:18px 0">넘긴 것은 노동이고<br>남은 것은 결정입니다</h1>
+    <p class="sub">읽고 보는 노동은 위임 가능 · 믿기로 한 결정은 위임 불가</p>
+  </div>
+  <aside>오늘 우리는 도구 이름을 외우지 않고, 그 도구가 어디에서 왔고 어떤 기술을 이어받았는지부터 따라갔습니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘 되짚기</h2>
+  <ul class="pts">
+    <li>여섯 도구를 <b>답의 자료형·근거·실패·사람이 정할 것</b>으로 정리</li>
+    <li>"AI로 읽어 주세요"를 <b>질문으로 나누기</b> (필요 → 도구)</li>
+    <li>위임할 수 있는 노동과 <b>위임되지 않는 결정</b></li>
+    <li>다음 시간 — <b>찾아내기에서 만들어내기</b>로, 구조가 깨지는 자리</li>
+  </ul>
+  <div class="hl">🎯 한 줄: 중요한 것은 도구의 유명세가 아니라 <b>만든 주체·입력·출력 자료형·검증 방법·실패·사회적 영향이 서로 연결되어 있다는 사실</b>입니다.</div>
+  <aside>Tesseract·PaddleOCR·PaddleOCR-VL·범용 VLM·YOLO 계보를 각각의 출처와 함께 짚어 왔습니다.</aside>
+</section>
+
+<!-- 3 어디서 왔나 -->
+<section class="slide" data-part="표지">
+  <h2>🧬 도구는 <span class="g">어디서 왔나</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="g">문서 쪽</h3><p style="margin:0"><b>Tesseract</b> 특징→LSTM 로컬 엔진 · <b>PaddleOCR</b> 탐지·방향·인식 조립 도구상자 · <b>PaddleOCR-VL</b> 문서 구조 복원 VLM · <b>Claude·ChatGPT</b> 범용 멀티모달</p></div>
+    <div class="box"><h3 class="b">사진 쪽</h3><p style="margin:0">최초 <b>YOLO 공동 연구 + Darknet</b> → 갈라진 계보 → 실습의 <b>Ultralytics YOLO</b>는 서로 다른 주체의 공헌. 박스·마스크·관절점 출력 차이 + Redmon의 군사·사생활 문제 → 사용 카드</p></div>
+  </div>
+  <div class="big" style="margin-top:12px">유명세가 아니라 <span class="y">만든 주체·입력·출력 자료형·검증·실패·사회적 영향</span>이<br>서로 연결되어 있다</div>
+  <aside>도구를 이름이 아니라 계보와 책임으로 이해하면, 새 도구가 나와도 같은 방식으로 읽어낼 수 있습니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">핵심 정리 — 여섯 도구를 한 표로</h2>
+    <p style="margin-top:11px">자료형 · 근거 · 실패 · 사람이 정할 것</p>
+    <span class="who">치트시트</span>
+  </div>
+  <aside>각 도구의 출처를 밝힌 뒤, 실제 결과에서 어떤 답을 주는지·무엇과 대조하는지·실패 시 누가 결정하는지를 기록합니다.</aside>
+</section>
+
+<!-- 5 표1 문서 -->
+<section class="slide" data-part="PART 1">
+  <h2>📊 핵심 정리 <span class="g">(1/2 · 문서)</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th>도구</th><th>답 자료형</th><th>근거 되짚기</th><th>대표 실패</th><th>사람이 정할 것</th></tr></thead>
+    <tbody>
+      <tr><td><b>Tesseract·PaddleOCR</b></td><td>문자열·점수·좌표</td><td>원본 위 좌표·중간 결과</td><td>누락·오인식·잘못된 읽기 순서</td><td>인식 언어·가중치, 허용 오류, 재검수 조건</td></tr>
+      <tr><td><b>PaddleOCR-VL</b></td><td>Markdown·표·수식·구조</td><td>원문 페이지·원시 출력 대조</td><td>구조 누락·재배열·생성</td><td>파이프라인 버전, 추정 금지 규칙</td></tr>
+      <tr><td><b>Claude·ChatGPT</b></td><td>질문에 따른 문장·구조</td><td>원문 인용 위치·대화 기록</td><td>환각·비공개 전처리·서비스 변경</td><td>업로드 가능 자료, 모델·실행일</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">문서 쪽은 좌표·페이지·원시 출력으로 <b>근거를 되짚을 수 있는지</b>가 갈립니다.</div>
+  <aside>OCR은 좌표로, 문서 VLM은 원문 페이지 대조로, 범용 VLM은 인용 위치와 대화 기록으로 근거를 남깁니다.</aside>
+</section>
+
+<!-- 6 표2 사진 -->
+<section class="slide" data-part="PART 1">
+  <h2>📊 핵심 정리 <span class="g">(2/2 · 사진)</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th>도구</th><th>답 자료형</th><th>근거 되짚기</th><th>대표 실패</th><th>사람이 정할 것</th></tr></thead>
+    <tbody>
+      <tr><td><b>Detection</b></td><td>클래스·박스·점수</td><td>정답 박스·IoU·원본 시각화</td><td>미탐·오탐·위치 오차</td><td>임계값, 놓치면 안 되는 대상</td></tr>
+      <tr><td><b>Instance seg</b></td><td>개체별 마스크</td><td>정답 마스크·IoU·Dice·경계 지표</td><td>경계 누락·개체 합침</td><td>경계 기준, 면적 사용 조건</td></tr>
+      <tr><td><b>Pose</b></td><td>사람별 keypoint</td><td>기준 관절점·원본 시각화</td><td>가림·관절 혼동·비인간 무출력</td><td>자세 정의, 사람 검토 조건</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">🔑 오늘은 <b>추론만 실행</b>했습니다. 학습은 <b>반복되는 도메인 실패 + 권리가 확인된 라벨 데이터</b>가 있을 때 검토합니다.</div>
+  <aside>박스는 IoU, 마스크는 IoU·Dice·경계 지표, 포즈는 기준 관절점으로 각각 다르게 채점합니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">"AI로 읽어 주세요"를 질문으로 나눈다</h2>
+    <p style="margin-top:11px">한 덩어리로 넘기지 않기</p>
+    <span class="who">필요 → 도구</span>
+  </div>
+  <aside>시작할 때 적은 세 칸을 다시 펴세요. 지금 답을 옆에 한 번 더 쓰고, 바뀐 답에는 '무엇을 알고 나서 바뀌었는지'를 덧붙입니다.</aside>
+</section>
+
+<!-- 8 질문 나누기 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔀 필요에 따라 <span class="g">도구를 고른다</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th>이 필요라면</th><th>이 도구</th></tr></thead>
+    <tbody>
+      <tr><td>글자와 <b>좌표</b>가 필요</td><td>OCR 엔진 (Tesseract·PaddleOCR)</td></tr>
+      <tr><td><b>표·수식의 구조</b>가 중요</td><td>문서 파서 · 문서 VLM (PaddleOCR-VL)</td></tr>
+      <tr><td><b>열린 질문</b>을 빠르게 시험</td><td>범용 VLM (Claude·ChatGPT)</td></tr>
+      <tr><td><b>위치·경계·자세</b>가 필요</td><td>탐지 · 분할 · 포즈 가중치</td></tr>
+    </tbody>
+  </table></div>
+  <div class="hl">🔑 이제 "AI로 읽어 주세요"라고 <b>한 덩어리로 넘기기 전에 질문을 나눌 수 있습니다.</b> 처음 떠올린 문서와 사진을 다시 보며, 시작 때의 세 칸 답과 지금 답을 비교하세요.</div>
+  <aside>바뀐 답 하나에 '무엇을 알고 나서 바뀌었는지'를 덧붙이면, 학습이 판단으로 굳습니다.</aside>
+</section>
+
+<!-- 9 위임 vs 결정 -->
+<section class="slide" data-part="PART 2">
+  <h2>🤝 위임할 수 있는 것 vs <span class="g">사람이 정할 것</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="b">코딩 에이전트에 위임</h3><p style="margin:0">설치·연결 · 반복 실행 · 파일 저장 · UI 조립</p></div>
+    <div class="box"><h3>사람이 결정</h3><p style="margin:0">같은 입력을 썼는가 · <b>모델을 몰래 바꾸지 않았는가</b> · 결과가 <b>원문 어디</b>에서 왔는가 · <b>틀리면 누가</b> 확인하는가</p></div>
+  </div>
+  <div class="big" style="margin-top:14px">읽고 보는 <span class="y">노동</span>은 위임할 수 있지만<br>그 결과를 믿기로 한 <span class="y">결정</span>은 위임되지 않는다</div>
+  <div class="hl">🔑 이번 실습에서 남긴 <b>원본 해시·모델·버전·원시 결과·<code>[UNCLEAR]</code>·실패 기록</b>이 그 결정을 감당하는 <b>최소한의 근거</b>입니다.</div>
+  <aside>그래서 오늘의 결론은 도구 선택으로 끝나지 않습니다. 결정을 감당할 근거를 남기는 데까지 갑니다.</aside>
+</section>
+
+<!-- 10 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">다음 시간 — 구조가 깨지는 자리</h2>
+    <p style="margin-top:11px">찾아내기에서 만들어내기로</p>
+    <span class="who">원본 정답이 없을 때</span>
+  </div>
+  <aside>오늘 다룬 능력들은 성격이 하나로 묶입니다 — 전부 파일 안에 이미 들어 있는 것을 찾아내는 일이었습니다.</aside>
+</section>
+
+<!-- 11 찾기 vs 만들기 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔎→🎨 찾아내기 vs <span class="g">만들어내기</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="g">오늘 (찾아내기)</h3><p style="margin:0">글자를 읽고, 상자를 그려 짚고, 픽셀을 칠해 경계를 선언 — 모두 <b>원본 어딘가를 가리킴</b>. 원본에 대조 근거가 남고, 합의한 기준으로 <b>정답지를 만들어 평가</b> 가능</p></div>
+    <div class="box"><h3 class="r">다음 (만들어내기)</h3><p style="margin:0"><b>원본에 없던 픽셀을 만들어 내는</b> 쪽. 대조할 <b>원본 정답이 없으면</b> 맞다/틀리다를 따지는 방식 자체가 달라지고, 던져야 할 질문도 바뀜</p></div>
+  </div>
+  <div class="hl">✍️ 미리 한 줄 — <b>오늘 손에 익힌 검수 습관 중 무엇이 그대로 쓰이고, 무엇이 통하지 않을지</b>를 적어 두고 오면 다음 시간이 훨씬 빨리 갑니다.</div>
+  <aside>원본 대조가 사라지는 순간, 오늘의 IoU·좌표·[UNCLEAR] 습관 중 일부는 그대로, 일부는 새 방식이 필요해집니다.</aside>
+</section>
+
+<!-- 12 출처 -->
+<section class="slide" data-part="PART 3">
+  <h2>📚 출처와 더 읽을거리 <small style="color:var(--soft)">(표시 버전·실행일 함께 기록)</small></h2>
+  <div class="links">
+    <div class="grp"><h4>OCR 계보·오픈소스</h4><div>Tesseract 저장소·역사</div><div>PaddleOCR · PP-OCR 개요 · PP-OCRv5 한국어</div><div>PaddleOCR-VL 기술 보고서·문서</div></div>
+    <div class="grp"><h4>YOLO 연구 계보·책임</h4><div>최초 YOLO(Redmon 등)·Darknet</div><div>YOLOv2·v3·v4 · Ultralytics(Glenn Jocher)</div><div>Redmon 2018 TEDx · 2020 연구 중단 발언</div></div>
+    <div class="grp"><h4>탐지·분할·포즈 도구</h4><div>Ultralytics 구조·predict·seg·pose·라이선스</div><div>Segment Anything 논문 · SAM 3 저장소</div></div>
+    <div class="grp"><h4>범용 멀티모달·비교</h4><div>OpenAI PDF 입력 · Claude PDF</div><div>Gemini 박스·분할 출력 · Gradio 소개</div></div>
+  </div>
+  <div class="hl">외부 PDF는 원문 링크에서 내려받아 사용하고 저장소에 재배포하지 않음. 제품·모델 이름과 지원 범위는 바뀌므로 <b>실제 실행 시 표시 버전과 실행일을 함께 기록</b>.</div>
+  <aside>공식 문서의 목차 구조를 눈에 익혀두면 새 서비스에서도 같은 자리에서 같은 정보를 찾게 됩니다.</aside>
+</section>
+
+<!-- 13 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 6문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">도구의 유명세가 아니라 <b>주체·입력·자료형·검증·실패·사회적 영향의 연결</b>을 본다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">여섯 도구는 <b>답의 자료형·근거·실패·사람이 정할 것</b>으로 정리된다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">"AI로 읽어 주세요"를 <b>필요별 질문으로 나눈다</b>(좌표/구조/열린 질문/위치·경계·자세)</span></div>
+    <div class="st"><span class="n">4</span><span class="t">설치·연결·반복·저장·UI는 위임 — <b>입력·모델 교체·근거·검토는 사람이</b></span></div>
+    <div class="st"><span class="n">5</span><span class="t"><b>노동은 위임 가능, 결정은 위임 불가</b> — 최소 근거 = 해시·모델·버전·원시·[UNCLEAR]·실패 기록</span></div>
+    <div class="st"><span class="n">6</span><span class="t">오늘은 <b>찾아내기</b>(원본을 가리킴) — 다음은 <b>만들어내기</b>(원본 정답 없음)</span></div>
+  </div>
+  <aside>이 단원의 산출물은 도구 선택이 아니라, 그 선택을 감당할 근거를 남기는 습관입니다.</aside>
+</section>
+
+<!-- 14 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 오늘 배운 것에서 "중요한 것"은 도구의 유명세가 아니라 <b>무엇들의 연결</b>인가?</div>
+    <div class="q"><b>Q2.</b> "AI로 읽어 주세요"를 어떤 <b>네 갈래 질문</b>으로 나누나? (필요 → 도구)</div>
+    <div class="q"><b>Q3.</b> 코딩 에이전트에 <b>위임할 수 있는 것</b>과 <b>사람이 정해야 하는 것</b>은?</div>
+    <div class="q"><b>Q4.</b> 오늘의 결론 한 문장은? 그 <b>결정을 감당하는 최소 근거</b>는 무엇인가?</div>
+    <div class="q"><b>Q5.</b> 오늘 다룬 능력의 <b>공통 성격</b>은? 다음 시간에 <b>깨지는 구조</b>는?</div>
+  </div>
+  <aside>Q4·Q5가 이 단원 전체를 한 문장으로 요약합니다.</aside>
+</section>
+
+<!-- 15 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> <b>만든 주체·입력·출력 자료형·검증 방법·실패·사회적 영향</b>이 서로 연결되어 있다는 사실.</div>
+    <div class="q a"><b>A2.</b> 글자·좌표 → OCR / 표·수식 구조 → 문서 파서·문서 VLM / 열린 질문 → 범용 VLM / 위치·경계·자세 → 탐지·분할·포즈.</div>
+    <div class="q a"><b>A3.</b> 위임: 설치·연결·반복 실행·파일 저장·UI 조립. 사람: <b>같은 입력인지·모델 몰래 안 바꿨는지·결과가 원문 어디서·틀리면 누가 확인</b>.</div>
+    <div class="q a"><b>A4.</b> <b>"읽고 보는 노동은 위임할 수 있지만, 믿기로 한 결정은 위임되지 않는다."</b> 최소 근거 = 원본 해시·모델·버전·원시 결과·<code>[UNCLEAR]</code>·실패 기록.</div>
+    <div class="q a"><b>A5.</b> 모두 <b>파일 안에 이미 있는 것을 찾아내는 일</b>(원본을 가리킴). 다음은 <b>원본에 없던 픽셀을 만들어 내는 일</b> → 대조할 원본 정답이 없어 채점 방식 자체가 달라짐.</div>
+  </div>
+  <aside>A5의 "원본 정답이 없다"가 다음 단원(생성)의 출발점입니다.</aside>
+</section>
+
+<!-- 16 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <span class="kick">단원 4 · 완결 🎓</span>
+    <h1 style="margin:14px 0">수고하셨습니다 🙌</h1>
+    <div class="big" style="margin-top:18px">읽고 보는 <span class="y">노동</span>은 넘길 수 있지만<br>믿기로 한 <span class="y">결정</span>은 남는다<br><small>그 결정을 감당하는 건 남긴 근거</small></div>
+    <p class="sub" style="margin-top:20px">다음 — 원본에 없던 것을 만들어 내는 쪽으로</p>
+  </div>
+  <aside>단원 4 "AI는 문서와 사진에서 무엇을 꺼낼까"를 모두 마쳤습니다. 다음은 생성(만들어내기)의 세계입니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

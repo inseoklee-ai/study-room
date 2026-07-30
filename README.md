@@ -39,7 +39,7 @@
    - ✅ 3-⑥. 비용은 어디서 발생하는가 (판단 축 ②·비용) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/cost-axis/) · 📊 [PPT](cost-axis/cost-axis.pptx)
    - ✅ 3-⑦. 통제권은 누구에게 남는가 (판단 축 ③·주권) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/control-axis/) · 📊 [PPT](control-axis/control-axis.pptx)
    - ✅ 3-⑧. 내 도메인의 실행 위치 결정문 (단원 종합) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/decision-doc/) · 📊 [PPT](decision-doc/decision-doc.pptx)
-4. **AI는 문서와 사진에서 무엇을 꺼낼까** ⬅️ 진행 중
+4. **AI는 문서와 사진에서 무엇을 꺼낼까** ✅ 완결 (8/8)
    - ✅ 4-①. 금요일 오후에 도착한 두 개의 요청 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/two-requests/) · 📊 [PPT](two-requests/two-requests.pptx)
    - ✅ 4-②. 글자를 꺼내는 길, OCR 조립 라인 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/ocr-pipeline/) · 📊 [PPT](ocr-pipeline/ocr-pipeline.pptx)
    - ✅ 4-③. 찾아내기와 경계 긋기 (객체 탐지·이미지 분할) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/detect-segment/) · 📊 [PPT](detect-segment/detect-segment.pptx)
@@ -47,6 +47,7 @@
    - ✅ 4-⑤. 도구를 외우지 말고 AI로 선택하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/ai-tool-choice/) · 📊 [PPT](ai-tool-choice/ai-tool-choice.pptx)
    - ✅ 4-⑥. 같은 PDF를 네 가지 눈으로 읽기 (OCR 비교 실습) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/ocr-lab/) · 📊 [PPT](ocr-lab/ocr-lab.pptx)
    - ✅ 4-⑦. YOLO로 탐지·분할·포즈 결과 만들기 (사진 실습) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/yolo-lab/) · 📊 [PPT](yolo-lab/yolo-lab.pptx)
+   - ✅ 4-⑧. 넘긴 것은 노동, 남은 것은 결정 (단원 정리) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/docimg-wrapup/) · 📊 [PPT](docimg-wrapup/docimg-wrapup.pptx)
 
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
@@ -67,6 +68,7 @@
 > - 4-⑤ https://inseoklee-ai.github.io/study-room/ai-tool-choice/
 > - 4-⑥ https://inseoklee-ai.github.io/study-room/ocr-lab/
 > - 4-⑦ https://inseoklee-ai.github.io/study-room/yolo-lab/
+> - 4-⑧ https://inseoklee-ai.github.io/study-room/docimg-wrapup/
 >
 > 📊 **PPT**: 각 강의 폴더의 `<폴더명>.pptx` (예: `vlm/vlm.pptx`). GitHub 저장소나 라이브 사이트에서 내려받아 PowerPoint로 열 수 있습니다.
 >
