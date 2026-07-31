@@ -154,12 +154,11 @@ function parsePipes(el){
     steps: p.querySelectorAll(".stp").map(s=>richRuns(s,INK))
   }));
 }
-function parseBlocks(sec){
-  const blocks=[];
-  for(const ch of sec.childNodes){
+function collectBlocks(node, blocks){
+  for(const ch of node.childNodes){
     if(ch.nodeType!==1) continue;
     const tag=ch.tagName, cl=ch.classList||{contains:()=>false};
-    if(tag==="H1"||tag==="H2"||tag==="ASIDE"||tag==="SCRIPT"||tag==="STYLE") continue;
+    if(tag==="H1"||tag==="H2"||tag==="H3"||tag==="ASIDE"||tag==="SCRIPT"||tag==="STYLE") continue;
     if(tag==="TABLE"){ blocks.push({type:"table",rows:parseTable(ch)}); continue; }
     if(tag==="UL"&&cl.contains("pts")){ blocks.push({type:"pts",items:ch.querySelectorAll("li").map(li=>richRuns(li,SOFT))}); continue; }
     if(cl.contains("steps")){ blocks.push({type:"steps",items:ch.querySelectorAll(".st").map(st=>({n:clean((st.querySelector(".n")||{text:""}).text), runs:richRuns(st.querySelector(".t")||st,INK)}))}); continue; }
@@ -172,12 +171,18 @@ function parseBlocks(sec){
     if(cl.contains("lgd")){ blocks.push({type:"legend",text:clean(ch.text)}); continue; }
     if(cl.contains("grid2")||cl.contains("grid3")){ blocks.push({type:"grid",boxes:ch.querySelectorAll(".box").map(parseBox)}); continue; }
     if(cl.contains("box")){ blocks.push({type:"box",box:parseBox(ch)}); continue; }
+    if(tag==="PRE"){ blocks.push({type:"code",text:decode(ch.text).replace(/[ \t]+$/gm,"").replace(/\s+$/,"")}); continue; }
     if(tag==="P"){ blocks.push({type:"p",runs:richRuns(ch,SOFT)}); continue; }
     if(anyClass(ch,DIAG)){ blocks.push({type:"diagram",text:clean(ch.text).slice(0,170)}); continue; }
-    if(tag==="DIV"){ const t=clean(ch.text); if(t) blocks.push({type:"p",runs:[{text:t,color:SOFT}]}); }
+    if(tag==="DIV"||tag==="SECTION"){
+      // 알 수 없는 래퍼: 요소 자식이 있으면 재귀(내부의 표·리스트·박스를 살림), 없으면 텍스트 문단
+      const hasElemChild=ch.childNodes.some(n=>n.nodeType===1 && n.tagName!=="BR");
+      if(hasElemChild) collectBlocks(ch, blocks);
+      else { const t=clean(ch.text); if(t) blocks.push({type:"p",runs:richRuns(ch,SOFT)}); }
+    }
   }
-  return blocks;
 }
+function parseBlocks(sec){ const blocks=[]; collectBlocks(sec,blocks); return blocks; }
 
 // ---- measure ----
 const CW=12.13, CX=0.6, TOP=1.5, BOTTOM=7.12, GAP=0.16;
@@ -197,6 +202,7 @@ function measure(b){
     case "box": { const bx=b.box; return (bx.h3?0.36:0)+bx.paras.reduce((a,p)=>a+textH(runText(p),CW-0.7,12.5),0)+0.34; }
     case "grid": { const hs=b.boxes.map(bx=>(bx.h3?0.36:0)+bx.paras.reduce((a,p)=>a+textH(runText(p),(CW-0.4)/2-0.5,12),0)+0.34); return Math.max(0.7,...hs); }
     case "table": return b.rows.reduce((a,r)=>{ const mc=Math.max(...r.map(c=>c.text.length)); const colW=(CW/r.length); return a+Math.max(0.42,textH("x".repeat(mc),colW-0.2,11)+0.16); },0);
+    case "code": { const lines=(b.text.match(/\n/g)||[]).length+1; return Math.max(0.5,lines*0.245+0.24); }
     case "diagram": return 1.1;
     default: return 0.5;
   }
@@ -303,6 +309,11 @@ function renderBlock(pres,s,b,x,y,w,h){
     case "diagram":
       card(pres,s,x,y,w,h,BG2,LINE);
       s.addText("[그림] "+b.text,{x:x+0.3,y,w:w-0.6,h,align:"center",valign:"middle",fontFace:FONT,fontSize:12,italic:true,color:SOFT,fit:"shrink"});
+      break;
+    case "code":
+      s.addShape(pres.ShapeType.roundRect,{x,y,w,h,fill:{color:BG2},line:{color:LINE,width:1},rectRadius:0.05});
+      leftbar(pres,s,x,y,h,GR,0.06);
+      s.addText(b.text,{x:x+0.24,y:y+0.1,w:w-0.42,h:h-0.2,align:"left",valign:"top",fontFace:MONO,fontSize:11,color:INK,fit:"shrink",lineSpacingMultiple:1.02});
       break;
   }
 }
