@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>여러 종류의 입력을 한 모델에 넣는다는 것 · 멀티모달 도입</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  .paths{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  @media(max-width:780px){.paths{grid-template-columns:1fr}}
+  .pipe{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px;box-shadow:var(--sh)}
+  .pipe .ph{font-size:.82rem;font-weight:800;margin-bottom:10px;text-align:center}
+  .pipe.no{border-color:var(--red)} .pipe.no .ph{color:var(--red)}
+  .pipe.yes{border-color:var(--gr)} .pipe.yes .ph{color:var(--gr)}
+  .pipe .fl{display:flex;flex-direction:column;gap:5px;align-items:stretch}
+  .pipe .stp{background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:8px 11px;font-size:.8rem;text-align:center;color:var(--ink)}
+  .pipe .dn{text-align:center;color:var(--gr);font-weight:800;font-size:.85rem;line-height:.7}
+  .pipe.no .dn{color:var(--red)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 6 · 멀티모달 (1)</span>
+    <h1 style="margin:18px 0">여러 종류의 입력을<br>한 모델에 넣는다는 것</h1>
+    <p class="sub">글·그림·소리를 같은 좌표계로 모아, 하나의 업무 판단으로 묶는다</p>
+  </div>
+  <aside>지금까지 이미지를 여러 방향으로 다뤄 봤지만, 실제 업무는 글·그림·소리가 한꺼번에 옵니다. 오늘은 여러 모달리티를 한 모델에 넣는다는 게 어떤 의미인지, 그리고 그것이 기능이 아니라 판단의 문제인 이유를 봅니다.</aside>
+</section>
+
+<!-- 2 오늘의 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>PART 1</small><b>왜 멀티모달인가</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>PART 2</small><b class="g">멀티모달이란</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>PART 3</small><b>판단으로 묶기</b></div>
+  </div>
+  <ul class="pts">
+    <li>지금까지의 이미지 도구들이 실무에선 <b>한꺼번에</b> 필요하다</li>
+    <li><b>멀티모달</b>은 "이미지도 넣는 챗봇"이 아니라 여러 증거를 한 맥락에서 다루는 흐름</li>
+    <li>핵심 질문은 "이미지를 받나?"가 아니라 <b>"핵심 증거가 어느 모달리티에 있나?"</b></li>
+    <li>마지막에 <b>내 업무 3개</b>로 필요한 모달리티를 예측해 본다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 멀티모달은 <b>기능 목록이 아니라, 판단을 묶는 사용법</b>이다.</div>
+  <aside>세 파트를 지나 마지막엔 내 업무로 "어떤 증거가 어느 형태로 존재하나"를 직접 예측해 봅니다.</aside>
+</section>
+
+<!-- 3 30초 복습 -->
+<section class="slide" data-part="표지">
+  <h2>⏪ 30초 복습 — 이미지를 다룬 <span class="g">네 방향</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px"><small>OCR</small><b>글자를 꺼내기</b></div>
+    <div class="cell" style="min-width:150px"><small>탐지·분할</small><b>무엇이 어디 있나</b></div>
+    <div class="cell" style="min-width:150px"><small>VLM</small><b>그림에 말로 묻기</b></div>
+    <div class="cell" style="min-width:150px"><small>생성</small><b>없던 그림 만들기</b></div>
+  </div>
+  <div class="hl">그런데 실제 업무 장면은 이렇게 <b>한 가지씩 깔끔하게 나뉘지 않습니다.</b></div>
+  <aside>스캔 문서에서 글자를 꺼내고, 사진에서 위치를 짚고, 그림에 말로 묻고, 없던 그림을 만들었습니다. 각각은 한 가지 일이었지만 실무는 그렇게 나뉘지 않습니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">실무는 한 가지씩 나뉘지 않는다</h2>
+    <p style="margin-top:11px">한 장면에 여러 형식의 증거가 함께 온다</p>
+    <span class="who">사진 · 글자 · 음성 · 영상</span>
+  </div>
+  <aside>보험, 의료, 교육 — 어느 현장이든 판단에 필요한 증거는 한 가지 형식으로 오지 않습니다. 여기에서 오늘의 긴장이 시작됩니다.</aside>
+</section>
+
+<!-- 5 세 현장 -->
+<section class="slide" data-part="PART 1">
+  <h2>🏢 한 장면에 <span class="g">여러 모달리티</span>가 함께 온다</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>보험 심사자</b> — 사진 속 <b>파손 부위</b> · 수리 견적서의 <b>글자</b> · 상담 녹취의 <b>설명</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>의료 기록자</b> — 영상 속 <b>움직임</b> · 차트의 <b>수치</b> · 환자의 <b>말투</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>교육자</b> — 학생의 <b>손글씨 풀이</b> · 설명 <b>음성</b> · <b>화면 녹화</b></span></div>
+  </div>
+  <div class="hl">공통점 — 판단에 필요한 <b>증거가 서로 다른 형식</b>으로 흩어져 있다.</div>
+  <aside>세 현장 모두 "글 하나"로는 판단이 서지 않습니다. 사진·소리·영상에 결정적 단서가 들어 있습니다.</aside>
+</section>
+
+<!-- 6 오늘의 긴장 -->
+<section class="slide" data-part="PART 1">
+  <h2>⚡ 오늘의 <span class="g">긴장</span></h2>
+  <div class="big">전문 모델을 <span class="y">여러 개 붙이면</span> 충분한가?<br>아니면 <span class="y">하나의 모델</span>이 보고·듣고·읽는 방식이 필요한가?</div>
+  <div class="hl">이 질문에 답하려면, 먼저 <b>"멀티모달"이 정확히 무엇인지</b> 봐야 합니다.</div>
+  <aside>전문 모델을 조합하는 길과 하나의 통합 모델을 쓰는 길 — 이 둘 사이의 선택이 이 강의 전체를 관통하는 긴장입니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">멀티모달이란 무엇인가</h2>
+    <p style="margin-top:11px">기능이 아니라, 여러 증거를 한 맥락에서 다루는 흐름</p>
+    <span class="who">텍스트 · 이미지 · 음성 · 영상 · 센서</span>
+  </div>
+  <aside>2026년의 멀티모달은 "이미지도 넣을 수 있는 챗봇"을 훨씬 넘어섭니다. 여러 모달리티를 하나의 작업 맥락 안에서 실시간으로 다루려는 흐름입니다.</aside>
+</section>
+
+<!-- 8 정의 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧩 "이미지도 넣는 챗봇"이 <span class="r">아니다</span></h2>
+  <ul class="pts">
+    <li>2026 멀티모달 = 텍스트·이미지·음성·영상·(때론 <b>센서 데이터</b>)를 <b>하나의 작업 맥락</b>에서 다루는 흐름</li>
+    <li>2024년 이후 주요 AI 기관들이 <b>네이티브 멀티모달</b> 구조를 차례로 공개</li>
+    <li>텍스트·이미지·오디오를 <b>한 모델에서 실시간</b>으로 다룬다</li>
+  </ul>
+  <div class="hl">"모달리티가 하나 늘었다"가 아니라, <b>일하는 방식</b>이 바뀌는 이야기입니다.</div>
+  <aside>단순히 입력 슬롯이 하나 늘어난 게 아닙니다. 여러 증거를 같은 맥락에서 함께 다루는 방향으로 설계가 이동했습니다.</aside>
+</section>
+
+<!-- 9 전통 vs 네이티브 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔀 <span class="r">줄 세우기</span> vs <span class="g">한 모델</span></h2>
+  <div class="paths">
+    <div class="pipe no">
+      <div class="ph">❌ 전통 구현 — 모델 셋을 줄 세움</div>
+      <div class="fl">
+        <div class="stp">말 → <b>글자로</b> 바꾸기 (STT)</div><div class="dn">↓</div>
+        <div class="stp">글자를 <b>읽고 답</b> 짓기 (LLM)</div><div class="dn">↓</div>
+        <div class="stp">답을 다시 <b>말소리로</b> (TTS)</div>
+      </div>
+    </div>
+    <div class="pipe yes">
+      <div class="ph">✅ 네이티브 — 한 모델 안에서</div>
+      <div class="fl">
+        <div class="stp">텍스트 · 이미지 · 음성 입력</div><div class="dn">↓</div>
+        <div class="stp">한 모델이 <b>함께 처리</b></div><div class="dn">↓</div>
+        <div class="stp">필요한 형식으로 출력<br>(중간 <b>텍스트 단계 의존↓</b>)</div>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:6px">전통 구현은 셋을 줄 세워 연결했고, 최신 구조는 <b>음성 입출력을 한 모델 안에서 네이티브로</b> 처리합니다.</p>
+  <aside>줄 세우기 방식은 각 단계가 명확하지만, 중간 텍스트로 옮기는 과정에서 단서가 샙니다. 네이티브는 원본을 한 모델이 함께 다룹니다.</aside>
+</section>
+
+<!-- 10 단서 종류가 달라졌다 -->
+<section class="slide" data-part="PART 2">
+  <h2>🎯 바뀐 건 <span class="g">도구 수</span>가 아니다</h2>
+  <div class="big">"도구가 하나 줄었다"가 아니라<br><span class="y">AI가 놓치던 단서의 종류</span>가 달라졌다</div>
+  <ul class="pts">
+    <li>중간 텍스트로 옮길 때 <b>억양·침묵·말 끊김</b> 같은 단서가 사라졌었다</li>
+    <li>한 모델이 <b>원본을 함께</b> 다루면 그 단서를 <b>살릴 수 있다</b></li>
+  </ul>
+  <aside>핵심은 파이프라인이 짧아진 게 아니라, 예전엔 버려지던 종류의 단서(목소리의 떨림, 화면의 미세한 변화)를 이제 판단에 쓸 수 있게 됐다는 것입니다.</aside>
+</section>
+
+<!-- 11 같은 좌표계 다이어그램 -->
+<section class="slide" data-part="PART 2">
+  <h2>🗺️ 서로 다른 형식을 <span class="g">같은 좌표계</span>로</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:170px;border-color:var(--bl)"><small>서로 다른 형식</small><b>글 · 그림 · 소리</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:170px;border-color:var(--gr)"><small>같은 좌표계</small><b class="g">숫자 배열로 통일</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:170px;border-color:var(--gold)"><small>하나의 모델</small><b>함께 놓고 판단</b></div>
+  </div>
+  <div class="hl">여러 입력을 <b>같은 형식(숫자 배열)</b>으로 바꾸면, 한 모델이 함께 다룰 수 있습니다.</div>
+  <aside>글·그림·소리는 원래 형식이 다르지만, 각각을 숫자 배열로 바꾸면 같은 좌표계에 올라옵니다. 그때 한 모델이 함께 놓고 판단할 수 있습니다. (다음 소단원에서 이 "같은 좌표계"를 자세히 봅니다.)</aside>
+</section>
+
+<!-- 12 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">기능이 아니라 판단으로 묶기</h2>
+    <p style="margin-top:11px">무엇을 넣느냐가 아니라, 무엇을 판단하느냐</p>
+    <span class="who">증거는 어느 형태로 존재하는가</span>
+  </div>
+  <aside>이 강의의 실무적 핵심입니다. "이 모델이 이미지를 받나요?"가 아니라, "이 업무의 핵심 증거는 어느 모달리티에 있나요?"가 더 쓸모 있는 질문입니다.</aside>
+</section>
+
+<!-- 13 먼저 예측 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔮 먼저 <span class="g">예측해</span> 보세요</h2>
+  <p style="margin-bottom:8px">아래 3업무에서 "텍스트만 줘도 충분한 업무"와 "이미지·음성까지 필요한 업무"를 나눠, 먼저 자기 기준을 적어 보세요.</p>
+  <table class="t">
+    <tr><th>업무</th><th>텍스트만 충분할까?</th><th>필요하다면 어떤 모달리티?</th><th>이유</th></tr>
+    <tr><td>고객 상담 요약</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>공장 설비 이상 진단</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>학생 발표 피드백</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+  </table>
+  <div class="hl">답은 잠시 숨겨두고, <b>먼저 자기 기준</b>을 적는 게 중요합니다. 다음 장에서 예시 사고와 맞춰 봅니다.</div>
+  <aside>정답을 보기 전에 스스로 기준을 세워 보는 게 학습에 훨씬 효과적입니다. 세 업무 각각 어떤 증거가 결정적일지 상상해 보세요.</aside>
+</section>
+
+<!-- 14 예시 사고 -->
+<section class="slide" data-part="PART 3">
+  <h2>💡 예시 사고</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>고객 상담 요약</b> — 전사만으로 시작 가능하나, <b>감정·침묵·말 끊김</b>이 품질 지표라면 <b class="g">음성 단서</b>가 필요</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>공장 설비 이상 진단</b> — 작업자 메모보다 <b>설비 소리·계기판 이미지·경고등 영상</b>이 더 중요한 증거일 수 있음</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>학생 발표 피드백</b> — 발표문은 논리 구조만; <b>시선 처리·속도·말의 주저함</b>은 영상·음성이 필요</span></div>
+  </div>
+  <div class="hl">핵심은 "더 많은 입력이 늘 정답"이 아니라, <b>판단에 필요한 증거가 어떤 형태로 존재하는가</b>입니다.</div>
+  <aside>세 예시 모두, 텍스트로 시작할 수는 있지만 결정적 단서가 다른 모달리티에 있습니다. 입력을 늘리는 것 자체가 목적이 아니라는 점이 핵심입니다.</aside>
+</section>
+
+<!-- 15 오늘의 핵심 개념 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧠 오늘의 <span class="g">핵심 개념</span></h2>
+  <div class="big">멀티모달 AI는 <span class="y">여러 입력을 받는 기능 목록</span>이 아니라,<br>서로 다른 증거를 <span class="y">같은 업무 판단으로 묶는</span> 모델 사용법</div>
+  <div class="box" style="margin-top:14px">
+    <p style="margin:0"><b>모달리티(modality)</b> = 정보를 담는 <b>감각·형식</b>. 텍스트·이미지·음성·영상·표·센서값이 모두 모달리티가 될 수 있습니다.</p>
+  </div>
+  <aside>오늘 하나만 가져간다면 이 문장입니다. 멀티모달은 "받을 수 있는 입력의 목록"이 아니라 "증거를 판단으로 묶는 사용법"입니다.</aside>
+</section>
+
+<!-- 16 실무 판단 4질문 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧭 실무의 네 가지 <span class="g">판단 질문</span></h2>
+  <table class="t">
+    <tr><th>판단 질문</th><th>왜 중요한가</th></tr>
+    <tr><td>이 업무의 핵심 증거는 어느 모달리티에 있는가</td><td>텍스트 요약만으로는 놓치는 단서가 생긴다</td></tr>
+    <tr><td>합치면 정확도가 오르는가, 책임만 커지는가</td><td>입력이 늘수록 비용·프라이버시·검증 부담도 는다</td></tr>
+    <tr><td>한 모델에 맡길 일인가, 전문 모델을 조합할 일인가</td><td>통합은 <b>맥락 연결</b>에, 전문은 <b>측정·추적</b>에 강하다</td></tr>
+    <tr><td>출력은 사람이 검증 가능한 형태인가</td><td>이미지·음성 근거가 들면 오류 설명도 복잡해진다</td></tr>
+  </table>
+  <div class="hl">"이 모델이 이미지를 받나요?"보다 이 네 질문이 <b>훨씬 실무적</b>입니다.</div>
+  <aside>기능 목록("이미지 되나요?")을 묻는 대신, 이 네 질문으로 접근하면 모달리티를 늘릴지 말지가 판단으로 정리됩니다.</aside>
+</section>
+
+<!-- 17 오늘 남길 산출물 -->
+<section class="slide" data-part="PART 3">
+  <h2>📦 오늘 남길 <span class="g">산출물</span></h2>
+  <table class="t">
+    <tr><th>산출물</th><th>형태</th><th>쓰임</th></tr>
+    <tr><td>회의록 실습 기록표</td><td>표</td><td>설정을 바꿔 가며 잰 오류율과 견딜 수 있는 한계를 적는다</td></tr>
+    <tr><td>노션 회의록 페이지</td><td>문서</td><td>되짚을 수 있는 형태로 남겼는지 확인한다</td></tr>
+  </table>
+  <div class="hl">이 강의는 결국 <b>회의록 실습</b>으로 이어집니다 — 오늘 세운 판단 기준이 그 실습의 뼈대가 됩니다.</div>
+  <aside>오늘 배운 "증거가 어느 형태로 존재하는가"라는 기준을 들고, 뒤에서 실제 회의록 실습으로 오류율과 한계를 재게 됩니다.</aside>
+</section>
+
+<!-- 18 핵심 5문장 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 5문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">실무의 증거는 글·그림·소리로 <b>흩어져</b> 온다 — 한 가지씩 나뉘지 않는다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">멀티모달은 "이미지도 넣는 챗봇"이 아니라 여러 증거를 <b>한 맥락</b>에서 다루는 흐름.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>네이티브 멀티모달</b>은 음성 입출력을 한 모델서 처리해 중간 텍스트 의존을 줄인다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">바뀐 건 도구 수가 아니라 <b>AI가 놓치던 단서의 종류</b>다.</span></div>
+    <div class="st"><span class="n">5</span><span class="t">첫 질문은 "이미지를 받나?"가 아니라 <b>"핵심 증거가 어느 모달리티에 있나?"</b></span></div>
+  </div>
+  <aside>다섯 문장 중 5번이 실무의 출발점입니다. 기능이 아니라 "증거가 어디 있나"를 먼저 묻습니다.</aside>
+</section>
+
+<!-- 19 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 실무 장면이 "한 가지씩 나뉘지 않는다"는 건 무슨 뜻? <b>예</b>를 들어보라.</div>
+    <div class="q"><b>Q2.</b> 2026의 멀티모달은 "이미지도 넣는 챗봇"과 어떻게 다른가?</div>
+    <div class="q"><b>Q3.</b> 전통적 음성 구현(3단 줄 세우기)과 <b>네이티브</b> 구조의 차이는?</div>
+    <div class="q"><b>Q4.</b> "도구가 하나 줄었다"가 아니라 무엇이 달라졌나?</div>
+    <div class="q"><b>Q5.</b> 모달리티를 늘릴지 판단할 때, 가장 실무적인 <b>첫 질문</b>은?</div>
+  </div>
+  <aside>Q5가 오늘 전체를 한 문장으로 압축합니다.</aside>
+</section>
+
+<!-- 20 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 보험(사진·견적서·녹취), 의료(영상·차트·말투), 교육(손글씨·음성·녹화)처럼 <b>여러 형식의 증거가 한 판단에 함께</b> 필요하다는 뜻.</div>
+    <div class="q a"><b>A2.</b> 기능이 아니라, 텍스트·이미지·음성·영상·센서를 <b>하나의 작업 맥락</b>에서 다루는 흐름이다.</div>
+    <div class="q a"><b>A3.</b> 전통은 말→글자→답→말소리로 <b>모델 셋을 줄 세움</b>; 네이티브는 음성 입출력을 <b>한 모델서 처리</b>해 중간 텍스트 의존을 줄인다.</div>
+    <div class="q a"><b>A4.</b> 도구 수가 아니라 <b>AI가 놓치던 단서의 종류</b>(억양·침묵 등)가 달라졌다.</div>
+    <div class="q a"><b>A5.</b> "핵심 증거가 <b>어느 모달리티에 존재하는가</b>" — 입력을 늘리는 것 자체가 목적이 아니다.</div>
+  </div>
+  <aside>A5를 자기 업무에 적용해 보면 오늘의 학습이 실무로 연결됩니다.</aside>
+</section>
+
+<!-- 21 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>기능이 아니라 판단입니다 🧭</h1>
+    <div class="big" style="margin-top:26px">글·그림·소리를 <span class="y">같은 좌표계</span>로 모아<br>하나의 <span class="y">업무 판단</span>으로 묶는다<br><br>다음 — 픽셀을 문장처럼 다루는 발상 (CLIP)</div>
+    <p class="sub" style="margin-top:24px">여러 종류의 입력을 한 모델에 — 여기까지</p>
+  </div>
+  <aside>오늘의 여정 끝. 다음 소단원(6-②)에서 "같은 좌표계"가 실제로 어떻게 만들어지는지, CLIP과 공유 임베딩 공간으로 들어갑니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
