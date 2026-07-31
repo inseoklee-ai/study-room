@@ -33,6 +33,7 @@
    - ✅ 2-①. 지금 이 모델은 어디서 왔을까 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/model-origin/) · 📊 [PPT](model-origin/model-origin.pptx)
    - ✅ 2-②. 이미지가 먼저 연 길 (CNN → ResNet) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/image-path/) · 📊 [PPT](image-path/image-path.pptx)
    - ✅ 2-③. 언어가 부딪힌 또 다른 벽 (RNN·LSTM·seq2seq·attention) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/sequence-wall/) · 📊 [PPT](sequence-wall/sequence-wall.pptx)
+   - ✅ 2-④. 두 길이 트랜스포머에서 합류하다 (Attention·Q·K·V·멀티헤드·위치 인코딩) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/transformer/) · 📊 [PPT](transformer/transformer.pptx)
 3. **LLM과 로컬 실행 — 클라우드 API vs 로컬** ✅ 완결 (8/8)
    - ✅ 3-①. 내 노트북에서도 LLM이 돌아갈까 — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/local-llm/) · 📊 [PPT](LLM_로컬실행_학습정리.pptx) · 📝 [요약](#-내-노트북에서도-llm이-돌아갈까)
    - ✅ 3-②. 거대한 모델을 노트북에 밀어 넣기 (양자화) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/quantization/) · 📊 [PPT](quantization/quantization.pptx)
@@ -73,6 +74,7 @@
 > - 2-① https://inseoklee-ai.github.io/study-room/model-origin/
 > - 2-② https://inseoklee-ai.github.io/study-room/image-path/
 > - 2-③ https://inseoklee-ai.github.io/study-room/sequence-wall/
+> - 2-④ https://inseoklee-ai.github.io/study-room/transformer/
 > - 3-① https://inseoklee-ai.github.io/study-room/local-llm/
 > - 3-② https://inseoklee-ai.github.io/study-room/quantization/
 > - 3-③ https://inseoklee-ai.github.io/study-room/run-local/

@@ -175,9 +175,13 @@ function collectBlocks(node, blocks){
     if(tag==="P"){ blocks.push({type:"p",runs:richRuns(ch,SOFT)}); continue; }
     if(anyClass(ch,DIAG)){ blocks.push({type:"diagram",text:clean(ch.text).slice(0,170)}); continue; }
     if(tag==="DIV"||tag==="SECTION"){
-      // 알 수 없는 래퍼: 요소 자식이 있으면 재귀(내부의 표·리스트·박스를 살림), 없으면 텍스트 문단
-      const hasElemChild=ch.childNodes.some(n=>n.nodeType===1 && n.tagName!=="BR");
-      if(hasElemChild) collectBlocks(ch, blocks);
+      // 알 수 없는 래퍼: 블록 자식(표·리스트·박스·중첩 div 등)이 있을 때만 재귀.
+      // 인라인 요소(b·span·sub·sup·code·br)만 섞인 div는 통째로 한 문단으로(텍스트 유실 방지).
+      const BLOCK=["DIV","SECTION","TABLE","UL","OL","PRE","P"];
+      const KNOWN=["steps","qa","hl","big","chain","io","paths","lgd","grid2","grid3","box","pts"];
+      const hasBlockChild=ch.childNodes.some(n=>n.nodeType===1 &&
+        (BLOCK.indexOf(n.tagName)>=0 || (n.classList && KNOWN.some(c=>n.classList.contains(c)))));
+      if(hasBlockChild) collectBlocks(ch, blocks);
       else { const t=clean(ch.text); if(t) blocks.push({type:"p",runs:richRuns(ch,SOFT)}); }
     }
   }
