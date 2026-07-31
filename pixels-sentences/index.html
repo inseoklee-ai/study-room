@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>픽셀을 문장처럼 다룬다는 발상 · 거리가 곧 의미가 되는 공간</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  /* tables */
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  /* io = 공유 임베딩 공간 다이어그램 */
+  .io{display:flex;align-items:center;gap:12px;margin:16px 0;flex-wrap:wrap;justify-content:center}
+  .io .enc{display:flex;flex-direction:column;gap:8px;justify-content:center;min-width:148px}
+  .io .elab{font-size:.72rem;font-weight:800;letter-spacing:.03em;text-align:center;color:var(--soft)}
+  .io .tok{border-radius:12px;padding:9px 13px;text-align:center;font-weight:750;font-size:.86rem;box-shadow:var(--sh);color:#fff}
+  .io .tok.bl{background:var(--bl)} .io .tok.pp{background:var(--pp)}
+  .io .tok.mut{background:var(--bg2);color:var(--soft);border:1px solid var(--line);box-shadow:none;font-weight:600}
+  .io .ar{color:var(--soft);font-size:1.3rem}
+  .io .space{flex:1;min-width:250px;max-width:400px;background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:10px 14px 14px;position:relative}
+  .io .stitle{font-size:.74rem;font-weight:800;color:var(--gr);text-align:center;margin-bottom:6px}
+  .io .plane{position:relative;height:150px}
+  .dot{position:absolute;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.68rem;font-weight:700;color:var(--ink);transform:translate(-50%,-50%);white-space:nowrap}
+  .dot .pt{width:15px;height:15px;border-radius:50%;box-shadow:0 0 0 3px var(--bg2)}
+  .lnk{position:absolute;height:0;border-top-width:2px;transform-origin:left center}
+  .lgd{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;font-size:.74rem;color:var(--soft);margin-top:2px}
+  .lgd span{display:inline-flex;align-items:center;gap:5px}
+  .sw{width:22px;height:0;border-top:3px solid}
+
+  /* paths = 두 파이프라인(오해 vs 정렬) */
+  .paths{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  @media(max-width:780px){.paths{grid-template-columns:1fr}}
+  .pipe{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px;box-shadow:var(--sh)}
+  .pipe .ph{font-size:.82rem;font-weight:800;margin-bottom:10px;text-align:center}
+  .pipe.no{border-color:var(--red)} .pipe.no .ph{color:var(--red)}
+  .pipe.yes{border-color:var(--gr)} .pipe.yes .ph{color:var(--gr)}
+  .pipe .fl{display:flex;flex-direction:column;gap:5px;align-items:stretch}
+  .pipe .stp{background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:8px 11px;font-size:.8rem;text-align:center;color:var(--ink)}
+  .pipe .dn{text-align:center;color:var(--gr);font-weight:800;font-size:.85rem;line-height:.7}
+  .pipe.no .dn{color:var(--red)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 6 · 멀티모달 (2)</span>
+    <h1 style="margin:18px 0">픽셀을 문장처럼<br>다룬다는 발상</h1>
+    <p class="sub">이미지와 텍스트가 같은 좌표계로 들어와, 거리가 곧 의미가 된다</p>
+  </div>
+  <aside>이미지를 다루는 AI라고 하면 "그림을 설명해 주는 챗봇"을 떠올리기 쉽습니다. 하지만 더 근본적인 발상은, 이미지와 문장을 같은 공간에 나란히 놓고 거리로 의미를 재는 것입니다. 오늘은 그 발상의 뿌리인 CLIP과 "정렬"이라는 개념을 따라갑니다.</aside>
+</section>
+
+<!-- 2 오늘의 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>PART 1</small><b>CLIP · 공유 임베딩</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>PART 2</small><b class="g">번역이 아니라 정렬</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gold)"><small>PART 3</small><b>붙이는 3갈래</b></div>
+  </div>
+  <ul class="pts">
+    <li>먼저 <b>VLM과 CLIP</b> — 이미지와 텍스트를 <b>같은 공간</b>에 놓는 대조 학습</li>
+    <li>왜 멀티모달이 <b>번역이 아니라 정렬</b>인지</li>
+    <li>모달리티를 붙이는 방식이 <b>세 갈래</b>로 갈린다 (연결형·공유 임베딩형·네이티브)</li>
+    <li>마지막에 <b>내 업무의 시각 자료</b>로 표를 채워 본다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — "가깝다"가 <b>측정 가능한 거리</b>가 되는 순간, 이미지와 문장은 서로를 검색할 수 있게 됩니다.</div>
+  <aside>세 파트를 지나 마지막엔 "내가 다루는 이미지엔 무엇이 담겼나"를 스스로 채워 보는 실습으로 마무리합니다.</aside>
+</section>
+
+<!-- 3 30초 복습 -->
+<section class="slide" data-part="표지">
+  <h2>⏪ 30초 복습</h2>
+  <p>지난 강의에서 우리는 이미지에서 <b>글자(OCR)</b>와 <b>물체(탐지·분할)</b>를 꺼내는 도구들을 봤습니다.</p>
+  <ul class="pts">
+    <li>그 도구들은 이미지 → <b>정보 추출</b>에 강했다 ("무엇이 있나")</li>
+    <li>하지만 "이 <b>사진</b>과 이 <b>문장</b>이 같은 뜻인가?"는 <b>다른 질문</b>이다</li>
+    <li>오늘은 이미지와 언어가 <b>애초에 어떻게 한 자리에서 만나는가</b>를 본다</li>
+  </ul>
+  <div class="hl">추출이 <b>"무엇이 있나"</b>라면, 오늘의 정렬은 <b>"무엇과 무엇이 같은 의미인가"</b>를 다룹니다.</div>
+  <aside>강의 6의 소단원입니다. 앞 강의의 추출 도구들과 달리, 이번엔 이미지와 언어를 같은 공간에서 잇는 발상 자체를 다룹니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">그림을 보는 챗봇이 아닙니다</h2>
+    <p style="margin-top:11px">이미지와 문장을 같은 공간에 놓는 발상</p>
+    <span class="who">VLM · 대조 학습 · CLIP</span>
+  </div>
+  <aside>멀티모달을 "그림을 읽어 주는 챗봇"으로만 이해하면 절반만 본 것입니다. 초기의 중요한 흐름은 이미지와 텍스트를 같은 의미 공간에 가깝게 놓는 대조 학습이었고, 이를 크게 민 것이 CLIP입니다.</aside>
+</section>
+
+<!-- 5 VLM & 대조학습 & CLIP -->
+<section class="slide" data-part="PART 1">
+  <h2>🔗 <span class="g">VLM</span>은 이미지와 언어를 잇는다</h2>
+  <ul class="pts">
+    <li><b>비전 언어 모델(VLM)</b> — 이미지와 언어를 <b>같은 작업 안에서</b> 연결하는 모델</li>
+    <li>초기 핵심 흐름 = <b>대조 학습(contrastive learning)</b> — 이미지와 텍스트를 같은 의미 공간에 가깝게</li>
+    <li>자연어를 <b>감독 신호</b>로 써서, 이미지 분류를 <b>자연어 지시</b>로 다룰 수 있게 했다</li>
+    <li>이 발상을 크게 민 것이 <b class="g">CLIP</b> — OpenAI, 2021</li>
+  </ul>
+  <div class="hl">CLIP은 인터넷에서 <b>이미지–설명글 쌍 4억 개</b>를 모아, "어느 설명이 어느 그림에 붙는가"를 맞히도록 학습했습니다.</div>
+  <aside>대조 학습은 "정답 쌍은 가깝게, 오답 쌍은 멀게" 만드는 방식입니다. 라벨을 사람이 일일이 붙이는 대신, 이미 인터넷에 널린 이미지-설명글 쌍을 감독 신호로 씁니다.</aside>
+</section>
+
+<!-- 6 인코더/임베딩/임베딩공간 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧩 인코더 · 임베딩 · 임베딩 공간</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>인코더</b> — 무언가를 받아 <b>숫자 목록</b>으로 바꾸는 부분. 그림을 넣어도, 문장을 넣어도 숫자 몇백 개가 나온다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>임베딩</b> — 그렇게 나온 숫자 목록. (앞으로 나올 <b>"표현"</b>도 같은 것을 가리키는 말)</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>임베딩 공간</b> — 그 임베딩들이 놓이는 좌표계.</span></div>
+  </div>
+  <div class="hl">이미지 인코더와 텍스트 인코더가 <b>따로</b> 있다는 사실보다, 둘의 결과가 <b>비교 가능한 같은 공간</b>으로 온다는 점이 핵심입니다.</div>
+  <aside>인코더 = 숫자로 바꾸는 장치, 임베딩 = 그 숫자 목록, 임베딩 공간 = 그 숫자들이 사는 좌표계. 이 세 단어만 잡으면 다음 그림이 쉽게 읽힙니다.</aside>
+</section>
+
+<!-- 7 공유 임베딩 공간 다이어그램 -->
+<section class="slide" data-part="PART 1">
+  <h2>🌐 같은 좌표계, <span class="g">거리가 곧 의미</span></h2>
+  <div class="io">
+    <div class="enc">
+      <div class="elab">이미지 인코더</div>
+      <div class="tok bl">개 사진</div>
+    </div>
+    <span class="ar">→</span>
+    <div class="space">
+      <div class="stitle">공유 임베딩 공간</div>
+      <div class="plane">
+        <div class="lnk" style="left:20%;top:36%;width:26%;border-top:3px solid var(--gr)"></div>
+        <div class="lnk" style="left:24%;top:40%;width:52%;border-top:2px dashed var(--gy)"></div>
+        <div class="dot" style="left:20%;top:36%"><span class="pt" style="background:var(--bl)"></span>개 사진</div>
+        <div class="dot" style="left:46%;top:46%"><span class="pt" style="background:var(--pp)"></span><span class="p">dog</span></div>
+        <div class="dot" style="left:78%;top:76%"><span class="pt" style="background:var(--gy)"></span>cat</div>
+      </div>
+    </div>
+    <span class="ar">←</span>
+    <div class="enc">
+      <div class="elab">텍스트 인코더</div>
+      <div class="tok pp">a photo of a dog</div>
+      <div class="tok mut">a photo of a cat</div>
+    </div>
+  </div>
+  <div class="lgd">
+    <span><span class="sw" style="border-color:var(--gr)"></span>정답 쌍 = 가깝게</span>
+    <span><span class="sw" style="border-color:var(--gy);border-style:dashed"></span>오답 쌍 = 멀게</span>
+  </div>
+  <p style="margin-top:12px">정답 쌍(개 사진 ↔ "a photo of a dog")의 거리는 <b>가깝게</b>, 오답 쌍(개 사진 ↔ "a photo of a cat")은 <b>멀게</b> 학습한다. 거리가 의미가 된 공간에서 <b>모달리티끼리 짝</b>을 찾는다.</p>
+  <aside>왼쪽 "개 사진"은 이미지 인코더를 지나 파란 점이 되고, 오른쪽 "a photo of a dog"는 텍스트 인코더를 지나 보라 점이 됩니다. 둘은 같은 뜻이라 가깝게, "a photo of a cat"(회색 점)은 멀게 놓입니다.</aside>
+</section>
+
+<!-- 8 CLIP 3단계 -->
+<section class="slide" data-part="PART 1">
+  <h2>🎯 CLIP은 이렇게 배우고, 이렇게 쓴다</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:180px;border-color:var(--bl)"><small>① 대조 사전학습</small><b>이미지·텍스트 쌍 N개 →<br>I·T 행렬에서 <span class="b">대각선(정답 쌍)</span>만 가깝게</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:180px;border-color:var(--pp)"><small>② 라벨을 문장으로</small><b>plane·car·dog… →<br>"A photo of a <span class="p">{object}</span>"</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:180px;border-color:var(--gr)"><small>③ 제로샷 예측</small><b>새 이미지 하나를 여러 문장과<br>비교 → <span class="g">가장 가까운 것</span> 선택</b></div>
+  </div>
+  <div class="hl">학습 때 <b>본 적 없는 이미지</b>도 "빨간 자동차" vs "파란 하늘" 사이에서 더 가까운 쪽에 놓입니다 — <b>거리가 곧 의미</b>가 된 것입니다.</div>
+  <aside>핵심은 3단계입니다. ① 정답 쌍의 거리를 최소화하도록 학습 → ② 분류하고 싶은 클래스 이름을 문장으로 바꿔 텍스트 인코더에 통과 → ③ 새 이미지를 그 문장들과 비교해 가장 가까운 라벨을 고른다. 클래스를 새로 학습시키지 않아도 되는 게 제로샷의 힘입니다.</aside>
+</section>
+
+<!-- 9 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">번역이 아니라 정렬입니다</h2>
+    <p style="margin-top:11px">이미지를 설명문으로 바꾸는 게 아니다</p>
+    <span class="who">표현 · 공유 의미 공간</span>
+  </div>
+  <aside>멀티모달을 처음 배울 때 "이미지를 먼저 설명문으로 번역하고, 그 글을 LLM이 읽는다"고 오해하기 쉽습니다. 그 방식도 쓰이지만, 2026년의 핵심 흐름은 각 모달리티를 표현으로 바꿔 같은 공간에서 함께 추론하는 정렬입니다.</aside>
+</section>
+
+<!-- 10 오해 vs 실제 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔀 <span class="r">번역</span>이라는 오해, <span class="g">정렬</span>이라는 실제</h2>
+  <div class="paths">
+    <div class="pipe no">
+      <div class="ph">❌ 흔한 오해 — 번역</div>
+      <div class="fl">
+        <div class="stp">이미지</div><div class="dn">↓</div>
+        <div class="stp">먼저 <b>설명문</b>으로 번역</div><div class="dn">↓</div>
+        <div class="stp">LLM이 설명문을 읽고 답함</div>
+      </div>
+    </div>
+    <div class="pipe yes">
+      <div class="ph">✅ 실제 흐름 — 정렬</div>
+      <div class="fl">
+        <div class="stp">이미지 / 음성 / 텍스트 조각</div><div class="dn">↓</div>
+        <div class="stp">각 모달리티를 <b>표현</b>으로 바꿈</div><div class="dn">↓</div>
+        <div class="stp"><b>공유 의미 공간</b>에서 함께 추론</div><div class="dn">↓</div>
+        <div class="stp">필요한 출력(텍스트·음성·이미지)으로</div>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:6px">번역 방식도 현실 제품에서 쓰일 수 있습니다. 다만 2026년의 핵심 흐름은 <b>더 넓습니다.</b></p>
+  <aside>왼쪽은 이미지를 글로 바꿔 흘려보내는 직렬 파이프라인, 오른쪽은 여러 모달리티가 같은 공간에서 나란히 추론되는 흐름입니다. 오른쪽이 더 강한 이유는 다음 장에서 봅니다.</aside>
+</section>
+
+<!-- 11 표현 & 왜 정렬이 강한가 -->
+<section class="slide" data-part="PART 2">
+  <h2>📦 "표현"은 복사가 아니라 <span class="g">압축</span></h2>
+  <ul class="pts">
+    <li><b>표현(representation)</b> = 원본을 그대로 복사한 게 아니라, <b>업무에 쓸 특징을 숫자 벡터로 압축</b>한 것</li>
+    <li>이미지는 픽셀 그대로가 아니라 <b>특징</b>으로, 음성은 파형 그대로가 아니라 <b>발화·억양·속도·배경음</b> 단서로</li>
+    <li>정렬이 강한 이유: "가깝다"가 느낌이 아니라 <b>측정 가능한 거리</b>이기 때문</li>
+  </ul>
+  <div class="big">짝이 맞는 이미지와 문장의 <span class="y">거리가 가장 가까워지도록</span> 학습<small>→ 텍스트 없이도 "이 사진과 비슷한 느낌의 녹음"을 찾을 수 있다</small></div>
+  <aside>표현은 원본의 사본이 아니라, 업무에 쓸 특징만 남긴 압축입니다. 그래서 모달리티가 달라도 같은 공간에서 거리로 비교할 수 있고, 이것이 번역보다 강한 이유입니다.</aside>
+</section>
+
+<!-- 12 가깝다≠같다 -->
+<section class="slide" data-part="PART 2">
+  <h2>⚠️ 하지만 "가깝다"가 <span class="r">"같다"</span>는 아니다</h2>
+  <ul class="pts">
+    <li>모델이 배운 거리 = <b>학습 데이터의 통계적 관계</b> — 그 업무에서 진짜 중요한 차이를 <b>늘 잡진 못한다</b></li>
+    <li>그래서 정렬된 공간은 <b>출발점이지 판단의 끝이 아니다</b></li>
+  </ul>
+  <div class="box" style="margin-top:8px">
+    <h3>🗂️ 회의 안건 비유</h3>
+    <p style="margin:0">여러 부서의 보고서를 하나의 <b>회의 안건 양식</b>으로 바꾸는 일과 비슷합니다. 영업팀은 고객 발언, 품질팀은 사진, 운영팀은 로그를 가져옵니다. 중요한 것은 "모두 <b>같은 문서 형식</b>인가"가 아니라, <b class="g">같은 의사결정 질문에 답하도록 정렬됐는가</b>입니다.</p>
+  </div>
+  <aside>정렬은 강력하지만 만능이 아닙니다. 거리가 가깝다고 정답인 것은 아니고, 업무에서 결정적인 차이는 사람이 마지막에 확인해야 합니다.</aside>
+</section>
+
+<!-- 13 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">붙이는 방식에 따라 셋으로 갈립니다</h2>
+    <p style="margin-top:11px">한 이름이지만, 증거를 처리하는 방식은 세 갈래</p>
+    <span class="who">연결형 · 공유 임베딩형 · 네이티브</span>
+  </div>
+  <aside>멀티모달 모델은 하나의 이름으로 불리지만 내부에서 증거를 처리하는 방식은 크게 셋으로 나뉩니다. 배타적 규격이 아니라 설계의 강조점 차이여서, 한 모델이 두 방식을 겹쳐 쓰기도 합니다.</aside>
+</section>
+
+<!-- 14 3갈래 표 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧭 멀티모달, <span class="g">세 갈래</span> 설계</h2>
+  <table class="t">
+    <tr><th>구조</th><th>직관</th><th>장점</th><th>조심할 점</th></tr>
+    <tr><td>연결형</td><td>이미지·음성 전용 인코더가 LLM에 정보를 넘긴다</td><td>기존 언어 모델 활용에 좋고, 오픈소스 생태계에 많다</td><td>세부 시각·음성 단서가 언어로 옮겨지며 사라질 수 있다</td></tr>
+    <tr><td>공유 임베딩형</td><td>여러 모달리티를 같은 의미 공간에 놓는다</td><td>이미지-음성 검색, 텍스트-이미지 매칭 등 <b>교차 검색</b>에 강하다</td><td>가깝다는 것이 곧 정답은 아니다</td></tr>
+    <tr><td>네이티브 멀티모달형</td><td>텍스트·이미지·음성을 한 모델의 입력·출력 흐름 안에서 다룬다</td><td>대화 중 화면·소리·문맥을 함께 다루기 좋다</td><td>비용·지연시간·안전 정책·검증 방법이 복잡해진다</td></tr>
+  </table>
+  <div class="hl">배타적 규격이 아니라 <b>강조점의 차이</b> — 한 모델이 두 방식을 겹쳐 쓰기도 합니다. 각 방식이 무엇에 강한지는 알아야 선택이 됩니다.</div>
+  <aside>연결형은 "붙이기 쉬움", 공유 임베딩형은 "교차 검색", 네이티브는 "한 흐름에서 다 다루기". 표의 마지막 열(조심할 점)이 선택의 실마리입니다.</aside>
+</section>
+
+<!-- 15 네이티브 대표 -->
+<section class="slide" data-part="PART 3">
+  <h2>🚀 네이티브로 간 대표 — <span class="g">GPT-4o · Gemini</span></h2>
+  <ul class="pts">
+    <li>텍스트·이미지·소리를 <b>한 신경망 안에서 처음부터 끝까지</b> 함께 다룬다</li>
+    <li>음성 대화도 텍스트를 읽어 주는 수준을 넘어 <b>억양·속도·표현·도구 사용</b>까지 함께 설계</li>
+    <li>둘 다 웹·앱으로 쓰는 <b>상용 서비스</b>이고 가중치는 공개돼 있지 않다</li>
+  </ul>
+  <div class="hl">단, 실제 제품은 <b>안전 필터·도구 호출</b> 등 여러 구성요소를 함께 묶어 돌립니다 — "네이티브"는 <b>모델 설계의 방향</b>이지, 전체 서비스가 파일 하나라는 뜻은 아닙니다.</div>
+  <aside>네이티브 멀티모달은 "모델이 여러 감각을 한 흐름에서 처리한다"는 설계 방향입니다. 우리가 쓰는 제품은 그 모델에 안전 필터와 도구 호출을 얹은 하나의 시스템이라는 점을 구분해야 합니다.</aside>
+</section>
+
+<!-- 16 실습 표 -->
+<section class="slide" data-part="PART 3">
+  <h2>📝 내가 다루는 이미지엔 <span class="g">무엇이 담겼나</span></h2>
+  <p style="margin-bottom:8px">사진뿐 아니라 <b>화면 캡처·도면·계기판·차트·필기·제품 상태</b>까지 포함해 아래 표를 채워 보세요.</p>
+  <table class="t">
+    <tr><th>내가 다루는 시각 자료</th><th>텍스트로 옮기면 사라지는 단서</th><th>AI에게 물어볼 좋은 질문</th><th>사람이 마지막에 확인할 점</th></tr>
+    <tr><td>예: 현장 설비 사진</td><td>녹슨 위치, 주변 배선, 계기판 상태</td><td>위험 징후를 위치별로 설명해 주세요</td><td>실제 설비 규정과 맞는가</td></tr>
+    <tr><td style="color:var(--soft);font-weight:400">(내 자료 ①)</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td style="color:var(--soft);font-weight:400">(내 자료 ②)</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+  </table>
+  <div class="hl">💡 좋은 멀티모달 질문은 "이 사진 설명해줘"에서 끝나지 않습니다 — <b>판단 기준·근거 위치·불확실한 부분·추가로 필요한 입력</b>을 함께 요구해야, 모델이 <b>본 것과 추정한 것</b>을 나눠 검토할 수 있습니다.</div>
+  <aside>첫 줄 예시를 참고해 자기 업무의 시각 자료로 나머지 칸을 채워 보세요. 핵심은 "설명"이 아니라 "판단 기준·근거·불확실성·추가 입력"을 함께 물어 본 것과 추정한 것을 분리하는 것입니다.</aside>
+</section>
+
+<!-- 17 핵심 5문장 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 5문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">VLM은 이미지와 언어를 <b>같은 작업</b>에서 잇고, 초기 핵심은 <b>대조 학습(CLIP)</b>이다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">인코더가 그림·문장을 <b>임베딩(숫자 벡터)</b>으로 바꿔 <b>같은 공간</b>에 놓는다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t">멀티모달은 <b>번역이 아니라 정렬</b> — "가깝다"가 <b>측정 가능한 거리</b>가 된다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">붙이는 방식은 <b>연결형·공유 임베딩형·네이티브</b> 세 갈래(겹쳐 쓰기도).</span></div>
+    <div class="st"><span class="n">5</span><span class="t">"가깝다 ≠ 같다" — 정렬된 공간은 <b>출발점이지 판단의 끝이 아니다</b>.</span></div>
+  </div>
+  <aside>이 다섯 문장이 오늘의 뼈대입니다. 특히 3번과 5번 — "정렬"과 "가깝다≠같다"가 멀티모달을 실무에 쓸 때의 감각을 결정합니다.</aside>
+</section>
+
+<!-- 18 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> CLIP은 <b>무엇을</b> <b>무엇으로</b> 학습했나? (데이터 · 목표)</div>
+    <div class="q"><b>Q2.</b> 멀티모달이 "번역이 아니라 정렬"이라는 말의 뜻은?</div>
+    <div class="q"><b>Q3.</b> "표현(representation)"은 원본과 어떻게 다른가?</div>
+    <div class="q"><b>Q4.</b> 멀티모달 세 갈래는 각각 무엇이며, 강점은?</div>
+    <div class="q"><b>Q5.</b> "가깝다 = 같다"가 아닌 이유와, 그래서 <b>사람이 할 일</b>은?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q2와 Q5가 오늘의 핵심을 가장 잘 가립니다.</aside>
+</section>
+
+<!-- 19 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 인터넷의 <b>이미지–설명글 쌍 4억 개</b>로, "어느 설명이 어느 그림에 붙는가"(정답 쌍의 거리 최소화)를 학습.</div>
+    <div class="q a"><b>A2.</b> 이미지를 설명문으로 바꿔 읽는 게 아니라, 각 모달리티를 <b>표현</b>으로 바꿔 <b>같은 의미 공간</b>에 놓고 <b>거리로 짝</b>을 찾는 것.</div>
+    <div class="q a"><b>A3.</b> 원본의 복사가 아니라 <b>업무에 쓸 특징을 숫자 벡터로 압축</b>한 것. (픽셀·파형 그대로가 아님)</div>
+    <div class="q a"><b>A4.</b> <b>연결형</b>(전용 인코더가 LLM에 전달·오픈소스 풍부), <b>공유 임베딩형</b>(교차 검색에 강함), <b>네이티브</b>(한 모델서 화면·소리·문맥 동시 / 비용·지연·안전은 복잡).</div>
+    <div class="q a"><b>A5.</b> 모델의 거리는 <b>통계적 관계</b>라 진짜 중요한 차이를 늘 잡진 못함 → 사람이 <b>판단 기준·근거·불확실성</b>을 마지막에 확인해야 한다.</div>
+  </div>
+  <aside>A2와 A5를 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다.</aside>
+</section>
+
+<!-- 20 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>거리가 의미가 되는 공간 🌐</h1>
+    <div class="big" style="margin-top:26px">이미지와 문장이 <span class="y">같은 좌표계</span>에서 만나<br>거리로 서로를 검색한다<br><br>정렬은 출발점, <span class="y">판단은 사람의 몫</span></div>
+    <p class="sub" style="margin-top:24px">픽셀을 문장처럼 다룬다는 발상 — 여기까지</p>
+  </div>
+  <aside>오늘의 여정 끝. 이미지와 텍스트가 같은 공간에서 거리로 짝을 찾는다는 발상, 그리고 그것이 번역이 아니라 정렬이라는 점을 기억하세요.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

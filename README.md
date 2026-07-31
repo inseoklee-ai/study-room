@@ -61,6 +61,9 @@
    - ⬜ 5-⑧. [과제] 원하는 포즈로 만들기
    - ⬜ 5-⑨. 만드는 일에는 만든 사람이 남습니다
    - 📦 프로젝트 제출
+6. **멀티모달 — 여러 감각을 함께 다루는 AI** *(가제)* ⬅️ 진행 중 (1/?)
+   - ⬜ 6-①. (소단원 1 — 예정)
+   - ✅ 6-②. 픽셀을 문장처럼 다룬다는 발상 (CLIP·공유 임베딩·정렬) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/pixels-sentences/) · 📊 [PPT](pixels-sentences/pixels-sentences.pptx)
 
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
@@ -84,6 +87,7 @@
 > - 4-⑥ https://inseoklee-ai.github.io/study-room/ocr-lab/
 > - 4-⑦ https://inseoklee-ai.github.io/study-room/yolo-lab/
 > - 4-⑧ https://inseoklee-ai.github.io/study-room/docimg-wrapup/
+> - 6-② https://inseoklee-ai.github.io/study-room/pixels-sentences/
 >
 > 📊 **PPT**: 각 강의 폴더의 `<폴더명>.pptx` (예: `vlm/vlm.pptx`). GitHub 저장소나 라이브 사이트에서 내려받아 PowerPoint로 열 수 있습니다.
 >
