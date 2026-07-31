@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>언어가 부딪힌 또 다른 벽 · 순서의 벽에서 attention까지</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:13px 16px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.15vw,.92rem);
+    color:var(--ink);overflow:auto;max-height:60vh;white-space:pre;line-height:1.5;margin:8px 0}
+  pre.out{border-left-color:var(--gold);color:var(--soft)}
+  pre b{color:var(--gr)}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 트랜스포머 (3)</span>
+    <h1 style="margin:18px 0">언어가 부딪힌<br>또 다른 벽</h1>
+    <p class="sub">순서의 벽 — word2vec에서 attention까지</p>
+  </div>
+  <aside>이미지가 깊이의 벽에 부딪혔던 이야기를 봤습니다. 언어는 결이 다른 벽 — 순서의 벽에 부딪혔습니다. 단어를 벡터로 바꾸는 word2vec에서 시작해, RNN·LSTM·seq2seq를 거쳐 attention에 이르는 흐름을 따라갑니다.</aside>
+</section>
+
+<!-- 2 오늘의 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:110px;border-color:var(--bl)"><small>PART 1</small><b>단어를 벡터로<br>(word2vec)</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px;border-color:var(--red)"><small>PART 2</small><b>순서의 벽<br>(RNN·LSTM)</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px;border-color:var(--gr)"><small>PART 3</small><b>병목과 되돌아보기<br>(seq2seq·attention)</b></div>
+  </div>
+  <ul class="pts">
+    <li>신경망은 글자를 못 먹는다 — <b>단어를 벡터로</b> 바꾸는 word2vec</li>
+    <li>순서대로 읽는 <b>RNN</b>이 만난 <b>순서의 벽</b>, 그리고 <b>LSTM</b></li>
+    <li>번역을 위한 <b>seq2seq</b>의 고정벡터 병목과, 그것을 깬 <b>attention</b></li>
+    <li>마지막에 <b>다음 벽을 향한 질문</b> — 트랜스포머로 가는 문</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 줄 — 이미지의 <b>깊이의 벽</b>과 언어의 <b>순서의 벽</b>은 한 뿌리이고, 둘 다 <b>지름길(통로)</b>로 넘는다.</div>
+  <aside>오늘은 손으로 돌려보는 유사도 게임 실습도 포함됩니다. 개념 → 코드 → 관찰 순으로 갑니다.</aside>
+</section>
+
+<!-- 3 30초 복습 -->
+<section class="slide" data-part="표지">
+  <h2>⏪ 30초 복습 — 이미지의 <span class="g">깊이의 벽</span></h2>
+  <ul class="pts">
+    <li>층을 깊게 쌓다가 <b>학습 신호가 희미해지는</b> vanishing gradient 문제에 부딪혔다</li>
+    <li>신경망은 <b>skip connection</b>(지름길)으로 그 벽을 넘었다</li>
+    <li>사진은 <b>한 장이 통째로</b> 주어지지만, 문장은 <b>단어가 하나씩 순서대로</b> 흐르는 시간의 데이터</li>
+  </ul>
+  <div class="hl">"나는 어제 도서관에서 책을 빌렸다" — <b>'빌렸다'</b>는 저 앞의 <b>'나는'·'책을'</b>을 기억해야 뜻이 통한다. 언어의 벽은 <b>순서의 벽</b>이다.</div>
+  <aside>이미지가 깊이의 벽이었다면 언어는 순서의 벽입니다. 이 둘이 어떻게 같은 뿌리인지가 오늘의 숨은 주제입니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">단어를 숫자로 바꾸는 첫 관문</h2>
+    <p style="margin-top:11px">뜻의 관계를 방향과 거리로 남기다</p>
+    <span class="who">word2vec · 임베딩</span>
+  </div>
+  <aside>신경망은 글자를 그대로 먹지 못합니다. 모든 입력은 결국 숫자 벡터여야 합니다. 그런데 번호만 매기면 단어 사이의 의미 관계가 통째로 사라집니다.</aside>
+</section>
+
+<!-- 5 word2vec -->
+<section class="slide" data-part="PART 1">
+  <h2>🔤 이웃으로 뜻을 배우는 <span class="g">word2vec</span> (2013)</h2>
+  <ul class="pts">
+    <li>'왕'=1번, '여왕'=2번처럼 <b>번호만 매기면</b> 의미 관계가 통째로 사라진다</li>
+    <li>발상: 단어의 뜻은 <b>어떤 이웃과 함께 등장하는지</b>에 이미 담겨 있다</li>
+    <li>"커피를 ___ 마셨다"의 <b>빈칸 맞히기</b>를 수억 번 → 비슷한 자리 단어는 비슷한 벡터</li>
+  </ul>
+  <div class="big"><span class="y">왕 − 남자 + 여자</span> ≈ 여왕<small>뜻의 관계가 벡터 공간의 방향과 거리로 남는다</small></div>
+  <aside>누가 뜻을 알려 준 적이 없는데도, 빈칸 채우기 연습만으로 왕−남자+여자를 계산하면 여왕 근처에 도착합니다. (Efficient Estimation of Word Representations, arXiv:1301.3781)</aside>
+</section>
+
+<!-- 6 임베딩 표준입력 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧱 임베딩 = 언어 신경망의 <span class="g">표준 입력</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px"><small>문장</small><b>단어들의 나열</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>각 단어</small><b class="b">한 개의 벡터<br>(임베딩)</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>신경망</small><b>벡터들의 흐름을<br>받아 처리</b></div>
+  </div>
+  <div class="hl">word2vec이 언어를 <b>신경망이 먹을 수 있는 재료</b>로 손질해 준 셈입니다. 재료는 준비됐고, 문제는 이 <b>흐름</b>을 어떻게 소화하느냐였습니다.</div>
+  <aside>임베딩(embedding)은 이후 모든 언어 신경망의 표준 입력이 됩니다. "표현"도 같은 것을 가리키는 말입니다.</aside>
+</section>
+
+<!-- 7 꼬맨틀 -->
+<section class="slide" data-part="PART 1">
+  <h2>🎮 만져 보기 — <span class="g">꼬맨틀</span></h2>
+  <ul class="pts">
+    <li>매일 정답 단어 하나. 아무 단어나 던지면 정답과의 <b>가까운 정도</b>를 −100~100 숫자로 돌려준다</li>
+    <li>사전 뜻풀이 비교가 아니라, <b>학습된 단어 벡터 사이의 거리</b>를 재는 것 (FastText)</li>
+    <li>'바다' → '해변'·'파도'는 예상대로인데, <b>뜻은 상관없어 보이는데 점수가 튀는</b> 단어가 꼭 있다</li>
+  </ul>
+  <div class="hl">벡터 공간이 배운 것은 <b>사전적 정의가 아니라 쓰임의 이웃 관계</b> — 설명 열 줄보다 한 판이 더 잘 보여 줍니다.</div>
+  <aside>꼬맨틀(semantle-ko.newsjel.ly)은 word2vec의 후속 격인 FastText로 위키·웹 문서를 학습한 벡터를 씁니다. "이게 왜 높지?" 하는 순간이 핵심 체험입니다.</aside>
+</section>
+
+<!-- 8 실습 프롬프트 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧪 손으로 돌려보기 (1) — <span class="g">에이전트에게 시키기</span></h2>
+  <p style="margin-bottom:6px">꼬맨틀을 직접 만들 차례입니다. 단어를 벡터로 바꾸고, 두 벡터의 <b>각도(코사인 유사도)</b>로 가까운 정도를 재면 끝. 코딩 에이전트에게 이렇게 시켜 보세요.</p>
+  <pre>파이썬으로 단어 유사도 게임을 만들어 줘.
+
+- sentence-transformers의 paraphrase-multilingual-MiniLM-L12-v2 모델로
+  단어를 벡터로 바꾼다
+- 정답 단어 하나를 정하고, 후보 단어 목록과 정답 사이의
+  코사인 유사도를 계산한다
+- 가까운 순으로 순위를 매겨 점수와 함께 출력한다
+- 모델은 CPU에서 돌리고, GPU가 없어도 되게 해 줘</pre>
+  <aside>원리는 방금 본 그대로입니다. 단어를 벡터로, 두 벡터의 각도로 가까운 정도를 재는 것. 에이전트가 만들어 준 것이 다음 장 코드와 크게 다르지 않다면 잘 나온 것입니다.</aside>
+</section>
+
+<!-- 9 실습 코드 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧪 손으로 돌려보기 (2) — <span class="g">코드</span></h2>
+  <pre><b># 처음 한 번만 설치합니다. 이미 깔려 있으면 건너뛰어도 됩니다.</b>
+!pip install sentence-transformers
+
+from sentence_transformers import SentenceTransformer
+import numpy as np
+
+model = SentenceTransformer(
+    "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+
+VOCAB = ["바다","해변","파도","모래","갈매기","항구","등대",
+         "산","숲","나무","계곡","등산","커피","카페","우유","아침",
+         "컴퓨터","키보드","코드","버그","고양이","강아지","산책",
+         "회사","회의","보고서","월급"]
+ANSWER = "바다"
+
+emb = model.encode(VOCAB, normalize_embeddings=True)
+ans = model.encode([ANSWER], normalize_embeddings=True)[0]
+sims = emb @ ans        <b># 길이를 1로 맞췄으니 내적이 곧 코사인 유사도</b>
+
+for rank, i in enumerate(np.argsort(-sims), 1):
+    print(f"  {rank}위  {VOCAB[i]}  {sims[i]*100:.1f}점")</pre>
+  <aside>normalize_embeddings=True로 길이를 1로 맞추면 내적(emb @ ans)이 그대로 코사인 유사도가 됩니다. 후보 단어를 여러분 관심사로 바꿔 돌려 보세요.</aside>
+</section>
+
+<!-- 10 실행 결과 -->
+<section class="slide" data-part="PART 1">
+  <h2>📊 실행 결과 — <span class="g">'바다'</span> 기준 순위</h2>
+  <pre class="out">정답은 '바다'. 후보 27개를 가까운 순으로 세우면
+    1위  바다     100.0점
+    2위  해변      76.7점
+    3위  파도      76.5점
+    4위  항구      73.3점
+    5위  모래      62.5점
+    6위  등대      59.5점
+    7위  갈매기     55.4점
+    8위  버그      55.2점   ← ⚠️ 뜻으론 먼데 왜?
+   25위  월급      17.0점
+   26위  우유      15.9점
+   27위  고양이     13.7점</pre>
+  <aside>바다·해변·파도가 위에 모이는 건 예상대로인데, '버그'가 8위(55.2점)로 커피·우유보다 높게 끼어듭니다. 다음 장에서 이 세 가지를 짚습니다.</aside>
+</section>
+
+<!-- 11 볼 것 세 가지 -->
+<section class="slide" data-part="PART 1">
+  <h2>👀 여기서 볼 것 <span class="g">세 가지</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">아무도 <b>바다와 해변이 비슷하다</b> 알려 준 적 없다 — 비슷한 자리에 등장한 문장을 읽었을 뿐인데 <b>76.7점</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>버그가 8위(55.2점)</b> — 벡터가 배운 건 사전적 정의가 아니라 <b class="g">쓰임의 이웃 관계</b>. "이게 왜 높지?"의 정체</span></div>
+    <div class="st"><span class="n">3</span><span class="t">후보를 <b>내 도메인 단어</b>로 바꿔 보라 — 업무 용어끼리 뭉치는지 보면 <b>이 모델을 내 일에 쓸 수 있을지</b> 감이 잡힌다</span></div>
+  </div>
+  <div class="hl">재료(임베딩)는 준비됐습니다. 이제 이 <b>벡터들의 흐름</b>을 신경망이 어떻게 소화하느냐가 문제입니다.</div>
+  <aside>세 번째가 실무 포인트입니다. 예제 단어를 자기 도메인으로 바꿔 보면 이 임베딩 모델의 쓸모를 바로 가늠할 수 있습니다.</aside>
+</section>
+
+<!-- 12 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">앞 단어를 기억하며 읽다 만난 순서의 벽</h2>
+    <p style="margin-top:11px">시간 축을 따라 다시 나타난 vanishing gradient</p>
+    <span class="who">RNN · LSTM</span>
+  </div>
+  <aside>사람이 문장을 읽는 방식을 흉내 낸 것이 순환 신경망(RNN)입니다. 앞에서 뒤로 한 단어씩 읽되, 지금까지 읽은 내용을 요약한 기억을 함께 들고 다음 단어로 넘깁니다.</aside>
+</section>
+
+<!-- 13 RNN -->
+<section class="slide" data-part="PART 2">
+  <h2>🔁 <span class="g">RNN</span> — 기억을 들고 한 단어씩</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px"><small>단어 1</small><b>읽기 → 은닉 상태</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>단어 2</small><b class="b">은닉 상태 + 단어 2<br>→ 새 은닉 상태</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px"><small>…끝까지</small><b>계속 갱신</b></div>
+  </div>
+  <ul class="pts">
+    <li>같은 신경망을 <b>문장의 단어 수만큼 반복</b>해서 돌리는 구조</li>
+    <li><b>은닉 상태(hidden state)</b> = 문장을 따라 흐르며 갱신되는 <b>작업 기억</b></li>
+  </ul>
+  <aside>첫 단어로 은닉 상태를 만들고, 그 은닉 상태와 두 번째 단어를 합쳐 새 은닉 상태를 만들고… 문장 끝까지 잇습니다.</aside>
+</section>
+
+<!-- 14 순서의 벽 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧱 발상은 우아했지만 — <span class="r">순서의 벽</span></h2>
+  <ul class="pts">
+    <li>문장이 길어지면 앞쪽 단어 정보가 은닉 상태를 <b>여러 번 거치며 흐려져</b>, 뒤엔 거의 안 남는다</li>
+    <li>'나는'이라는 주어가 <b>스무 단어 뒤 동사까지</b> 살아 도달하지 못한다</li>
+    <li>은닉 상태를 한 단계씩 넘기는 건 <b>신경망 층을 하나씩 쌓는 것과 수학적으로 같다</b></li>
+  </ul>
+  <div class="big">이미지의 <span class="y">vanishing gradient</span>가 이번엔 깊이가 아니라<br><span class="y">시간 축</span>을 따라 나타난 것<small>순서의 벽 = 깊이의 벽과 한 뿌리</small></div>
+  <aside>학습 신호가 시간을 거슬러 앞 단어로 전달될 때 이미지에서와 똑같이 희미해집니다. 두 벽은 이름만 다를 뿐 같은 문제였습니다.</aside>
+</section>
+
+<!-- 15 LSTM -->
+<section class="slide" data-part="PART 2">
+  <h2>🚪 <span class="g">LSTM</span> — 장기 기억 통로와 게이트</h2>
+  <ul class="pts">
+    <li>은닉 상태 옆에 <b>셀 상태(cell state)</b>라는 별도의 <b>장기 기억 통로</b>를 하나 더 둔다</li>
+    <li>이 통로에 정보가 들고·나고·지워지는 것을 <b>게이트</b>로 조절 — 입력·망각·출력 게이트를 스스로 학습</li>
+  </ul>
+  <div class="chain">
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>입력 게이트</small><b>무엇을 새로 기억?</b></div>
+    <div class="cell" style="min-width:120px;border-color:var(--red)"><small>망각 게이트</small><b>무엇을 잊을까?</b></div>
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>출력 게이트</small><b>무엇을 내보낼까?</b></div>
+  </div>
+  <div class="hl">셀 상태 통로엔 <b>곱셈으로 뒤섞는 변형이 거의 없다</b> → 신호가 멀리까지 온전히 흐른다. 이미지의 <b>skip connection과 발상이 놀랍도록 닮았다</b>(통로를 터 준다).</div>
+  <aside>게이트가 열려 있으면 정보가 거의 그대로 통과합니다. 지름길을 터 신호가 흐려지지 않게 한다는 아이디어가 skip connection과 같습니다. (LSTM, Neural Computation 1997)</aside>
+</section>
+
+<!-- 16 남은 순차성 -->
+<section class="slide" data-part="PART 2">
+  <h2>⛓️ 그래도 남은 <span class="r">순차성</span></h2>
+  <ul class="pts">
+    <li>LSTM으로 벽이 낮아졌지만 <b>완전히 사라진 건 아니다</b></li>
+    <li>순서대로 한 단어씩 처리한다는 <b>RNN의 본질은 그대로</b></li>
+    <li>앞 단어를 끝내야 뒤 단어를 시작 → <b>문장 전체를 한꺼번에 병렬 계산할 수 없다</b></li>
+  </ul>
+  <div class="hl">이 <b>순차성</b>은 두고두고 발목을 잡습니다 — 나중에 트랜스포머가 정면으로 겨냥할 지점입니다.</div>
+  <aside>병렬 계산을 막는 순차성은 속도와 확장성의 걸림돌로 남습니다. 이 걸림돌이 다음 이야기의 씨앗입니다.</aside>
+</section>
+
+<!-- 17 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">병목을 만들고, 되돌아보기로 깨다</h2>
+    <p style="margin-top:11px">문장을 벡터 하나에 욱여넣기 → 원문을 다시 보기</p>
+    <span class="who">seq2seq · attention</span>
+  </div>
+  <aside>RNN·LSTM으로 문장을 읽게 되자 사람들은 번역을 시켰습니다. 한 언어를 읽고 다른 언어로 뱉는 인코더-디코더, 곧 seq2seq입니다.</aside>
+</section>
+
+<!-- 18 seq2seq -->
+<section class="slide" data-part="PART 3">
+  <h2>🗜️ <span class="g">seq2seq</span> — 압축했다 푸는 통역사</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>인코더 RNN</small><b>원문을 끝까지 읽어</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--red)"><small>문맥 벡터 1개</small><b class="r">문장 전체 뜻을<br>압축해 담음</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>디코더 RNN</small><b>이 벡터로 번역문을<br>한 단어씩 풀어냄</b></div>
+  </div>
+  <div class="hl">원문을 <b>압축했다가 다시 푸는 통역사</b> 구조. 통계 기반 번역을 넘어서는 성능을 처음 보여 주며 큰 반향을 일으켰습니다.</div>
+  <aside>인코더의 마지막 은닉 상태 하나에 문장 전체 뜻을 담은 것이 문맥 벡터(context vector)입니다. (Sequence to Sequence Learning, arXiv:1409.3215)</aside>
+</section>
+
+<!-- 19 고정벡터 병목 -->
+<section class="slide" data-part="PART 3">
+  <h2>🍾 <span class="r">고정벡터 병목</span></h2>
+  <ul class="pts">
+    <li>열 단어든 쉰 단어든, 원문의 모든 정보가 <b>크기가 고정된 벡터 하나</b>를 반드시 통과해야 한다</li>
+    <li>문장이 길어질수록 <b>다 욱여넣을 수 없어 앞부분이 뭉개진다</b></li>
+    <li>실제로 seq2seq 번역 품질은 <b>문장이 길어지면 눈에 띄게 무너졌다</b></li>
+  </ul>
+  <div class="box" style="margin-top:8px">
+    <p style="margin:0">🎧 <b>통역 부스 비유</b> — 통역사가 <b>3분짜리 연설을 다 듣고 나서 단 한 문장으로 요약</b>해 전달하라는 요구를 받은 셈입니다. 애초에 무리였던 것이죠.</p>
+  </div>
+  <aside>국제회의 통역 부스처럼, 연설이 끝날 때까지 기다렸다가 한 문장으로 압축해 넘기라는 건 무리입니다. (사진: G7 통역 부스, Wikimedia, CC BY-SA 2.0 — 여기선 CSS/비유로 대체)</aside>
+</section>
+
+<!-- 20 attention -->
+<section class="slide" data-part="PART 3">
+  <h2>🔎 <span class="g">attention</span> — 되돌아보기로 병목을 깨다</h2>
+  <ul class="pts">
+    <li>질문을 바꿨다: <b>왜 원문 전체를 벡터 하나로 압축</b>해야만 할까?</li>
+    <li>인코더가 만든 <b>단어별 은닉 상태를 뭉개지 않고 전부 남겨</b> 둔다</li>
+    <li>디코더는 번역 단어를 만들 때마다 <b>원문의 모든 단어를 되돌아보며 가중치</b>를 매긴다</li>
+    <li>'학교'를 번역할 차례면 원문 <b>'school'에 큰 가중치</b>, 나머진 작게</li>
+  </ul>
+  <div class="hl">원문 전체가 <b>매 순간 다시 열람 가능한 참고 자료</b>가 된다 → 고정벡터 병목이 깨지고, 긴 문장에서 무너지던 번역 품질이 되살아났다.</div>
+  <aside>정보가 더는 벡터 하나의 좁은 문을 억지로 통과할 필요가 없어졌습니다. (Neural Machine Translation by Jointly Learning to Align and Translate, arXiv:1409.0473)</aside>
+</section>
+
+<!-- 21 다이어그램 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔍 병목 vs 되돌아보기 — 한눈에</h2>
+  <div class="plabel">❌ seq2seq · 고정벡터 병목</div>
+  <div class="chain">
+    <div class="cell"><b>원문 1</b></div><div class="cell"><b>원문 2</b></div><div class="cell"><b>원문 3</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="border-color:var(--red)"><small>← 좁은 문</small><b class="r">벡터 1개</b></div>
+    <span class="ar">→</span>
+    <div class="cell"><b>번역</b></div>
+  </div>
+  <div class="plabel">✅ attention · 되돌아보기</div>
+  <div class="chain">
+    <div class="cell"><b>원문 1</b></div><div class="cell"><b>원문 2</b></div><div class="cell"><b>원문 3</b></div>
+    <span class="ar">↘↓↙</span>
+    <div class="cell" style="border-color:var(--gr)"><small>굵을수록 큰 가중치</small><b class="g">번역 단어</b></div>
+  </div>
+  <div class="hl">왼쪽은 원문 전체가 <b>벡터 하나로 좁아졌다 펼쳐지는</b> 병목, 오른쪽은 <b>매 단어가 원문 전체를 되돌아보며</b> 필요한 곳에 가중치를 준다.</div>
+  <aside>왼쪽 seq2seq는 모든 원문이 벡터 1개를 통과합니다. 오른쪽 attention은 번역 단어마다 원문 세 개를 직접 되돌아보며, 굵은 연결선일수록 큰 가중치입니다.</aside>
+</section>
+
+<!-- 22 다음 벽을 향한 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🚪 다음 벽을 향한 <span class="g">질문</span></h2>
+  <ul class="pts">
+    <li>attention은 원래 <b>순차적으로 도는 RNN을 거드는 보조 장치</b>였다</li>
+    <li>그런데 번역 품질을 끌어올린 <b>주역은 attention</b>이었고, RNN의 순차 처리는 <b>병렬을 막는 걸림돌</b>로 남았다</li>
+  </ul>
+  <div class="big">순차 처리를 <span class="y">통째로 걷어내고</span><br>attention 하나만으로 문장을 처리하면?<small>순서의 벽도, 병렬을 막던 순차성도 한꺼번에 사라지지 않을까</small></div>
+  <div class="hl">이미지가 <b>skip connection</b>으로 깊이의 벽을 넘었듯, 언어는 이 질문 하나로 <b class="g">트랜스포머(Transformer)</b>로 건너갑니다.</div>
+  <aside>이 대담한 질문이 다음 이야기의 문을 엽니다. 다음 소단원에서 attention만으로 세운 구조, 트랜스포머로 들어갑니다.</aside>
+</section>
+
+<!-- 23 핵심 5문장 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 5문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>word2vec</b> — 이웃 단어로 뜻을 배워, 임베딩이 언어 신경망의 <b>표준 입력</b>이 됐다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>RNN</b>은 은닉 상태로 기억을 넘기지만, 긴 문장에서 <b>순서의 벽</b>(시간 축 vanishing gradient)에 부딪혔다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>LSTM</b>은 셀 상태 통로+게이트로 신호를 멀리 날랐다 — <b>skip connection과 한 뿌리</b>.</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>seq2seq</b>는 문맥 벡터 하나로 압축 → <b>고정벡터 병목</b>. <b>attention</b>이 원문을 되돌아보며 그 병목을 깼다.</span></div>
+    <div class="st"><span class="n">5</span><span class="t">남은 <b>순차성</b>을 걷어내자는 질문이 <b>트랜스포머</b>로 가는 문을 연다.</span></div>
+  </div>
+  <aside>깊이의 벽과 순서의 벽은 한 뿌리이고, 둘 다 "통로를 터 주는" 아이디어로 넘었습니다. 그리고 남은 걸림돌이 다음 구조를 부릅니다.</aside>
+</section>
+
+<!-- 24 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> word2vec은 뜻을 어떻게 배우나? '왕−남자+여자≈여왕'이 가능한 이유는?</div>
+    <div class="q"><b>Q2.</b> 꼬맨틀에서 뜻이 먼 단어가 높게 나오는 건 벡터가 무엇을 배웠기 때문인가?</div>
+    <div class="q"><b>Q3.</b> RNN의 <b>순서의 벽</b>은 무엇이며, 이미지의 어떤 문제와 한 뿌리인가?</div>
+    <div class="q"><b>Q4.</b> LSTM의 <b>셀 상태</b>가 skip connection과 닮은 점은?</div>
+    <div class="q"><b>Q5.</b> seq2seq의 <b>고정벡터 병목</b>을 attention은 어떻게 깼나?</div>
+  </div>
+  <aside>Q3와 Q5가 오늘의 핵심입니다. 순서의 벽=깊이의 벽, 병목=되돌아보기로 해소.</aside>
+</section>
+
+<!-- 25 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 주변 단어(이웃) 맞히기를 반복해 <b>비슷한 자리에 오는 단어는 비슷한 벡터</b>가 되게 학습. 뜻의 관계가 <b>방향·거리</b>로 남아 왕−남자+여자≈여왕이 성립.</div>
+    <div class="q a"><b>A2.</b> 벡터가 배운 건 사전적 정의가 아니라 <b>쓰임의 이웃 관계</b> — 같은 문맥에 자주 함께 쓰인 단어라 점수가 높게 튄다.</div>
+    <div class="q a"><b>A3.</b> 긴 문장에서 앞 단어 정보가 은닉 상태를 거치며 흐려지는 것. 은닉 상태 넘김 = 층 쌓기와 같아, <b>시간 축의 vanishing gradient</b>(=깊이의 벽)와 한 뿌리.</div>
+    <div class="q a"><b>A4.</b> 셀 상태 통로엔 <b>곱셈 변형이 거의 없어</b> 신호가 온전히 멀리 흐른다 — <b>지름길(통로)을 터 준다</b>는 발상이 같다.</div>
+    <div class="q a"><b>A5.</b> 원문 단어별 은닉 상태를 <b>전부 남기고</b>, 디코더가 매 단어마다 <b>원문 전체를 되돌아보며 가중치</b>를 줘 벡터 하나의 좁은 문을 없앴다.</div>
+  </div>
+  <aside>A3·A5를 자기 말로 설명할 수 있으면 오늘 목표 달성입니다.</aside>
+</section>
+
+<!-- 26 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>순차성을 걷어낼 차례 🚪</h1>
+    <div class="big" style="margin-top:26px">단어를 벡터로 → 순서의 벽 → 병목 → <span class="y">되돌아보기</span><br><br>남은 <span class="y">순차성</span>을 걷어내면?<br>다음 — <span class="y">트랜스포머</span></div>
+    <p class="sub" style="margin-top:24px">언어가 부딪힌 또 다른 벽 — 여기까지</p>
+  </div>
+  <aside>오늘의 여정 끝. attention이 주역이 되고 순차성만 걸림돌로 남은 지금, 다음 소단원에서 attention만으로 세운 트랜스포머로 건너갑니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
