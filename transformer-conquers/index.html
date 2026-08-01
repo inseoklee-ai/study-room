@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>트랜스포머가 세상을 먹다 · 사전학습·스케일링·정렬·정복</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.76rem,1.28vw,.94rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  .fml{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);
+    padding:15px 18px;text-align:center;margin:8px 0;font-family:"SF Mono",Consolas,monospace}
+  .fml .e{font-size:clamp(.95rem,1.9vw,1.28rem);font-weight:800;color:var(--gr);margin:2px 0}
+  .fml .e2{font-size:clamp(.82rem,1.45vw,1.02rem);color:var(--soft);margin:2px 0}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 트랜스포머 (5)</span>
+    <h1 style="margin:18px 0">트랜스포머가<br>세상을 먹다</h1>
+    <p class="sub">사전학습 · 스케일링 · 정렬, 그리고 언어 밖으로의 정복</p>
+  </div>
+  <aside>2017년의 트랜스포머는 번역기 한 대였습니다. 몇 해 만에 챗봇이자 에이전트의 뼈대가 됐고, 이미지·소리·로봇·단백질까지 같은 구조로 빨려 들어갔습니다. 그 사이 무슨 일이 있었는지 따라갑니다.</aside>
+</section>
+
+<!-- 2 오늘의 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:110px;border-color:var(--bl)"><small>PART 1</small><b>언어 안<br>세 번의 도약</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px;border-color:var(--gr)"><small>PART 2</small><b class="g">정렬<br>(SFT·RLHF·DPO)</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px;border-color:var(--gold)"><small>PART 3</small><b>언어 밖<br>정복</b></div>
+  </div>
+  <ul class="pts">
+    <li><b>사전학습</b>(BERT·GPT) → <b>스케일링</b>(멱법칙·인컨텍스트 러닝) 세 도약의 첫 둘</li>
+    <li>똑똑하지만 말귀 못 알아듣던 모델을 사람 곁으로 — <b>정렬</b></li>
+    <li>어텐션이 언어를 떠나 <b>이미지·소리·로봇·단백질</b>까지 정복한 이야기</li>
+    <li>마지막에 <b>활용가인 우리에게</b> 왜 반가운 소식인지</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 줄 — <b>토큰으로 자를 수 있으면 무엇이든</b> 트랜스포머가 삼킨다. 구조 하나를 알면 나머지가 읽힌다.</div>
+  <aside>수식(🔬 깊이 보기)도 몇 장 나오지만 "무엇의 확률을 올리고 내리나"만 읽으면 됩니다.</aside>
+</section>
+
+<!-- 3 30초 복습 -->
+<section class="slide" data-part="표지">
+  <h2>⏪ 30초 복습 — 2017의 <span class="g">트랜스포머</span></h2>
+  <ul class="pts">
+    <li>어텐션만으로 문장을 <b>한꺼번에</b> 바라보고, 그 덕에 <b>병렬 학습</b>이 가능한 구조</li>
+    <li>사실 그때는 <b>번역기 한 대</b>에 지나지 않았다</li>
+    <li>그런데 몇 해 만에 <b>챗봇·코드·에이전트의 뼈대</b>가 됐다 — 그 사이 무슨 일이?</li>
+  </ul>
+  <div class="hl">먼저 언어 안에서 <b>세 번의 도약</b> — 인터넷을 삼킨 <b>사전학습</b>, 키웠더니 능력이 솟은 <b>스케일링</b>, 사람 곁으로 데려온 <b>정렬</b>.</div>
+  <aside>"모델을 키운다"는 말의 실제 모습은 끝없이 이어지는 데이터센터 서버 랙 복도의 길이입니다. 세 도약은 결국 그 복도로 환산되는 이야기입니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">언어 안, 세 번의 도약</h2>
+    <p style="margin-top:11px">사전학습으로 삼키고, 스케일로 창발하고</p>
+    <span class="who">BERT·GPT · 스케일링 · 인컨텍스트 러닝</span>
+  </div>
+  <aside>트랜스포머는 원래 문장을 읽는 인코더와 쓰는 디코더가 짝을 이룬 구조였습니다. 이후 연구는 한쪽만 떼어 극단으로 밀어붙이는 두 갈래로 갈립니다.</aside>
+</section>
+
+<!-- 5 사전학습 두 갈래 -->
+<section class="slide" data-part="PART 1">
+  <h2>🍴 사전학습의 <span class="g">두 갈래</span></h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="b">📖 BERT (2018) · 인코더만</h3>
+      <p style="margin:0">문장의 단어 일부를 가리고 <b>앞뒤 문맥을 모두 보고</b> 빈칸 맞히기 = <b>양방향 마스크 LM</b>. 의미를 깊이 <b>이해</b>하는 분류·검색에 강함.</p>
+    </div>
+    <div class="box">
+      <h3 class="g">✍️ GPT 계열 · 디코더만</h3>
+      <p style="margin:0">오직 <b>다음 토큰 하나</b> 예측. 앞 문맥 → 다음 단어 확률 → 뽑아 이어 붙이고 반복. 글을 <b>생성</b>하는 데 자연스러움.</p>
+    </div>
+  </div>
+  <div class="hl">두 갈래 모두 <b>웹 규모 텍스트로 언어 통계를 크게 익혀 두고(사전학습)</b>, 과제마다 적은 데이터로 손보는(<b>파인튜닝</b>) 흐름을 공유했다 — 곧 이 당연함이 무너진다.</div>
+  <aside>BERT: arXiv:1810.04805. 인코더=이해, 디코더=생성이라는 두 성격이 여기서 갈립니다.</aside>
+</section>
+
+<!-- 6 스케일링 -->
+<section class="slide" data-part="PART 1">
+  <h2>📈 키웠더니 — <span class="g">스케일링 법칙</span> (2020)</h2>
+  <ul class="pts">
+    <li>GPT 계열은 구조를 바꾸는 대신 <b>그냥 더 키웠다</b> — GPT-2(2019)는 15억 개, 파인튜닝 없이도 그럴듯한 글</li>
+    <li>"얼마나 키우면 얼마나 좋아지나?" → 모델·데이터·계산량을 키우며 재 보니</li>
+    <li><b>손실</b>(틀린 정도)이 뚝 떨어지는 게 아니라, 자원을 몇 배 할 때마다 <b>정해진 비율로 매끈하게</b> 감소 = <b class="g">멱법칙</b></li>
+  </ul>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--pp)"><small>GPT-2 · 2019</small><b class="p">15억 · 손실 높음</b></div>
+    <span class="ar">규모(로그)↑ →</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>GPT-3 · 2020</small><b class="g">1,750억 · 손실 낮음</b></div>
+  </div>
+  <div class="hl">성능 향상이 <b>요행이 아니라, 자원을 부으면 예측 가능하게 따라오는 공학의 문제</b>임을 보인 것. (Scaling Laws, arXiv:2001.08361)</div>
+  <aside>손실은 틀린 정도를 숫자 하나로 요약한 값, 작을수록 잘 맞힌 것입니다.</aside>
+</section>
+
+<!-- 7 멱법칙 식 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔬 깊이 보기 — <span class="g">멱법칙</span>을 식으로</h2>
+  <div class="fml">
+    <div class="e">L ∝ N<sup>−α</sup></div>
+    <div class="e2">L=손실 · N=파라미터 수 · ∝=비례 · α=감소 기울기(작은 양수)</div>
+  </div>
+  <ul class="pts">
+    <li>지수 앞의 <b>마이너스</b> = N이 커질수록 손실이 <b>내려간다</b>는 뜻</li>
+    <li>데이터 양·계산량에도 <b>같은 모양의 식</b>이 성립 — 일부 추세는 <b>일곱 자릿수 범위</b>에서도 안 흐트러짐</li>
+    <li>관찰: 큰 모델일수록 같은 데이터에서 더 많이 뽑아낸다 → 예산이 정해지면 <b>작은 모델 오래보다 큰 모델을 비교적 적은 데이터로</b></li>
+  </ul>
+  <div class="hl">요컨대 규모↑ → 손실↓가 <b>자로 잰 듯 예측된다</b>는 것이 스케일링 법칙의 핵심입니다.</div>
+  <aside>이 "큰 모델이 유리하다"는 관찰이 이후 초거대 모델 경쟁의 이론적 근거가 됩니다.</aside>
+</section>
+
+<!-- 8 GPT-3 창발 -->
+<section class="slide" data-part="PART 1">
+  <h2>✨ GPT-3와 솟아난 능력 — <span class="g">인컨텍스트 러닝</span></h2>
+  <ul class="pts">
+    <li>2020년 GPT-3는 <b>1,750억 개</b>. 놀라운 건 낮은 손실이 아니라 <b>아무도 안 가르친 능력</b>이 솟은 것</li>
+    <li><b>인컨텍스트 러닝</b> — 가중치를 <b>하나도 안 바꾸고</b>, 입력 창에 <b>예시 몇 개</b>만 적어 새 과제 수행</li>
+    <li>"영어→프랑스어" 예시 두세 쌍을 보여 준 뒤 새 문장을 던지면, <b>그 자리에서 패턴을 흉내 내</b> 답 (= 퓨샷)</li>
+  </ul>
+  <div class="big">과제는 이제 <span class="y">훈련의 대상</span>이 아니라<br><span class="y">프롬프트에 적어 넣는 지시</span>가 되었다<small>다시 학습시키는 대신 말로 시키는 시대 — 지금 우리가 프롬프트를 쓰는 방식의 뿌리</small></div>
+  <aside>Language Models are Few-Shot Learners, arXiv:2005.14165. 방금 전까지 당연했던 "과제마다 파인튜닝" 워크플로가 통째로 뒤집혔습니다.</aside>
+</section>
+
+<!-- 9 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">똑똑하지만 말귀를 못 알아듣던 모델</h2>
+    <p style="margin-top:11px">다음 토큰 잇기 ≠ 사람이 원하는 것</p>
+    <span class="who">정렬 · SFT · RLHF · DPO</span>
+  </div>
+  <aside>사전학습을 마친 모델은 방대한 지식을 품었지만, 훈련 목표가 오직 "다음에 올 법한 토큰 잇기"뿐이었습니다. 이 간극을 메우는 작업이 정렬입니다.</aside>
+</section>
+
+<!-- 10 말귀 -->
+<section class="slide" data-part="PART 2">
+  <h2>🙉 "다음에 올 법한" ≠ "<span class="g">사람이 원하는</span>"</h2>
+  <div class="box">
+    <p style="margin:0">사전학습만 마친 모델에게 <code>프랑스의 수도를 알려 줘</code> → 답을 아는데도 <b>"이탈리아의 수도도 알려 줘"</b>라고 <b>비슷한 질문을 이어 쓴다.</b> 인터넷엔 질문 뒤 질문이 이어지는 텍스트가 널려, 그것이 통계적으로 그럴듯한 다음 토큰이었으니까.</p>
+  </div>
+  <ul class="pts">
+    <li>모델은 <b>지시를 따르도록·정직하게·해로운 요청을 거절하도록</b> 만들어진 적이 없다</li>
+    <li>정렬 = 트랜스포머가 매 순간 내놓는 <b>다음 토큰 확률 분포를 원하는 쪽으로 미는</b> 작업</li>
+  </ul>
+  <div class="hl">곧 <b>강화학습</b>이 등장 — 정답을 알려 주는 대신 <b>잘한 행동에 보상</b>. 보상을 좇는 주체(정책)가 바로 <b>트랜스포머 언어 모델 자신</b>. 구조를 아는 지금이라야 "무엇을 어디로 미는지"가 말이 된다.</div>
+  <aside>정렬을 트랜스포머 직후에 다루는 이유가 이것입니다. 정렬은 허공의 마법이 아니라 토큰 분포를 미는 구체적 작업입니다.</aside>
+</section>
+
+<!-- 11 SFT -->
+<section class="slide" data-part="PART 2">
+  <h2>1️⃣ 첫 손질 — <span class="g">지시학습(SFT)</span></h2>
+  <ul class="pts">
+    <li>사람이 <b>좋은 질문 + 모범 답안</b> 쌍을 여럿 써 두고, 그 답안이 나올 확률이 커지도록 미세조정</li>
+    <li>중요 — 이 단계는 <b>새 지식을 심지 않는다.</b> "파리가 프랑스 수도"는 이미 사전학습에 들어 있음</li>
+    <li>SFT가 바꾸는 건 지식을 꺼내는 <b>행동의 양식</b> — 질문에 질문 말고 <b>지시가 오면 수행</b>하라는 대화의 매너</li>
+  </ul>
+  <div class="hl">SFT만으로도 눈에 띄게 쓸 만해진다. 다만 <b>모범 답안은 양이 한정</b>적이고, "무엇이 <b>더</b> 좋은 답인가"는 답 하나를 베껴선 전해지지 않는다.</div>
+  <aside>supervised fine-tuning. 사실을 새로 심는 게 아니라 태도를 조각한다 — 정렬 전체를 관통하는 핵심입니다.</aside>
+</section>
+
+<!-- 12 RLHF -->
+<section class="slide" data-part="PART 2">
+  <h2>2️⃣ 사람 선호로 다듬다 — <span class="g">RLHF</span></h2>
+  <ul class="pts">
+    <li>같은 질문에 모델이 낸 <b>여러 답을 사람에게 보여 주고 어느 쪽이 나은지 고르게</b> 한다</li>
+    <li>절대 점수는 어려워도 <b>둘 중 나은 쪽 고르기는 쉽다</b>는 사람 판단의 결을 이용</li>
+    <li>모은 비교로 <b>보상 모델</b>(심판)을 학습 → 그 점수가 높아지는 쪽으로 토큰 분포를 이동</li>
+    <li><b>KL 제약</b> — 손질 전 모델에서 멀어진 만큼 벌점, 심판 허점 파고드는 폭주 방지</li>
+  </ul>
+  <div class="big">GPT-3에 적용한 <span class="y">InstructGPT</span> — <b>130배 작은 13억 모델</b>의 답을<br>1,750억 원본보다 사람들이 <span class="y">더 선호</span><small>크기 100배를 정렬 하나가 뒤집었다 — ChatGPT의 바탕</small></div>
+  <aside>Deep RL from human preferences, arXiv:1706.03741 / InstructGPT, arXiv:2203.02155. 쓸 만함은 크기만의 문제가 아니었습니다.</aside>
+</section>
+
+<!-- 13 SFT/RLHF 수식 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔬 깊이 보기 — <span class="g">SFT·RLHF</span>의 목적함수</h2>
+  <div class="fml">
+    <div class="e2">π<sub>θ</sub> = 우리가 훈련하는 모델(정책) · σ = 실수를 0~1로 누름</div>
+    <div class="e">SFT :　L = − E [ log π<sub>θ</sub>(y | x) ]　<span style="color:var(--soft);font-weight:400">← 모범답안 확률 최대(최대우도)</span></div>
+    <div class="e">보상모델 :　L = − E [ log σ( r(x,y<sub>w</sub>) − r(x,y<sub>l</sub>) ) ]</div>
+    <div class="e">정책 :　max E[ r(x,y) ] − β·KL( π<sub>θ</sub> ‖ π<sub>ref</sub> )</div>
+  </div>
+  <ul class="pts">
+    <li>보상모델 — 이긴 답 <b>y<sub>w</sub></b> 점수가 진 답 <b>y<sub>l</sub></b>보다 클수록 손실↓ (사람이 고른 쪽에 높은 점수)</li>
+    <li>정책 — 앞항 <b>보상 높이기</b> + 뒷항 <b>기준 π<sub>ref</sub>에서 멀어진 만큼 벌점(KL 고삐)</b>. β가 고삐 세기</li>
+    <li>보통 <b>PPO</b>로 조금씩만 움직여 학습이 안 무너지게</li>
+  </ul>
+  <aside>KL은 두 확률분포가 얼마나 벌어졌는지 재는 값. 이 벌점이 없으면 보상 허점만 파고들어 언어 능력이 망가집니다.</aside>
+</section>
+
+<!-- 14 DPO -->
+<section class="slide" data-part="PART 2">
+  <h2>3️⃣ 보상 모델을 지우고 곧장 — <span class="g">DPO</span> (2023)</h2>
+  <ul class="pts">
+    <li>RLHF는 강력하지만 <b>무겁다</b> — 보상 모델 따로 학습 + 불안정한 RL + 훈련 내내 답 생성</li>
+    <li>DPO의 질문: 목표가 선호에 맞는 정책이라면, <b>보상 모델·RL을 건너뛰고 선호 쌍에서 곧장</b>?</li>
+    <li>KL 고삐 걸린 보상 최대화를 <b>종이 위에서 풀어 뒤집으면</b> 보상이 <b>정책 자신의 확률 비</b>로 바뀐다</li>
+    <li>그러면 보상 모델이 통째로 사라지고 — <b>이긴 답 확률↑ 진 답 확률↓</b>의 분류 손실 하나만 남는다</li>
+  </ul>
+  <div class="hl">RLHF와 <b>같은 목표를 지도학습 한 번</b>으로 겨냥 → 단순·안정. 이후 여러 오픈 모델이 채택. (DPO, arXiv:2305.18290)</div>
+  <aside>"Your Language Model is Secretly a Reward Model" — 언어 모델 자체가 이미 보상 모델 역할을 품고 있다는 통찰입니다.</aside>
+</section>
+
+<!-- 15 DPO 수식 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔬 깊이 보기 — 보상 모델이 <span class="g">사라지는</span> 과정</h2>
+  <ul class="pts">
+    <li>KL 제약 보상 최대화는 <b>닫힌 형태의 해</b>(종이 위 수식 하나로 딱 떨어짐)로 적힌다</li>
+    <li>그 해를 뒤집으면 <b>보상 = 정렬 정책과 기준 정책의 확률 비</b>, 즉 r = β·log( π<sub>θ</sub> / π<sub>ref</sub> )</li>
+    <li>이를 선호 비교 식에 대입하면 <b>보상 모델 r이 통째로 소거</b>되고 다음만 남는다</li>
+  </ul>
+  <div class="fml">
+    <div class="e">L<sub>DPO</sub> = − E [ log σ( β·log π<sub>θ</sub>(y<sub>w</sub>)/π<sub>ref</sub>(y<sub>w</sub>) − β·log π<sub>θ</sub>(y<sub>l</sub>)/π<sub>ref</sub>(y<sub>l</sub>) ) ]</div>
+  </div>
+  <div class="hl">하는 일은 직관적 — 고른 답 <b>y<sub>w</sub> 확률은 기준 대비 올리고</b>, 진 답 <b>y<sub>l</sub> 확률은 내린다.</b> β·π<sub>ref</sub>가 <b>KL 고삐</b>를 그대로 이어받아 원래 능력에서 못 벗어나게 잡아 준다.</div>
+  <aside>RLHF의 3부품(보상모델+RL+생성)을 수식 조작으로 지도학습 1회로 접은 것이 DPO의 우아함입니다.</aside>
+</section>
+
+<!-- 16 정렬 종합 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧩 정렬의 정체 — <span class="g">태도를 조각한다</span></h2>
+  <table class="t">
+    <tr><th>단계</th><th>학습 신호</th><th>파라미터의 무엇이 바뀌나</th><th>대가</th></tr>
+    <tr><td>사전학습</td><td>웹 텍스트의 다음 토큰</td><td>세계 지식 + 언어의 통계</td><td>막대한 계산량</td></tr>
+    <tr><td>지시학습(SFT)</td><td>사람이 쓴 모범 답안</td><td>지식을 꺼내는 <b>행동 양식</b></td><td>모범 답안 작성 비용</td></tr>
+    <tr><td>강화학습(RLHF)</td><td>답들 사이 사람 선호</td><td>선호하는 쪽으로 분포 이동</td><td>보상 모델·불안정 RL</td></tr>
+    <tr><td>직접 최적화(DPO)</td><td>답들 사이 사람 선호</td><td>RLHF와 같으나 절차만 단순</td><td>선호 데이터 품질 의존</td></tr>
+  </table>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>사전학습</small><b class="b">지식을 쌓다</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>지시학습 SFT</small><b class="g">행동을 가르치다</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>선호 정렬 RLHF·DPO</small><b>가치를 입히다</b></div>
+  </div>
+  <div class="hl">핵심 한 문장 — <b>아는 것은 대체로 사전학습에서 정해지고, 정렬은 그 아는 것을 어떻게 말하고 행동할지를 바꾼다.</b></div>
+  <aside>네 단계는 경쟁자가 아니라 파라미터의 서로 다른 층위를 차례로 건드리는 흐름입니다. 사실을 심는 게 아니라 태도를 조각합니다.</aside>
+</section>
+
+<!-- 17 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">언어의 울타리를 넘다</h2>
+    <p style="margin-top:11px">토큰으로 자를 수 있으면 무엇이든 삼킨다</p>
+    <span class="who">ViT · Whisper · DiT · AlphaFold · RT-2</span>
+  </div>
+  <aside>정렬이 마지막 퍼즐을 맞추자 모델은 쓸 만해졌고, 진짜 사건은 그다음 — 트랜스포머가 언어를 떠나기 시작한 것입니다.</aside>
+</section>
+
+<!-- 18 왜 넘어갔나 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔑 넘어간 이유는 <span class="g">허무할 만큼 단순</span></h2>
+  <ul class="pts">
+    <li>어텐션은 애초에 <b>언어에 대한 계산이 아니었다</b></li>
+    <li>하는 일 = 여러 조각이 서로를 둘러보며 <b>누구를 얼마나 참고할지</b> 정하는 것뿐</li>
+    <li>그 조각이 <b>꼭 단어여야 한다는 조건은 어디에도 없었다</b></li>
+  </ul>
+  <div class="big">무엇이든 <span class="y">조각으로 잘라 한 줄로 세울 수만 있다면</span><br>픽셀이든 소리든 로봇의 관절 각도든 <span class="y">똑같이 삼킨다</span></div>
+  <div class="hl">이 한 줄이 열쇠였고, 열쇠를 쥔 사람들이 <b>분야마다 문을 열고 들어갔다.</b></div>
+  <aside>"조각으로 자르고, 서로를 참고하게 한다" — 이 추상이 분야를 가리지 않는 이유입니다.</aside>
+</section>
+
+<!-- 19 정복 현장 -->
+<section class="slide" data-part="PART 3">
+  <h2>🏴 정복의 현장 — <span class="g">전용 구조를 걷어내다</span></h2>
+  <table class="t">
+    <tr><th>분야</th><th>오래된 왕좌</th><th>트랜스포머로</th></tr>
+    <tr><td>시각</td><td>CNN — 필터로 국소 패턴</td><td><b>ViT</b> — 이미지를 16×16 패치로 잘라 단어처럼</td></tr>
+    <tr><td>음성</td><td>음향모델+발음사전+LM 조립품</td><td><b>Whisper</b> — 스펙트로그램 조각을 토큰 줄로</td></tr>
+    <tr><td>강화학습</td><td>가치 함수 기반 정책 개선</td><td><b>Decision Transformer</b> — 궤적을 시퀀스로, 다음 행동=다음 토큰</td></tr>
+    <tr><td>이미지 생성</td><td>확산 모델의 U-Net</td><td><b>DiT</b> — 잠재 패치를 토큰으로, 스케일링 성질까지</td></tr>
+    <tr><td>생물학</td><td>서열→구조 예측 난제</td><td><b>AlphaFold</b> — 아미노산을 어텐션으로 참고</td></tr>
+    <tr><td>로봇</td><td>별도 제어 이론</td><td><b>RT-2</b> — 로봇 동작을 글자 토큰으로</td></tr>
+  </table>
+  <div class="hl">픽셀은 <b>패치</b>가, 소리는 <b>스펙트로그램 조각</b>이, 행동 기록은 <b>궤적 토큰</b>이 되었다.</div>
+  <aside>ViT arXiv:2010.11929 / Whisper arXiv:2212.04356 / Decision Transformer arXiv:2106.01345 / DiT arXiv:2212.09748 / AlphaFold Nature 2021 / RT-2 arXiv:2307.15818.</aside>
+</section>
+
+<!-- 20 ViT 깊이보기 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔬 깊이 보기 — <span class="g">ViT</span>는 왜 데이터를 그렇게 먹었나</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="b">CNN — 공짜 전제</h3>
+      <p style="margin:0">필터 구조 자체에 <b>"가까운 픽셀은 관련 있다"·"같은 무늬는 어디 있든 같다"</b>가 이미 박혀 있음. 학습이 아니라 <b>설계로 얻은 지식</b>.</p>
+    </div>
+    <div class="box">
+      <h3 class="g">ViT — 전제 없음</h3>
+      <p style="margin:0">모든 패치가 모든 패치를 <b>평등하게</b> 둘러봄. <b>이웃이 특별하다는 사실마저 데이터에서</b> 배워야 함.</p>
+    </div>
+  </div>
+  <div class="hl">그래서 데이터가 적을 땐 CNN에 밀렸고, <b>3억 장 규모로 사전학습한 뒤에야 앞섰다.</b> 공짜 전제를 버린 대신 <b>전제에 갇히지 않는 자유</b>를 얻은 거래 — 데이터 흔한 시대엔 남는 장사.</div>
+  <aside>이 "귀납 편향(inductive bias)을 버리고 데이터로 대체한다"는 거래가 트랜스포머 정복의 공통 대가입니다. 확산(DiT)은 U-Net을 들어내고 잠재 패치를 토큰으로 세웠고, 요즘 Stable Diffusion 3·CogVideoX가 이 뼈대 위에 섭니다.</aside>
+</section>
+
+<!-- 21 공식 + 활용가 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧮 공식은 어디서나 <span class="g">같았다</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--red)"><small>1</small><b>전용 구조를<br>걷어내고</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>2</small><b>대상을 조각으로<br>자르고</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>3</small><b class="g">조각들이 서로를<br>참고하게</b></div>
+  </div>
+  <div class="hl">그래서 활용가인 우리에게 반가운 소식 — 분야마다 따로 있던 <b>입장권이 하나로 합쳐졌다.</b> 구조 하나를 제대로 알면 나머지가 대체로 읽힌다.</div>
+  <ul class="pts">
+    <li>새 모델이 뉴스에 뜨면 두 질문으로 자리 잡기 — <b>"무엇을 토큰으로 잘랐나"</b> · <b>"무엇이 무엇을 참고하나"</b></li>
+    <li>비용도 같은 잣대 — 어텐션은 조각 비교 계산이라 <b>"조각이 몇 개인가"</b>가 어디서든 속도·요금·한계를 가른다</li>
+  </ul>
+  <aside>자기 노트북의 로컬 모델도 같은 디코더 블록의 반복이고, 문서 이미지를 읽는 시각-언어 모델도 그림 패치와 글자 토큰을 한 줄에 세워 어텐션을 돌립니다.</aside>
+</section>
+
+<!-- 22 여정 종합 -->
+<section class="slide" data-part="마무리">
+  <h2>🧭 여기까지의 <span class="g">여정</span></h2>
+  <table class="t">
+    <tr><th>물음</th><th>핵심 정리</th></tr>
+    <tr><td>사전학습은 무엇을 남기나</td><td>다음 토큰 예측만으로 세계 지식·언어 통계를 파라미터에 쌓는다</td></tr>
+    <tr><td>스케일은 무엇을 바꿨나</td><td>멱법칙으로 성능↑, 파인튜닝 대신 <b>프롬프트로 시키는 인컨텍스트 러닝</b> 창발</td></tr>
+    <tr><td>정렬은 무엇을 바꾸나</td><td>지식이 아니라 <b>행동·선호</b>. SFT가 매너를, RLHF·DPO가 가치를 입힌다</td></tr>
+    <tr><td>왜 언어 밖으로 번졌나</td><td>어텐션은 조각들이 서로를 참고하는 계산 — <b>토큰으로 자를 수 있으면 무엇이든</b></td></tr>
+    <tr><td>활용가에게 무엇이 남나</td><td>구조 하나를 알면 시각·음성·생성 모델까지 <b>같은 눈</b>으로 읽고 <b>같은 잣대</b>로 비용을 딴다</td></tr>
+  </table>
+  <aside>트랜스포머 한 구조가 인터넷을 삼키고, 규모로 창발하고, 사람의 선호로 다듬어진 뒤, 언어의 울타리마저 넘은 여정이었습니다.</aside>
+</section>
+
+<!-- 23 핵심 5문장 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 5문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>사전학습</b>은 다음 토큰 예측만으로 지식·언어 통계를 쌓는다. BERT=이해, GPT=생성.</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>스케일링 법칙</b>(멱법칙)으로 성능이 예측 가능하게 오르고, GPT-3에서 <b>인컨텍스트 러닝</b>이 창발 → 프롬프트 시대.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>정렬</b>은 지식이 아니라 태도 — SFT(매너) → RLHF/DPO(선호). "아는 건 사전학습, 태도는 정렬."</span></div>
+    <div class="st"><span class="n">4</span><span class="t">어텐션은 <b>조각들이 서로를 참고하는 계산</b>일 뿐 → ViT·Whisper·DiT·AlphaFold·RT-2로 언어 밖 정복.</span></div>
+    <div class="st"><span class="n">5</span><span class="t">활용가는 두 질문으로 — <b>"무엇을 토큰으로 잘랐나 · 무엇이 무엇을 참고하나"</b>. 비용은 <b>조각 수</b>가 가른다.</span></div>
+  </div>
+  <aside>3번과 4번이 오늘의 심장입니다. 태도를 조각한다는 것, 그리고 조각으로 자르면 무엇이든 삼킨다는 것.</aside>
+</section>
+
+<!-- 24 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> BERT와 GPT는 트랜스포머의 <b>어느 쪽</b>을 떼어 냈고, 각각 무엇에 강한가?</div>
+    <div class="q"><b>Q2.</b> <b>스케일링 법칙</b>과, GPT-3에서 창발한 <b>인컨텍스트 러닝</b>이 바꾼 워크플로는?</div>
+    <div class="q"><b>Q3.</b> 사전학습만 한 모델이 지시를 안 따르는 이유와, <b>정렬</b>이 바꾸는 것은?</div>
+    <div class="q"><b>Q4.</b> <b>RLHF</b>와 <b>DPO</b>의 차이는? DPO는 무엇을 지웠나?</div>
+    <div class="q"><b>Q5.</b> 어텐션이 <b>언어 밖으로</b> 번질 수 있었던 이유를 한 문장으로.</div>
+  </div>
+  <aside>Q3·Q5가 오늘의 핵심입니다. 태도 조각, 그리고 조각화의 보편성.</aside>
+</section>
+
+<!-- 25 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> <b>BERT</b>=인코더만(양방향 마스크 LM)→이해·분류·검색. <b>GPT</b>=디코더만(다음 토큰 예측)→생성.</div>
+    <div class="q a"><b>A2.</b> 규모↑→손실↓가 <b>멱법칙으로 예측</b>. 인컨텍스트 러닝으로 과제가 <b>훈련 대상 → 프롬프트 지시</b>로 바뀜(다시 학습 대신 말로 시키기).</div>
+    <div class="q a"><b>A3.</b> 목표가 <b>"다음에 올 법한 토큰"</b>뿐이라 지시·정직·거절을 배운 적 없음. 정렬은 지식이 아니라 <b>행동·선호(태도)</b>를 바꾼다.</div>
+    <div class="q a"><b>A4.</b> RLHF=<b>보상 모델+불안정한 RL</b>로 선호 반영. DPO=<b>보상 모델·RL을 지우고</b> 선호 쌍에서 곧장 최적화(지도학습 1회). 단순·안정.</div>
+    <div class="q a"><b>A5.</b> 어텐션은 <b>조각들이 서로를 참고하는 계산</b>일 뿐, 조각이 단어일 필요가 없어 <b>토큰으로 자를 수 있으면 무엇이든</b> 삼킨다.</div>
+  </div>
+  <aside>A3·A5를 자기 말로 설명할 수 있으면 트랜스포머 강의 전체를 손에 쥔 것입니다.</aside>
+</section>
+
+<!-- 26 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>한 구조가 세상을 먹다 🌍</h1>
+    <div class="big" style="margin-top:26px">토큰으로 자를 수 있으면 <span class="y">무엇이든</span><br>구조 하나를 알면 <span class="y">나머지가 읽힌다</span><br><br>다음 — 첫 관문 <span class="y">토큰</span>과 <span class="y">컨텍스트</span></div>
+    <p class="sub" style="margin-top:24px">트랜스포머가 세상을 먹다 — 여기까지</p>
+  </div>
+  <aside>어느 분야의 모델을 만나든 첫 관문은 같습니다. 무엇을 조각으로 자를 것이며, 그 조각을 한 번에 몇 개까지 작업대에 올릴 수 있는가. 다음은 토큰과 컨텍스트의 이야기입니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
