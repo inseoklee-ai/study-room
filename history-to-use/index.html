@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>역사에서 활용까지 한 줄로 꿰기 · 강의 2 트랜스포머 종합</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:10px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.9rem,1.5vw,1.08rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:78px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.88rem}
+  .ar{color:var(--gr);font-size:1.2rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.76rem,1.28vw,.94rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 11px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 트랜스포머 (8) · 종합 정리</span>
+    <h1 style="margin:18px 0">역사에서 활용까지<br>한 줄로 꿰기</h1>
+    <p class="sub">강의 2 트랜스포머 — 여덟 소단원을 한 문장으로 접는다</p>
+  </div>
+  <aside>긴 역사를 한 문장으로 접어 넣을 차례입니다. CNN과 초기 언어 모델의 벽에서 시작해, 어텐션·트랜스포머·LLM을 지나, 토큰과 컨텍스트라는 활용가의 책상까지 온 여정을 한 줄로 꿰어 봅니다.</aside>
+</section>
+
+<!-- 2 한 줄로 접기 -->
+<section class="slide" data-part="표지">
+  <h2>🧵 긴 역사를 <span class="g">한 줄</span >로</h2>
+  <div class="chain">
+    <div class="cell" style="border-color:var(--red)"><small>각자의 벽</small><b>CNN · 초기 언어</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="border-color:var(--bl)"><small>벽을 넘다</small><b class="b">어텐션</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="border-color:var(--gr)"><small>쌓아 올려</small><b class="g">트랜스포머</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="border-color:var(--gr2)"><small>낳은 것</small><b>거대 언어 모델</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="border-color:var(--gold)"><small>남긴 것</small><b>토큰 · 컨텍스트<br>(비용·한계)</b></div>
+  </div>
+  <div class="big">그래서 활용가의 일은 <span class="y">더 긴 입력을 넣는 것</span>이 아니라<br>필요한 문맥을 <span class="y">검토 가능한 구조로 배치</span>하는 것</div>
+  <aside>바로 그 어텐션 구조가 토큰과 컨텍스트라는 비용·한계를 만들었습니다. 강함과 한계가 같은 뿌리라는 것이 이 강의의 핵심 통찰입니다.</aside>
+</section>
+
+<!-- 3 수식 없이 봤지만 -->
+<section class="slide" data-part="표지">
+  <h2>🔎 수식 없이 봤다고 <span class="g">얕게 본 건 아니다</span></h2>
+  <ul class="pts">
+    <li>활용가에게 필요한 건 <b>모델 내부 계산을 재현</b>하는 게 아니다</li>
+    <li>필요한 건 <b>왜 입력 설계가 답의 품질과 비용을 좌우하는지 설명</b>할 수 있는 것</li>
+    <li>어텐션이 왜 <b>토큰 수의 제곱</b>에 가까운 비용을 만드는지</li>
+    <li>왜 중요한 정보가 <b>중간에 묻히면</b> 놓치기 쉬운지</li>
+  </ul>
+  <div class="hl">이 두 가지를 말할 수 있다면, 그 사람은 <b>코딩 에이전트가 만든 구조를 판단</b>할 수 있습니다. 그게 오늘 강의의 목적지였습니다.</div>
+  <aside>구조를 설명할 수 있는 능력이 곧 판단할 수 있는 능력입니다. 재현이 아니라 설명이 활용가의 무기입니다.</aside>
+</section>
+
+<!-- 4 강의 2 전체 여정 -->
+<section class="slide" data-part="복습">
+  <h2>🗂️ 강의 2 <span class="g">여덟 소단원</span> 되짚기</h2>
+  <table class="t">
+    <tr><th>소단원</th><th>한 줄 요약</th></tr>
+    <tr><td>① 도입</td><td>두 골목이 같은 벽에 부딪히다 — 이미지·언어의 합류 예고</td></tr>
+    <tr><td>② 이미지가 연 길</td><td>CNN → ResNet, <b>깊이의 벽</b>을 skip connection으로</td></tr>
+    <tr><td>③ 언어의 또 다른 벽</td><td>word2vec·RNN·LSTM·seq2seq → <b>순서의 벽</b>과 attention</td></tr>
+    <tr><td>④ 두 길의 합류</td><td>Attention·Q/K/V·멀티헤드·위치 인코딩 = <b>트랜스포머</b></td></tr>
+    <tr><td>⑤ 세상을 먹다</td><td>사전학습·스케일링·정렬(SFT·RLHF·DPO)·언어 밖 정복</td></tr>
+    <tr><td>⑥ 토큰과 컨텍스트</td><td>어텐션 <b>n² 비용</b> → 토큰·컨텍스트 윈도우·Lost in the Middle</td></tr>
+    <tr><td>⑦ 예산표·캔버스</td><td>토큰 예산표·병목 계산식·컨텍스트 설계 <b>실습</b></td></tr>
+    <tr><td>⑧ 한 줄로 꿰기</td><td>오늘 — 역사에서 활용까지 종합 정리</td></tr>
+  </table>
+  <aside>①~④가 역사(어떻게 왔나), ⑤가 확장(어디까지 갔나), ⑥~⑧이 활용(그래서 우리는)입니다.</aside>
+</section>
+
+<!-- 5 활용가가 기억할 한계 -->
+<section class="slide" data-part="정리">
+  <h2>⚠️ 활용가가 기억할 <span class="r">한계</span></h2>
+  <p>트랜스포머는 문맥을 보는 구조지만, <b>사실 확인 능력이나 책임 판단을 보장하진 않는다.</b> 그래서 컨텍스트 설계엔 항상 <b>검증 장치</b>가 붙어야 한다.</p>
+  <table class="t">
+    <tr><th>한계</th><th>대응</th></tr>
+    <tr><td>긴 문서 중 일부를 놓칠 수 있다</td><td>결론마다 <b>근거 위치를 요구</b>하고 샘플을 검수한다</td></tr>
+    <tr><td>토큰 비용이 누적된다</td><td>입력·출력 <b>예산표</b>를 만들고 반복 지시를 압축한다</td></tr>
+    <tr><td>요약이 근거를 삭제할 수 있다</td><td>위험 정보는 <b>원문 링크·ID를 보존</b>한다</td></tr>
+    <tr><td>모델별 토큰화가 다르다</td><td>사용하는 모델의 <b>공식 문서·도구</b>로 확인한다</td></tr>
+  </table>
+  <aside>긴 컨텍스트에 공식 문서를 넣어도 잘못 인용할 수 있고, 근거가 충돌하면 그럴듯한 절충안을 만들 수 있습니다. 검증 없는 컨텍스트 설계는 위험합니다.</aside>
+</section>
+
+<!-- 6 핵심 정리 -->
+<section class="slide" data-part="정리">
+  <h2>🎯 핵심 정리 — <span class="g">오늘의 질문 → 가져갈 판단</span></h2>
+  <table class="t">
+    <tr><th>오늘의 질문</th><th>가져갈 판단</th></tr>
+    <tr><td>트랜스포머를 왜 알아야 하나</td><td>AI가 문맥을 어떻게 참고하는지 알아야 <b>입력 설계·실패 원인</b>을 설명한다</td></tr>
+    <tr><td>토큰은 왜 중요한가</td><td>비용·지연·컨텍스트 한계가 <b>글자 수보다 토큰 수</b>에 가깝게 움직인다</td></tr>
+    <tr><td>어텐션은 왜 비용이 되나</td><td>모든 토큰이 서로를 참고 → 계산이 <b>토큰 수의 제곱</b>에 가깝게 늘어난다</td></tr>
+    <tr><td>컨텍스트 윈도우는 무엇인가</td><td>한 번에 펼치는 작업대 — <b>크기보다 배치·선별</b>이 중요하다</td></tr>
+    <tr><td>활용가의 역할은 무엇인가</td><td>에이전트가 만든 구조에서 <b>토큰 예산·근거 보존·위험한 압축</b>을 판단한다</td></tr>
+  </table>
+  <aside>다섯 질문에 자기 말로 답할 수 있으면 강의 2의 목표를 달성한 것입니다.</aside>
+</section>
+
+<!-- 7 한 문장으로 닫기 -->
+<section class="slide" data-part="정리">
+  <h2>🔒 한 문장으로 <span class="g">닫는다</span></h2>
+  <div class="big">토큰은 <span class="y">비용</span>을 만들고, 컨텍스트는 <span class="y">한계</span>를 만든다<br><br>트랜스포머를 잘 쓰는 일은 <span class="y">더 긴 입력</span>을 넣는 일이 아니라<br>필요한 문맥을 <span class="y">검토 가능한 구조로 배치</span>하는 일이다</div>
+  <aside>이 한 문장이 강의 2 전체를 담습니다. 강함(문맥을 본다)과 한계(제곱 비용·중간 묻힘)가 같은 구조에서 나온다는 것.</aside>
+</section>
+
+<!-- 8 회고 -->
+<section class="slide" data-part="정리">
+  <h2>🤔 오늘의 <span class="g">회고</span> — 세 줄로</h2>
+  <div class="steps">
+    <div class="st"><span class="n">🧠</span><span class="t"><b>머리</b> — 트랜스포머 구조가 왜 곧 <b>비용·한계</b>가 되는지, 어제와 달라진 관점을 한 문장으로.</span></div>
+    <div class="st"><span class="n">✋</span><span class="t"><b>손</b> — 오늘 만든 <b>토큰 예산표·컨텍스트 캔버스</b>에서 가장 중요한 칸은 무엇이었나.</span></div>
+    <div class="st"><span class="n">❤️</span><span class="t"><b>마음</b> — "비용을 줄이자"는 제안을 받았을 때, <b>어떤 근거만은 지키겠다</b>고 마음먹었나.</span></div>
+  </div>
+  <div class="hl">자기 노트에 세 줄로 남겨 보세요. 머리·손·마음 — 아는 것, 만든 것, 지킬 것.</div>
+  <aside>회고는 배운 것을 자기 것으로 굳히는 단계입니다. 특히 세 번째('마음')가 도메인 책임을 자기 기준으로 만듭니다.</aside>
+</section>
+
+<!-- 9 출처 1 -->
+<section class="slide" data-part="정리">
+  <h2>📚 출처 · 더 찾아보기 <span class="g">(1) 논문·개념</span></h2>
+  <ul class="pts">
+    <li><b>어텐션·트랜스포머</b> — Attention Is All You Need, arXiv:1706.03762 (Vaswani et al., 2017)</li>
+    <li><b>긴 컨텍스트 위치 문제</b> — Lost in the Middle, arXiv:2307.03172 (Liu et al., 2023)</li>
+    <li><b>RAG(검색 증강 생성)</b> — arXiv:2005.11401 (Lewis et al., 2020)</li>
+    <li><b>시각</b> — ViT, arXiv:2010.11929 · <b>음성</b> — Whisper, arXiv:2212.04356</li>
+    <li><b>강화학습</b> — Decision Transformer, arXiv:2106.01345</li>
+    <li><b>확산</b> — DiT(2212.09748) · SD3(2403.03206) · CogVideoX(2408.06072)</li>
+    <li><b>과학·로봇</b> — AlphaFold(Nature 2021) · RT-2, arXiv:2307.15818</li>
+  </ul>
+  <aside>강의 2 전반과 ⑤ 정복 편에서 다룬 핵심 논문들입니다. arXiv 번호로 원문을 찾을 수 있습니다.</aside>
+</section>
+
+<!-- 10 출처 2 -->
+<section class="slide" data-part="정리">
+  <h2>📚 출처 · 더 찾아보기 <span class="g">(2) 도구·한국어</span></h2>
+  <ul class="pts">
+    <li><b>토큰 수 확인</b> — OpenAI Tokenizer, Platform</li>
+    <li><b>컨텍스트·모델 사양</b> — OpenAI Models Docs · <b>긴 컨텍스트 예</b> — Google AI "Long context"</li>
+    <li><b>한국어로 더 읽기</b> — ratsgo's NLPBOOK(Self Attention), FFighting(ResNet 리뷰), greeksharifa(ViT 설명), cosmoquester(Decision Transformer 요약)</li>
+  </ul>
+  <div class="hl">⚠️ 모델별 <b>컨텍스트 길이와 가격은 빠르게 바뀝니다.</b> 과제·프로젝트에서 실제 수치를 쓸 땐 <b>사용 중인 제공사의 공식 문서를 요청 직전에 다시 확인</b>하세요.</div>
+  <aside>숫자를 외우지 말고 확인하는 습관 — 이 강의가 내내 강조한 태도입니다.</aside>
+</section>
+
+<!-- 11 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 강의 2 <span class="g">전체 복습</span> 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 이미지의 <b>깊이의 벽</b>과 언어의 <b>순서의 벽</b>은 각각 무엇으로 넘었나?</div>
+    <div class="q"><b>Q2.</b> 트랜스포머가 RNN을 이긴 <b>계산상의</b> 결정적 이유는?</div>
+    <div class="q"><b>Q3.</b> 어텐션이 <b>언어 밖으로</b> 번질 수 있었던 한 문장 이유는?</div>
+    <div class="q"><b>Q4.</b> 왜 비용은 <b>글자 수가 아니라 토큰 수</b>에 가깝게 움직이나?</div>
+    <div class="q"><b>Q5.</b> "트랜스포머를 잘 쓰는 일"을 <b>한 문장</b>으로 말하면?</div>
+  </div>
+  <aside>강의 2의 여덟 소단원을 관통하는 질문들입니다. Q5가 오늘의 최종 한 문장입니다.</aside>
+</section>
+
+<!-- 12 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 깊이의 벽 = <b>skip connection</b>(ResNet), 순서의 벽 = <b>LSTM 셀 상태 → 끝내 attention</b>. 둘 다 "통로를 터 준다"는 한 뿌리.</div>
+    <div class="q a"><b>A2.</b> RNN은 <b>순차 처리</b>였는데 트랜스포머는 모든 토큰을 동시에 봐 <b>GPU 병렬 계산</b>이 가능 → 큰 데이터·모델을 감당.</div>
+    <div class="q a"><b>A3.</b> 어텐션은 <b>조각들이 서로를 참고하는 계산</b>일 뿐, 조각이 단어일 필요가 없어 <b>토큰으로 자를 수 있으면 무엇이든</b> 삼킨다.</div>
+    <div class="q a"><b>A4.</b> 모델은 글을 <b>토큰 단위</b>로 다루고 비용도 그 단위로 매겨진다. 한국어는 글자당 토큰이 더 들어 <b>체감 길이와 비용이 어긋난다.</b></div>
+    <div class="q a"><b>A5.</b> <b>더 긴 입력을 넣는 일이 아니라, 필요한 문맥을 검토 가능한 구조로 배치하는 일.</b></div>
+  </div>
+  <aside>A1·A3·A5를 자기 말로 설명할 수 있으면 강의 2 트랜스포머를 온전히 손에 쥔 것입니다.</aside>
+</section>
+
+<!-- 13 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>한 줄로 꿰었다 🧵</h1>
+    <div class="big" style="margin-top:26px">벽 → 어텐션 → 트랜스포머 → LLM → <span class="y">토큰·컨텍스트</span><br><br>토큰은 비용을, 컨텍스트는 한계를 만든다<br>활용가는 <span class="y">검토 가능한 구조</span>를 설계한다</div>
+    <p class="sub" style="margin-top:24px">강의 2 트랜스포머 — 여기서 매듭</p>
+  </div>
+  <aside>강의 2 트랜스포머, 여덟 소단원의 매듭입니다. 이제 이 눈으로 로컬 모델·시각-언어 모델·RAG를 같은 잣대로 읽어 나가면 됩니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
