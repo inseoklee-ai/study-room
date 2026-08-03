@@ -36,6 +36,7 @@
    - ✅ 2-④. 두 길이 트랜스포머에서 합류하다 (Attention·Q·K·V·멀티헤드·위치 인코딩) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/transformer/) · 📊 [PPT](transformer/transformer.pptx)
    - ✅ 2-⑤. 트랜스포머가 세상을 먹다 (사전학습·스케일링·정렬 SFT·RLHF·DPO·언어 밖 정복) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/transformer-conquers/) · 📊 [PPT](transformer-conquers/transformer-conquers.pptx)
    - ✅ 2-⑥. 그래서 활용가는 토큰과 컨텍스트를 본다 (n² 비용·토큰·컨텍스트 윈도우·Lost in the Middle·RAG) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/tokens-context/) · 📊 [PPT](tokens-context/tokens-context.pptx)
+   - ✅ 2-⑦. 토큰 예산표와 컨텍스트를 직접 설계한다 (실습·예산표·병목 계산식·컨텍스트 캔버스) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/token-budget/) · 📊 [PPT](token-budget/token-budget.pptx)
 3. **LLM과 로컬 실행 — 클라우드 API vs 로컬** ✅ 완결 (8/8)
    - ✅ 3-①. 내 노트북에서도 LLM이 돌아갈까 — 🖥️ [웹 슬라이드 열기](https://inseoklee-ai.github.io/study-room/local-llm/) · 📊 [PPT](LLM_로컬실행_학습정리.pptx) · 📝 [요약](#-내-노트북에서도-llm이-돌아갈까)
    - ✅ 3-②. 거대한 모델을 노트북에 밀어 넣기 (양자화) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/quantization/) · 📊 [PPT](quantization/quantization.pptx)
@@ -79,6 +80,7 @@
 > - 2-④ https://inseoklee-ai.github.io/study-room/transformer/
 > - 2-⑤ https://inseoklee-ai.github.io/study-room/transformer-conquers/
 > - 2-⑥ https://inseoklee-ai.github.io/study-room/tokens-context/
+> - 2-⑦ https://inseoklee-ai.github.io/study-room/token-budget/
 > - 3-① https://inseoklee-ai.github.io/study-room/local-llm/
 > - 3-② https://inseoklee-ai.github.io/study-room/quantization/
 > - 3-③ https://inseoklee-ai.github.io/study-room/run-local/
