@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>그래서 활용가는 토큰과 컨텍스트를 본다 · n²·토큰·컨텍스트 윈도우</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.78rem,1.3vw,.96rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:13px 16px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.68rem,1.05vw,.86rem);
+    color:var(--ink);overflow:auto;max-height:60vh;white-space:pre;line-height:1.5;margin:8px 0}
+  pre.out{border-left-color:var(--gold);color:var(--soft)}
+  pre b{color:var(--gr)}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 트랜스포머 (6)</span>
+    <h1 style="margin:18px 0">그래서 활용가는<br>토큰과 컨텍스트를 본다</h1>
+    <p class="sub">어텐션의 n² 비용이 곧 요금·지연·한계</p>
+  </div>
+  <aside>강의를 열었던 질문 — "문서를 더 넣었는데 왜 답이 더 좋아지지 않았나"로 돌아옵니다. 트랜스포머를 강하게 만든 바로 그 구조가, 우리가 매일 치르는 비용과 한계의 정체입니다.</aside>
+</section>
+
+<!-- 2 오늘의 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--red)"><small>연결</small><b class="r">어텐션 = n² 비용</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>PART 1</small><b class="b">토큰<br>비용의 단위</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>PART 2</small><b class="g">컨텍스트 윈도우<br>배치의 설계</b></div>
+  </div>
+  <ul class="pts">
+    <li>어텐션이 강한 이유가 곧 <b>비용·한계의 정체</b> — 토큰 수의 <b>제곱</b>에 가까운 계산</li>
+    <li><b>토큰</b> = 모델이 글을 다루는 단위이자 <b>우리가 비용·문맥을 세는 단위</b></li>
+    <li><b>컨텍스트 윈도우</b> = 한 번에 펼치는 작업대 — 크다고 좋은 게 아니다</li>
+    <li>실전 함정 <b>"중간에서 길을 잃는다"</b>와, 긴 컨텍스트 vs RAG 판단</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 줄 — 트랜스포머를 이해한 사람은 <b>"글자 몇 자"가 아니라 "토큰 몇 개, 어디에 배치했나"</b>를 본다.</div>
+  <aside>토큰 세기 실습 코드도 직접 돌려 봅니다. 개념 → 코드 → 관찰 순입니다.</aside>
+</section>
+
+<!-- 3 도입 n² -->
+<section class="slide" data-part="표지">
+  <h2>🔙 강의를 열었던 <span class="g">질문</span>으로</h2>
+  <p>"문서를 더 많이 넣었는데 왜 답은 더 좋아지지 않았을까?" — 역사는 여기서 <b>활용가의 책상 위로</b> 내려옵니다.</p>
+  <ul class="pts">
+    <li>어텐션 = 한 토큰이 <b>다른 모든 토큰</b>을 참고 → 비교 수 ≈ <b>n × n</b> (토큰 수의 제곱)</li>
+    <li>입력을 <b>2배</b>로 늘리면 계산은 2배가 아니라 <b>4배 가까이</b> 불어난다</li>
+    <li>앞서 본 <b>KV cache</b>가 그 비용이 쌓이는 자리 — 대화가 길수록 Key·Value를 계속 들고 있어야 함</li>
+  </ul>
+  <div class="big">긴 입력 = <span class="y">긴 계산</span> = 비용 + 대기 시간<small>트랜스포머를 강하게 만든 구조가, 동시에 우리가 치르는 비용·한계의 정체</small></div>
+  <aside>그래서 프롬프트를 다르게 봅니다. "글자를 몇 자 썼는가"가 아니라 "토큰을 몇 개 썼고 어디에 배치했는가". 이 두 가지가 이 강의가 향하던 실용의 목적지입니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">토큰 — 비용과 문맥의 단위</h2>
+    <p style="margin-top:11px">비용은 글자 수가 아니라 토큰 수에 가깝게 움직인다</p>
+    <span class="who">Token · 한국어의 함정</span>
+  </div>
+  <aside>토큰은 모델이 글을 다루는 가장 작은 단위이자, 우리가 비용과 문맥을 세는 단위입니다. 문장이 토큰으로 쪼개지는 과정은 앞서 봤고, 여기서는 그 쪼개짐이 왜 비용과 한계가 되는지를 봅니다.</aside>
+</section>
+
+<!-- 5 토큰이란 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔤 사람의 "한 문장"이 모델에겐 <span class="g">다르다</span></h2>
+  <ul class="pts">
+    <li>사람에겐 한 문장이 자연스러운 단위지만 <b>모델에겐 그렇지 않다</b></li>
+    <li>한국어는 <b>조사·어미·띄어쓰기·희귀 전문용어</b> 때문에 체감보다 토큰이 늘어난다</li>
+    <li>"10쪽이라 별로 안 길다"는 감각이 <b>API 비용·응답 지연</b>에선 맞지 않을 수 있다</li>
+  </ul>
+  <div class="big">비용은 <span class="y">글자 수</span>가 아니라 <span class="y">토큰 수</span>에 가깝게 움직이고<br>긴 입력은 곧 긴 계산이다</div>
+  <div class="hl">모델별 토큰화·한도·가격은 <b>제공사·시점마다 다르다.</b> 숫자를 외우는 대신 <b>요청 직전에 공식 문서·토큰 도구에서 다시 확인</b>하는 습관을. (예: OpenAI Tokenizer·Models 문서)</div>
+  <aside>토큰이 어떻게 쪼개지는지 눈으로 보여 주는 Tokenizer, 모델별 한도를 정리한 Models 문서가 확인 지점의 예입니다.</aside>
+</section>
+
+<!-- 6 토큰 세 판단 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔍 토큰이 만드는 <span class="g">세 가지 판단</span></h2>
+  <table class="t">
+    <tr><th>판단 질문</th><th>왜 중요한가</th><th>업무 예시</th></tr>
+    <tr><td>입력 토큰이 많은가</td><td>비용·대기 시간이 늘어난다</td><td>120쪽 회의록 전체를 매번 넣는 챗봇</td></tr>
+    <tr><td>출력 토큰이 긴가</td><td>생성 비용·검토 시간이 늘어난다</td><td>"상세히 설명"만 반복하는 보고서 생성기</td></tr>
+    <tr><td>같은 내용을 더 짧게 줄일 수 있나</td><td>더 중요한 근거를 컨텍스트에 넣을 수 있다</td><td>계약서 원문 대신 조항 번호·쟁점·근거 표를 먼저</td></tr>
+  </table>
+  <div class="hl">목표는 <b>무조건 짧게</b>가 아니다. 짧게 만들다 <b>판단 근거를 빼면 더 위험</b>하다. 토큰을 아끼되 <b>책임 있는 판단에 필요한 근거는 남기는</b> 균형이 활용가의 일.</div>
+  <aside>비용 절감과 판단 품질 사이의 균형이 핵심입니다. 줄이는 것 자체가 목적이 아닙니다.</aside>
+</section>
+
+<!-- 7 실습 코드 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧪 손으로 돌려보기 — <span class="g">내 문장이 몇 토큰?</span></h2>
+  <pre>!pip install transformers tiktoken
+
+import tiktoken
+from transformers import AutoTokenizer
+
+gpt_tok = tiktoken.get_encoding("o200k_base")   <b># 최근 OpenAI 모델 계열 방식</b>
+ko_tok  = AutoTokenizer.from_pretrained(
+            "monologg/koelectra-small-v3-discriminator")
+
+PAIRS = [
+  ("계약 기간은 체결일로부터 1년으로 하며, 자동 갱신됩니다.",
+   "The contract term is one year from the date of execution, ..."),
+  ("환불은 결제일로부터 7일 이내에만 가능합니다.",
+   "Refunds are available only within 7 days of payment."),
+]
+for ko, en in PAIRS:
+    for s in (ko, en):
+        n = len(gpt_tok.encode(s))
+        print(f"{len(s):&gt;3}자 → {n:&gt;3}토큰  (글자당 {len(s)/n:.2f})  {s}")</pre>
+  <aside>모델 가중치는 필요 없고 토크나이저만 있으면 됩니다. tiktoken은 OpenAI 방식, AutoTokenizer로 한국어 특화 토크나이저도 함께 비교합니다.</aside>
+</section>
+
+<!-- 8 실행 결과 -->
+<section class="slide" data-part="PART 1">
+  <h2>📊 실행 결과 — <span class="g">한국어 vs 영어</span></h2>
+  <pre class="out"> 32자 →  22토큰  (글자당 1.45)  계약 기간은 체결일로부터 1년으로 하며, 자동 갱신됩니다.
+ 81자 →  16토큰  (글자당 5.06)  The contract term is one year from the date of execution, ...
+ 25자 →  17토큰  (글자당 1.47)  환불은 결제일로부터 7일 이내에만 가능합니다.
+ 52자 →  12토큰  (글자당 4.33)  Refunds are available only within 7 days of payment.
+
+같은 문장을 두 토크나이저가 어떻게 쪼개는지:
+  GPT 방식       ['계','약',' 기간','은',' 체','결','일','로','부터',' ','1','년',
+                 '으로',' 하','며',',',' 자동',' �','�','신','됩니다','.']
+  한국어 모델 방식 ['계약','기간','##은','체결','##일로','##부터','1','##년',
+                 '##으로','하','##며',',','자동','갱신','##됩','##니다','.']</pre>
+  <aside>한국어 문장은 글자당 1.45토큰인데 영어는 5.06토큰 — 같은 뜻인데 글자당 토큰이 3.5배 차이. GPT 방식은 '갱'을 두 조각으로 깨뜨렸고, 한국어 모델은 '계약·기간'처럼 뜻을 살려 17개로 더 적게 잘랐습니다.</aside>
+</section>
+
+<!-- 9 볼 것 세 가지 -->
+<section class="slide" data-part="PART 1">
+  <h2>👀 여기서 볼 것 <span class="g">세 가지</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">같은 뜻인데 <b>글자당 토큰 3.5배 차이</b> — 컨텍스트 128K라도 <b>한국어로 채우면 훨씬 적게</b> 들어가고, 요금도 같은 비율로 불어난다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>'갱'이 두 조각으로 깨짐</b>(바이트 단위) vs 한국어 토크나이저는 뜻을 살려 17개 — <b>토크나이저가 어떤 언어를 많이 봤나</b>가 갈린다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">앞의 <b>어텐션 n² 비용과 직결</b> — 조각이 2배면 계산은 4배. 한국어라 토큰이 더 나온다는 사실은 <b>요금·속도·한계를 함께</b> 밀어 올린다</span></div>
+  </div>
+  <div class="hl">후보 문장을 <b>여러분 도메인 문서</b>로 바꿔 이 표를 다시 만들어 보면 <b>예산 감각이 확</b> 잡힙니다.</div>
+  <aside>세 번째가 핵심 — 토큰 수는 요금표 한 줄로 끝나지 않고 속도와 한계까지 함께 결정합니다.</aside>
+</section>
+
+<!-- 10 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">컨텍스트 윈도우 — 한 번에 펼치는 작업대</h2>
+    <p style="margin-top:11px">클수록 좋은 게 아니라, 근거를 배치하는 설계 공간</p>
+    <span class="who">Context Window · 배치 · Lost in the Middle</span>
+  </div>
+  <aside>토큰이 낱장의 종이라면, 컨텍스트 윈도우는 그 종이를 한 번에 펼쳐 놓는 작업대입니다. 정확히는 모델이 한 요청에서 참고할 수 있는 토큰의 범위입니다.</aside>
+</section>
+
+<!-- 11 컨텍스트 윈도우 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧭 큰 작업대라고 <span class="r">검토가 쉬워지진 않는다</span></h2>
+  <p>컨텍스트 윈도우 = 검토자가 <b>책상 위에 한 번에 올려놓을 수 있는 자료의 크기.</b> 지원 길이는 모델·모드·시점마다 다르니 <b>공식 사양에서 확인</b>합니다.</p>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">자료를 많이 올릴수록 <b>검토 비용·시간</b>이 늘어난다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>중요한 종이가 어디 있는지</b> 찾기 어려워진다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">충돌하는 자료를 함께 올리면 <b>어떤 기준을 우선할지 모델이 흔들린다</b></span></div>
+  </div>
+  <div class="hl">그래서 컨텍스트 윈도우는 <b>"클수록 좋다"가 아니라 근거를 배치하는 설계 공간.</b> 모델마다 다룰 수 있는 길이가 다른 이유 하나가 <b>위치 인코딩 방식</b>(RoPE·ALiBi는 학습보다 긴 입력에 유리).</div>
+  <aside>이미지 비유: 서류와 메모가 잔뜩 널린 책상. 책상이 넓다고 검토가 쉬워지지 않듯, 컨텍스트도 그렇습니다. (사진은 저작권 고려해 비유로 대체)</aside>
+</section>
+
+<!-- 12 컨텍스트 4칸 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧱 컨텍스트는 <span class="g">네 칸</span>으로 나눠 설계</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:140px;border-color:var(--bl)"><small>무엇을 하는가</small><b class="b">역할 / 목표</b></div>
+    <div class="cell" style="min-width:140px;border-color:var(--gold)"><small>무엇을 우선하나</small><b>판단 기준</b></div>
+    <div class="cell" style="min-width:140px;border-color:var(--gr)"><small>무엇을 보고 답하나</small><b class="g">근거 자료</b></div>
+    <div class="cell" style="min-width:140px;border-color:var(--pp)"><small>어떻게 내놓나</small><b class="p">출력 형식</b></div>
+  </div>
+  <div class="box" style="margin-top:6px">
+    <p style="margin:0">🚫 흔한 실패 — <b>근거 자료만 잔뜩</b> 넣고 <b>판단 기준을 비워</b> 둔다. 고객 불만 300건 넣고 "분석해줘"만 하면, <b>환불 위험·법적 리스크·제품 결함·교육 필요</b> 중 무엇을 우선할지 안 줬으니 산출물을 검토하기 어렵다.</p>
+  </div>
+  <div class="hl">트랜스포머는 문맥을 볼 수 있지만, <b>여러분의 업무 우선순위를 스스로 책임지진 않는다.</b> 그 우선순위는 <b>컨텍스트 안에 직접</b> 넣어야 한다.</div>
+  <aside>역할·판단기준·근거·출력형식 네 칸으로 나누면 무엇을 넣고 뺄지가 분명해집니다. 특히 '판단 기준'을 빠뜨리지 않는 게 핵심입니다.</aside>
+</section>
+
+<!-- 13 Lost in the Middle -->
+<section class="slide" data-part="PART 2">
+  <h2>📌 큰 작업대의 함정 — <span class="r">중간에서 길을 잃는다</span></h2>
+  <ul class="pts">
+    <li>80쪽을 통째로 넣으면 <b>앞부분은 잘 반영되는데 중간이 뭉개진다</b> — 착각이 아니었다</li>
+    <li>"Lost in the Middle"(Liu 등, 2023): 중요 정보가 <b>맨 앞·맨 뒤</b>일 때 성능 최고, <b>중간</b>일 때 뚝 떨어지는 <b>U자 곡선</b></li>
+    <li>긴 컨텍스트를 표방하는 모델에서도 <b>이 경향이 나타났다</b> (arXiv:2307.03172)</li>
+  </ul>
+  <table class="t">
+    <tr><th>처방</th><th>프롬프트 설계 예</th></tr>
+    <tr><td>중요한 기준을 앞쪽에</td><td>"우선순위: 안전 → 법규 준수 → 비용 순으로 판단합니다."</td></tr>
+    <tr><td>근거 자료에 제목·번호를</td><td><code>[자료 A: 2026-05 고객 불만]</code>, <code>[자료 B: 내부 정책]</code></td></tr>
+    <tr><td>답변에 근거 위치를 요구</td><td>"각 결론마다 인용한 자료 번호를 붙이세요."</td></tr>
+  </table>
+  <div class="hl">긴 컨텍스트는 자료를 많이 넣게 해주지만, <b>자료를 구조화하는 일까지 대신해 주지는 않는다.</b></div>
+  <aside>처방은 논문을 외우는 게 아니라 이 세 가지를 습관으로 만드는 것입니다. 위치가 성능을 가른다는 사실을 배치로 활용합니다.</aside>
+</section>
+
+<!-- 14 긴 컨텍스트 vs RAG -->
+<section class="slide" data-part="PART 2">
+  <h2>🔬 긴 컨텍스트에 직접 넣기 vs <span class="g">RAG</span></h2>
+  <p><b>RAG</b>(검색 증강 생성) = 필요한 조각을 <b>먼저 검색해 그 조각만</b> 컨텍스트에 넣는 방식(Lewis 등, 2020). "긴 컨텍스트면 RAG 불필요?"의 답은 <b>업무에 따라 다르다.</b></p>
+  <table class="t">
+    <tr><th>선택</th><th>어울리는 상황</th><th>주의</th></tr>
+    <tr><td>긴 컨텍스트 직접</td><td>자료가 한 번성·전체 맥락 중요·비용 감당 가능</td><td>길수록 비용·지연·누락 위험 점검</td></tr>
+    <tr><td>RAG로 조각 검색</td><td>문서 많음·반복 질의·최신성·근거 추적 중요</td><td>검색이 틀리면 좋은 모델도 틀린 근거로 답함</td></tr>
+    <tr><td>요약 후 투입</td><td>긴 회의록·리포트를 여러 단계 판단에 쓸 때</td><td>요약에서 빠진 정보는 뒤에서 복구 어려움</td></tr>
+  </table>
+  <div class="hl">지금 구현하진 않는다. 다만 <b>큰 모델을 고르는 판단</b>과 <b>좋은 컨텍스트를 설계하는 판단</b>은 서로 다른 일이라는 점만 기억. 이후 RAG·컨텍스트 엔지니어링으로 이어진다.</div>
+  <aside>RAG: arXiv:2005.11401. 검색이 틀리면 모델도 틀리므로, 모델 선택과 컨텍스트 설계는 별개의 책임입니다.</aside>
+</section>
+
+<!-- 15 핵심 5문장 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 5문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">어텐션은 모든 토큰이 서로를 참고 → 계산이 <b>토큰 수의 제곱(n²)</b>. 입력 2배면 계산 4배, 곧 <b>비용·지연</b>.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">비용은 <b>글자 수가 아니라 토큰 수</b>로 움직인다. 한국어는 영어보다 <b>글자당 토큰이 몇 배</b> 더 든다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>컨텍스트 윈도우</b>는 작업대 — 클수록 좋은 게 아니라 <b>근거를 배치하는 설계 공간</b>.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">컨텍스트는 <b>역할·판단기준·근거·출력형식</b> 네 칸. '판단 기준'을 비우면 산출물을 검토하기 어렵다.</span></div>
+    <div class="st"><span class="n">5</span><span class="t"><b>중간은 뭉개진다(Lost in the Middle)</b> — 중요 기준은 앞쪽에, 자료엔 번호를, 답엔 근거 위치를.</span></div>
+  </div>
+  <aside>토큰과 컨텍스트, 이 두 단어가 트랜스포머 강의가 처음부터 향하던 실용의 목적지였습니다.</aside>
+</section>
+
+<!-- 16 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 어텐션 때문에 입력을 2배 늘리면 계산이 왜 <b>4배 가까이</b> 되나?</div>
+    <div class="q"><b>Q2.</b> "비용은 글자 수가 아니라 토큰 수"라는 말이 <b>한국어 사용자</b>에게 특히 중요한 이유는?</div>
+    <div class="q"><b>Q3.</b> 컨텍스트 윈도우가 <b>"클수록 좋다"가 아닌</b> 이유 세 가지는?</div>
+    <div class="q"><b>Q4.</b> 컨텍스트 <b>네 칸</b>은 무엇이며, 현장에서 가장 흔히 비우는 칸은?</div>
+    <div class="q"><b>Q5.</b> <b>Lost in the Middle</b>이 무엇이며, 활용가의 <b>처방 세 가지</b>는?</div>
+  </div>
+  <aside>Q1이 오늘의 뿌리(n² 비용), Q5가 오늘의 실전 처방입니다.</aside>
+</section>
+
+<!-- 17 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 어텐션은 각 토큰이 <b>나머지 모든 토큰</b>과 비교되므로 비교 수 ≈ <b>n×n</b>. 토큰이 2배면 비교는 약 4배 → 비용·대기 시간도 함께.</div>
+    <div class="q a"><b>A2.</b> 한국어는 조사·어미 등으로 <b>글자당 토큰이 영어의 몇 배</b>. 같은 128K라도 한국어는 훨씬 적게 들어가고 <b>요금도 그 비율로</b> 불어난다.</div>
+    <div class="q a"><b>A3.</b> ① 자료 많을수록 비용·시간↑ ② 중요한 정보 찾기 어려움 ③ 충돌 자료면 <b>우선 기준이 흔들림</b>.</div>
+    <div class="q a"><b>A4.</b> <b>역할/목표 · 판단 기준 · 근거 자료 · 출력 형식.</b> 가장 흔히 비우는 칸은 <b>판단 기준</b>(근거만 넣고 "분석해줘").</div>
+    <div class="q a"><b>A5.</b> 중요 정보가 <b>중간</b>에 있으면 성능이 떨어지는 U자 현상. 처방: <b>기준은 앞쪽 · 자료엔 제목/번호 · 답엔 근거 위치 요구.</b></div>
+  </div>
+  <aside>A1·A4·A5를 자기 업무에 대보면 오늘 배운 것이 곧장 실무로 연결됩니다.</aside>
+</section>
+
+<!-- 18 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>토큰을 세고, 컨텍스트를 설계한다 🧭</h1>
+    <div class="big" style="margin-top:26px">"글자 몇 자"가 아니라 <span class="y">"토큰 몇 개, 어디에 배치"</span><br>긴 컨텍스트는 넣게 해주지만<br><span class="y">구조화까지 대신해 주진 않는다</span></div>
+    <p class="sub" style="margin-top:24px">그래서 활용가는 토큰과 컨텍스트를 본다 — 여기까지</p>
+  </div>
+  <aside>이 판단이 이후 RAG와 컨텍스트 엔지니어링으로 이어집니다. 큰 모델을 고르는 판단과 좋은 컨텍스트를 설계하는 판단은 서로 다른 일이라는 점을 기억하세요.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
