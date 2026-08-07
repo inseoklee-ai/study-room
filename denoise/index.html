@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>노이즈에서 되돌린다는 발상 · 확산 모델의 역사</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:22px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:12px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;
+    text-align:center;box-shadow:var(--sh);min-width:76px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.68rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.86rem}
+  .ar{color:var(--gr);font-size:1.15rem;font-weight:700;display:flex;align-items:center}
+  .ar.rev{color:var(--red)}
+
+  .steps{display:grid;gap:8px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:11px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.78rem}
+  .st .t{font-size:clamp(.88rem,1.48vw,1.03rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.78rem,1.3vw,.96rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  .fml{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);
+    padding:15px 18px;text-align:center;margin:8px 0;font-family:"SF Mono",Consolas,monospace}
+  .fml .e{font-size:clamp(.95rem,1.85vw,1.25rem);font-weight:800;color:var(--gr);margin:3px 0}
+  .fml .e2{font-size:clamp(.8rem,1.4vw,1rem);color:var(--soft);margin:3px 0}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 5 · 이미지 생성 (2)</span>
+    <h1 style="margin:18px 0">노이즈에서<br>되돌린다는 발상</h1>
+    <p class="sub">확산 모델은 어떻게 태어나, 4스텝까지 내려왔나</p>
+  </div>
+  <aside>그림 그리는 기계를 만들려면 먼저 답할 게 있습니다 — 그럴듯함을 어떻게 채점할까. 이 질문에서 두 갈래 답(GAN·확산)이 갈렸고, 오늘 여러분이 쓸 도구는 두 번째 갈래의 후손입니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:100px;border-color:var(--red)"><small>문제</small><b class="r">그럴듯함을<br>어떻게 채점?</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:100px;border-color:var(--pp)"><small>갈래 1</small><b class="p">GAN</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:100px;border-color:var(--gr)"><small>갈래 2</small><b class="g">확산</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:100px;border-color:var(--bl)"><small>진화</small><b class="b">CLIP·잠재·<br>DiT·증류</b></div>
+  </div>
+  <ul class="pts">
+    <li>채점표를 어떻게 만드나 — <b>GAN</b>(채점관을 같이 키움) vs <b>확산</b>(채점을 아예 없앰)</li>
+    <li>확산이 문장을 알아듣게 한 <b>CLIP</b>, 그리고 "말귀가 그림 공부보다 중요"했던 반전</li>
+    <li>개인 PC로 내려온 <b>잠재 확산·Stable Diffusion 공개</b></li>
+    <li>실습 숫자의 뿌리 — 왜 <b>스텝 4</b>, 왜 <b>guidance=0</b>, 왜 <b>FlowMatch</b>인지</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 줄 — 확산은 <b>정답 없는 문제를 정답 있는 문제로 바꾼</b> 발상. 그 뒤 역사는 전부 "더 빠르게·더 말을 잘 듣게"였다.</div>
+  <aside>수식(🔬 깊이 보기)도 두 번 나오지만 "무엇을 맞히나"만 읽으면 됩니다.</aside>
+</section>
+
+<!-- 3 채점 문제 -->
+<section class="slide" data-part="표지">
+  <h2>🎯 "그럴듯함"을 어떻게 <span class="g">채점</span>하나</h2>
+  <ul class="pts">
+    <li>기계 학습 = <b>채점표</b>가 있어야 굴러간다 — 답 내고, 틀린 만큼 재고, 덜 틀리는 쪽으로 민다</li>
+    <li>정답 사진과 <b>픽셀 차이</b>로 채점? → 모델이 <b>모든 고양이의 평균(흐릿한 회색 덩어리)</b>을 그린다</li>
+    <li>더 근본적 문제 — 학습은 <b>미분 가능</b>해야 한다(어디로 움직이면 얼마나 좋아지는지 계산). "그럴듯함"엔 그 정의를 못 붙인다</li>
+  </ul>
+  <div class="hl">채점표가 잘못되면 모델은 그 표를 <b>정확히 만족시키는 쓸모없는 답</b>을 찾아낸다. 여기서 <b>두 갈래 답</b>이 나왔다.</div>
+  <aside>사람은 보면 아는데, 어느 픽셀을 얼마나 바꾸면 더 그럴듯해지는지를 식으로 적을 수가 없습니다. 이 막막함이 출발점입니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">첫 번째 답 — 채점관을 같이 키운다</h2>
+    <p style="margin-top:11px">위조범과 감정사를 붙여 놓는다</p>
+    <span class="who">GAN · 2014</span>
+  </div>
+  <aside>2014년 이언 굿펠로와 동료들의 답 — 채점 기준을 사람이 적지 말고, 채점하는 신경망을 함께 학습시키자.</aside>
+</section>
+
+<!-- 5 GAN -->
+<section class="slide" data-part="PART 1">
+  <h2>🎭 <span class="g">GAN</span> — 위조범 vs 감정사</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--pp)"><small>Generator</small><b class="p">위조범<br>가짜로 속이려 함</b></div>
+    <span class="ar">⇄</span>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>Discriminator</small><b class="b">감정사<br>진짜·가짜 구별</b></div>
+  </div>
+  <ul class="pts">
+    <li>둘이 서로 이기려 들면 <b>위조범의 실력이 올라간다</b> = 적대적 생성 신경망(GAN)</li>
+    <li>채점 기준도 신경망 — 사람이 규칙 적는 대신 <b>데이터로 배우게</b> 한다</li>
+    <li>2018 <b>StyleGAN</b> → 사람 얼굴이 진짜와 구별 어려운 수준. ("존재하지 않는 사람 얼굴" 사이트가 이 계열)</li>
+  </ul>
+  <div class="hl">원논문 한 문장 — "동시에 두 모델을 학습: 데이터 분포를 담는 <b>생성 G</b>와, 표본이 진짜일 확률을 추정하는 <b>판별 D</b>." (arXiv:1406.2661)</div>
+  <aside>사람이 채점표를 못 적으니, 채점표 자체를 학습시켜 버리자는 시원한 발상입니다.</aside>
+</section>
+
+<!-- 6 모드 붕괴 -->
+<section class="slide" data-part="PART 1">
+  <h2>😴 그런데 위조범이 <span class="r">게을러진다</span></h2>
+  <ul class="pts">
+    <li>감정사를 확실히 속이는 그림 한 장을 찾으면, 그 뒤로 <b>그것만 계속 그린다</b></li>
+    <li>손글씨 0~9 학습 중 그럴듯한 <b>8</b>을 익히면 → 나머지 아홉을 그릴 이유가 없다(8만 내도 계속 이김)</li>
+    <li>다양성에 점수를 안 주는 게임이니 당연한 귀결 — <b>모델이 게을러진 게 아니라 보상 구조가 그렇다</b></li>
+  </ul>
+  <div class="hl">이 현상이 <b>모드 붕괴(mode collapse)</b>. 원논문의 별명은 <b class="g">"헬베티카 시나리오"</b> — 무엇을 넣어도 결국 같은 하나로 무너진다. + 두 신경망 <b>힘 균형</b>이 저절로 안 잡히는 불안정도.</div>
+  <aside>원논문부터 "감정사 몇 번, 위조범 한 번" 식으로 균형을 손으로 맞추라 적어 놓았습니다. 이후 몇 년간 이 불안정을 잡는 논문이 이어졌습니다.</aside>
+</section>
+
+<!-- 7 GAN 자리 내준 이유 -->
+<section class="slide" data-part="PART 1">
+  <h2>🚪 GAN이 자리를 내준 <span class="g">진짜 이유</span></h2>
+  <div class="big">불안정이 아니라 — <span class="y">말로 시킬 수가 없었다</span></div>
+  <ul class="pts">
+    <li>StyleGAN은 얼굴로 학습하면 <b>얼굴만</b> 만든다. 훌륭한 얼굴을</li>
+    <li>그런데 <b>"눈 덮인 산 위의 빨간 오두막"</b>을 시킬 통로가 구조 안에 없다 — <b>문장을 받는 입구가 설계에 없었다</b></li>
+  </ul>
+  <div class="hl">미리 말해 두면, GAN은 <b>죽지 않았다.</b> 뒤에서 <b>조연으로</b> 다시 나온다(증류의 조교로).</div>
+  <aside>텍스트 조건을 붙이는 통로가 없다는 것이 결정적이었습니다. 이 약점을 다음 갈래가 정면으로 해결합니다.</aside>
+</section>
+
+<!-- 8 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">두 번째 답 — 채점을 아예 없앤다</h2>
+    <p style="margin-top:11px">정답 없는 문제를 정답 있는 문제로 바꾼다</p>
+    <span class="who">확산 · 2015</span>
+  </div>
+  <aside>깨끗한 사진에 잡음을 직접 뿌리고, "방금 섞인 잡음이 무엇이었나"를 묻습니다. 우리가 뿌린 잡음이니 정답을 우리가 압니다.</aside>
+</section>
+
+<!-- 9 확산 발상 + 다이어그램 -->
+<section class="slide" data-part="PART 2">
+  <h2>🌫️ <span class="g">확산</span> — 뿌리고, 되돌린다</h2>
+  <div class="plabel">학습할 때 · 우리가 잡음을 뿌린다 (파랑)</div>
+  <div class="chain">
+    <div class="cell" style="border-color:var(--bl)"><b>깨끗한 사진</b></div><span class="ar">→</span>
+    <div class="cell"><b>조금 지저분</b></div><span class="ar">→</span>
+    <div class="cell"><b>많이 지저분</b></div><span class="ar">→</span>
+    <div class="cell" style="border-color:var(--bl)"><b>완전한 잡음</b></div>
+    <div class="cell" style="border:none;box-shadow:none"><b class="b">뿌린 잡음이<br>곧 정답</b></div>
+  </div>
+  <div class="plabel">만들 때 · 신경망이 걷어 낸다 (빨강)</div>
+  <div class="chain">
+    <div class="cell" style="border-color:var(--red)"><b>없던 그림</b></div><span class="ar rev">←</span>
+    <div class="cell"><b>윤곽 선명</b></div><span class="ar rev">←</span>
+    <div class="cell"><b>형체 잡힘</b></div><span class="ar rev">←</span>
+    <div class="cell" style="border-color:var(--red)"><b>아무 잡음</b></div>
+    <div class="cell" style="border:none;box-shadow:none"><b class="r">이 걸음 수가<br>스텝</b></div>
+  </div>
+  <div class="hl">채점관이 필요 없고, 학습 내내 기준이 흔들리지도 않는다. 아래쪽 <b>화살표 개수 = 실습의 스텝 수</b> — 예전 50, 지금 <b>4</b>. (원논문 arXiv:1503.03585, 2015)</div>
+  <aside>위쪽에서 잡음을 뿌리는 사람은 우리라서 매 단계 정답을 갖고 있습니다. 신경망은 그 정답 맞히기만 연습하고, 생성 때 거꾸로 씁니다.</aside>
+</section>
+
+<!-- 10 수식 깊이보기 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔬 깊이 보기 — 잡음을 <span class="g">걷어 낸다</span>는 것</h2>
+  <div class="fml">
+    <div class="e2">x<sub>t</sub> = √ᾱ<sub>t</sub> · x₀ + √(1−ᾱ<sub>t</sub>) · ε　<span style="font-weight:400">(x₀=원본, ε=뿌린 잡음)</span></div>
+    <div class="e">L = E [ ‖ ε − ε<sub>θ</sub>(x<sub>t</sub>, t) ‖² ]</div>
+  </div>
+  <ul class="pts">
+    <li>ᾱ<sub>t</sub>는 t가 커질수록 0에 가까워짐 → t 작으면 원본이 남고, t 크면 <b>순수 잡음</b></li>
+    <li>신경망 ε<sub>θ</sub>가 하는 일 = x<sub>t</sub>와 t를 받아 <b>섞인 잡음 ε을 맞히기</b></li>
+    <li>손실은 <b>예측−정답의 제곱 평균</b> = 평범한 회귀. GAN처럼 서로 쫓지 않아 <b>안정적</b></li>
+  </ul>
+  <div class="hl">"픽셀 차이로 채점하면 흐릿한 평균"이라 했는데, 여기선 같은 제곱오차를 써도 괜찮다 — 채점 대상이 최종 그림이 아니라 <b>한 걸음치의 잡음</b>이라서. 한 걸음은 평균 내도 무방하고, 수백 걸음 쌓으면 선명해진다.</div>
+  <aside>생성은 이 과정을 거꾸로: x_T를 잡음으로 놓고 예측 잡음을 조금씩 빼며 내려옵니다. 이 반복 횟수가 스텝 수입니다.</aside>
+</section>
+
+<!-- 11 타임라인 + 대가 -->
+<section class="slide" data-part="PART 2">
+  <h2>⏳ 좋은 아이디어가 <span class="g">바로 이기진 않는다</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>2015</small><b>확산 착상<br>(GAN보다 반년 늦음)</b></div>
+    <span class="ar">→ 5년 묻힘 →</span>
+    <div class="cell" style="min-width:110px;border-color:var(--bl)"><small>2020</small><b>DDPM<br>좋은 그림</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>2021</small><b class="g">"Diffusion Models<br>Beat GANs"</b></div>
+  </div>
+  <div class="box" style="margin-top:8px">
+    <h3 class="r">확산이 치른 대가 — 느림</h3>
+    <p style="margin:0">GAN은 <b>한 번 통과</b>하면 그림. 확산은 <b>수백~수천 번 반복</b>. 2022년 기본 <b>50스텝</b>, 한 장에 30초~1분. 이 느림이 그 뒤 몇 년의 숙제가 된다.</p>
+  </div>
+  <aside>2015 착상이 5년 가까이 묻혀 있다가 2020 DDPM으로 실용화되고, 2021 논문 제목이 그대로 사건이 됐습니다 — Diffusion Models Beat GANs.</aside>
+</section>
+
+<!-- 12 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">문장을 그림 쪽으로 데려오기</h2>
+    <p style="margin-top:11px">어느 방향으로 걷어 낼지 말해 줄 통로</p>
+    <span class="who">CLIP · Imagen</span>
+  </div>
+  <aside>잡음을 걷어 내는 법은 배웠는데, 어느 방향으로 걷어 낼지 말해 줄 통로가 없습니다. "빨간 오두막"이란 기호를 픽셀 공간의 방향으로 번역할 무언가가 필요했습니다.</aside>
+</section>
+
+<!-- 13 CLIP -->
+<section class="slide" data-part="PART 3">
+  <h2>🧭 <span class="g">CLIP</span> — 프롬프트가 나침반이 되는 이유</h2>
+  <ul class="pts">
+    <li>2021 CLIP — 인터넷의 <b>이미지·캡션 쌍 4억 개</b>로 "어느 캡션이 어느 그림에?"를 학습</li>
+    <li><b>인코더</b> = 받은 걸 숫자 목록(좌표)으로 바꾸는 부분. 문장도 그림도 <b>같은 공간의 한 점</b>이 된다</li>
+    <li>짝 맞는 그림·캡션은 <b>가까이</b>, 안 맞으면 <b>멀리</b> 놓이도록</li>
+  </ul>
+  <div class="big">같은 공간 = <span class="y">거리를 잴 수 있다</span><small>"빨간 오두막" 좌표와 지금 그림의 좌표 사이 거리가 줄어드는 쪽으로 밀 수 있다</small></div>
+  <div class="hl">프롬프트가 <b>나침반</b>이 되는 물리적 근거가 여기입니다. (arXiv:2103.00020)</div>
+  <aside>거리를 잴 수 있어야 그 거리를 줄이는 방향으로 확산의 걷어냄을 유도할 수 있습니다.</aside>
+</section>
+
+<!-- 14 Imagen 반전 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔁 반전 — <span class="g">그림 공부보다 말귀가 먼저</span></h2>
+  <ul class="pts">
+    <li>그림 그릴 거니 이미지를 함께 본 인코더(CLIP)가 유리할 것 같은데…</li>
+    <li>2022 구글 <b>Imagen</b> — 이미지를 <b>한 번도 안 본 순수 언어모델</b>이 더 잘했다</li>
+    <li>게다가 <b>언어모델 쪽을 키우는 것</b>이 이미지 생성 쪽을 키우는 것보다 <b>결과에 훨씬 크게 기여</b></li>
+  </ul>
+  <div class="hl">그래서 — 프롬프트를 <b>키워드 나열이 아니라 문장으로</b> 쓰라는 조언의 근거가 이것. 지금 최신 모델이 텍스트 인코더 자리에 <b>현역 언어모델을 통째로</b> 꽂는 이유도 같다. (arXiv:2205.11487)</div>
+  <aside>"언어모델 크기를 키우는 것이 이미지 확산 모델을 키우는 것보다 충실도·정합성을 훨씬 크게 끌어올린다" — Imagen 초록. 이 사실이 오늘 실습 내내 따라다닙니다.</aside>
+</section>
+
+<!-- 15 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part">
+    <div class="pno">4</div>
+    <h2 style="margin:0">개인 컴퓨터로 내려오고, 심장이 바뀌다</h2>
+    <p style="margin-top:11px">잠재 확산 · 공개 · 트랜스포머 · 증류</p>
+    <span class="who">Stable Diffusion · DiT · 4스텝</span>
+  </div>
+  <aside>2022년 초까지 이 기술은 전부 대기업 서버 안에 있었습니다. 512×512는 픽셀값이 78만 개, 그 위에서 확산을 수백 번 반복하니 비용이 감당 안 됐습니다.</aside>
+</section>
+
+<!-- 16 잠재 확산 + 공개 -->
+<section class="slide" data-part="PART 4">
+  <h2>💾 <span class="g">잠재 확산</span>과 공개된 날</h2>
+  <ul class="pts">
+    <li>돌파구 — 픽셀 위에서 말고, 이미지를 <b>확 압축한 공간(잠재 공간)</b>에서 확산을 돌리고 마지막에만 편다</li>
+    <li>압축은 <b>오토인코더</b>: 작은 숫자 뭉치로 줄였다 되돌리게 학습 → 되돌려지니 핵심이 남아 있다는 뜻</li>
+    <li>512×512가 다루는 값 개수가 <b>수십 분의 일</b>로 줄어든다 (arXiv:2112.10752)</li>
+  </ul>
+  <div class="big">2022년 8월 22일 — <span class="y">가중치 공개, 필요 VRAM 6.9GB</span><small>당시 게이밍 노트북 크기. 기술 개선보다 이 "공개"가 더 큰 사건이었다</small></div>
+  <div class="hl">두 달 안에 지금 도구 대부분의 조상이 태어났다 — 브라우저 인터페이스·인페인팅·이미지 변형·화풍 덧입히기·구도 잡기. <b>회사가 아니라 사용자들이</b> 만들었다.</div>
+  <aside>Stable Diffusion 공개가 생태계 폭발의 방아쇠였습니다. 오픈 가중치가 만든 커뮤니티 혁신입니다.</aside>
+</section>
+
+<!-- 17 DiT -->
+<section class="slide" data-part="PART 4">
+  <h2>🫀 심장까지 <span class="g">트랜스포머</span>로</h2>
+  <ul class="pts">
+    <li>잡음 예측 신경망은 한동안 <b>U-Net</b>(CNN 바탕, 압축→복원 U자, 지름길 연결)</li>
+    <li>한계 두 가지 — <b>키워도 성능이 안 따라오고</b>, 텍스트를 옆에서 슬쩍 참조라 <b>글·그림이 대등하게 안 섞임</b></li>
+    <li>2022말 <b>DiT</b>가 그 자리를 트랜스포머로 교체 → 화면을 격자로 잘라 <b>각 칸을 토큰</b>으로, 어텐션으로 멀리끼리 연결</li>
+  </ul>
+  <div class="hl">효과가 눈에 보이는 곳 = <b>글자</b>. 2024 이전엔 간판 글자를 뭉갰는데, 글자가 <b>이미지와 동등한 토큰</b>으로 같은 판에 오르며 "이 다섯 글자를 이 순서로"가 픽셀까지 살아남았다. <i>(단, 데이터 기여도 큼 — 구조만의 인과는 아님)</i></div>
+  <aside>2024년엔 텍스트 토큰과 이미지 토큰을 같은 어텐션 판에 올리되 가중치는 따로 주는 구조로 진화합니다. 키우는 만큼 좋아지는 성질도 따라왔습니다. (arXiv:2212.09748)</aside>
+</section>
+
+<!-- 18 증류 -->
+<section class="slide" data-part="PART 4">
+  <h2>⚡ 쉰 번을 <span class="g">네 번</span>으로 — 증류</h2>
+  <ul class="pts">
+    <li>2022년 기본 50스텝·한 장 30초~1분 → 수업 중 실습 불가(한 칸 고치고 1분 대기)</li>
+    <li>해법은 <b>가르치는 방식</b> — 선생 모델이 50번에 가는 지점을 <b>학생이 한두 번에 찍도록</b> 가르친다 = <b>증류</b></li>
+    <li>2023 <b>ADD</b>(Adversarial Diffusion Distillation) — 증류에 <b>적대적 손실</b>을 얹음. <b class="p">2014년 감정사가 2023년 조교로 복귀</b> (GAN이 조연으로)</li>
+  </ul>
+  <div class="big">지금 오픈 모델 기본 스텝 <span class="y">4~9</span> · 한 장 <span class="y">1초 남짓</span><small>증류가 없었으면 오늘 실습 자체가 성립하지 않는다</small></div>
+  <div class="hl">실무 결과 — 증류 모델에선 <b>가이던스를 0으로 꺼야</b> 한다. 코드에서 볼 <code style="font-family:monospace">guidance_scale=0.0</code>은 오타가 아니라, 그 값이 이미 <b>모델 안에 구워져</b> 있어서다(밖에서 또 밀면 그림이 상함).</div>
+  <aside>guidance_scale=0.0을 실습 코드에서 보게 됩니다. 증류로 프롬프트를 미는 힘이 모델에 내장돼, 밖에서 또 밀면 오히려 상합니다.</aside>
+</section>
+
+<!-- 19 가이던스 + flow matching -->
+<section class="slide" data-part="PART 4">
+  <h2>🔬 깊이 보기 — <span class="g">가이던스</span>와 곧게 편 경로</h2>
+  <div class="fml">
+    <div class="e">ε̂ = ε<sub>θ</sub>(x<sub>t</sub>,∅) + w · ( ε<sub>θ</sub>(x<sub>t</sub>,c) − ε<sub>θ</sub>(x<sub>t</sub>,∅) )</div>
+    <div class="e2">c=프롬프트 준 예측 · ∅=안 준 예측 · w=가이던스 값</div>
+  </div>
+  <ul class="pts">
+    <li>w=1이면 그냥 조건부 예측, 올릴수록 <b>"있을 때−없을 때 차이"를 과장</b> → 프롬프트엔 충실하나 <b>색이 타고 뻣뻣</b></li>
+    <li>예측을 <b>두 번</b> 해야 함(계산 2배) — 증류 모델이 아예 끄는 데는 <b>속도 이유</b>도 (분류기 없는 가이던스, arXiv:2207.12598)</li>
+    <li><b>곧게 편 경로</b>(Flow Matching) — 잡음→이미지 길을 직선 케이블카처럼. 코드 스케줄러에 <code style="font-family:monospace">FlowMatch</code>가 있으면 이 계열 (arXiv:2210.02747)</li>
+  </ul>
+  <div class="hl">스텝을 줄인 두 힘 — <b>증류</b>(선생→학생)와 <b>곧게 편 경로</b>(길 자체를 직선으로). 그래서 몇 정거장만 서도 목적지에 닿는다.</div>
+  <aside>비유(등산로 vs 케이블카)는 직관용이고 엄밀한 설명은 아닙니다. 실무에선 스케줄러 이름의 FlowMatch 표시로 알아봅니다.</aside>
+</section>
+
+<!-- 20 지금 어디쯤 -->
+<section class="slide" data-part="PART 4">
+  <h2>📍 지금 어디쯤 — <span class="g">세 흐름</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>텍스트 인코더에 언어모델이 통째로.</b> 2021 CLIP → 2022 "범용 LM이 낫다" → 지금 현역 LM이 그 자리. <b>그래서 문장으로 쓰라.</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>만들기와 고치기가 한 모델로.</b> 실무는 백지보다 "있는 이미지를 말로 고치기"가 잦다. 참조 이미지 여러 장 → <b>같은 인물·제품 유지</b>가 수월.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>모델이 다시 작아졌다.</b> 2022 개인 GPU → 한동안 수십 배 → 지금 <b>40~60억 파라미터</b>가 훨씬 큰 모델과 겨룬다(언어모델과 똑같은 곡선).</span></div>
+  </div>
+  <div class="hl">파라미터 = 신경망의 조정 대상 숫자 하나하나. 많을수록 담는 게 많지만 메모리·계산도 는다. <b>큰 모델을 못 쓰던 사람이 쓸 수 있게 되는</b> 곡선이 다시 왔다.</div>
+  <aside>이제 그 작아진 모델들을 다음 소단원부터 직접 써 봅니다.</aside>
+</section>
+
+<!-- 21 핵심 5문장 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 5문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">"그럴듯함"은 채점이 어렵다 — <b>GAN</b>은 채점관을 같이 키우고, <b>확산</b>은 정답 있는 문제(잡음 맞히기)로 바꿨다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">확산 = <b>뿌린 잡음을 되돌리기</b>. 손실은 평범한 회귀라 <b>안정적</b>. 대가는 <b>느림(반복)</b>.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>CLIP</b>이 문장·그림을 같은 공간에 놓아 <b>프롬프트가 나침반</b>이 됐고, Imagen은 <b>말귀가 그림 공부보다 중요</b>함을 보였다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>잠재 확산 + 공개(SD)</b>로 개인 PC에 내려오고, 심장이 <b>U-Net → 트랜스포머(DiT)</b>로 바뀌었다.</span></div>
+    <div class="st"><span class="n">5</span><span class="t"><b>증류·곧은 경로</b>로 50→4스텝. 그래서 <b>guidance=0</b>, <b>FlowMatch</b>, 문장형 프롬프트가 실습의 기본값.</span></div>
+  </div>
+  <aside>5번이 실습으로 직결됩니다. 오늘 배운 역사가 곧 코드의 숫자와 설정으로 나타납니다.</aside>
+</section>
+
+<!-- 22 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 정답 사진과 <b>픽셀 차이</b>로 채점하면 왜 흐릿한 회색 덩어리가 나오나?</div>
+    <div class="q"><b>Q2.</b> GAN의 <b>모드 붕괴</b>는 무엇이며, GAN이 주역에서 내려온 <b>진짜 이유</b>는?</div>
+    <div class="q"><b>Q3.</b> 확산이 "정답 없는 문제를 정답 있는 문제로 바꿨다"는 말의 뜻은?</div>
+    <div class="q"><b>Q4.</b> <b>CLIP</b>이 프롬프트를 나침반으로 만든 원리를 한 문장으로.</div>
+    <div class="q"><b>Q5.</b> 실습에서 <b>스텝 4·guidance=0</b>이 가능/필요한 이유는?</div>
+  </div>
+  <aside>Q3·Q5가 오늘의 핵심입니다. 확산의 발상, 그리고 증류가 만든 실습 조건.</aside>
+</section>
+
+<!-- 23 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 흐릿한 <b>평균 덩어리</b>가 모든 고양이 사진과 적당히 비슷해 <b>픽셀 차이를 최소</b>로 만들기 때문. 잘못된 채점표를 정확히 만족시키는 쓸모없는 답.</div>
+    <div class="q a"><b>A2.</b> 다양성에 점수가 없어 <b>같은 것 하나만 반복</b>(헬베티카 시나리오). 내려온 진짜 이유는 불안정이 아니라 <b>문장으로 시킬 통로가 없어서</b>.</div>
+    <div class="q a"><b>A3.</b> 잡음을 <b>우리가 직접 뿌려</b> 정답을 알고 있으니, "섞인 잡음 맞히기"라는 <b>정답 있는 회귀 문제</b>가 된다 — 채점관 불필요.</div>
+    <div class="q a"><b>A4.</b> 문장과 그림을 <b>같은 공간의 좌표</b>로 놓아 <b>거리를 잴 수 있게</b> 해, 그 거리가 줄어드는 쪽으로 걷어냄을 유도한다.</div>
+    <div class="q a"><b>A5.</b> <b>증류·곧은 경로</b>로 50→4스텝이 됐고, 프롬프트를 미는 힘이 <b>모델에 내장(구워짐)</b>돼 밖에서 또 밀면(guidance↑) 상하므로 0으로 끈다.</div>
+  </div>
+  <aside>A3·A5를 자기 말로 설명할 수 있으면 다음 실습의 설정이 전부 납득됩니다.</aside>
+</section>
+
+<!-- 24 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>정답 없는 문제를 뒤집다 🌫️→🖼️</h1>
+    <div class="big" style="margin-top:26px">잡음을 <span class="y">뿌리고 되돌린다</span> — 확산의 발상<br>그 뒤 역사는 전부 <span class="y">"더 빠르게·더 말을 잘 듣게"</span><br><br>다음 — 이제 <span class="y">직접</span> 써 봅니다</div>
+    <p class="sub" style="margin-top:24px">노이즈에서 되돌린다는 발상 — 여기까지</p>
+  </div>
+  <aside>이제 그 작아진 모델들을 브라우저·코드·무료 GPU로 직접 돌려 봅니다. 오늘 배운 스텝 수·guidance·FlowMatch가 코드에서 그대로 나타납니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
