@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>같은 모델인데 결과가 갈립니다 · 문제는 모델이 아니라 빈 칸</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:78px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.88rem}
+  .ar{color:var(--gr);font-size:1.2rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.78rem,1.3vw,.96rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  table.t td.fill{color:var(--gy);font-weight:400}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.88rem);
+    color:var(--ink);overflow:auto;max-height:52vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 6px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 5 · 이미지 생성 (1)</span>
+    <h1 style="margin:18px 0">같은 모델인데<br>결과가 갈립니다</h1>
+    <p class="sub">문제는 모델이 아니라, 비어 있는 칸이다</p>
+  </div>
+  <aside>이미지 생성 도구에 "a factory worker"라고 적었더니 표지로 쓰기엔 어정쩡한 그림이 나옵니다. 다섯 번 반복하다 "이 모델이 별로인가 보다" 생각하게 됩니다 — 거의 언제나 틀린 결론입니다. 오늘은 왜 그런지 봅니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>실험</small><b class="b">모델 고정,<br>문장만 바꾸기</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>발견</small><b class="g">안 적으면<br>모델이 채운다</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gold)"><small>전환</small><b>읽기 → 만들기</b></div>
+  </div>
+  <ul class="pts">
+    <li>모델·시드를 <b>전부 고정</b>하고 프롬프트만 바꿔 본다 — 무엇이 바뀔까</li>
+    <li>그림 한 장엔 <b>정해져야 할 여섯 칸</b>이 있고, 안 적으면 <b>모델이 대신</b> 정한다</li>
+    <li>좋은 프롬프트 = <b>길게 쓴 것이 아니라 빈 칸이 없는 것</b></li>
+    <li>오늘부터는 <b>읽어 내기가 아니라 만들어 내기</b> — 책임이 새로 붙는다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 줄 — <b>프롬프트는 모델에게 건네는 주문서</b>. 비운 칸은 여러분 의도가 아니라 <b>학습 데이터의 최빈값</b>으로 채워진다.</div>
+  <aside>강의 5 [프로젝트] 이미지 생성 앱 만들기의 첫 소단원입니다. 개념을 잡고, 이후 브라우저·코드·GPU로 직접 만들어 봅니다.</aside>
+</section>
+
+<!-- 3 도입 스토리 -->
+<section class="slide" data-part="표지">
+  <h2>🌙 수요일 저녁, 표지가 <span class="g">비어 있다</span></h2>
+  <p>공장 점검 라인 사진 한 장이면 되는데 쓸 만한 게 없어, 이미지 생성 도구를 열고 이렇게 적습니다.</p>
+  <pre>a factory worker</pre>
+  <ul class="pts">
+    <li>만들고 싶은 것을 적어 넣는 이 문장을 <b class="g">프롬프트</b>라 부른다 — 모델에게 건네는 <b>주문서</b></li>
+    <li>결과: 사람이 구석에 작게, 정체 모를 기계가 잔뜩, 누런 형광등, 어정쩡한 구도</li>
+    <li>다섯 번 반복 → <b>"이 모델이 별로인가 보다. 더 좋은 걸 써야겠다."</b></li>
+  </ul>
+  <div class="big">거의 언제나 <span class="y">틀린 결론</span>입니다<small>모델을 바꾸기 전에, 확인해 볼 수 있는 방법이 있습니다</small></div>
+  <aside>"프롬프트"는 오늘 하루 내내 나올 말입니다. 결국 여러분이 모델에게 건네는 주문서입니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">모델을 그대로 두고 문장만 바꿔 봤습니다</h2>
+    <p style="margin-top:11px">모델·시드·스텝을 고정하면, 달라진 건 프롬프트뿐</p>
+    <span class="who">통제된 실험</span>
+  </div>
+  <aside>시드란 생성을 시작할 때 뿌리는 무작위 잡음을 정하는 숫자입니다. 같은 시드를 주면 같은 출발점에서 시작하므로, 결과가 달라졌다면 그건 프롬프트 때문입니다.</aside>
+</section>
+
+<!-- 5 3단계 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧪 프롬프트를 <span class="g">세 단계</span>로</h2>
+  <table class="t">
+    <tr><th>단계</th><th>프롬프트</th><th>단어 수</th></tr>
+    <tr><td>게으르게</td><td><code>a factory worker</code></td><td>3</td></tr>
+    <tr><td>피사체·장소만</td><td><code>a factory worker in a safety helmet standing at an inspection line …</code></td><td>16</td></tr>
+    <tr><td>여섯 칸을 다 채워서</td><td><code>Medium shot, 50mm lens. A worker leans over a stainless inspection line … soft morning light from tall windows … shallow depth of field. Photorealistic documentary …</code></td><td>67</td></tr>
+  </table>
+  <div class="hl">모델도, <b>무작위 시드</b>도, 계산 스텝 수도 <b>전부 고정</b>. 바뀐 것은 오직 <b>프롬프트의 빈 칸을 채웠다는 것</b>뿐입니다.</div>
+  <aside>같은 시드를 고정했으므로 출발점(초기 잡음)은 세 번 다 동일합니다. 그래서 결과의 차이는 순수하게 프롬프트에서 옵니다.</aside>
+</section>
+
+<!-- 6 결과 3장 -->
+<section class="slide" data-part="PART 1">
+  <h2>🖼️ 실제로 돌려 본 <span class="g">세 장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">3</span><span class="t"><b>3단어</b> — 인물이 <b>정중앙에서 카메라를 정면</b>으로 본다. 아무도 시키지 않았지만 "공장 노동자"만 듣고 그릴 수 있는 <b class="g">가장 흔한 그림</b>.</span></div>
+    <div class="st"><span class="n">16</span><span class="t"><b>16단어</b> — 안전모·점검 라인이 생겼다. 그런데 <b>여전히 카메라를 본다</b> — 시선을 어디 두라 안 적었으니 <b>모델이 또 채웠다</b>.</span></div>
+    <div class="st"><span class="n">67</span><span class="t"><b>67단어</b> — 몸을 숙여 손을 난간에, 왼쪽 창빛이 상판을 따라 길게 반사, 뒤쪽은 초점에서 풀림. <b class="g">전부 적은 대로</b>.</span></div>
+  </div>
+  <div class="hl"><b>모델은 한 번도 바뀌지 않았습니다.</b> 시드도 그대로. 바뀐 건 <b>비어 있던 칸을 채웠다</b>는 것뿐입니다.</div>
+  <aside>가운데(16단어) 그림에서 작업자가 카메라를 정면으로 보는데, 프롬프트 어디에도 "카메라를 보라"는 말이 없습니다. 안전모·장소는 적었지만 시선을 안 적었더니 모델이 대신 정한 것입니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">안 적은 것은 모델이 대신 정합니다</h2>
+    <p style="margin-top:11px">그림 한 장이 성립하려면 정해져야 하는 것들</p>
+    <span class="who">여섯 칸 · 빈 칸 없음</span>
+  </div>
+  <aside>사진작가는 셔터를 누르기 전에 여섯 가지를 어떤 식으로든 정합니다. 정하지 않고는 사진이 찍히지 않으니까요. 생성 모델도 마찬가지인데, 여러분이 안 정하면 모델이 알아서 정합니다.</aside>
+</section>
+
+<!-- 8 여섯 칸 다이어그램 -->
+<section class="slide" data-part="PART 2">
+  <h2>🎬 그림 한 장이 성립하려면 — <span class="g">여섯 칸</span></h2>
+  <div class="chain">
+    <div class="cell" style="border-color:var(--bl)"><small>누가 있는가</small><b class="b">피사체</b></div>
+    <div class="cell" style="border-color:var(--bl)"><small>무엇을 하는가</small><b class="b">동작</b></div>
+    <div class="cell" style="border-color:var(--red)"><small>어디서 보는가</small><b class="r">카메라</b></div>
+    <div class="cell" style="border-color:var(--red)"><small>빛이 어디서</small><b class="r">조명</b></div>
+    <div class="cell" style="border-color:var(--bl)"><small>어디이고 언제</small><b class="b">환경</b></div>
+    <div class="cell" style="border-color:var(--red)"><small>어떤 느낌</small><b class="r">스타일</b></div>
+  </div>
+  <div class="big">비워 두면 <span class="y">모델이 대신 정합니다</span><small>여러분의 의도가 아니라, 학습 데이터에서 가장 흔했던 값으로</small></div>
+  <aside>세 단어만 적었을 때 인물이 멀리 있었던 건 모델이 게을러서가 아니라, "공장 노동자"만 듣고 그릴 수 있는 가장 평범한 그림이 그것이었기 때문입니다.</aside>
+</section>
+
+<!-- 9 좋은 프롬프트 -->
+<section class="slide" data-part="PART 2">
+  <h2>✍️ 좋은 프롬프트란</h2>
+  <div class="big">길게 쓴 것이 아니라<br><span class="y">빈 칸이 없는 것</span></div>
+  <ul class="pts">
+    <li>단어를 <b>많이</b> 넣는 게 목표가 아니다 — 여섯 칸 중 <b>비어 있는 칸</b>을 찾아 채우는 것</li>
+    <li>채우지 않은 칸은 반드시 채워진다 — <b>다만 내 의도와 무관하게</b></li>
+    <li>이 구분이 <b>오늘 하루를 관통</b>한다</li>
+  </ul>
+  <div class="hl">"모델이 별로다"가 아니라 <b>"어느 칸을 안 적었지?"</b>를 먼저 묻는 것 — 이것이 활용가의 첫 습관입니다.</div>
+  <aside>67단어가 3단어보다 나았던 건 길어서가 아니라 여섯 칸을 다 채웠기 때문입니다. 빈 칸이 없으면 짧아도 좋은 프롬프트입니다.</aside>
+</section>
+
+<!-- 10 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">읽어 내는 일과 만들어 내는 일은 다릅니다</h2>
+    <p style="margin-top:11px">정답이 있던 세계에서, 정답이 없는 세계로</p>
+    <span class="who">입력 설계 · 책임</span>
+  </div>
+  <aside>지금까지 다룬 것은 전부 이미 있는 것에서 무언가를 꺼내는 일이었습니다. 오늘부터는 없던 것을 만들어 냅니다. 여기엔 정답이 없습니다.</aside>
+</section>
+
+<!-- 11 읽기 vs 만들기 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔀 읽어 내기 vs <span class="g">만들어 내기</span></h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="b">📖 읽어 내기 (지금까지)</h3>
+      <p style="margin:0">문서에서 글자, 사진에서 위치를 <b>꺼낸다</b>. <b>정답이 있다</b> — 3,200만 원이면 3,200만 원. 그래서 <b>검산</b>할 수 있었다.</p>
+    </div>
+    <div class="box">
+      <h3 class="g">🎨 만들어 내기 (오늘부터)</h3>
+      <p style="margin:0">없던 것을 <b>만든다</b>. <b>정답이 없다</b> — 같은 문장도 매번 다른 그림, 어느 것도 틀렸다 말할 수 없다.</p>
+    </div>
+  </div>
+  <div class="hl">만들어 내는 쪽에는 읽어 내는 쪽에 없던 <b>두 가지</b>가 새로 붙습니다 — 다음 장에서.</div>
+  <aside>읽기는 입력이 이미 정해져 있었지만, 만들기는 입력(프롬프트)을 여러분이 씁니다. 그래서 성격이 완전히 다릅니다.</aside>
+</section>
+
+<!-- 12 새로 붙는 두 가지 -->
+<section class="slide" data-part="PART 3">
+  <h2>🆕 만들기에 <span class="g">새로 붙는 두 가지</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>무엇을 적었느냐가 결과를 거의 다 좌우한다.</b> 읽기는 입력이 정해져 있었지만, 만들기는 <b>입력을 내가 쓴다</b>.</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>만들어 낸 것에는 책임이 남는다.</b> 읽은 게 틀리면 오류지만, <b>만든 것이 실제와 혼동되면</b> 다른 종류의 문제다.</span></div>
+  </div>
+  <div class="hl">없는 장면을 <b>있는 것처럼</b> 보이게 만들었을 때, 그 그림을 어디에 어떻게 쓸 수 있는지는 <b>기술이 아니라 판단의 영역</b>입니다. 오늘은 <b>잘 만드는 법</b>과 <b>만든 것을 어떻게 다룰지</b>를 함께 다룹니다.</div>
+  <aside>생성은 정답이 없는 대신, 입력 설계의 무게와 책임의 무게가 함께 커집니다. 이 둘이 이 강의 전체의 두 축입니다.</aside>
+</section>
+
+<!-- 13 먼저 예측 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔮 먼저 <span class="g">예측해</span> 보세요</h2>
+  <p style="margin-bottom:6px">맞히는 게 목적이 아니라, 하루가 끝날 때 무엇이 바뀌었는지 스스로 확인하려는 것입니다. 마지막에 이 표로 돌아옵니다.</p>
+  <table class="t">
+    <tr><th>질문</th><th>지금 내 생각</th></tr>
+    <tr><td>그림이 마음에 안 들 때, 모델 교체 vs 프롬프트 수정 — 어느 쪽이 더 크게 바뀔까</td><td class="fill">…</td></tr>
+    <tr><td>오픈소스로 공개된 이미지 생성 모델은 회사 업무에 그대로 써도 될까</td><td class="fill">…</td></tr>
+    <tr><td>내 노트북에 그래픽카드가 없어도 이미지 생성을 직접 돌려 볼 수 있을까</td><td class="fill">…</td></tr>
+    <tr><td>만든 그림에 "AI로 만들었다"고 밝혀야 하는 경우가 있을까</td><td class="fill">…</td></tr>
+  </table>
+  <aside>지금 답을 적어 두고, 강의 5를 마칠 때 다시 봅니다. 관점이 어떻게 바뀌었는지가 학습의 증거입니다.</aside>
+</section>
+
+<!-- 14 오늘 걸어갈 길 -->
+<section class="slide" data-part="PART 3">
+  <h2>🚶 앞으로 <span class="g">걸어갈 길</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">📜</span><span class="t"><b>역사</b> — 어떻게 여기까지 왔나. 왜 스텝 수를 4로, 왜 어떤 모델은 가이던스를 0으로 끄는지가 여기서 나온다.</span></div>
+    <div class="st"><span class="n">🖐️</span><span class="t"><b>손</b> — 설치·결제 없이 브라우저로 첫 장 → 코드로 자동화 → 무료 GPU에서 직접</span></div>
+    <div class="st"><span class="n">🧭</span><span class="t"><b>기준</b> — 무엇으로 만들지 고르는 잣대, 그리고 <b>움직이는 것(영상)</b>까지</span></div>
+    <div class="st"><span class="n">🧩</span><span class="t"><b>도구</b> — 마지막엔 <b>원하는 포즈로 한 장</b> 만드는 도구를 직접 만든다</span></div>
+  </div>
+  <div class="hl">개념(빈 칸 채우기) → 역사 → 실습(브라우저·코드·GPU) → 판단(무엇을·어떻게 쓸지)의 순서로 갑니다.</div>
+  <aside>오늘 실습에서 만나는 숫자들(스텝 수, 가이던스)이 왜 그렇게 생겼는지는 다음 소단원의 역사에서 나옵니다.</aside>
+</section>
+
+<!-- 15 핵심 5문장 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 5문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>프롬프트</b>는 모델에게 건네는 주문서. 그림이 별로일 때 <b>먼저 의심할 건 모델이 아니라 프롬프트</b>.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">모델·시드를 고정하고 문장만 바꿔 보면, <b>결과 차이는 순수하게 프롬프트</b>에서 온다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t">그림엔 여섯 칸(<b>피사체·동작·카메라·조명·환경·스타일</b>)이 있고, 안 적으면 <b>모델이 최빈값으로</b> 채운다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">좋은 프롬프트는 <b>길게 쓴 게 아니라 빈 칸이 없는 것</b>.</span></div>
+    <div class="st"><span class="n">5</span><span class="t">읽기(정답 있음)와 달리 <b>만들기는 정답이 없고</b>, 입력 설계와 <b>책임</b>이 새로 붙는다.</span></div>
+  </div>
+  <aside>3번과 4번이 오늘의 심장입니다. "어느 칸을 안 적었지?"를 먼저 묻는 습관.</aside>
+</section>
+
+<!-- 16 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> "프롬프트"란 무엇이며, 그림이 별로일 때 먼저 의심할 것은?</div>
+    <div class="q"><b>Q2.</b> 모델·<b>시드</b>를 고정한 채 문장만 바꾸는 실험이 증명하는 것은?</div>
+    <div class="q"><b>Q3.</b> 그림 한 장이 성립하는 <b>여섯 칸</b>은? 안 적으면 어떻게 되나?</div>
+    <div class="q"><b>Q4.</b> "좋은 프롬프트 = 긴 프롬프트"가 <b>아닌</b> 이유는?</div>
+    <div class="q"><b>Q5.</b> 읽어 내기와 달리 <b>만들어 내기</b>에 새로 붙는 두 가지는?</div>
+  </div>
+  <aside>Q3·Q5가 오늘의 핵심입니다. 여섯 칸과, 만들기의 두 무게(입력 설계·책임).</aside>
+</section>
+
+<!-- 17 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 만들고 싶은 것을 적어 넣는 <b>주문서 문장</b>. 그림이 별로면 <b>모델보다 프롬프트(빈 칸)를 먼저</b> 의심한다.</div>
+    <div class="q a"><b>A2.</b> 시드=출발 잡음을 정하는 숫자. 같은 시드면 출발점이 같으니, <b>결과 차이는 오직 프롬프트</b> 때문임이 증명된다.</div>
+    <div class="q a"><b>A3.</b> <b>피사체·동작·카메라·조명·환경·스타일.</b> 안 적으면 <b>모델이 학습 데이터의 최빈값</b>(내 의도와 무관)으로 대신 정한다.</div>
+    <div class="q a"><b>A4.</b> 중요한 건 길이가 아니라 <b>여섯 칸에 빈 칸이 없는지</b>. 빈 칸만 없으면 짧아도 좋은 프롬프트.</div>
+    <div class="q a"><b>A5.</b> ① <b>무엇을 적었느냐가 결과를 좌우</b>(입력을 내가 씀) ② <b>만든 것에 책임이 남음</b>(실제와 혼동되면 판단의 문제).</div>
+  </div>
+  <aside>A3·A4를 자기 업무의 이미지 요청에 대보면 오늘 배운 습관이 곧장 붙습니다.</aside>
+</section>
+
+<!-- 18 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>문제는 모델이 아니라 빈 칸 🎬</h1>
+    <div class="big" style="margin-top:26px">안 적은 칸은 <span class="y">반드시 채워진다</span><br>다만 내 의도가 아니라 <span class="y">최빈값으로</span><br><br>다음 — 이 기술이 <span class="y">어떻게 여기까지 왔나</span></div>
+    <p class="sub" style="margin-top:24px">같은 모델인데 결과가 갈립니다 — 여기까지</p>
+  </div>
+  <aside>다음 소단원에서 이미지 생성이 어떻게 여기까지 왔는지(노이즈에서 되돌린다는 발상)를 봅니다. 오늘 실습 숫자들의 뿌리가 거기 있습니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
