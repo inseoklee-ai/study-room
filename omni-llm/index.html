@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Omni LLM 사용해서 처리하기 · 한 모델이 다 받는다</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.78rem,1.3vw,.96rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 6 · 멀티모달 (5)</span>
+    <h1 style="margin:18px 0">Omni LLM으로<br>처리하기</h1>
+    <p class="sub">전문 도구 여럿인가, 하나가 다 받는가</p>
+  </div>
+  <aside>지금까지는 소리를 글자로 바꿔 언어 모델에 넘기는 받아쓰기 방식이었습니다. 강의를 연 질문이 이 지점 — 전문 도구를 여러 개 붙일 것인가, 하나가 다 받게 할 것인가.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 이 덱의 여정</h2>
+  <ul class="pts">
+    <li><b>옴니 모델</b> — 글·소리·이미지·영상을 어떤 조합으로든 받는 하나의 모델(GPT-4o의 'o', Gemma 4)</li>
+    <li>함정 — <b>모델이 받는다고 내가 쓸 수 있는 건 아니다</b>(실행 도구에 따라 입력이 다름)</li>
+    <li><b>추론 엔진</b>이란 무엇이고, 개인용 vs 서버용이 왜 다른가</li>
+    <li>한 모델이 다 받으면 무엇이 달라지나 — <b>중간 손실↓ vs 검증 자리↓</b></li>
+  </ul>
+  <div class="big">선택은 정확도가 아니라 <span class="y">무엇을 검증해야 하는가</span>로 갈린다</div>
+  <div class="hl">🎯 한 줄 — "이 모델이 무엇을 할 수 있나"와 "내 환경에서 무엇을 쓸 수 있나"는 <b>따로 확인</b>해야 한다.</div>
+  <aside>후자를 부르는 이름이 옴니 모델(omni model) — 모든 것이라는 라틴어. 만든 쪽이 직접 그렇게 부릅니다.</aside>
+</section>
+
+<!-- 3 옴니 -->
+<section class="slide" data-part="옴니">
+  <h2>🌐 <span class="g">옴니 모델</span> — 하나가 다 받는다</h2>
+  <ul class="pts">
+    <li>오픈AI는 GPT-4o를 "글·소리·이미지·영상을 <b>어떤 조합으로든</b> 입력으로 받는 옴니 모델"이라 설명 — 이름 끝 <code>o</code>가 그 뜻</li>
+    <li>이런 모델을 노트북에서도 만져 볼 수 있다 — 구글 <b>Gemma 4</b>는 가중치를 내려받아 쓰고, 글·이미지에 더해 <b>소리·영상까지</b> 받는다</li>
+  </ul>
+  <table class="t">
+    <tr><th>무엇을 받는가</th><th>어느 크기에서</th></tr>
+    <tr><td>글, 이미지, 영상</td><td>전 크기</td></tr>
+    <tr><td><b>소리</b></td><td>E2B · E4B · 12B</td></tr>
+  </table>
+  <div class="hl">이름의 숫자가 크기 — 12B=120억. <b>E2B·E4B는 실제로 더 크지만 돌 때 2B·4B만큼만 메모리를 쓰게</b> 만든 것(노트북 시작은 E4B 무난). 12B는 <b>시각·청각 인코더를 따로 두지 않고 입력을 곧바로 모델 안으로 투영</b> — 공유 공간의 중간 단계를 없앤 쪽.</div>
+  <aside>맥락 길이는 작은 것 128K, 중간 256K. GPT-4o System Card / Gemma 4 overview.</aside>
+</section>
+
+<!-- 4 받는다≠쓴다 -->
+<section class="slide" data-part="함정">
+  <h2>⚠️ 모델이 받는다고 <span class="r">내가 쓸 수 있는 건 아니다</span></h2>
+  <p>같은 모델을 로컬 실행 도구(Ollama <code>ollama run gemma4:e4b</code>)로도 받을 수 있다. 그런데 <b>무엇으로 돌리느냐에 따라 넣을 수 있는 입력이 달라진다.</b></p>
+  <table class="t">
+    <tr><th>무엇으로 돌리나</th><th>넣을 수 있는 것</th></tr>
+    <tr><td>간편한 로컬 실행 도구</td><td>글, 이미지</td></tr>
+    <tr><td>서버용 추론 엔진</td><td>글, 이미지, 소리, <b>영상</b></td></tr>
+  </table>
+  <div class="hl">모델 가중치는 하나인데 받는 게 다르다. 심지어 <b>한 도구의 문서끼리도 어긋난다</b>(소개엔 소리를 받는다는데 판본 표기엔 글·이미지만). 모델이 못 하는 게 아니라 <b>그 도구가 아직 안 열어 준 것</b>.</div>
+  <aside>새 기능은 모델이 먼저 나오고 실어 주는 도구가 뒤따라옵니다. 그래서 "이 모델이 무엇을 하나"와 "내 환경에서 무엇을 쓰나"를 따로 확인해야 합니다. vLLM 문서의 T+I+V+A가 글·이미지·영상·소리.</aside>
+</section>
+
+<!-- 5 추론 엔진 -->
+<section class="slide" data-part="함정">
+  <h2>🔧 실행 도구(<span class="g">추론 엔진</span>)란</h2>
+  <ul class="pts">
+    <li>내려받은 가중치는 그 자체론 <b>숫자가 잔뜩 든 파일</b></li>
+    <li>이걸 돌리려면 — 메모리에 올리고, 입력을 모델이 먹을 형태로 바꾸고, 계산을 GPU에 실어 보내고, 나온 숫자를 다시 글자로. 그 일을 하는 프로그램이 <b class="g">추론 엔진</b></li>
+  </ul>
+  <div class="grid2">
+    <div class="box"><h3 class="b">개인 노트북, 하나씩</h3><p style="margin:0">중요한 건 <b>설치가 쉽고 메모리를 적게</b>. GPU 없어도 돌고, 명령 한 줄로 끝나야.</p></div>
+    <div class="box"><h3 class="g">서버 한 대, 수십 명 동시</h3><p style="margin:0">중요한 건 <b>GPU를 놀리지 않는 것</b>. 요청을 겹쳐 밀어 넣고, 앞 요청을 안 기다리고 끼워 넣고, 같은 앞부분 계산을 재사용.</p></div>
+  </div>
+  <div class="hl">"한 사람이 하나씩"과 "서버로 수십 명 동시"는 <b>완전히 다른 문제</b>라 도구가 갈린다.</div>
+  <aside>요청이 하나씩 들어올 때마다 처리하면 GPU가 대부분의 시간을 쉽니다.</aside>
+</section>
+
+<!-- 6 갈래 -->
+<section class="slide" data-part="함정">
+  <h2>🔀 어느 갈래인지만 <span class="g">알아보면</span> 된다</h2>
+  <table class="t">
+    <tr><th>갈래</th><th>무엇을 잘하나</th><th>이름</th></tr>
+    <tr><td>내 기기에서 혼자</td><td>설치 쉽고 GPU 없어도 돈다</td><td>로컬 실행 도구, C++ 구현(llama.cpp)</td></tr>
+    <tr><td>서버에서 여럿이</td><td>요청을 겹쳐 GPU를 꽉 채운다</td><td>vLLM · SGLang · LMDeploy</td></tr>
+    <tr><td>애플 기기 전용</td><td>통합 메모리에 맞춰 최적화</td><td>애플 전용 프레임워크</td></tr>
+  </table>
+  <div class="hl">직접 서버 엔진을 세울 일은 당장 없어도 알아 둘 이유 셋 — ① <b>넣을 수 있는 입력이 다르다</b> ② <b>회사 배포 때 도구가 바뀐다</b>(노트북서 잘 되던 게 열 명만 붙어도 느려짐) ③ <b>속도 비교 글은 어느 엔진으로 잰 건지</b>부터 본다(같은 모델도 두세 배 차이).</div>
+  <aside>이름을 외울 필요는 없고, 어느 갈래인지 알아보는 것이면 충분합니다.</aside>
+</section>
+
+<!-- 7 무엇이 달라지나 -->
+<section class="slide" data-part="선택">
+  <h2>⚖️ 한 모델이 다 받으면 <span class="g">무엇이 달라지나</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="g">중간에서 잃는 게 줄어든다</h3><p style="margin:0">소리를 글자로 바꾸면 억양·침묵이 사라진다. 소리째로 받는 모델엔 <b>그 단서가 남아</b> — "긴 침묵 뒤 낮은 목소리로 말했다"를 나중에 물어볼 수 있다.</p></div>
+    <div class="box"><h3 class="r">검증할 자리가 줄어든다 (대가)</h3><p style="margin:0">받아쓰기·요약을 나누면 <b>어느 단계에서 틀렸는지</b> 짚을 수 있다(<code>제안</code>→<code>제한</code>도 중간 산출물로 잡음). 한 모델이 곧바로 결론을 말하면 <b>그 중간이 없다</b>.</p></div>
+  </div>
+  <div class="big">선택은 정확도가 아니라 <span class="y">무엇을 검증해야 하는가</span>로 갈린다<small>근거를 되짚어야 하면 나누고, 실시간 상황 파악이면 한 번에 받는다</small></div>
+  <aside>회의록처럼 나중에 근거를 되짚어야 하는 일은 나눠 두는 편이 낫고, 실시간 안내처럼 상황을 즉시 파악해야 하면 한 번에 받는 편이 낫습니다.</aside>
+</section>
+
+<!-- 8 핵심 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 5문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>옴니 모델</b>은 글·소리·이미지·영상을 어떤 조합으로든 받는다(GPT-4o·Gemma 4).</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>모델이 받는다 ≠ 내가 쓸 수 있다</b> — 같은 가중치도 실행 도구에 따라 넣을 입력이 다르다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>추론 엔진</b>은 가중치 파일을 실제로 돌리는 프로그램. 개인용(쉬움)과 서버용(GPU 꽉 채움)이 다르다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">이름을 외우지 말고 <b>어느 갈래인지</b>만 — 입력·배포 도구·속도 비교에서 필요하다.</span></div>
+    <div class="st"><span class="n">5</span><span class="t">한 모델이 다 받으면 <b>중간 손실↓·검증 자리↓</b> — 선택은 <b>무엇을 검증해야 하나</b>로.</span></div>
+  </div>
+  <aside>2번과 5번이 핵심 — 환경 확인, 그리고 검증 기준의 선택.</aside>
+</section>
+
+<!-- 9 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> "옴니 모델"이란? GPT-4o의 <code>o</code>는 무슨 뜻인가?</div>
+    <div class="q"><b>Q2.</b> "모델이 받는다 ≠ 내가 쓸 수 있다"를 실행 도구로 설명하면?</div>
+    <div class="q"><b>Q3.</b> <b>추론 엔진</b>이란? 개인용과 서버용이 다른 이유는?</div>
+    <div class="q"><b>Q4.</b> 서버 엔진을 직접 안 세워도 <b>알아 둘 이유 셋</b>은?</div>
+    <div class="q"><b>Q5.</b> 받아쓰기 분리 vs 한 모델 통합, <b>선택 기준</b>은?</div>
+  </div>
+  <aside>Q2·Q5가 핵심 — 환경 확인과 검증 기준.</aside>
+</section>
+
+<!-- 10 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 글·소리·이미지·영상을 <b>어떤 조합으로든</b> 입력으로 받는 하나의 모델. <code>o</code>=omni(모든 것).</div>
+    <div class="q a"><b>A2.</b> 같은 가중치도 <b>로컬 도구는 글·이미지</b>, <b>서버 엔진은 소리·영상까지</b> — 도구가 안 열어 준 입력은 못 쓴다.</div>
+    <div class="q a"><b>A3.</b> 가중치 파일을 <b>메모리에 올리고 계산해 글자로 되돌리는 프로그램</b>. 개인용은 쉬움·저메모리, 서버용은 요청을 겹쳐 <b>GPU를 꽉 채움</b>.</div>
+    <div class="q a"><b>A4.</b> ① 입력이 다름 ② 배포 때 도구가 바뀜(열 명만 붙어도 느려짐) ③ 속도 비교는 <b>어느 엔진으로 잰 건지</b> 봐야.</div>
+    <div class="q a"><b>A5.</b> 정확도가 아니라 <b>무엇을 검증해야 하나</b> — 근거를 되짚으면 나누고, 실시간이면 통합.</div>
+  </div>
+  <aside>A5를 자기 업무에 대보면 통합/분리 판단이 섭니다.</aside>
+</section>
+
+<!-- 11 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>받는다 ≠ 쓸 수 있다 🌐</h1>
+    <div class="big" style="margin-top:26px">한 모델이 다 받으면 <span class="y">중간 손실↓</span>, 대신 <span class="y">검증 자리↓</span><br>선택은 <span class="y">무엇을 검증해야 하나</span>로<br><br>다음 — <span class="y">목소리를 만든다</span>(TTS·복제)</div>
+    <p class="sub" style="margin-top:24px">Omni LLM으로 처리하기 — 여기까지</p>
+  </div>
+  <aside>다음 덱에서 받아쓰기 반대편, 글자를 소리로 바꾸는 일과 목소리 복제·법을 봅니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>

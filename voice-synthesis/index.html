@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>목소리를 만든다는 것 · TTS·복제·라이선스·법</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.77rem,1.28vw,.94rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  table.t td.fill{color:var(--gy);font-weight:400}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 6 · 멀티모달 (6)</span>
+    <h1 style="margin:18px 0">목소리를<br>만든다는 것</h1>
+    <p class="sub">합성·복제, 그리고 라이선스와 법</p>
+  </div>
+  <aside>받아쓰기 반대편에는 글자를 소리로 바꾸는 일(TTS)이 있습니다. 여기도 함정이 같은 자리에 있습니다 — 유명하다고 골랐다가 한국어가 없어 벽에 부딪힙니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 이 덱의 여정</h2>
+  <ul class="pts">
+    <li>노트북에서 도는 한국어 <b>합성기</b>(supertonic)와, 만든 것을 <b>다시 받아쓰기로 검증</b>하는 법</li>
+    <li>목소리를 <b>고르는 것과 복제하는 것은 다른 기능</b> — 감정 태그의 함정</li>
+    <li>반대편 끝 <b>Fish Audio S2 Pro</b>(복제·감정 문장 지시·정반대 라이선스)</li>
+    <li>목소리 복제는 <b>기술이 아니라 법·권리의 문제</b></li>
+  </ul>
+  <div class="big">기술적으로 가능하다는 것과 <span class="y">해도 된다는 것</span>은 다르다</div>
+  <div class="hl">🎯 한 줄 — 10~30초 샘플이면 누구든 내 목소리를 만든다. 그래서 <b>라이선스·목소리 주인의 동의·표시</b>가 함께 온다.</div>
+  <aside>이미지에서도 라이선스가 갈렸지만 음성 쪽은 더 심합니다.</aside>
+</section>
+
+<!-- 3 supertonic -->
+<section class="slide" data-part="합성">
+  <h2>🔊 노트북에서 도는 한국어 <span class="g">합성기</span></h2>
+  <ul class="pts">
+    <li><b>내려받기 1위 모델에 한국어가 없다</b>(지원 9개 언어 중 한국어 없음) — 유명하다고 고르면 벽</li>
+    <li>한국어를 하면서 노트북에서 도는 국내 모델 <b>supertonic</b> — <code>pip install</code> 한 줄, <b>385MB</b>, GPU 없이 코어 많은 노트북서 <b>실제 재생의 1/6 속도</b>(1분 음성 10초)</li>
+  </ul>
+  <div class="big">만든 음성을 다시 <span class="y">받아쓰기에 넣어 원문과 대조</span> → 거의 그대로 복원<small>품질 주장을 검증하는 법 — 반대 방향 도구에 넣어 돌아오는지 본다</small></div>
+  <div class="hl">단 이 방법이 증명하는 건 <b>"알아들을 수 있다"까지</b> — 자연스럽게 들리는지는 직접 들어 봐야 한다. 그리고 무료 코랩 기본 환경에선 오히려 재생보다 느렸다(<b>어디서 돌리느냐로 여덟 배</b>).</div>
+  <aside>supertonic, GitHub. 라이선스는 supertonic-3 모델 카드에서 확인.</aside>
+</section>
+
+<!-- 4 라이선스/생존 -->
+<section class="slide" data-part="합성">
+  <h2>⚠️ "오픈소스"라고 다 <span class="r">쓸 수 있는 게 아니다</span></h2>
+  <ul class="pts">
+    <li>음성 쪽은 라이선스가 더 심하다 — 목소리 복제가 되는 유명 모델 상당수가 <b>비상업</b>. "무료 오픈소스"로 소개되는 것도 약관을 열면 상업 사용을 막아 둔 게 있다</li>
+    <li>회사 일이면 <b>배포 페이지 라이선스를 반드시 열어</b> — 아파치/MIT면 열림, 회사명 붙은 자체 라이선스면 본문을. <b>코드와 가중치의 라이선스가 다를 수</b> 있다(방금 도구도 코드 MIT·가중치는 다른 약관)</li>
+  </ul>
+  <div class="hl">🪦 그리고 <b>프로젝트가 살아 있는지</b>도 봐라 — supertonic은 <b>2026-07-23 아카이브 예고</b>(만든 회사도 정리). 가중치는 계속 쓸 수 있고 실습도 돌지만, <b>버그 수정·새 판본은 없다</b>고 보고 계획을. 마지막 커밋·공지부터 확인.</div>
+  <aside>오픈소스를 업무에 넣을 땐 성능·라이선스만 보지 말고 그 프로젝트가 살아 있는지도 봐야 합니다.</aside>
+</section>
+
+<!-- 5 고르기 vs 복제 -->
+<section class="slide" data-part="복제">
+  <h2>🎭 목소리를 <span class="g">고르는 것</span> vs <span class="g">복제하는 것</span></h2>
+  <ul class="pts">
+    <li>많이 기대하는 "내 목소리로 읽게 하기" — <b>supertonic으론 안 된다</b>. 목소리는 <b>10개 중 고르기</b>(남5·여5). '설정 파일 불러오기'는 <b>미리 만든 설정을 읽는 것</b>이지 녹음에서 목소리를 뽑는 게 아니다(추출 부분 자체가 없음)</li>
+    <li><b>감정은 값으로 지정 못 한다</b> — 조절되는 건 품질·속도·끊는 방식뿐. 목소리 성격은 <b>고르는 것이지 조절하는 게 아니다</b></li>
+    <li>대신 <b>표현 태그</b> 10개 — <code>&lt;laugh&gt; &lt;sigh&gt; &lt;breath&gt;</code>를 문장에 끼우면 웃음·한숨·숨소리가 섞인다(실제 효과 남)</li>
+  </ul>
+  <div class="hl">⚠️ 꼭 확인 — 목록에 없는 <code>&lt;angry&gt;</code>를 넣었더니 화난 톤이 아니라 <b>"앵그리"라고 글자를 그대로 읽었다</b>. <b>목록에 있는 것인지 확인하고, 넣은 뒤 반드시 들어 볼 것.</b></div>
+  <aside>복제는 별도 서비스로만 열려 있었는데 그 서비스가 2026-08-31에 문을 닫습니다(신규 가입은 7월에 막힘).</aside>
+</section>
+
+<!-- 6 Fish Audio 비교 -->
+<section class="slide" data-part="복제">
+  <h2>↔️ 반대편 끝 — <span class="g">Fish Audio S2 Pro</span></h2>
+  <table class="t">
+    <tr><th></th><th>앞의 합성기</th><th>Fish Audio S2 Pro</th></tr>
+    <tr><td>내려받기</td><td>385MB</td><td><b class="r">11GB</b></td></tr>
+    <tr><td>어디서</td><td>노트북 CPU</td><td>그래픽카드(서버용)</td></tr>
+    <tr><td>목소리 복제</td><td>안 됨</td><td><b>10~30초 참조 음성으로 됨</b></td></tr>
+    <tr><td>감정 지시</td><td>태그 10개</td><td><b>문장으로 적어 넣음</b></td></tr>
+    <tr><td>가중치 라이선스</td><td>조건부 상업 가능</td><td><b class="r">연구·비상업만, 상업 별도 계약</b></td></tr>
+    <tr><td>프로젝트 상태</td><td>지원 종료 예고</td><td>활발</td></tr>
+  </table>
+  <div class="hl"><b>이건 노트북에 깔아 쓰는 물건이 아니다</b> — 11GB(받아쓰기 large-v3가 3.1GB인데 세 배). 속도 수치도 <b>서버용 GPU(H200) 한 장</b> 기준. 시험은 만든 쪽 웹 놀이터나 코랩에서.</div>
+  <aside>거의 모든 축에서 앞 합성기와 반대편이라 비교하기 좋습니다.</aside>
+</section>
+
+<!-- 7 알아둘 이유 셋 -->
+<section class="slide" data-part="복제">
+  <h2>🔑 알아 둘 이유 <span class="g">셋</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>감정을 문장으로 지시</b> — 태그 10개가 아니라 <code>[professional broadcast tone]</code>처럼 말로 풀어 적은 것도 알아듣는다(1만 5천 가지 이상). 같은 "감정 조절"도 급이 다르면 형태가 이렇게.</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>라이선스가 정반대</b>(제일 중요) — 연구·비상업 무료, <b>상업은 별도 계약</b>. 그 상업의 범위가 넓어 <b>회사 내부 업무에 쓰는 것도 포함</b>. "우리끼리 사내에서만" 하고 넘어가기 딱 좋은 자리.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>여기서부터는 기술 문제가 아니다</b> — 10~30초 샘플이면 음색·말투·감정 버릇까지 잡고 추가 학습도 불필요. 뒤집으면 <b>누구든 내 목소리를 만들 수 있다</b>.</span></div>
+  </div>
+  <div class="hl">앞 합성기는 조건부로 상업이 열려 있어 <b>둘이 정반대</b> — 같은 "무료 공개 모델"에 이만큼 다른 게 들어 있다.</div>
+  <aside>이 모델은 앞서 이름만 지나간 서버용 추론 엔진 중 하나를 바탕으로 스트리밍 실행기를 함께 냈습니다 — "어느 갈래인지 알아보는 눈"이 이렇게 쓰입니다.</aside>
+</section>
+
+<!-- 8 법 -->
+<section class="slide" data-part="법">
+  <h2>⚖️ 목소리를 <span class="g">복제한다는 것</span> — 법과 권리</h2>
+  <ul class="pts">
+    <li>국내 법에 <b>AI 산출물임을 알아볼 수 있게 표시하라</b>는 조항 — 그림만이 아니라 <b>가상의 음향·이미지·영상을 한 문장에</b> 놓아, 합성 목소리도 같은 규율</li>
+    <li>다만 <b>표시 의무의 주체는 AI 서비스 사업자</b>이고, 도구로 만드는 사람은 그 조항의 의무 대상이 아니다(과태료도 다른 조항, 1년+ 계도기간은 정부 방침)</li>
+    <li>그렇다고 마음대로는 아니다 — 여러분에게 걸리는 건 법 조항이 아니라 <b>모델 라이선스 + 목소리 주인의 권리</b>. 복제하려면 <b>그 사람의 동의</b>가 있어야 하고, 모델이 복제를 금지해 둔 경우도</li>
+  </ul>
+  <div class="hl">국내 목소리 복제 확정 판례는 아직 없다 — <b>없다는 건 안전하다는 뜻이 아니라 기준이 아직 안 섰다는 뜻</b>.</div>
+  <aside>조문: 인공지능 발전과 신뢰 기반 조성 등에 관한 기본법(및 시행령), 국가법령정보센터.</aside>
+</section>
+
+<!-- 9 단서 검토표 -->
+<section class="slide" data-part="법">
+  <h2>🧐 목소리의 <span class="g">단서</span>를 써도 되는가</h2>
+  <p>상담 녹취 자동 분석 기능이 내놓을 법한 항목들 — 어떤 건 쓸 만하고 어떤 건 위험하다.</p>
+  <table class="t">
+    <tr><th>AI가 제안한 항목</th><th>써도 되나 / 이유</th></tr>
+    <tr><td>고객 발화 요약</td><td>비교적 검증 가능 — 단 <b>원문 링크·근거 구간</b> 필요</td></tr>
+    <tr><td>고객 감정: 분노/불안/기쁨 자동 분류</td><td><b>보조 신호로만</b>, 단정 표현 피하기</td></tr>
+    <tr><td>침묵 5초+ 구간 표시</td><td>정량 신호라 유용 — 단 <b>통화 품질·지연과 구분</b></td></tr>
+    <tr><td>규정 문구를 읽었는지 확인</td><td>검증 가능 — 단 근거 구간 함께</td></tr>
+    <tr><td>고객 성격 유형 추정</td><td><b class="r">대부분 제외</b> — 필요성·개인정보/차별 위험·검증 약함</td></tr>
+  </table>
+  <div class="hl">감정 분류는 보조로만, <b>성격 유형 추정은 대부분의 운영 환경에서 빼는 편</b>이 낫다.</div>
+  <aside>발화 요약과 규정 문구 확인은 검증 가능하지만 그래도 원문 링크와 근거 구간이 필요합니다.</aside>
+</section>
+
+<!-- 10 핵심 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 5문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">노트북에서 도는 한국어 합성기(supertonic)는 있다 — 만든 것은 <b>다시 받아쓰기로 검증</b>.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">"오픈소스"도 <b>라이선스·코드/가중치 구분·프로젝트 생존</b>을 봐야 한다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>목소리를 고르는 것과 복제하는 것은 다른 기능</b> — 태그는 <b>목록에 있는 것만</b> 통하고 넣은 뒤 들어 본다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">복제되는 모델(Fish S2)은 <b>GPU·11GB·정반대 라이선스</b>(내부 업무도 상업).</span></div>
+    <div class="st"><span class="n">5</span><span class="t">복제는 기술이 아니라 <b>법·권리</b> — 표시 의무는 사업자에게, 나에겐 <b>라이선스+주인의 동의</b>.</span></div>
+  </div>
+  <aside>3번과 5번이 핵심 — 고르기≠복제, 그리고 동의와 라이선스.</aside>
+</section>
+
+<!-- 11 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 합성 품질을 <b>검증</b>하는 방법과, 그 방법이 증명하는 한계는?</div>
+    <div class="q"><b>Q2.</b> "오픈소스" 음성 모델을 업무에 넣기 전 봐야 할 것 셋은?</div>
+    <div class="q"><b>Q3.</b> 목소리 "고르기"와 "복제"의 차이, 그리고 <b>표현 태그</b>의 함정은?</div>
+    <div class="q"><b>Q4.</b> Fish Audio S2의 라이선스가 "정반대"라는 건 무슨 뜻인가?</div>
+    <div class="q"><b>Q5.</b> 목소리 복제에서 <b>나에게 걸리는 것</b>은 법 조항인가, 무엇인가?</div>
+  </div>
+  <aside>Q4·Q5가 핵심 — 상업 범위와 동의.</aside>
+</section>
+
+<!-- 12 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 만든 음성을 <b>다시 받아쓰기에 넣어 원문과 대조</b>. 다만 증명되는 건 <b>"알아들을 수 있다"까지</b>, 자연스러움은 직접 들어야.</div>
+    <div class="q a"><b>A2.</b> <b>라이선스</b>(비상업 많음)·<b>코드/가중치 구분</b>·<b>프로젝트 생존</b>(마지막 커밋·아카이브 공지).</div>
+    <div class="q a"><b>A3.</b> 고르기 = 미리 만든 목소리 중 선택, 복제 = 녹음에서 목소리를 뽑음(별도 기능·supertonic엔 없음). 태그는 <b>목록에 없으면 글자로 읽는다</b>.</div>
+    <div class="q a"><b>A4.</b> 연구·비상업 무료지만 <b>상업은 별도 계약이고 그 범위에 회사 내부 업무도 포함</b> — 상업이 열린 앞 합성기와 반대.</div>
+    <div class="q a"><b>A5.</b> 표시 의무는 <b>사업자</b>에게. 나에게 걸리는 건 <b>모델 라이선스 + 목소리 주인의 동의</b>(판례 없음=기준 없음).</div>
+  </div>
+  <aside>A5를 기억하면 "사내에서만 쓰니 괜찮겠지"의 함정을 피합니다.</aside>
+</section>
+
+<!-- 13 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>가능하다 ≠ 해도 된다 🎙️</h1>
+    <div class="big" style="margin-top:26px">고르기와 복제는 다른 기능<br>복제는 <span class="y">라이선스·주인의 동의·표시</span>가 함께 온다<br><br>다음 — <span class="y">회의록을 자동으로</span> 정리해 본다</div>
+    <p class="sub" style="margin-top:24px">목소리를 만든다는 것 — 여기까지</p>
+  </div>
+  <aside>다음 덱에서 받아쓰기·정리·노션 저장까지, 회의록 자동화를 직접 만들고 강의 6을 마무리합니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>

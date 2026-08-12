@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>회의록을 자동으로 정리해 봅니다 · 실습과 마무리</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.77rem,1.28vw,.94rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.9rem);
+    color:var(--ink);overflow:auto;max-height:52vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 6 · 멀티모달 (7~8)</span>
+    <h1 style="margin:18px 0">회의록을<br>자동으로 정리해 봅니다</h1>
+    <p class="sub">받아쓰기 → 회의록 → 노션, 그리고 강의 마무리</p>
+  </div>
+  <aside>강의 6의 마지막 덱(실습 ⑦ + 마무리 ⑧ 통합)입니다. 녹음을 넣으면 받아쓰고, 회의록으로 정리하고, 노션에 남기는 것까지 에이전트에게 시키고 판단합니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 회의록 실습의 <span class="g">한 바퀴</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:110px"><small>준비</small><b>음성 파일<br>30초 손으로</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px;border-color:var(--bl)"><small>1</small><b class="b">받아쓰기<br>시각 남김</b></div>
+    <span class="ar">↺</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gold)"><small>2 · 한 칸씩</small><b>안 나오면<br>되돌아간다</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px"><small>3</small><b>회의록 정리<br>의심은 그대로</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px;border-color:var(--gr)"><small>4</small><b class="g">노션에<br>되짚을 수 있게</b></div>
+  </div>
+  <ul class="pts">
+    <li>오늘은 코드를 직접 안 쓴다 — 에이전트에게 시키고 <b>나온 것을 판단</b>하는 데 시간을</li>
+    <li><b>처음부터 잘 안 나온다.</b> 그게 정상이고, 제일 값어치 있는 시간이 거기서 나온다</li>
+  </ul>
+  <div class="hl">🎯 한 줄 — <b>소리를 손보는 게 모델 바꾸기보다 먼저</b>, 그리고 <b>요약이 오류를 세탁</b>하니 의심스러운 곳은 원문 그대로 남긴다.</div>
+  <aside>회사에서 가장 자주 요청받는 자동화이기도 합니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">회의록 자동 정리 실습</h2>
+  <p style="margin-top:11px">받아쓰기 → 전처리 → 회의록 → 노션</p><span class="who">faster-whisper · ntn</span></div>
+  <aside>한국어 음성 파일 하나로 시작합니다. 준비물부터 봅니다.</aside>
+</section>
+
+<!-- 4 준비물 -->
+<section class="slide" data-part="PART 1">
+  <h2>🎤 준비물 — 음성 파일 하나</h2>
+  <table class="t">
+    <tr><th>조건</th><th>왜</th></tr>
+    <tr><td>사람이 <b>둘 이상</b></td><td>한 사람이 또박또박 읽는 건 너무 쉬운 시험지</td></tr>
+    <tr><td><b>3~10분</b></td><td>너무 짧으면 차이가 안 보이고, 너무 길면 한 번 돌리기 지친다</td></tr>
+    <tr><td>내 분야의 <b>약어·고유명사</b></td><td>여기가 제일 먼저 무너진다</td></tr>
+  </table>
+  <div class="hl">📏 <b>앞쪽 30초는 손으로 받아 적어 두라</b>(정답). 뒤에서 설정을 바꿔 가며 좋아졌는지 재야 하는데 <b>기준이 없으면 잴 수가 없다</b> — "아까보다 나은 것 같다"로는 판단이 안 선다.</div>
+  <aside>구하는 법 — 직접 녹음(가장 좋음)·공개 음성·실제 회의(참석자 동의 + 노트북에서 도는 받아쓰기. 남의 서버로 올리는 순간 사고). 오늘 도구가 인터넷 없이 돌아 이 자리에 쓸모.</aside>
+</section>
+
+<!-- 5 1단계 -->
+<section class="slide" data-part="PART 1">
+  <h2>1️⃣ 받아쓰기부터 — <span class="g">한 번에 다 시키지 말 것</span></h2>
+  <pre>준비한 음성 파일을 한국어로 받아쓰는 스크립트를 만들어 주세요.
+- 도구는 faster-whisper, 모델은 small 크기로 시작.
+- 별도 프로그램을 따로 설치해야 하는 방법은 쓰지 마세요.
+- 각 조각의 시작·끝 시각을 결과에 함께 남기세요(원본 되짚기용).
+- 결과를 화면에 보여 주고 파일로도 저장(파일명에 어느 모델인지 드러나게).
+- 다시 실행하면 앞 결과를 덮어쓰지 말고 새 파일로.</pre>
+  <div class="hl">마지막 두 줄이 중요 — 뒤에서 설정을 바꿔 여러 번 돌릴 텐데 <b>결과가 서로 덮어써지면 무엇과 무엇을 비교하는지 알 수 없다</b>.</div>
+  <aside>받아쓴 것이 나오면 손으로 적은 30초와 나란히 놓고 어디가 어떻게 틀렸는지 봅니다 — 그게 다음 단계의 재료.</aside>
+</section>
+
+<!-- 6 2단계 -->
+<section class="slide" data-part="PART 1">
+  <h2>2️⃣ 처음엔 잘 안 나온다 — <span class="r">소리부터 손본다</span></h2>
+  <p>이름이 뭉개지고 약어가 엉뚱해지고 겹쳐 말한 곳이 빠진다. <b>정상이다.</b> 같은 모델·회의도 헤드셋 37% vs 회의실 마이크 68% — <b>모델을 바꾸기 전에 소리부터 손볼 자리</b>가 있다.</p>
+  <div class="grid2">
+    <div class="box"><h3 class="b">소리 쪽</h3><p style="margin:0">16kHz 단일 채널 · 소리 크기 고르게 · 긴 무음 잘라내기 · 잡음 억제(과하면 목소리도 깎임)</p></div>
+    <div class="box"><h3 class="g">설정 쪽</h3><p style="margin:0">언어를 한국어로 못 박기 · <b>자주 나오는 고유명사 미리 알려 주기</b> · 모델 크기 한 단계(가장 확실하나 가장 느림)</p></div>
+  </div>
+  <div class="hl"><b>한 번에 하나만</b> 바꿔 돌리고, 손으로 적은 정답과 대조해 <b>글자 단위 오류율</b>을 계산(띄어쓰기·문장부호 빼고, <b>바꾸기는 한 번</b>으로 세는지 확인 — 이것만으로 숫자가 두 배). 결과가 기대와 달라도 그대로 적을 것 — <b>하나 알아낸 것</b>(잡음 억제를 걸었더니 나빠지기도).</div>
+  <aside>네 가지를 한꺼번에 켜고 좋아졌다면 무엇이 그렇게 만들었는지 모릅니다. 돌릴 때마다 "무엇을 바꿨나/오류율/시간/변화" 표를 채우세요 — 이게 오늘의 산출물.</aside>
+</section>
+
+<!-- 7 크기 실측 -->
+<section class="slide" data-part="PART 1">
+  <h2>📊 크기를 바꾸면 — 그리고 <span class="g">숫자를 하나로 안 적는 이유</span></h2>
+  <table class="t">
+    <tr><th>모델</th><th>추론 시간</th><th>조각 수</th><th>글자 오류율</th></tr>
+    <tr><td>small</td><td>3.8초</td><td>8~11개</td><td>0.7~4.1% (대개 2%대)</td></tr>
+    <tr><td>medium</td><td>10.6초</td><td>6~9개</td><td>0.0~1.4% (대개 0%)</td></tr>
+  </table>
+  <ul class="pts">
+    <li>세 배 느린 대신 정확 — 33초라 작아 보여도 <b>한 시간 회의면 큰 차이</b></li>
+    <li>같은 녹음·설정인데 오류율이 <b>0.7~4.1%를 오간다</b> → "정확도 몇 %"를 들으면 <b>몇 번 잰 값인지</b>부터 묻는다</li>
+  </ul>
+  <div class="hl">⚠️ 여기 small이 2%대인데 앞에선 17.5%였다 — <b>우리 녹음이 세상에서 가장 쉬운 시험지</b>(잡음 없고 안 겹치고 마이크 일정)라서. <b>이 숫자를 실제 업무 기대치로 삼으면 안 된다.</b> 알 수 있는 건 <b>모델 사이 상대 차이와 어떤 말이 틀리는지</b>뿐.</div>
+  <aside>약어는 파이프라인 어딘가에서 반드시 흔들립니다(합성기가 'QA'를 읽는 단계에서 이미). 조각 수도 매번 달라지는데, 누가 말했는지 나누는 작업이 조각 단위에 붙어 조각이 엉뚱하면 화자 구분도 틀어집니다.</aside>
+</section>
+
+<!-- 8 3단계 -->
+<section class="slide" data-part="PART 1">
+  <h2>3️⃣ 회의록으로 정리 — <span class="g">무엇을 요구할지</span>가 전부</h2>
+  <pre>아래는 회의 녹음을 받아쓴 것입니다. 다음 형식으로 정리해 주세요.
+1. 결정된 것: 확정된 것만. 논의 중인 건 넣지 마세요.
+2. 할 일: 담당자와 기한을 함께. 둘 중 하나라도 없으면 "미정".
+3. 결론이 안 난 것: 이견이 있었지만 정리되지 않은 것.
+4. 받아쓰기가 의심스러운 곳: 말이 안 되거나 잘못 들린 것 같은
+   부분을 원문 그대로 인용해 표시. 다듬지 마세요.
+5. 원본 위치: 각 항목마다 근거가 되는 녹취 시각을 그대로.
+화자 정보가 없으니 담당자를 발언 내용으로 추정하지 마세요.
+녹취에 없는 내용을 추측해서 채우지 마세요.</pre>
+  <div class="hl"><b>가장 잘 나온 판본을 쓰지 말 것</b> — 오류가 조금 남은 쪽을 넘겨야 다음 실험이 된다. 앞의 세 항목은 짐작하겠지만 <b>네 번째가 이 실습에서 제일 중요</b>.</div>
+  <aside>화자를 나눠야 하는 일이라면 받아쓰기 정확도만 보지 말고 조각을 어떻게 자르는지도 확인하세요.</aside>
+</section>
+
+<!-- 9 세탁 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧺 마지막 관문 — <span class="r">요약이 오류를 세탁한다</span></h2>
+  <div class="box">
+    <p style="margin:0">받아쓰기가 <code>제안</code>을 <code>제한</code>으로 바꿈 — "출시일을 2주 미루자는 <b class="r">제한</b>입니다"</p>
+  </div>
+  <ul class="pts">
+    <li>네 번째 항목을 <b>빼고</b> 그냥 "정리해 주세요" → <b>제한도 기회의도 흔적 없이 사라지고</b> 매끄러운 회의록, 경고 한 줄 없음. <b>게다가 없는 개최일까지 지어냄</b></li>
+    <li>네 번째 항목을 <b>넣으니</b> 같은 모델이 두 오류를 원문 그대로 인용해 표시 — <b>프롬프트가 제 몫을 한다</b></li>
+  </ul>
+  <div class="big">그럴듯한 출력이 <span class="y">가장 위험</span>하다<small>받아쓰기 오류는 눈에 띄지만, 요약을 거친 오류는 안 띈다 — 매끄러워지며 알아채기 어려워진다</small></div>
+  <div class="hl">여러분 결과에서도 찾아라 — <b>원문에선 이상했는데 회의록에선 말이 되어 버린 문장.</b> 하나는 반드시 있다. 그래서 <b>의심은 다듬지 말고 원문 그대로 + 녹취 시각</b>을 남긴다.</div>
+  <aside>더 큰 모델은 시키지 않아도 "이 부분은 전사 오류로 보인다"고 주석을 달기도 합니다. 잡아 줄 수도 아닐 수도 있어 운에 못 맡기니 프롬프트에 명시합니다.</aside>
+</section>
+
+<!-- 10 4단계 노션 -->
+<section class="slide" data-part="PART 1">
+  <h2>4️⃣ 노션에 남긴다 — <span class="g">되짚을 수 있게</span></h2>
+  <pre>curl -fsSL https://ntn.dev | bash    # 설치 (윈도우: winget install Notion.ntn)
+ntn login                             # 터미널 코드와 브라우저 코드가 같은지 확인 후 승인</pre>
+  <ul class="pts">
+    <li>노션 공식 CLI <b>ntn</b> — 터미널에서 노션 API를 부를 수 있어 에이전트에게 잘 맞는다</li>
+    <li>회의록 넣을 페이지를 만들고 링크의 <b>페이지 아이디</b>를 복사 → 에이전트에게: 제목 형식·본문 <b>마크다운 한 번에</b>·할 일은 <code>[ ]</code> 체크박스·맨 아래에 <b>원본 파일명과 받아쓰기 설정</b>·의심에 녹취 시각</li>
+  </ul>
+  <div class="hl">맨 아래 줄을 빼지 말 것 — <b>한 달 뒤 필요한 건 매끄러운 요약이 아니라 어디를 다시 들어야 하는지</b>. 열어서 확인할 것 하나 — <b>회의록만 보고 원본의 어느 지점을 들어야 할지 알 수 있는가?</b></div>
+  <aside>Notion CLI 개발자 문서 / markdown content. 페이지를 만드는 API가 markdown 항목을 그대로 받으니 블록을 하나씩 쌓지 말라고 지시합니다.</aside>
+</section>
+
+<!-- 11 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">중간을 남겨야 되짚을 수 있습니다</h2>
+  <p style="margin-top:11px">이 다음은 어디로, 그리고 강의 6 정리</p><span class="who">산출물 · 핵심 · 회고</span></div>
+  <aside>지금은 영상·소리·그림·글을 한 좌표계에 함께 올리는 쪽으로 연구가 이어집니다. 멀티모달이 대화 모델에만 걸린 이야기가 아니라는 뜻입니다.</aside>
+</section>
+
+<!-- 12 이 다음 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔭 이 다음은 <span class="g">어디로</span> 가나</h2>
+  <ul class="pts">
+    <li>영상·소리·그림·글을 <b>한 좌표계에 함께</b> 올리는 쪽 — 검색·추천·유사 사례 탐색·아카이브에서도 모달리티 통합이 중요해진다</li>
+    <li>검색의 단위가 키워드에서 <b>경험 단서</b>로 확장된다</li>
+  </ul>
+  <div class="box">
+    <p style="margin:0">🔎 "이 회의 녹음과 <b>비슷한 결론</b>이 난 과거 문서는?" · "이 제품 사진과 <b>비슷한 불량</b>의 상담 녹취는?" · "이 교육 영상에서 학생이 <b>막힌 순간</b>과 비슷한 풀이 노트는?"</p>
+  </div>
+  <div class="hl">오늘의 산출물 — <b>노션 회의록 페이지</b>(의심에 녹취 시각 + 어느 설정으로 만들었는지)와 <b>회의록 실습 기록표</b>가 남아 있으면 다음 실습으로 넘어갈 준비가 된 것.</div>
+  <aside>기록표에는 쓴 음성·손으로 적은 정답·설정별 기록·가장 좋아진 것·오히려 나빠진 것·견딜 수 있는 오류율과 근거·요약본만으론 못 잡은 오류·노션 링크가 채워져야 합니다.</aside>
+</section>
+
+<!-- 13 핵심 정리 -->
+<section class="slide" data-part="PART 2">
+  <h2>🎯 강의 6 <span class="g">핵심 정리</span></h2>
+  <table class="t">
+    <tr><th>배운 것</th><th>한 문장 + 실무 판단</th></tr>
+    <tr><td>소리와 글자의 어긋남</td><td>소리는 흐르고 글자는 끊어진다 — <b>정렬</b>을 누가 맞추느냐가 역사. 스텝을 어떻게 자르나 보면 화자 분리가 붙을지 안다</td></tr>
+    <tr><td>한국어와 모델 크기</td><td><b>크기보다 그 언어를 봤느냐</b>가 먼저. 영어 예제의 크기를 그대로 쓰지 않는다</td></tr>
+    <tr><td>지표의 단위</td><td>글자냐 단어냐로 <b>네 배</b> 차이. 정확도 숫자는 무엇을 몇 번 재서 나온 값인지 묻는다</td></tr>
+    <tr><td>합성과 복제</td><td><b>고르기 ≠ 복제</b>. 복제는 GPU·라이선스·<b>목소리 주인의 동의</b>를 먼저</td></tr>
+    <tr><td>실행 도구</td><td>같은 모델도 <b>무엇으로 돌리느냐로 입력·속도가 다르다</b>. 내 환경에서 되는지 따로 확인</td></tr>
+    <tr><td>요약의 세탁</td><td>받아쓰기 오류는 띄지만 <b>요약을 거친 오류는 안 띈다</b>. 의심은 원문 그대로 표시하게</td></tr>
+  </table>
+  <aside>모달리티·VLM·단일vs파이프라인·멀티모달 위험(입력 많을수록 결론이 더 그럴듯)도 강의 6 전체의 정리입니다.</aside>
+</section>
+
+<!-- 14 회고 + 출처 -->
+<section class="slide" data-part="PART 2">
+  <h2>🤔 오늘의 <span class="g">회고</span> — 네 줄</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">소리를 <b>글자로 옮기는 것</b>과 <b>소리째로 넘기는 것</b> 중 내 업무엔 어느 쪽이 맞나?</span></div>
+    <div class="st"><span class="n">2</span><span class="t">내 업무에서 가장 중요한 입력은 무엇이고, <b>텍스트로 옮기면 무엇이 사라지나?</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t">AI에게 <b>맡길 수 있는 것과 맡기면 안 되는 것</b>은 무엇으로 갈리나?</span></div>
+    <div class="st"><span class="n">4</span><span class="t">합성한 목소리를 쓸 자리가 있나? 있다면 <b>그 목소리는 누구의 것</b>이어야 하나?</span></div>
+  </div>
+  <div class="hl">📚 출처 — CTC(ICML 2006)·wav2vec 2.0(2006.11477)·Whisper(2212.04356)·CLIP(2103.00020) · faster-whisper·supertonic·Open ASR Leaderboard. <b>값·라이선스·지원 언어는 바뀌니 확인한 날짜를 남길 것.</b></div>
+  <aside>직접 돌려 얻은 숫자라서, 여러분 업무에 이 자동화를 붙일 수 있는지를 여기서 판단하게 됩니다.</aside>
+</section>
+
+<!-- 15 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 받아쓰기가 잘 안 나올 때 <b>모델 바꾸기 전에</b> 할 일은?</div>
+    <div class="q"><b>Q2.</b> 왜 오류율을 <b>한 번만 재서 믿으면</b> 안 되나?</div>
+    <div class="q"><b>Q3.</b> 회의록 프롬프트의 <b>네 번째 항목</b>이 왜 제일 중요한가?</div>
+    <div class="q"><b>Q4.</b> "요약이 오류를 세탁한다"는 무슨 뜻이며, 어떻게 막나?</div>
+    <div class="q"><b>Q5.</b> 노션에 <b>녹취 시각</b>을 꼭 남기는 이유는?</div>
+  </div>
+  <aside>Q3·Q4가 이 실습의 핵심 교훈입니다.</aside>
+</section>
+
+<!-- 16 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> <b>소리를 손본다</b>(16kHz·크기 정규화·무음 제거·잡음 억제)와 설정(언어·고유명사). 같은 회의도 헤드셋 37% vs 회의실 68%.</div>
+    <div class="q a"><b>A2.</b> 같은 녹음·설정인데 <b>0.7~4.1%를 오간다</b>. 한 번 값을 그대로 믿으면 안 되고 <b>몇 번 잰 값인지</b> 봐야.</div>
+    <div class="q a"><b>A3.</b> <b>의심스러운 곳을 다듬지 말고 원문 그대로 표시</b>하게 — 안 넣으면 오류가 매끄럽게 사라지고 없는 것까지 지어낸다.</div>
+    <div class="q a"><b>A4.</b> 받아쓰기 오류가 요약을 거치며 <b>말이 되는 문장으로 바뀌어 안 보이게</b> 됨. <b>의심을 원문 그대로 표시</b>하게 시켜 막는다.</div>
+    <div class="q a"><b>A5.</b> 한 달 뒤 필요한 건 요약이 아니라 <b>어디를 다시 들어야 하는지</b> — 되짚을 수 있어야 한다.</div>
+  </div>
+  <aside>A3·A4를 자기 회의록에 적용하면 "그럴듯한 오류"를 잡는 눈이 생깁니다.</aside>
+</section>
+
+<!-- 17 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>중간을 남겨야 되짚는다 🎙️</h1>
+    <div class="big" style="margin-top:26px">소리를 먼저 손보고 · 한 칸씩 재고<br>의심은 <span class="y">원문 그대로</span> · 노션엔 <span class="y">녹취 시각</span><br><br>강의 6 여러 입력을 처리하는 모델들 — 매듭</div>
+    <p class="sub" style="margin-top:24px">회의록을 자동으로 정리해 봅니다 — 여기까지</p>
+  </div>
+  <aside>강의 6 완결. 소리를 글자로·한 모델이 다 받기·목소리 만들기·회의록 자동화까지, 멀티모달의 실무 감각을 손으로 익혔습니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>

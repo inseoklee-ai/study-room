@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>소리를 글자로 바꾸는 길 · 정렬의 역사와 모델 고르기</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.76rem,1.26vw,.93rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  .fml{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);
+    padding:14px 18px;text-align:center;margin:8px 0;font-family:"SF Mono",Consolas,monospace}
+  .fml .e{font-size:clamp(.95rem,1.8vw,1.2rem);font-weight:800;color:var(--gr)}
+  .fml .e2{font-size:clamp(.82rem,1.4vw,1rem);color:var(--soft);margin-top:4px}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.9rem);
+    color:var(--ink);overflow:auto;max-height:52vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 6 · 멀티모달 (3~4)</span>
+    <h1 style="margin:18px 0">소리를 글자로<br>바꾸는 길</h1>
+    <p class="sub">정렬의 역사, 그리고 내 노트북에서 고르기</p>
+  </div>
+  <aside>강의 6의 음성 인식 덱(소단원 3·4 통합)입니다. 소리가 글자가 되기까지의 계보(정렬 문제·CTC·Whisper)를 보고, 실무로 내려와 한국어에서 어느 모델을 고를지 정합니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 이 덱의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:110px;border-color:var(--red)"><small>벽</small><b class="r">소리≠글자<br>시간 정렬</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px;border-color:var(--bl)"><small>돌파</small><b class="b">CTC·wav2vec2</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px;border-color:var(--gr)"><small>강건함</small><b class="g">Whisper</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px;border-color:var(--gold)"><small>실무</small><b>모델 고르기</b></div>
+  </div>
+  <ul class="pts">
+    <li>소리는 이어져 흐르고 글자는 끊어진다 — 이 <b>정렬</b>을 누가 맞추느냐가 역사</li>
+    <li>정렬을 고르지 말고 전부 더한 <b>CTC</b>, 라벨 없이 배운 <b>wav2vec2</b>, 강건한 <b>Whisper</b></li>
+    <li>한국어에선 <b>크기보다 그 언어를 봤느냐</b>가 먼저 — tiny·base는 못 쓴다</li>
+    <li>내 노트북 사양별로 무엇이 도는가, 그리고 <b>글자 단위</b>로 세기</li>
+  </ul>
+  <div class="hl">🎯 한 줄 — 낡은 모델이면 먼저 바꾸되, 그다음 가장 큰 손잡이는 <b>모델이 아니라 마이크</b>다.</div>
+  <aside>옛 질문은 "얼마나 정확히 받아썼나", 새 질문은 "말소리 안 어떤 단서가 판단에 필요했나"입니다.</aside>
+</section>
+
+<!-- 3 도입 -->
+<section class="slide" data-part="표지">
+  <h2>🎙️ 받아쓰기는 <span class="g">시작점</span>이지 끝점이 아니다</h2>
+  <ul class="pts">
+    <li><b>STT</b>(말→글자)·<b>TTS</b>(글자→말)의 구분은 여전히 유용(콜센터 문서화·안내 음성)</li>
+    <li>하지만 멀티모달 관점에선 질문이 바뀐다 — "얼마나 정확히" → <b>"어떤 단서가 판단에 필요했나"</b></li>
+    <li>"네, 알겠습니다"는 텍스트론 동의지만, <b>긴 침묵 뒤 낮은 목소리</b>면 불만·포기 신호일 수 있다</li>
+  </ul>
+  <div class="hl">회의록에서도 <b>누가 말했나·서로 끊었나·특정 단어 앞에서 망설였나</b>가 의사결정 단서가 된다.</div>
+  <aside>이 덱은 먼저 소리→글자의 계보를, 그다음 실무 모델 선택을 다룹니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">소리를 글자로 — 정렬의 역사</h2>
+  <p style="margin-top:11px">사람이 자로 맞추다 → 확률에 맡기다 → 모델이 스스로</p><span class="who">스펙트로그램 · CTC · Whisper</span></div>
+  <aside>같은 사람이 "안녕하세요"를 두 번 말하면 파형은 한 번도 같지 않습니다. 그런데 답은 매번 똑같은 다섯 글자. 이 어긋남이 이 분야의 축입니다.</aside>
+</section>
+
+<!-- 5 세 층 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧅 소리를 다루는 <span class="g">세 층</span></h2>
+  <table class="t">
+    <tr><th>층위</th><th>모델이 보는 것</th><th>쓸 수 있는 업무</th><th>놓치기 쉬운 위험</th></tr>
+    <tr><td>전사</td><td>발화 내용을 텍스트로</td><td>회의록·상담 요약·문진 초안</td><td>억양·감정·침묵이 사라짐</td></tr>
+    <tr><td>음향 단서</td><td>속도·높낮이·강세·배경음·화자 구분</td><td>콜 품질·발표 피드백·이상음 감지</td><td>감정 추정은 문화·상황에 틀릴 수</td></tr>
+    <tr><td>네이티브 대화</td><td>음성을 입출력으로 직접</td><td>실시간 안내·화면 공유 상담</td><td>잘못 말한 답이 즉시 행동으로</td></tr>
+  </table>
+  <div class="hl">2025년 네이티브 음성 대화 모델은 톤·억양·비언어 발성·배경 발화 무시·화면 이해를 함께 다룬다 — <b>STT+TTS를 붙인 기능 목록보다 훨씬 넓은 설계</b>.</div>
+  <aside>이 덱은 첫 층(전사)에 집중하되, 그 계보가 셋 전체의 바탕입니다.</aside>
+</section>
+
+<!-- 6 스펙트로그램 -->
+<section class="slide" data-part="PART 1">
+  <h2>🖼️ 먼저 소리를 <span class="g">그림</span>으로</h2>
+  <ul class="pts">
+    <li>파형은 같은 말이라도 매번 달라 그대로 비교하면 안 된다 → <b>주파수 쪽으로</b> 옮긴다</li>
+    <li>짧은 구간마다 어떤 높이가 얼마나 강한지 재서, 가로=시간·세로=주파수로 펼친 것이 <b class="g">스펙트로그램</b></li>
+    <li>성대의 웅웅거림이 입·목 관을 지나며 특정 높이가 강조되는 자리가 <b>모음마다 다르다</b> → 파형엔 안 보이던 차이가 <b>무늬</b>로 드러난다</li>
+  </ul>
+  <div class="big">지금 모델도 이 방식 — 오디오를 스펙트로그램으로 바꿔 신경망에</div>
+  <div class="hl">그래서 음성 모델은 <b>귀로 듣는 모델이자 소리의 무늬를 읽는 모델</b>. 소리는 글과 그림 사이 어딘가의 입력이다.</div>
+  <aside>스펙트로그램을 처음 그린 기계는 1940년대 벨 연구소에서, 겉으론 청각장애인 발음 학습용이었지만 실제론 목소리 식별·암호 통신용이었습니다(1960년 기밀 해제). 목소리 기술이 화자 식별과 붙어 있는 출발점입니다.</aside>
+</section>
+
+<!-- 7 시간 정렬 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧵 진짜 벽 — <span class="r">시간 정렬</span></h2>
+  <ul class="pts">
+    <li>1970년대 전환 — 규칙을 적지 말고 <b>확률로</b>. 손으로 정하는 쪽으로 다신 안 돌아갔다</li>
+    <li>그래도 남는 문제 — <b>소리의 길이와 글자의 길이가 안 맞는다</b></li>
+  </ul>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>느리게</small><b class="b">"안녕하세요" 3초</b></div>
+    <div class="cell" style="min-width:150px;border-color:var(--pp)"><small>빠르게</small><b class="p">"안녕하세요" 1초</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>정답</small><b class="g">둘 다 다섯 글자</b></div>
+  </div>
+  <div class="hl">소리를 잘게 잘라 앞에서부터 글자와 하나씩 짝지으면 <b>처음부터 어긋나 전부 틀린다</b>. "어느 소리 조각이 어느 글자인가" — 그게 우리가 모르는 것. 이것이 <b>시간 정렬</b> 문제.</div>
+  <aside>그림·문장을 같은 공간에 놓는 것도 정렬이지만, 그건 서로 다른 입력을 맞추는 것. 여기선 하나의 소리 안에서 어느 구간이 어느 글자인지를 맞추는 것이라 성격이 다릅니다.</aside>
+</section>
+
+<!-- 8 네 조각 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧩 네 조각을 따로 만들어 붙이던 시절</h2>
+  <table class="t">
+    <tr><th>조각</th><th>하는 일</th><th>누가 만드나</th></tr>
+    <tr><td>음향 모델</td><td>소리 조각 → 어떤 발음일지 확률</td><td>음성 데이터+전문가</td></tr>
+    <tr><td>발음 사전</td><td>단어 → 발음 기호 열</td><td><b class="r">사람이 손으로</b></td></tr>
+    <tr><td>언어 모델</td><td>이 단어 다음에 올 법한 단어</td><td>대량 텍스트</td></tr>
+    <tr><td>디코더</td><td>셋을 합쳐 가장 그럴듯한 문장</td><td>별도 공학</td></tr>
+  </table>
+  <div class="hl">손이 많이 갔다 — 영어 발음 사전 <b>13만 5천 개</b>가 손으로 적혀 있고 <b>사전에 없는 단어는 인식 불가</b>. 소리 조각 조합도 <b>필요 55,000개 중 데이터엔 18,500개</b>뿐. 그리고 <b>새 언어·분야면 넷을 전부 다시</b> — 한국어가 오래 뒤처진 구조적 이유.</div>
+  <aside>2012년 딥러닝이 들어와 오류 27.4%→18.5%(1/3↓). 그런데 바뀐 건 네 조각 중 음향 모델 하나뿐. → "부품 하나로 1/3이 줄었다면, 조립 구조 자체를 없애면?"</aside>
+</section>
+
+<!-- 9 CTC -->
+<section class="slide" data-part="PART 1">
+  <h2>➕ 정렬을 고르지 말고 <span class="g">전부 더한다</span> — CTC</h2>
+  <ul class="pts">
+    <li>신경망으로 소리→글자로 바로 가고 싶은데, 학습하려면 "이 조각=이 글자" 짝을 알려 줘야 — 그게 <b>우리가 모르는 것</b></li>
+    <li>답은 이미 <b>2006년</b>에 나와 있었다(당시엔 신경망·데이터 부족). 발상 — <b>어느 정렬이 옳은지 고르지 말고 가능한 정렬을 전부 더한다</b></li>
+    <li>출력에 <b>"빈칸"</b> 기호를 추가하면 같은 정답에 대응하는 배열이 여럿 → 그 확률을 <b>모두 합한 값</b>을 문장 확률로. 정렬을 알아낼 필요가 사라진다 = <b class="g">CTC</b></li>
+  </ul>
+  <div class="fml">
+    <div class="e2">"안녕" = 안안_녕녕 = _안__녕 = 안_녕녕_ … (전부 같은 답)</div>
+    <div class="e">p(정답 | 소리) = Σ (모든 정렬의 확률)</div>
+  </div>
+  <div class="hl">목적이 <b>글자의 순서에만 의존하고 길이·분할엔 의존하지 않는다</b> → 긴/짧은 발음 가중치를 손으로 맞추는 요령이 필요 없다. (발음 사전은 글자 단위로 옮기며 사라짐)</div>
+  <aside>경우의 수가 많아 보이지만 앞에서부터 누적하는 방식으로 효율적 계산됩니다. 원논문 CTC, ICML 2006.</aside>
+</section>
+
+<!-- 10 wav2vec2 + Whisper -->
+<section class="slide" data-part="PART 1">
+  <h2>🎧 라벨 없이 배우고(wav2vec2), <span class="g">강건해지다</span>(Whisper)</h2>
+  <ul class="pts">
+    <li>다음 벽은 데이터 — 받아쓴 자료가 비싸다(수천 시간 필요, 7천여 언어 대부분엔 없음). "<b>아기는 전사본이 아니라 그냥 듣고 배운다</b>" → 라벨 없는 소리로 먼저 구조를 배우고 받아쓴 자료는 마지막에 조금만 = <b>wav2vec2</b>(라벨 1시간이 예전 100시간을 넘김)</li>
+    <li>2022 <b>Whisper</b> — 특정 데이터셋에 다듬지 말고 인터넷 <b>68만 시간</b>으로 학습 후 아무 데나 던진다. 30초 단위 스펙트로그램 → 트랜스포머, 크기 여러 종. <b>가중치를 내려받아 내 컴퓨터에서</b>(오늘 실습 도구)</li>
+  </ul>
+  <table class="t">
+    <tr><th>시험지</th><th>이전</th><th>Whisper</th><th>오류 감소</th></tr>
+    <tr><td>낭독체 표준 벤치마크</td><td>2.7</td><td>2.7</td><td><b>0.0%</b></td></tr>
+    <tr><td>회의(각자 헤드셋)</td><td>37.0</td><td>16.9</td><td>54.3%</td></tr>
+    <tr><td>회의(회의실 마이크 하나)</td><td>67.6</td><td>36.4</td><td>46.2%</td></tr>
+    <tr><td>평균(14줄)</td><td>29.3</td><td>12.8</td><td><b>55.2%</b></td></tr>
+  </table>
+  <div class="hl"><b>같은 시험지엔 소수점까지 동점, 다른 시험지 전부엔 오류가 절반</b> — 이게 강건함. 그리고 새 모델을 쓴 뒤 남는 <b>가장 큰 손잡이는 마이크</b>(같은 회의도 헤드셋 16.9 vs 회의실 마이크 36.4).</div>
+  <aside>회의실 마이크가 멀면 거리 차·동시 발화·뒤쪽 대화가 섞입니다. 각자 헤드셋이면 셋이 한꺼번에 사라집니다. 오류율 두 배 차이가 모델이 아니라 여기 있습니다.</aside>
+</section>
+
+<!-- 11 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">내 노트북에서 돌아가는 것 고르기</h2>
+  <p style="margin-top:11px">한국어에선 크기 선택이 특히 크게 갈린다</p><span class="who">Whisper 크기 · faster-whisper</span></div>
+  <aside>Whisper는 tiny·base·small·medium·large 순으로 무거워집니다. 어느 크기를 고르느냐가 한국어에서 특히 크게 갈립니다.</aside>
+</section>
+
+<!-- 12 크기 표 -->
+<section class="slide" data-part="PART 2">
+  <h2>📏 Whisper 크기와 <span class="g">한국어 오류율</span></h2>
+  <table class="t">
+    <tr><th>크기</th><th>파라미터</th><th>내려받기</th><th>메모리</th><th>한국어 CER</th></tr>
+    <tr><td>tiny</td><td>3,900만</td><td>78MB</td><td>0.7GB</td><td><b class="r">36.6%</b></td></tr>
+    <tr><td>base</td><td>7,400만</td><td>148MB</td><td>0.9GB</td><td><b class="r">40.6%</b></td></tr>
+    <tr><td>small</td><td>2억 4,400만</td><td>486MB</td><td>1.4GB</td><td>17.5%</td></tr>
+    <tr><td>medium</td><td>7억 6,900만</td><td>1.5GB</td><td>2.4GB</td><td>13.9%</td></tr>
+    <tr><td>large-v3</td><td>15억 5천만</td><td>3.1GB</td><td>3.8GB</td><td><b class="g">8.0%</b></td></tr>
+    <tr><td>large-v3 turbo(빠른 판)</td><td>8억 900만</td><td>1.6GB</td><td>—</td><td>10.8%</td></tr>
+  </table>
+  <div class="hl"><b>tiny·base는 한국어에서 못 쓴다</b>(열에 넷 틀리면 소설). turbo는 빨라도 오류가 <b>오히려 커진다</b>. 결정적 — <b>한국어로 다시 학습한 base가 8.7%</b>로, 스무 배 큰 large-v3(8.0%)에 붙는다. <b class="g">크기보다 그 언어를 봤느냐</b>가 먼저.</div>
+  <aside>내려받기 용량은 8비트로 줄인 판본 기준(원본은 두 배 이상). 램 8GB면 small까지 편하고, 16GB면 medium 편하고 large도 됩니다.</aside>
+</section>
+
+<!-- 13 단위 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔢 단위를 먼저 — <span class="g">글자냐 단어냐</span></h2>
+  <ul class="pts">
+    <li>같은 모델·같은 한국어인데 어떤 문서는 <b>3%대</b>, 어떤 문서는 <b>14%대</b> — 네 배 차이인데 둘 다 맞다</li>
+    <li>차이는 <b>글자 단위(CER)로 셌나 단어 단위(WER)로 셌나</b></li>
+    <li>한국어는 띄어쓰기가 유연 — "할 수 있다"를 "할수있다"로 받아쓰면 내용은 맞는데 <b>단어 기준으론 전부 오답</b></li>
+  </ul>
+  <div class="big">한국어는 <span class="y">글자 단위</span>로 본다<small>"한국어 정확도 97%" 광고를 보면 무엇을 기준으로 셌는지부터 물을 것</small></div>
+  <aside>한국어 음성 인식 결과를 모아 놓은 곳들도 같은 이유로 글자 단위를 씁니다.</aside>
+</section>
+
+<!-- 14 사양별 -->
+<section class="slide" data-part="PART 2">
+  <h2>💻 내 노트북에서 <span class="g">돌아갈까</span></h2>
+  <table class="t">
+    <tr><th>내 컴퓨터</th><th>쓸 수 있는 것</th><th>1시간 녹음 처리</th></tr>
+    <tr><td>GPU 없는 윈도우 노트북</td><td>small, 8비트로</td><td>8분 남짓(CER 17.5%라 초안용)</td></tr>
+    <tr><td>애플 실리콘</td><td>small 편하게, large 무리</td><td>small 6분 / large 85분</td></tr>
+    <tr><td>외장 GPU(VRAM 6GB+)</td><td>medium까지 편하게</td><td>5분 안팎</td></tr>
+    <tr><td>무료 코랩</td><td>large-v3까지</td><td>10분 안팎(세션 끊기면 처음부터)</td></tr>
+  </table>
+  <div class="hl">애플 실측(35분 녹음) — small <b>3:28</b> / turbo 10:43 / medium 11:11 / large-v3 <b>50:41</b>. <b>turbo는 small의 빠른 판이 아니라 large의 빠른 판</b>이라 small보다 느리다. large는 수업 중 돌릴 물건이 아니다.</div>
+  <aside>설치는 한 줄 — pip install faster-whisper. 파이썬 3.11+. 앞의 그 모델을 더 빠르게 돌리는 구현이고, ffmpeg 없이 오디오를 읽는 기능이 안에 들어 있어(윈도우에서 ffmpeg 설치가 만만치 않음) 이 도구를 골랐습니다.</aside>
+</section>
+
+<!-- 15 핵심 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 5문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">소리는 이어지고 글자는 끊어진다 — <b>시간 정렬</b>이 이 분야의 진짜 벽이었다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">먼저 <b>스펙트로그램</b>(소리를 무늬로), 그리고 규칙→확률. <b>CTC</b>가 정렬을 전부 더해 그 문제를 없앴다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>Whisper</b>는 68만 시간으로 <b>강건</b> — 같은 시험지 동점, 다른 시험지 오류 절반.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">한국어에선 <b>tiny·base 못 쓴다</b>. <b>크기보다 그 언어를 봤느냐</b>가 먼저(재학습 base가 large에 붙음).</span></div>
+    <div class="st"><span class="n">5</span><span class="t">한국어는 <b>글자 단위</b>로 세고, 새 모델 뒤 남는 손잡이는 <b>마이크</b>.</span></div>
+  </div>
+  <aside>5번이 실무의 핵심 — 모델 씨름보다 헤드셋이 빠릅니다.</aside>
+</section>
+
+<!-- 16 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 파형 대신 <b>스펙트로그램</b>을 쓰는 이유는?</div>
+    <div class="q"><b>Q2.</b> <b>시간 정렬</b> 문제란 무엇이며, <b>CTC</b>는 어떻게 풀었나?</div>
+    <div class="q"><b>Q3.</b> Whisper의 <b>강건함</b>을 "같은/다른 시험지"로 설명하면?</div>
+    <div class="q"><b>Q4.</b> 한국어에서 tiny·base를 못 쓰는 이유와, "크기보다 언어"의 증거는?</div>
+    <div class="q"><b>Q5.</b> 한국어 오류율은 왜 <b>글자 단위</b>로 세나? 새 모델 뒤 남는 손잡이는?</div>
+  </div>
+  <aside>Q2·Q4가 핵심 — 정렬의 해법, 그리고 언어를 본 모델.</aside>
+</section>
+
+<!-- 17 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 파형은 같은 말도 매번 달라 비교 불가. 주파수로 옮기면 <b>모음마다 다른 무늬</b>가 드러난다.</div>
+    <div class="q a"><b>A2.</b> 3초/1초 발음이 같은 다섯 글자라 <b>어느 조각이 어느 글자인지 모른다</b>는 것. CTC는 <b>빈칸을 넣어 가능한 정렬을 전부 더해</b> 정렬 문제를 없앴다.</div>
+    <div class="q a"><b>A3.</b> 훈련 분포와 <b>같은 시험지엔 사람과 동점</b>, 안 본 <b>다른 시험지엔 오류가 절반</b> — 처음 보는 것에도 잘한다.</div>
+    <div class="q a"><b>A4.</b> 한국어 CER 36~40%라 소설 수준. <b>한국어로 재학습한 base(8.7%)가 스무 배 큰 large(8.0%)에 붙는다</b> — 크기보다 언어를 본 것.</div>
+    <div class="q a"><b>A5.</b> 띄어쓰기가 유연해 단어 단위는 실제보다 나빠 보임 → <b>글자 단위(CER)</b>. 새 모델 뒤 가장 큰 손잡이는 <b>마이크</b>.</div>
+  </div>
+  <aside>A2·A5를 자기 말로 하면 음성 인식의 뼈대와 실무 감각을 잡은 것입니다.</aside>
+</section>
+
+<!-- 18 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>정렬을 넘어, 강건함으로 🎙️</h1>
+    <div class="big" style="margin-top:26px">CTC가 정렬을 없애고 · Whisper가 강건해졌다<br>한국어는 <span class="y">언어를 본 모델·글자 단위·마이크</span><br><br>다음 — <span class="y">한 모델이 다 받는다</span>(Omni LLM)</div>
+    <p class="sub" style="margin-top:24px">소리를 글자로 바꾸는 길 — 여기까지</p>
+  </div>
+  <aside>다음 덱에서 받아쓰기 도구를 붙이는 대신, 하나의 모델이 소리를 그대로 받는 옴니 모델을 봅니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>

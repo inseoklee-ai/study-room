@@ -68,15 +68,15 @@
    - ✅ 5-⑥. 무엇으로 만들 것인가 (세 갈래·라이선스·ControlNet·약관) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/choose-image-model/) · 📊 [PPT](choose-image-model/choose-image-model.pptx)
    - ✅ 5-⑦. 동영상도 만들 수 있을까? (비는 칸·층·소리·이어붙이기) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/video-gen/) · 📊 [PPT](video-gen/video-gen.pptx)
    - ✅ 5-⑧⑨·제출. 원하는 포즈로 만들기 + 마무리·루브릭 (ControlNet Pose·GitHub 제출) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/make-and-submit/) · 📊 [PPT](make-and-submit/make-and-submit.pptx)
-6. **여러 입력을 처리하는 모델들** ⬅️ 진행 중 (2/8)
+6. **여러 입력을 처리하는 모델들** ✅ 완결 (8/8)
    - ✅ 6-①. 여러 종류의 입력을 한 모델에 넣는다는 것 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/many-inputs/) · 📊 [PPT](many-inputs/many-inputs.pptx)
    - ✅ 6-②. 픽셀을 문장처럼 다룬다는 발상 (CLIP·공유 임베딩·정렬) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/pixels-sentences/) · 📊 [PPT](pixels-sentences/pixels-sentences.pptx)
-   - ⬜ 6-③. 소리를 글자로 바꾸는 길
-   - ⬜ 6-④. 내 노트북에서 돌아가는 것 고르기
-   - ⬜ 6-⑤. Omni LLM 사용해서 처리하기
-   - ⬜ 6-⑥. 목소리를 만든다는 것
-   - ⬜ 6-⑦. 회의록을 자동으로 정리해 봅니다
-   - ⬜ 6-⑧. 중간을 남겨야 되짚을 수 있습니다
+   - ✅ 6-③. 소리를 글자로 바꾸는 길 (스펙트로그램·CTC·Whisper) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/speech-to-text/) · 📊 [PPT](speech-to-text/speech-to-text.pptx)
+   - ✅ 6-④. 내 노트북에서 돌아가는 것 고르기 (크기·한국어 CER) — 🖥️ [6-③ 덱에 포함](https://inseoklee-ai.github.io/study-room/speech-to-text/#11)
+   - ✅ 6-⑤. Omni LLM 사용해서 처리하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/omni-llm/) · 📊 [PPT](omni-llm/omni-llm.pptx)
+   - ✅ 6-⑥. 목소리를 만든다는 것 (합성·복제·라이선스) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/voice-synthesis/) · 📊 [PPT](voice-synthesis/voice-synthesis.pptx)
+   - ✅ 6-⑦. 회의록을 자동으로 정리해 봅니다 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/meeting-notes/) · 📊 [PPT](meeting-notes/meeting-notes.pptx)
+   - ✅ 6-⑧. 중간을 남겨야 되짚을 수 있습니다 (강의 정리) — 🖥️ [6-⑦ 덱에 포함](https://inseoklee-ai.github.io/study-room/meeting-notes/#11)
 7. **[프로젝트] 공간을 다루는 AI** ⬅️ 준비 중 (0/9)
    - ⬜ 7-①. 셔터가 닫힐 때 사라지는 것
    - ⬜ 7-②. 무엇에 담고 무엇이라 부르나
@@ -147,6 +147,10 @@
 > - 4-⑧ https://inseoklee-ai.github.io/study-room/docimg-wrapup/
 > - 6-① https://inseoklee-ai.github.io/study-room/many-inputs/
 > - 6-② https://inseoklee-ai.github.io/study-room/pixels-sentences/
+> - 6-③④ https://inseoklee-ai.github.io/study-room/speech-to-text/
+> - 6-⑤ https://inseoklee-ai.github.io/study-room/omni-llm/
+> - 6-⑥ https://inseoklee-ai.github.io/study-room/voice-synthesis/
+> - 6-⑦⑧ https://inseoklee-ai.github.io/study-room/meeting-notes/
 >
 > 📊 **PPT**: 각 강의 폴더의 `<폴더명>.pptx` (예: `vlm/vlm.pptx`). GitHub 저장소나 라이브 사이트에서 내려받아 PowerPoint로 열 수 있습니다.
 >
