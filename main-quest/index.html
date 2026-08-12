@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Main Quest · 도구가 아니라 업무에서 출발한다 (AI 적용 판단 · PoC)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:52px 38px 72px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.3rem,3vw,2rem);font-weight:800;letter-spacing:-.015em;margin-bottom:14px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:9px}
+  p{font-size:clamp(.92rem,1.5vw,1.08rem);color:var(--soft);margin-bottom:11px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:26px 0}
+  .part .pno{display:inline-grid;place-items:center;width:66px;height:66px;border-radius:20px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.7rem;font-weight:800;margin-bottom:18px}
+  .part .who{margin-top:16px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:10px}
+  ul.pts li{position:relative;padding-left:28px;font-size:clamp(.9rem,1.5vw,1.08rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 20px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:13px 17px;margin-top:13px;font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:22px 26px;text-align:center;font-size:clamp(1rem,2vw,1.45rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:12px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;
+    text-align:center;box-shadow:var(--sh);min-width:76px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.68rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.86rem}
+  .ar{color:var(--gr);font-size:1.15rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:8px}
+  .st{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:11px 15px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:25px;height:25px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.76rem}
+  .st .t{font-size:clamp(.88rem,1.46vw,1.02rem)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.76rem,1.28vw,.94rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  table.t td.fill{color:var(--gy);font-weight:400}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.7rem,1.05vw,.85rem);
+    color:var(--ink);overflow:auto;max-height:56vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 9 · Main Quest</span>
+    <h1 style="margin:18px 0">도구가 아니라<br>업무에서 출발한다</h1>
+    <p class="sub">AI 적용 판단 — 작게 만들어 확인하는 PoC</p>
+  </div>
+  <aside>대단원 3 "AI의 이해와 사용"의 Main Quest입니다. 도구를 먼저 정하지 않고, 자기 업무의 병목을 찾아 AI가 들어갈 수 있는지 작게 만들어 확인합니다. 제출물은 남이 클론해 돌려 볼 수 있는 저장소 하나입니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정 — <span class="g">여섯 파트</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>도구 학습에서 적용 판단으로</b> — PoC란 무엇이고 왜 순서를 뒤집나</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>업무 유형과 성공 기준</b> — 네 유형, 적용 안 할 일, 정량 기준</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>후보 선정</b> — 크기가 아니라 종류로, 제외 조건 먼저</span></div>
+    <div class="st"><span class="n">4·5</span><span class="t"><b>예시 둘</b> — 사진 검색기 · 스쿼트 보조도구를 실제로 만들어 확인</span></div>
+    <div class="st"><span class="n">6·7</span><span class="t"><b>내 업무로 옮기기 + 핵심 정리</b></span></div>
+  </div>
+  <div class="hl">🎯 한 줄 — PoC의 산출물은 <b>작동하는 물건이 아니라 판단</b>이다. 기준을 넘으면 구축, 못 넘으면 그 이유 — <b>둘 다 성과</b>.</div>
+  <aside>이 덱은 Main Quest 브리핑입니다. 파트 라벨(위쪽)과 페이지 번호로 필요한 섹션을 오가며 보세요. 화면 좌/우 클릭 또는 ←/→로 이동합니다.</aside>
+</section>
+
+<!-- 3 오프닝 -->
+<section class="slide" data-part="표지">
+  <h2>💬 "우리도 AI를 좀 <span class="g">써 봐야</span> 하는데"</h2>
+  <ul class="pts">
+    <li>그다음 대화는 대개 <b>도구 이름</b>으로 간다 — 어떤 모델이 좋다더라, 어디 API가 싸다더라</li>
+    <li>몇 주 뒤 그럴듯한 시연이 나오고, 다들 고개를 끄덕이고 — <b>아무도 쓰지 않는다</b></li>
+    <li>시연 자리의 질문 하나가 빠진 것을 드러낸다 — <b class="g">"이걸로 누가 어떤 일을 하나요?"</b></li>
+  </ul>
+  <div class="big">도구를 정한 뒤 쓸 자리를 찾으면<br>업무가 <span class="y">도구에 맞춰지고</span>, 결과는 아무의 업무도 되지 못한다<small>오늘 하는 일 — 그 순서를 뒤집는다</small></div>
+  <aside>도구에서 출발한 프로젝트의 전형적 결말입니다. 업무에서 출발하면 병목을 먼저 찾고, 그 병목에 맞는 도구를 고를 수 있습니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">도구 학습에서 적용 판단으로</h2>
+    <p style="margin-top:11px">쓰이는 것이 목적인 완성품과, 판단이 목적인 PoC</p>
+    <span class="who">PoC · Proof of Concept</span>
+  </div>
+  <aside>PoC는 실제로 구축할 값이 있는지를 판단하기 위해 최소한만 만들어 보는 단계입니다.</aside>
+</section>
+
+<!-- 5 PoC란 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔬 완성품과 <span class="g">PoC</span>는 목적이 다르다</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="b">완성품</h3>
+      <p style="margin:0">목적은 <b>쓰이는 것</b>. 화면 완성도와 안정성이 필요하다.</p>
+    </div>
+    <div class="box">
+      <h3 class="g">PoC</h3>
+      <p style="margin:0">목적은 <b>판단이 서는 것</b>. 미리 적은 기준과 재서 나온 숫자가 필요하다.</p>
+    </div>
+  </div>
+  <div class="big" style="margin-top:12px">기준을 넘었다 → <span class="y">구축</span>　·　못 넘었다 → <span class="y">그 이유</span><small>오늘 만드는 것은 오른쪽. 두 결과 다 성과다</small></div>
+  <aside>그래서 PoC에서 중요한 것은 화면의 완성도가 아니라, 만들기 전에 적어 둔 기준과 만든 뒤에 나온 숫자입니다.</aside>
+</section>
+
+<!-- 6 일의 순서 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧭 일의 순서는 <span class="g">넷</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>1</small><b>자리를 찾는다<br>(병목)</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px"><small>2</small><b>후보를 좁힌다</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>3</small><b>작게 만들어<br>확인한다</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gold)"><small>4</small><b>판단을 적어<br>남긴다</b></div>
+  </div>
+  <div class="hl">오늘 제출하는 것은 <b>저장소 하나</b>. 남이 클론해서 돌려 보고 <b>여러분의 판단을 다시 확인</b>할 수 있는 상태여야 합니다.</div>
+  <aside>자리를 찾고, 후보를 좁히고, 작게 만들어 확인하고, 판단을 적어 남긴다 — 이 네 걸음이 오늘의 뼈대입니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">업무 유형과 성공 기준</h2>
+    <p style="margin-top:11px">유형마다 병목이 다르고, 도입 근거도 다르다</p>
+    <span class="who">네 유형 · 적용 안 할 일 · 정량 기준</span>
+  </div>
+  <aside>업무에서 출발하면 AI가 들어가는 자리가 네 가지로 정리됩니다. 유형이 정해지면 병목도 정해집니다.</aside>
+</section>
+
+<!-- 8 4 유형 -->
+<section class="slide" data-part="PART 2">
+  <h2>🗂️ AI가 들어가는 <span class="g">네 가지 자리</span></h2>
+  <table class="t">
+    <tr><th>유형</th><th>상태</th><th>병목</th><th>붙는 도구</th></tr>
+    <tr><td>검색</td><td>자료는 있는데 찾지 못한다</td><td>자료에 붙은 <b>설명이 없다</b></td><td>임베딩 검색</td></tr>
+    <tr><td>검사·판독</td><td>사람이 보고 등급을 정한다</td><td>판정의 <b>일관성·지속 시간</b></td><td>객체 탐지·분할·자세 추정</td></tr>
+    <tr><td>분류·배분</td><td>들어온 것을 나눠 담당자에게</td><td>판단이 아니라 <b>판단의 총량</b></td><td>분류 모델·구조화 출력</td></tr>
+    <tr><td>입력·전사</td><td>한 형식에서 다른 형식으로</td><td>판단이 아니라 <b>손</b></td><td>OCR·문서 이해·음성 인식</td></tr>
+  </table>
+  <div class="hl">⚠️ <b>검사·판독</b>에서 도입 근거를 <b>정확도</b>로 잡으면 대개 "도입할 값 없음" 결론이 난다 — 정확도는 사람이 더 높은 경우가 많다. 근거는 <b>일관성·지속 시간</b>으로.</div>
+  <aside>검색: 상자는 다 있고 라벨도 있는데 그 라벨로는 못 찾음. 입력·전사: 자동화 효과가 가장 직접적이지만, 틀렸을 때 알아채기 가장 어려움(그럴듯하면 검산 안 하고 넘어감).</aside>
+</section>
+
+<!-- 9 적용 안 할 -->
+<section class="slide" data-part="PART 2">
+  <h2>🚫 이 셋에 걸리면 <span class="r">PoC가 아니라 다른 일</span> 먼저</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>판정 기준이 사람마다 다르다</b> (담당자 셋의 판정이 갈린다) → 학습시킬 정답도 채점 방법도 없다. <b class="g">기준을 문서로</b> 먼저.</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>틀렸을 때 되돌릴 수 없다</b> (고객·몸·자격·법적 효력) → AI는 최종 판정이 아니라 <b class="g">후보를 좁혀 사람에게 넘기는 앞단</b>에만.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>판정 기록이 없다</b> → 무엇으로 채점할지가 없다. PoC보다 <b class="g">기록을 남기는 절차</b>를 먼저.</span></div>
+  </div>
+  <div class="hl">네 유형에 들어맞아 보여도, 이 셋을 먼저 걸러야 합니다. 걸리면 필요한 건 모델이 아닙니다.</div>
+  <aside>기준이 없으면 모델이 아니라 기준 문서화가, 되돌릴 수 없으면 사람 앞단만, 기록이 없으면 기록 절차가 먼저입니다.</aside>
+</section>
+
+<!-- 10 성공 기준 -->
+<section class="slide" data-part="PART 2">
+  <h2>🎯 만들기 전에 <span class="g">한 줄</span>을 적는다 — 정량으로</h2>
+  <table class="t">
+    <tr><th>업무 유형</th><th>성공 기준의 형태</th></tr>
+    <tr><td>검색</td><td>질의 10건 중 8건에서 찾는 자료가 상위 5위 안에 온다</td></tr>
+    <tr><td>검사·판독</td><td>숙련자 판정과 20건 중 18건 일치한다</td></tr>
+    <tr><td>분류·배분</td><td>오분류 100건 중 5건 이하 + 확신 낮은 건은 사람에게 넘어간다</td></tr>
+    <tr><td>입력·전사</td><td>항목 100개 중 오류 3개 이하 + 오류 자리를 원본에서 찾을 수 있다</td></tr>
+  </table>
+  <div class="hl">숫자의 근거는 <b>지금 사람이 하는 수준</b>. 사람이 100건에 3건 틀리면 5건 틀리는 도구는 값이 없다 → 기준을 적기 전에 <b>현행 수준을 먼저 재야</b> 하는 경우가 많다.</div>
+  <aside>이 한 줄이 없으면 PoC가 끝나도 "그럴듯하다"와 "아직 부족하다" 사이에서 아무도 결론을 못 냅니다. 단, 기준을 넘어도 자료를 외부로 못 보내거나 라이선스가 막으면 도입 못 함 — 이 조건은 따로 다룹니다.</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">후보 선정</h2>
+    <p style="margin-top:11px">고르는 과정은 표 하나로 남는다 — 무엇을 늘어놓느냐가 관건</p>
+    <span class="who">종류로 벌리기 · 제외 조건 먼저</span>
+  </div>
+  <aside>후보를 행에, 재는 항목을 열에 놓은 표. 후보를 어떻게 늘어놓느냐가 그 표에 무엇이 나타날지를 정합니다.</aside>
+</section>
+
+<!-- 12 종류로 벌리기 -->
+<section class="slide" data-part="PART 3">
+  <h2>📐 크기가 아니라 <span class="g">종류</span>로 벌린다</h2>
+  <p>한 회사의 대·중·소를 놓으면 "큰 것이 정확·느림·무거움"만 나온다 — 재 보기 전에도 알던 것. 성격이 갈리는 <b>세 축</b>으로 놓는다.</p>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>실행 위치</b> — 내 노트북 / 사내 서버 / 외부 서비스. 갈리면 <b>자료가 어디까지 나가는지</b>가 표에 나타난다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>만들어진 목적</b> — 범용 모델 vs 전용 모델. 어느 쪽이 나은지는 <b>자기 자료로 확인</b>해야 안다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>결과의 형태</b> — 점수만 vs 근거 자리까지. 사람이 검토하는 업무면 이 차이가 <b>정확도보다 중요</b>할 수 있다.</span></div>
+  </div>
+  <div class="hl">그리고 <b>지금 쓰는 방식</b>(눈으로 보기·엑셀·사내 검색·폰 앱)을 <b>기준선</b>으로 후보에 넣는다. 이게 이기면 결론은 "AI 쓸모없다"가 아니라 <b>"이 업무엔 지금 방식이 낫다"</b> — 그것도 결과.</div>
+  <aside>기준선을 넣지 않으면 개선 폭을 모르는 채 도입을 결정하게 됩니다.</aside>
+</section>
+
+<!-- 13 제외 조건 먼저 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧹 점수를 매기기 전에 <span class="g">조건으로 먼저</span> 걸러낸다</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="r">점수부터 매기면</h3>
+      <p style="margin:0">1위 외부 서비스(정확도 최고) · 2위 노트북 · 3위 지금 방식 → <b>자료가 외부로 나간다는 사실이 각주로 밀린다.</b> 쓸 수 없는 후보가 1위.</p>
+    </div>
+    <div class="box">
+      <h3 class="g">조건으로 먼저 걸러내면</h3>
+      <p style="margin:0">외부 서비스는 조건에서 <b>제외</b> → 남은 것 중 노트북 선택. <b>쓸 수 없는 후보가 1위에 오르지 않는다.</b></p>
+    </div>
+  </div>
+  <div class="hl">거를 두 조건 — <b>자료가 어디까지 나가는가</b>, <b>라이선스가 그 용도를 허용하는가</b>. 이 둘은 <b>점수와 섞지 않는다.</b> 감점 항목으로 다루면 다른 점수가 높을 때 다시 올라온다.</div>
+  <aside>같은 후보라도 거르는 순서가 결론을 바꿉니다. 라이선스는 저장소 첫 화면 표시만 보면 놓치기 쉬우니(코드·가중치 조건이 다를 수 있음) 설치한 패키지의 배포 정보에서 확인하는 편이 정확합니다.</aside>
+</section>
+
+<!-- 14 자기 자료 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧪 최종 판단은 <span class="g">자기 자료</span> 위에서</h2>
+  <ul class="pts">
+    <li>공개 순위표·벤치마크는 <b>후보를 좁히는 데까지만</b> — 여러분 자료로 잰 게 아니다</li>
+    <li>특히 <b>한국어</b>는 측정에서 빠진 경우가 많다. "지원 언어에 한국어 있음" ≠ "내 업무 문장에서 잘 됨"</li>
+    <li>자료는 <b>10~20건</b>이면 충분하고, 그중 <b>3~4건은 담당자가 어렵다고 하는 것</b>을 넣는다 (쉬운 것만 모으면 표가 아무것도 안 알려 준다)</li>
+  </ul>
+  <div class="hl">그리고 정답을 <b>모델을 돌리기 전에</b> 적어 둔다. 결과를 본 뒤 정답을 정하면 <b>이미 나온 답 쪽으로 기준이 기울어</b>, 그 채점표로는 아무것도 판단할 수 없다.</div>
+  <aside>정답을 먼저 적어 두는 것이 채점이 성립하는 최소 조건입니다. 이 규칙은 두 예시에서 반복됩니다.</aside>
+</section>
+
+<!-- 15 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part">
+    <div class="pno">4</div>
+    <h2 style="margin:0">예시 하나 · 사진 검색기</h2>
+    <p style="margin-top:11px">수만 장 점검 사진, 파일명과 날짜뿐 — 검색 유형</p>
+    <span class="who">임베딩 검색 · 임계값 · SigLIP 2</span>
+  </div>
+  <aside>건물 점검 팀이 몇 해에 걸쳐 찍은 사진 수만 장. 하자 분쟁 때 "천장 누수 흔적 사진"을 찾아야 하는데 검색창엔 파일명(IMG_4821.jpg)과 날짜뿐. 한 건 찾는 데 반나절.</aside>
+</section>
+
+<!-- 16 사진검색 도입+기준 -->
+<section class="slide" data-part="PART 4">
+  <h2>📷 도입 지점과 <span class="g">성공 기준</span></h2>
+  <p>자료는 있고 찾을 방법이 없다 → <b>검색 유형</b>. 못 찾으면 "없다"고 결론 내리는데, 실제로 없는지 못 찾은 건지 아무도 모른다.</p>
+  <div class="box">
+    <p style="margin:0">✅ 성공 기준 — 질의 10건 중 8건에서 찾는 사진이 <b>상위 5위 안</b>. 그리고 <b>사진첩에 없는 것을 물으면 결과를 비우고 "없다"고 답한다.</b></p>
+  </div>
+  <div class="hl">두 번째 조건이 어려운 부분. 첫 조건만 두면 검색기는 <b>언제나 무언가를 내놓는다</b>. 질의 10건은 실제 업무 문장으로, 셋은 어려운 것, 하나는 확실히 없는 것 — 정답은 <b>돌리기 전에</b> 적어 둔다.</div>
+  <aside>"가장 비슷한 것"으로 이해하는지 "찾는 것이 이것"으로 이해하는지에 따라 하자 판정이 달라집니다. 그래서 "없다"를 답할 수 있어야 합니다.</aside>
+</section>
+
+<!-- 17 사진검색 파이프라인 -->
+<section class="slide" data-part="PART 4">
+  <h2>🔧 파이프라인 — <span class="g">색인</span>과 <span class="g">검색</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>색인 · 한 번만</small><b class="b">사진 수천 장 → 임베딩<br>길이 1로 정규화 → index.npz</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>검색 · 질의마다</small><b class="g">질의 문장 임베딩<br>→ 색인과 내적 → 상위 5</b></div>
+  </div>
+  <pre>사진 폴더의 사진을 전부 임베딩으로 바꿔 저장하는 스크립트:
+- 모델은 google/siglip2-base-patch16-224, 노트북에서 실행. 사진 외부 전송 금지.
+- 임베딩은 길이 1로 정규화(내적 = 코사인 유사도). index.npz 에 파일명과 함께 저장.
+- 벡터 DB·검색 서비스 쓰지 말고 배열 하나와 내적으로.
+- 질의 문장 → 상위 5장을 점수와 함께. 점수는 반올림하지 말 것(임계값에 씀).
+- 유사도는 sigmoid 적용. softmax 로 바꾸지 말 것.</pre>
+  <div class="hl">길이를 1로 맞추면 <b>내적이 곧 유사도</b>. 수천 장이면 배열 하나로 충분(벡터 DB는 수십만 장부터). 모델은 <b>사진·글을 함께 학습</b>한 것이어야 같은 좌표계에 놓인다.</div>
+  <aside>점검 사진엔 주소·세대 정보가 있어 외부 전송 불가 → 노트북 실행 조건이 후보를 먼저 좁힙니다. 한국어 질의가 되어야 하는데 SigLIP 2는 다국어 학습이라 한국어에서도 동작하고, 노트북 크기 판본 + Apache 2.0 라이선스입니다.</aside>
+</section>
+
+<!-- 18 사진검색 검증 -->
+<section class="slide" data-part="PART 4">
+  <h2>📊 검증 — <span class="r">"없다"는 순위에서 나오지 않는다</span></h2>
+  <ul class="pts">
+    <li><b>한국어 질의는 통과</b> — 10건에서 상위 5위 안, 현장 용어로도 동작</li>
+    <li>없는 것을 물어도 <b>다섯 장을 내놓는다</b>(순위 방식이라). <b>softmax</b>는 합을 1로 만들어 "전부 아니다"가 표현될 자리가 없다 → 0.53을 "53% 확률"로 오해</li>
+    <li>"없다"를 답하려면 <b>임계값</b>이 필요하고, 임계값은 점수가 <b>순위용이 아니라 짝마다 독립된 값</b>일 때만 걸 수 있다</li>
+  </ul>
+  <div class="chain">
+    <div class="cell" style="border-color:var(--red)"><small>임계값 낮음</small><b>없는 걸 물어도<br>결과가 나온다</b></div>
+    <span class="ar">…</span>
+    <div class="cell" style="border-color:var(--gr)"><small>쓸 수 있는 구간</small><b class="g">여기</b></div>
+    <span class="ar">…</span>
+    <div class="cell" style="border-color:var(--red)"><small>임계값 높음</small><b>정답이 있는데도<br>빠진다</b></div>
+  </div>
+  <div class="hl">SigLIP은 <b>짝마다 맞다/아니다를 따로 학습</b>해 그 값을 임계값으로 쓸 수 있다 — 코드 계산식만 바꿔선 안 되고 <b>모델이 그렇게 학습됐어야</b> 한다. <b>구간이 없을 수도</b> 있고, 그러면 이 구성으론 "없다"를 못 만든다(임의로 정해 놓고 만족했다 적으면 안 됨).</div>
+  <aside>남은 제약 셋: 비슷한 사진 많으면 구간이 좁아짐 / 한국어 잘하는 후보 둘이 비상업 라이선스로 제외 / 폰 사진첩 앱(날짜·위치·글자)이 기준선인데 점검 사진을 못 올리는 조건이 그것을 제외. 성능 1위를 못 쓰는 상황이 흔하고, 그때 무엇을 고르는지가 판단.</aside>
+</section>
+
+<!-- 19 PART 5 -->
+<section class="slide" data-part="PART 5">
+  <div class="part">
+    <div class="pno">5</div>
+    <h2 style="margin:0">예시 둘 · 스쿼트 보조도구</h2>
+    <p style="margin-top:11px">자세를 보고 판정 — 검사·판독 유형</p>
+    <span class="who">자세 추정 · 신뢰도 · 촬영 방향</span>
+  </div>
+  <aside>지도자가 회원 스쿼트를 봅니다. 몇 번 했는지 세고, 충분히 앉았는지 봅니다. 한 명은 괜찮지만 여러 명 동시면 놓치고, 집에서 혼자면 봐 줄 사람이 없습니다. 병목은 정확도가 아니라 지속 시간·동시 처리.</aside>
+</section>
+
+<!-- 20 스쿼트 도입+기준 -->
+<section class="slide" data-part="PART 5">
+  <h2>🏋️ 도입 지점과 <span class="g">성공 기준</span></h2>
+  <div class="box">
+    <p style="margin:0">✅ 성공 기준 — <b>반복 횟수가 사람이 센 것과 일치</b>한다. 그리고 <b>충분히 앉지 않은 반복을 표시</b>한다. (두 항목만)</p>
+  </div>
+  <ul class="pts">
+    <li>무릎이 모이는지, 등이 굽는지는 <b>이 PoC에서 판정하지 않는다</b></li>
+    <li>항목을 늘리면 각 항목마다 기준을 따로 세워야 하고, <b>기준 세울 자료가 없는 항목</b>이 생긴다</li>
+    <li>정답은 사람이 먼저 — 영상 보며 횟수 세고, 반복마다 충분히 앉았는지 적어 둔다</li>
+  </ul>
+  <div class="hl">PoC는 <b>판정 하나가 되는지</b> 확인하는 단계. 항목을 늘리는 것은 그다음이다. 숙련 지도자 한 명의 정확도를 도구가 넘기는 어렵다 — 근거는 지속 시간·동시 처리.</div>
+  <aside>판정 항목을 하나로 좁히는 것이 이 예시의 핵심 결정입니다.</aside>
+</section>
+
+<!-- 21 스쿼트 파이프라인 -->
+<section class="slide" data-part="PART 5">
+  <h2>🔧 파이프라인 — <span class="g">세 단계</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>1 · 자세 추정</small><b class="b">관절 좌표<br>+ 신뢰도</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px"><small>2 · 각도 산출</small><b>엉덩이·무릎·발목<br>→ 무릎 각도</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>3 · 반복 판정</small><b>내려갔다 올라오면<br>한 번</b></div>
+  </div>
+  <pre>영상에서 관절 좌표를 뽑아 스쿼트 반복을 세는 스크립트:
+- 자세 추정 모델은 노트북에서 실행. 영상 외부 전송 금지.
+- 프레임마다 관절 좌표 + 각 관절의 신뢰도를 함께 남길 것.
+- 신뢰도가 낮은 관절로는 각도를 계산하지 말 것(그 프레임은 '계산 제외' 표시).
+- 무릎 각도를 계산하고, 어느 관절 셋으로 계산했는지 적을 것.
+- '내려감' 각도와 '올라옴' 각도를 따로 인자로 받게 할 것.
+- 판정 임계값을 코드에 박지 말고 전부 인자로.
+- 관절 좌표를 원본 프레임에 그린 영상도 저장(넘는 관절/못 넘는 관절 다른 색).</pre>
+  <div class="hl">내려감·올라옴 각도를 <b>따로</b> 둬야 한다(하나면 경계에서 몸이 흔들릴 때 한 번이 여러 번으로). 신뢰도 낮은 관절 제외 + 그려서 저장 — 이 두 항목을 빼면 안 된다.</div>
+  <aside>회원의 몸이 찍힌 영상이라 외부로 안 보냅니다. 신뢰도는 모델이 그 관절 위치를 얼마나 확신하는지의 값입니다.</aside>
+</section>
+
+<!-- 22 스쿼트 검증 - 세 동작 -->
+<section class="slide" data-part="PART 5">
+  <h2>⚠️ 횟수는 맞았다 — 그런데 <span class="r">무릎 각도만 보면</span></h2>
+  <p>제자리에서 뛰어도, 한쪽 다리만 접었다 펴도 <b>한 번으로 세어진다</b>(둘 다 무릎이 굽었다 펴짐). 세 동작을 구분하는 값은 <b>다른 관절</b>에 있다.</p>
+  <table class="t">
+    <tr><th>동작</th><th>엉덩이 높이</th><th>무릎</th></tr>
+    <tr><td>스쿼트</td><td>내려간다</td><td>양쪽이 함께 굽는다</td></tr>
+    <tr><td>제자리 뛰기</td><td>올라간다</td><td>굽었다 펴진다</td></tr>
+    <tr><td>한쪽 다리 접기</td><td>거의 변하지 않는다</td><td>한쪽만 굽는다</td></tr>
+  </table>
+  <div class="hl">그래서 값을 여러 개 계산해 조건을 <b>함께</b> 걸어야 한다 — 무릎 각도 · 엉덩이 높이 변화량 · 좌우 무릎 각도 차이. <b>성공 기준을 만족한 뒤에도 확인할 것이 남는다.</b></div>
+  <aside>무릎 각도는 스쿼트에만 있는 특징이 아닙니다. 성공 기준을 만족했다고 끝이 아니라, 그 값이 정말 스쿼트를 재고 있는지 확인해야 합니다.</aside>
+</section>
+
+<!-- 23 스쿼트 신뢰도/값 검증 -->
+<section class="slide" data-part="PART 5">
+  <h2>🔍 값이 <span class="g">의도한 것</span>을 재고 있나</h2>
+  <ul class="pts">
+    <li><b>값이 계산된다 ≠ 그 값이 의도한 것을 잰다.</b> 발이 떴는지 보려 발목 높이를 썼는데, 깊이 앉으면 발목이 정강이로 올라가 <b>스쿼트가 제자리 뛰기로</b> 분류됨</li>
+    <li><b>신뢰도를 안 보면 없는 부위의 각도가 계산된다.</b> 다리가 화면에 없어도 모델은 좌표를 내놓되 신뢰도를 0.001로 붙임 → 좌표만 쓰면 무릎 각도 20도. <b>오류도 없고 결과가 비지도 않는다</b> — 모델은 모른다고 말했는데 그 말을 안 읽은 것</li>
+    <li><b>관절 좌표를 영상에 그려 확인</b>이 가장 빠른 검산 — 숫자로만 보면 조금 낮은 값이, 그려 보면 관절이 <b>엉뚱한 부위에 찍혀</b> 있는 게 보인다</li>
+  </ul>
+  <div class="hl">신뢰도 임계값은 <b>판정 항목이 정한다</b> — 0.5가 흔하지만 근거는 없다. 한쪽 다리만 필요하면 높게 잘라 반대쪽을 버리는 게 안전, 좌우를 견주면 같은 값으로도 부족.</div>
+  <aside>측면 촬영 최저점에선 반대쪽 팔·다리가 몸에 가려 빨강(신뢰도 미달) — 빨간 넓적다리는 X자로 교차하고 발목은 공중에 뜸. 이 좌표로 각도를 내면 숫자는 나오지만 그 다리 판정이 아닙니다.</aside>
+</section>
+
+<!-- 24 스쿼트 촬영 방향 -->
+<section class="slide" data-part="PART 5">
+  <h2>🎥 판정 항목이 <span class="g">촬영 방향</span>을 정한다</h2>
+  <table class="t">
+    <tr><th>판정할 것</th><th>필요한 촬영 방향</th></tr>
+    <tr><td>앉은 깊이</td><td>측면</td></tr>
+    <tr><td>무릎이 발끝을 넘었는가</td><td>측면</td></tr>
+    <tr><td>좌우 무릎이 벌어졌는가</td><td>정면</td></tr>
+  </table>
+  <ul class="pts">
+    <li>모델은 좌표를 <b>화면 가로·세로 + 카메라 쪽 깊이</b> 세 값으로 낸다. 몸의 앞뒤가 어느 축에 놓이는지가 <b>촬영 방향에 따라 바뀐다</b></li>
+    <li>발끝 넘음은 앞뒤 관계 → 측면이면 <b>보이는 가로 좌표</b>로 답, 정면이면 <b>추정한 깊이</b>에 의존(따로 확인 필요)</li>
+  </ul>
+  <div class="big">하나의 영상으로 이 셋을 <span class="y">다 판정할 수 없다</span><small>판정 항목을 하나로 좁히면 노트북의 작은 모델로 충분 · 늘리려면 촬영 절차부터 — 모델 교체로 해결 안 됨</small></div>
+  <aside>라이선스에서도 하나: 자세 추정에 널리 쓰는 도구 중 AGPL이 있어, 닫힌 제품에 넣어 배포하면 소스 공개 의무. 유료 라이선스가 따로 있어 배포 계획이 있으면 여기서 결정됩니다. 이 PoC의 결론은 모델 이름이 아니라 "항목을 좁히면 작은 모델로 충분"입니다.</aside>
+</section>
+
+<!-- 25 PART 6 -->
+<section class="slide" data-part="PART 6">
+  <div class="part">
+    <div class="pno">6</div>
+    <h2 style="margin:0">내 업무로 옮기기 · 핵심 정리</h2>
+    <p style="margin-top:11px">지점 셋을 적고, 하나를 골라, 작게 만들어 확인한다</p>
+    <span class="who">후보 목록 · 성공 기준 · 만들기</span>
+  </div>
+  <aside>이제 각자 자기 업무로 옮깁니다. 지점을 셋 이상 적어야 어느 것이 PoC로 확인하기 좋은지가 드러납니다.</aside>
+</section>
+
+<!-- 26 내 업무 후보 -->
+<section class="slide" data-part="PART 6">
+  <h2>📝 내 업무 후보 목록 — <span class="g">셋 이상</span></h2>
+  <table class="t">
+    <tr><th>적은 것</th><th>업무 유형</th><th>지금 처리 방식</th><th>병목</th><th>발생량</th><th>틀렸을 때</th></tr>
+    <tr><td class="fill">…</td><td class="fill">…</td><td class="fill">…</td><td class="fill">…</td><td class="fill">…</td><td class="fill">…</td></tr>
+    <tr><td class="fill">…</td><td class="fill">…</td><td class="fill">…</td><td class="fill">…</td><td class="fill">…</td><td class="fill">…</td></tr>
+    <tr><td class="fill">…</td><td class="fill">…</td><td class="fill">…</td><td class="fill">…</td><td class="fill">…</td><td class="fill">…</td></tr>
+  </table>
+  <div class="hl">고르는 기준 — ① 판정 기준이 이미 있다 ② 판정 기록이 있어 채점 자료를 만들 수 있다 ③ 틀려도 되돌릴 수 있다 ④ 발생량이 충분해 개선이 눈에 보인다. 다 만족하는 게 없으면 <b>가장 많이 만족하는 것</b>을 고르고 못 만족한 항목을 제약으로 적는다.</div>
+  <aside>업무 유형은 넷 중에서 고르되 안 들어가면 이유를 적습니다(새 유형이거나 여러 업무가 섞인 것). '틀렸을 때' 칸을 비우지 마세요 — 이 칸이 무엇을 고를지를 가릅니다.</aside>
+</section>
+
+<!-- 27 만들기 지시 -->
+<section class="slide" data-part="PART 6">
+  <h2>🛠️ 성공 기준을 적고, <span class="g">만든다</span></h2>
+  <p>고른 지점에 한 줄(정량)을 쓴다. 근거는 지금 사람 수준 — 모르면 스무 건 처리시켜 시간·오류를 재면 충분. 후보 셋을 실행 위치·라이선스로 걸러낸 뒤 자기 자료로 비교(정답은 돌리기 전에).</p>
+  <div class="plabel">코딩 에이전트 지시문에 넣을 다섯 가지</div>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">모델 이름·실행 위치, 그리고 <b>자료를 외부로 보내지 말라</b>는 조건</span></div>
+    <div class="st"><span class="n">2</span><span class="t">판정에 쓰는 값을 <b>전부 인자로</b> — 코드에 숫자를 박지 말 것</span></div>
+    <div class="st"><span class="n">3</span><span class="t">결과에 <b>점수·신뢰도를 함께</b> 남기고 반올림하지 말 것</span></div>
+    <div class="st"><span class="n">4</span><span class="t">중간 산출물을 파일로 남기고 <b>다시 돌려도 덮어쓰지</b> 말 것</span></div>
+    <div class="st"><span class="n">5</span><span class="t">결과를 <b>눈으로 확인할 수 있는 형태</b>로 함께 저장할 것</span></div>
+  </div>
+  <div class="hl">마지막 항목이 <b>검산을 가능하게</b> 한다 — 숫자만 보면 값이 의도한 것을 재고 있지 않은 경우를 놓친다.</div>
+  <aside>다섯 항목은 두 예시에서 문제를 잡아낸 바로 그 장치들입니다(점수 그대로·신뢰도·그려서 확인).</aside>
+</section>
+
+<!-- 28 핵심 정리 1 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 핵심 정리 <span class="g">(1)</span></h2>
+  <table class="t">
+    <tr><th>항목</th><th>한 줄 정리</th></tr>
+    <tr><td>출발점</td><td>도구가 아니라 <b>업무</b>에서. 도구에서 출발하면 업무가 도구에 맞춰진다</td></tr>
+    <tr><td>업무 유형</td><td>검색·검사와 판독·분류와 배분·입력과 전사 — 유형마다 병목·도입 근거가 다르다</td></tr>
+    <tr><td>적용하지 않을 업무</td><td>기준이 사람마다 다른 일·되돌릴 수 없는 일·판정 기록이 없는 일</td></tr>
+    <tr><td>성공 기준</td><td>만들기 전에 <b>정량</b>으로. 근거는 지금 사람이 하는 수준</td></tr>
+    <tr><td>후보 구성</td><td>크기가 아니라 <b>종류</b>로 — 실행 위치·만들어진 목적·결과의 형태</td></tr>
+    <tr><td>기준선</td><td>지금 처리 방식을 후보에 — 이것이 이기면 그것도 결과</td></tr>
+  </table>
+  <aside>앞 3개 파트(방법론)의 요지입니다.</aside>
+</section>
+
+<!-- 29 핵심 정리 2 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 핵심 정리 <span class="g">(2)</span></h2>
+  <table class="t">
+    <tr><th>항목</th><th>한 줄 정리</th></tr>
+    <tr><td>제외 조건</td><td>실행 위치·라이선스로 <b>먼저</b> 걸러낸다 — 점수와 섞으면 쓸 수 없는 후보가 1위</td></tr>
+    <tr><td>임계값</td><td>값 아래를 잘라내는 경계 — 걸 수 있으려면 점수가 <b>순위용이 아니어야</b></td></tr>
+    <tr><td>신뢰도</td><td>모델이 확신 정도를 함께 내주는 값 — 안 읽으면 없는 것에 대한 판정이 나온다</td></tr>
+    <tr><td>값의 검증</td><td>값을 새로 넣을 때마다 그 값이 <b>의도한 것을 재는지</b> 따로 확인</td></tr>
+    <tr><td>촬영·입력 조건</td><td>판정 항목을 정하면 자료를 어떻게 모을지가 함께 정해진다 — 모델 교체로 해결 안 됨</td></tr>
+    <tr><td>PoC의 산출물</td><td>작동하는 물건이 아니라 <b>판단</b> — 기준을 못 넘은 이유도 결과</td></tr>
+  </table>
+  <aside>두 예시(검증)에서 나온 실전 원칙들입니다.</aside>
+</section>
+
+<!-- 30 회고 + 출처 -->
+<section class="slide" data-part="마무리">
+  <h2>🤔 오늘의 <span class="g">회고</span> — 네 가지</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">적은 세 지점 중 <b>고른 것과 뺀 것의 차이</b>는 무엇이었나?</span></div>
+    <div class="st"><span class="n">2</span><span class="t">성공 기준의 숫자를 어디서 가져왔나? <b>현행 수준을 실제로 재</b> 보았나?</span></div>
+    <div class="st"><span class="n">3</span><span class="t">실행 위치·라이선스 때문에 <b>제외한 후보</b>가 있었나? 점수로는 몇 위였나?</span></div>
+    <div class="st"><span class="n">4</span><span class="t">기준을 못 넘은 항목이 있다면, <b>다음에 무엇을 바꿔</b> 다시 확인할까?</span></div>
+  </div>
+  <div class="hl">📚 출처 · 더 찾아보기 — Hugging Face Models / Leaderboards / Artificial Analysis · 예시 모델: <b>SigLIP 2</b>, <b>MediaPipe Pose</b> · 정확도 하나로 줄 세울 수 없다: HELM(arXiv:2211.09110). <b>값·라이선스·지원 언어는 바뀐다 → 저장소에 확인한 날짜를 링크와 함께 남길 것.</b></div>
+  <aside>제출물(저장소)에 이 회고 네 답과 성공 기준, 후보 표, 그리고 확인 날짜를 함께 남기면 남이 클론해 판단을 다시 확인할 수 있습니다.</aside>
+</section>
+
+<!-- 31 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>산출물은 물건이 아니라 판단 🧭</h1>
+    <div class="big" style="margin-top:26px">업무에서 출발 → 유형·기준 → 후보 → 작게 확인 → <span class="y">판단을 남긴다</span><br><br>기준을 넘으면 구축, 못 넘으면 그 이유<br><span class="y">둘 다 성과</span></div>
+    <p class="sub" style="margin-top:24px">Main Quest — 도구가 아니라 업무에서 출발한다</p>
+  </div>
+  <aside>제출은 저장소 하나. 남이 클론해 돌려 보고 여러분의 판단을 다시 확인할 수 있는 상태 — 성공 기준, 후보 표, 자기 자료와 정답, 결과 숫자, 회고, 확인 날짜를 담으세요.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

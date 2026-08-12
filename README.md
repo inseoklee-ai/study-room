@@ -106,6 +106,11 @@
    - ⬜ 8-⑨. 채점이 되는 곳에 걸리는 보상
    - ⬜ 8-⑩. 공개된 것과 오늘 쓸 수 있는 것
    - ⬜ 8-⑪. 안 갈 데를 아는 것도 지도입니다
+9. **[Main Quest] AI 적용 판단 (PoC)** ✅ 완결 · 7개 소단원을 **통합 1덱**으로 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/main-quest/) · 📊 [PPT](main-quest/main-quest.pptx)
+   - 9-①. 도구 학습에서 적용 판단으로 · 9-②. AI를 적용할 업무 유형 · 9-③. 후보 선정
+   - 9-④. 예시 하나(사진 검색기) · 9-⑤. 예시 둘(스쿼트 보조도구)
+   - 9-⑥. 내 업무의 적용 지점 도출 · 9-⑦. 핵심 정리
+   - ℹ️ 내용이 하나의 프로젝트 흐름이라 소단원 7개를 한 덱(31슬라이드)으로 묶었습니다.
 
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
@@ -121,6 +126,7 @@
 > - 2-⑧ https://inseoklee-ai.github.io/study-room/history-to-use/
 > - 5-① https://inseoklee-ai.github.io/study-room/prompt-blanks/
 > - 5-② https://inseoklee-ai.github.io/study-room/denoise/
+> - 9 (Main Quest) https://inseoklee-ai.github.io/study-room/main-quest/
 > - 3-① https://inseoklee-ai.github.io/study-room/local-llm/
 > - 3-② https://inseoklee-ai.github.io/study-room/quantization/
 > - 3-③ https://inseoklee-ai.github.io/study-room/run-local/
