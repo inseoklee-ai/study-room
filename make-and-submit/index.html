@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>원하는 포즈로 만들기, 그리고 만든 사람이 남습니다</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.78rem,1.3vw,.96rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.9rem);
+    color:var(--ink);overflow:auto;max-height:54vh;white-space:pre;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 5 · 이미지 생성 (8~9)</span>
+    <h1 style="margin:18px 0">원하는 포즈로 만들기,<br>그리고 만든 사람이 남습니다</h1>
+    <p class="sub">포즈 도구 과제 · 강의 정리 · 제출 루브릭</p>
+  </div>
+  <aside>강의 5의 마지막 덱(과제 ⑧ + 마무리 ⑨ + 제출 통합)입니다. ControlNet 포즈로 "이 자세로 한 장" 도구를 직접 만들어 GitHub에 제출하고, 오늘 한 일을 되짚습니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 이 덱의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>PART 1 · 과제</small><b class="g">포즈 도구 만들어<br>GitHub 제출</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gold)"><small>PART 2 · 마무리</small><b>되짚기 · 남는 것<br>루브릭</b></div>
+  </div>
+  <ul class="pts">
+    <li><b>과제</b> — ControlNet Pose로 "이 자세로" 도구, 산출물은 Colab 노트 → GitHub</li>
+    <li><b>마무리</b> — 처음 적은 예측과 맞춰 보고, 만들기에 <b>남는 것</b>을 본다</li>
+  </ul>
+  <div class="big">읽기엔 정답(오류/검산)이 있었지만<br>만들기엔 <span class="y">선택이 남는다</span><small>어떤 장면을·어디까지 실제처럼·어디에·무엇을 밝힐지</small></div>
+  <aside>제출은 저장소 URL 한 줄. 남이 클론해 재현할 수 있어야 합니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">[과제] 원하는 포즈로 만들기</h2>
+  <p style="margin-top:11px">"이 자세로 한 장" 도구를 직접 만든다</p><span class="who">ControlNet Pose · Colab · GitHub</span></div>
+  <aside>앞서 본 ControlNet의 Pose 조건을 써서 도구를 직접 만듭니다. 강사가 노트를 주지 않고, FLUX.2-klein 4B Colab 노트를 출발점으로 삼아 포즈 조건을 얹는 방향으로 갑니다.</aside>
+</section>
+
+<!-- 4 과제 단계 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧩 두 단계로 도구를 만든다</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>포즈 조건을 넣어 도구 만들기 (30~60분)</b> — 참조 사진 한 장 → OpenPose로 관절 추출 → ControlNet 전처리로 넣고 프롬프트와 함께 FLUX.2-klein 4B에. 결과는 참조와 <b>같은 자세</b>의 다른 인물/장면.</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>다른 포즈·프롬프트로 바꿔 보기 (15분)</b> — 같은 포즈에 프롬프트만, 같은 프롬프트에 다른 포즈 사진. <b>어느 쪽을 바꿨을 때 크게 달라지나</b>를 관찰해 노트 마지막에 기록.</span></div>
+  </div>
+  <div class="hl">노트에는 처음 보는 사람도 따라 할 수 있게 <b>한 셀 한 셀</b> 적고, 셀마다 주석으로 '이 셀이 하는 일'을 — 모델 로드 · 포즈 추출 · 이미지 생성 · 결과 저장을 각 한 셀로.</div>
+  <aside>도구가 한 번 돌아갔다면 조건을 바꿔 가며 잘 되는지 확인합니다. 이 관찰이 노트의 마지막 마크다운 셀에 '무엇을 바꿨고 어떻게 달라졌나'로 적혀 있어야 합니다.</aside>
+</section>
+
+<!-- 5 폴더/제출 -->
+<section class="slide" data-part="PART 1">
+  <h2>📦 폴더 구조와 <span class="g">제출</span></h2>
+  <pre>pose-image-tool/
+├── README.md          # 도구 설명·사용법 한 줄
+├── pose_tool.ipynb    # Colab 튜토리얼 노트 (핵심)
+├── samples/           # 테스트 결과 예시
+│   ├── pose_01.png · output_01.png
+│   └── pose_02.png · output_02.png
+└── prompts.md         # 테스트에 쓴 프롬프트 모음</pre>
+  <ul class="pts">
+    <li>README에 <b>도구 설명 · 사용법 · 테스트 결과(포즈→프롬프트→잘됨/어긋남) · 한계</b>를 채운다</li>
+    <li>GitHub <b>public 저장소</b>에 올리고 <b>URL 한 줄</b>을 제출. <code>.ipynb</code>는 GitHub가 노트 모양으로 보여 줌</li>
+    <li>명령줄 없이 — New repository(Public) → 'uploading an existing file'로 <b>브라우저에 끌어다 놓기</b></li>
+  </ul>
+  <div class="hl">제출물 = <code>https://github.com/본인아이디/pose-image-tool</code> 이 주소 한 줄.</div>
+  <aside>GitHub 계정이 없으면 github.com에서 가입 → 오른쪽 위 + → New repository → 이름 pose-image-tool, Public.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">만드는 일에는 만든 사람이 남습니다</h2>
+  <p style="margin-top:11px">읽기엔 오류가, 만들기엔 선택이 남는다</p><span class="who">되짚기 · 남는 것</span></div>
+  <aside>세 단어와 예순일곱 단어를 비교하는 것으로 시작해, 기계가 어떻게 만들어졌는지 따라가고, 직접 만들고, 포즈 도구까지 제출했습니다.</aside>
+</section>
+
+<!-- 7 예측 맞춰보기 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔮 처음에 적은 <span class="g">예측</span>과 맞춰 보기</h2>
+  <table class="t">
+    <tr><th>처음의 질문</th><th>오늘의 답</th></tr>
+    <tr><td>모델 교체 vs 프롬프트 수정, 뭐가 크게 바뀌나</td><td>같은 모델·시드에서 <b>프롬프트만으로 크게 갈렸다</b>. 모델 교체는 대개 가장 늦게 — 먼저 <b>빈 칸</b>을 찾는다</td></tr>
+    <tr><td>오픈소스 모델, 회사 업무에 그대로?</td><td>같은 이름도 <b>크기에 따라 상업 가부</b>가 갈린다. 제약이 <b>가중치냐 산출물이냐</b>도 구분</td></tr>
+    <tr><td>그래픽카드 없어도 직접 돌려 볼 수 있나</td><td>된다 — 무료 GPU·브라우저. 오히려 노트북에서 무리하게 돌리는 쪽이 위험</td></tr>
+    <tr><td>"AI로 만들었다" 밝혀야 하나</td><td>법적 의무는 <b>사업자</b>에게. 개인엔 바로 아니지만, 실제와 혼동될 자리엔 <b>캡션 한 줄이 나를 지킨다</b></td></tr>
+  </table>
+  <aside>시작할 때 적어 둔 예측 표로 돌아가, 관점이 어떻게 바뀌었는지 확인합니다.</aside>
+</section>
+
+<!-- 8 남는 것 -->
+<section class="slide" data-part="PART 2">
+  <h2>🫱 남는 것 — <span class="g">선택</span></h2>
+  <ul class="pts">
+    <li>읽어 내는 쪽 — 틀리면 <b>오류</b>. 검산하면 잡고, 잡으면 고친다</li>
+    <li>만들어 내는 쪽 — 그런 정답이 없다. 대신 <b>선택</b>이 남는다: 어떤 장면을 · 어디까지 실제처럼 · 어디에 쓸지 · 무엇을 밝힐지</li>
+    <li>이 넷은 <b>모델이 결정해 주지 않고</b>, 앞으로도 그럴 것</li>
+  </ul>
+  <div class="big">기술이 좋아질수록 이 선택의 무게는 <span class="y">오히려 늘어난다</span><small>손가락 여섯 개는 누구나 알아본다 — 완벽해 보이는 그림은 아무도 못 알아본다. 그래서 완벽해질수록 더 따져 물어야 한다</small></div>
+  <aside>다음 시간에는 하나의 모델이 글·그림·소리를 함께 받아들이기 시작하면서 입력의 경계가 흐려지는 이야기를 봅니다.</aside>
+</section>
+
+<!-- 9 루브릭 -->
+<section class="slide" data-part="PART 2">
+  <h2>📋 프로젝트 제출 <span class="g">루브릭</span></h2>
+  <table class="t">
+    <tr><th>학습목표</th><th>평가기준</th></tr>
+    <tr><td>만들어진 결과물을 직접 평가할 수 있다</td><td>다양한 테스트를 해 보고 <b>스스로 성능을 평가</b></td></tr>
+    <tr><td>한번 진행된 결과를 <b>재현</b>할 수 있다</td><td>제출된 결과 이미지가 <b>동일한 실험으로 재현</b></td></tr>
+    <tr><td>원하는 기능의 툴을 직접 만들 수 있다</td><td>입력 이미지의 <b>포즈가 정말 그대로 반영</b>됐는가</td></tr>
+  </table>
+  <div class="hl">제출 — <b>파일 또는 URL 중 한 가지</b>(ZIP·PDF·이미지, 최대 5MB / 또는 저장소 URL). <b>제출 후 수정 불가.</b></div>
+  <aside>세 평가기준이 이 강의의 세 축입니다 — 평가·재현·직접 제작. 특히 재현(시드 고정·기록)을 앞 덱에서 강조한 이유입니다.</aside>
+</section>
+
+<!-- 10 핵심 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 5문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">과제 = <b>ControlNet Pose</b>로 "이 자세로" 도구를 만들어 <b>Colab 노트 → GitHub URL</b>로 제출.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">노트는 <b>셀마다 주석</b>(모델 로드·포즈 추출·생성·저장), 마지막에 '무엇을 바꿨고 어떻게 달라졌나'.</span></div>
+    <div class="st"><span class="n">3</span><span class="t">결과가 시원찮을 때 <b>모델부터 갈아 치우지 말고</b> 빈 칸을 먼저 찾는다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">"공개됐다"≠"써도 된다" · 무료 GPU로 직접 돌릴 수 있다 · 혼동될 자리엔 <b>밝힘 한 줄</b>.</span></div>
+    <div class="st"><span class="n">5</span><span class="t">만들기엔 정답이 아니라 <b>선택</b>이 남고, 완벽해질수록 더 따져 물어야 한다.</span></div>
+  </div>
+  <aside>루브릭의 세 축 — 평가·재현·직접 제작 — 을 제출물에 담으세요.</aside>
+</section>
+
+<!-- 11 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 포즈 도구의 파이프라인(참조 사진 → 결과)을 순서대로 말하면?</div>
+    <div class="q"><b>Q2.</b> 노트가 <b>재현 가능</b>하려면 무엇을 갖춰야 하나(루브릭 기준)?</div>
+    <div class="q"><b>Q3.</b> 그림이 시원찮을 때 <b>가장 늦게</b> 해야 할 일은?</div>
+    <div class="q"><b>Q4.</b> 읽기와 달리 만들기에 <b>남는 것</b> 네 가지는?</div>
+    <div class="q"><b>Q5.</b> "완벽해질수록 더 따져 물어야 한다"는 무슨 뜻인가?</div>
+  </div>
+  <aside>Q4·Q5가 강의 5의 결론입니다 — 선택과 책임.</aside>
+</section>
+
+<!-- 12 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 참조 사진 → <b>OpenPose로 관절 추출</b> → ControlNet 전처리로 넣고 <b>프롬프트와 함께</b> 모델에 → 같은 자세의 다른 인물/장면.</div>
+    <div class="q a"><b>A2.</b> <b>시드 고정 + 프롬프트·시드·모델명 기록</b> — 제출된 결과가 동일한 실험으로 재현되어야 한다.</div>
+    <div class="q a"><b>A3.</b> <b>모델을 갈아 치우는 것</b>. 먼저 빈 칸을 찾고, 시드 고정·한 칸씩 수정을 거친 뒤에야 다른 것을 의심한다.</div>
+    <div class="q a"><b>A4.</b> <b>어떤 장면을 · 어디까지 실제처럼 · 어디에 쓸지 · 무엇을 밝힐지</b> — 모델이 결정해 주지 않는다.</div>
+    <div class="q a"><b>A5.</b> 완벽해 보이는 그림은 실제와 <b>혼동돼도 아무도 못 알아본다</b> → 기술이 좋아질수록 용도·밝힘을 더 따져야 한다.</div>
+  </div>
+  <aside>A4·A5를 자기 업무에 대보면 "만든 것에는 만든 사람이 남는다"가 실감납니다.</aside>
+</section>
+
+<!-- 13 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>만든 것에는 만든 사람이 남는다 🫱</h1>
+    <div class="big" style="margin-top:26px">빈 칸을 채우고 · 재현 가능하게 만들고<br>완벽해질수록 <span class="y">더 따져 묻는다</span><br><br>다음 강의 — <span class="y">글·그림·소리를 함께</span> 받는 모델</div>
+    <p class="sub" style="margin-top:24px">강의 5 [프로젝트] 이미지 생성 — 여기서 매듭</p>
+  </div>
+  <aside>강의 5 완결. 다음 강의(여러 입력을 처리하는 모델들)에서 입력의 경계가 흐려지는 이야기로 이어집니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>

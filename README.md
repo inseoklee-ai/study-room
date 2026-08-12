@@ -60,17 +60,14 @@
    - ✅ 4-⑥. 같은 PDF를 네 가지 눈으로 읽기 (OCR 비교 실습) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/ocr-lab/) · 📊 [PPT](ocr-lab/ocr-lab.pptx)
    - ✅ 4-⑦. YOLO로 탐지·분할·포즈 결과 만들기 (사진 실습) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/yolo-lab/) · 📊 [PPT](yolo-lab/yolo-lab.pptx)
    - ✅ 4-⑧. 넘긴 것은 노동, 남은 것은 결정 (단원 정리) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/docimg-wrapup/) · 📊 [PPT](docimg-wrapup/docimg-wrapup.pptx)
-5. **[프로젝트] 이미지 생성 어플리케이션 만들기** ⬅️ 진행 중 (2/9)
+5. **[프로젝트] 이미지 생성 어플리케이션 만들기** ✅ 완결 (9/9) · 9개 소단원을 **5개 덱으로 통합**
    - ✅ 5-①. 같은 모델인데 결과가 갈립니다 (프롬프트 6요소·빈 칸·읽기 vs 만들기) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/prompt-blanks/) · 📊 [PPT](prompt-blanks/prompt-blanks.pptx)
    - ✅ 5-②. 노이즈에서 되돌린다는 발상 (GAN·확산·CLIP·잠재확산·DiT·증류·guidance) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/denoise/) · 📊 [PPT](denoise/denoise.pptx)
-   - ⬜ 5-③. 브라우저만으로 첫 장을 뽑습니다
-   - ⬜ 5-④. 프롬프트를 쓰는 법
-   - ⬜ 5-⑤. 코드로 불러 자동화에 끼웁니다
-   - ⬜ 5-⑥. 무엇으로 만들 것인가
-   - ⬜ 5-⑦. 동영상도 만들 수 있을까?
-   - ⬜ 5-⑧. [과제] 원하는 포즈로 만들기
-   - ⬜ 5-⑨. 만드는 일에는 만든 사람이 남습니다
-   - 📦 프로젝트 제출
+   - ✅ 5-③④. 프롬프트 실전 (브라우저 첫 장 + 쓰는 법·시드 고정·한 칸씩) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/prompt-craft/) · 📊 [PPT](prompt-craft/prompt-craft.pptx)
+   - ✅ 5-⑤. 코드로 불러 자동화에 끼웁니다 (API·Colab GPU·에이전트 배치) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/image-code/) · 📊 [PPT](image-code/image-code.pptx)
+   - ✅ 5-⑥. 무엇으로 만들 것인가 (세 갈래·라이선스·ControlNet·약관) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/choose-image-model/) · 📊 [PPT](choose-image-model/choose-image-model.pptx)
+   - ✅ 5-⑦. 동영상도 만들 수 있을까? (비는 칸·층·소리·이어붙이기) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/video-gen/) · 📊 [PPT](video-gen/video-gen.pptx)
+   - ✅ 5-⑧⑨·제출. 원하는 포즈로 만들기 + 마무리·루브릭 (ControlNet Pose·GitHub 제출) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/make-and-submit/) · 📊 [PPT](make-and-submit/make-and-submit.pptx)
 6. **여러 입력을 처리하는 모델들** ⬅️ 진행 중 (2/8)
    - ✅ 6-①. 여러 종류의 입력을 한 모델에 넣는다는 것 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/many-inputs/) · 📊 [PPT](many-inputs/many-inputs.pptx)
    - ✅ 6-②. 픽셀을 문장처럼 다룬다는 발상 (CLIP·공유 임베딩·정렬) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/pixels-sentences/) · 📊 [PPT](pixels-sentences/pixels-sentences.pptx)
@@ -123,6 +120,11 @@
 > - 2-⑧ https://inseoklee-ai.github.io/study-room/history-to-use/
 > - 5-① https://inseoklee-ai.github.io/study-room/prompt-blanks/
 > - 5-② https://inseoklee-ai.github.io/study-room/denoise/
+> - 5-③④ https://inseoklee-ai.github.io/study-room/prompt-craft/
+> - 5-⑤ https://inseoklee-ai.github.io/study-room/image-code/
+> - 5-⑥ https://inseoklee-ai.github.io/study-room/choose-image-model/
+> - 5-⑦ https://inseoklee-ai.github.io/study-room/video-gen/
+> - 5-⑧⑨ https://inseoklee-ai.github.io/study-room/make-and-submit/
 > - 9 (Main Quest) https://inseoklee-ai.github.io/study-room/main-quest/
 > - 1-① 학습의 원리 https://inseoklee-ai.github.io/study-room/how-ai-learns/
 > - 1-② 세 가지 학습 https://inseoklee-ai.github.io/study-room/three-learnings/

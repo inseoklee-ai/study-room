@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>동영상도 만들 수 있을까? · 영상 생성</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.76rem,1.26vw,.93rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.08vw,.88rem);
+    color:var(--ink);overflow:auto;max-height:52vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  pre.no{border-left-color:var(--red)}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 5 · 이미지 생성 (7)</span>
+    <h1 style="margin:18px 0">동영상도<br>만들 수 있을까?</h1>
+    <p class="sub">여섯 칸의 연장 — 칸이 늘고, 함정이 하나 생긴다</p>
+  </div>
+  <aside>정지 화면에서 여섯 칸을 채우는 감을 잡았다면 영상은 그 연장입니다. 다만 칸이 몇 개 늘어나고, 새로 생기는 함정이 하나 있습니다 — 비는 칸이 중립이 아니라는 것.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 이 덱의 여정</h2>
+  <ul class="pts">
+    <li>여러 영상 모델을 나란히 비교(<b>Video Arena</b>), 코드로 돌릴 수 있는 모델들</li>
+    <li>함정 — <b>비는 칸이 중립이 아니다</b>(카메라를 안 적으면 움직인다)</li>
+    <li>여섯 칸이 <b>층으로</b> 늘어난다 — 동작 끝점 · 카메라 움직임 · 소리</li>
+    <li>이미 있는 그림에서 출발, 그리고 <b>길게 = 짧게 나눠 잇기</b></li>
+  </ul>
+  <div class="big">비는 칸은 "아무래도 좋다"가 아니라 <span class="y">"네가 정해라"</span><small>모델이 배운 영상은 대부분 카메라가 움직이는 footage — 정하라면 움직인다</small></div>
+  <div class="hl">🎯 한 줄 — 정지 화면과 <b>같은 60~120단어</b>, 다만 <b>동작에 끝점 · 카메라 움직임 하나 · 소리 한 줄</b>이 더 붙는다.</div>
+  <aside>상용(Veo·Sora·Runway·Kling)보다 한 수 아래지만, 로컬·Colab에서 짧은 한 편을 뽑는 코드 경로도 2026년 제법 열렸습니다.</aside>
+</section>
+
+<!-- 3 모델 -->
+<section class="slide" data-part="모델">
+  <h2>🎬 비교와 <span class="g">코드로 돌릴 모델</span></h2>
+  <p>먼저 <b>Video Arena</b> — 영상 모델 둘을 무작위 페어링해 같은 프롬프트로 좌우 비교(가입 필요, 하루 2편, 한 편 5~8초·최대 10분). 코드로 직접 돌릴 만한 것들:</p>
+  <table class="t">
+    <tr><th>모델</th><th>개발사</th><th>라이선스</th><th>매개변수</th><th>비고</th></tr>
+    <tr><td>LingBot-Video Dense 1.3B</td><td>Ant Group</td><td>Apache 2.0</td><td>DiT 1.3B + Qwen3 인코더</td><td>전체 패키지 ~12GB. 평문 아닌 JSON 캡션 필요</td></tr>
+    <tr><td>LTX-2</td><td>Lightricks</td><td>LTX-2 Community</td><td>19B</td><td>HF 인기(2.3 22B가 최신)</td></tr>
+    <tr><td>Bernini-R</td><td>ByteDance</td><td>Apache 2.0</td><td>14B(1.3B도)</td><td>상업 이용 가능</td></tr>
+    <tr><td>Lance</td><td>ByteDance</td><td>Apache 2.0</td><td>3B active</td><td>40GB VRAM 필요</td></tr>
+  </table>
+  <div class="hl">⚠️ 함정 — <b>1.3B는 DiT 본체만</b> 가리킨다. 텍스트 인코더·VAE가 별도로 붙어 <b>전체 패키지 ~12GB</b>. 이미지보다 이런 '부품 합산'이 더 흔하다(B=매개변수 수, GB=파일/메모리 — 헷갈리지 말 것).</div>
+  <aside>LingBot은 평문이 아니라 구조화 JSON 캡션을 받아, 평문→JSON '프롬프트 리라이터'가 필요한데 이 역할을 에이전트에게 맡길 수 있습니다(한국어 평문 → 영어 JSON). 에이전트가 곧 리라이터.</aside>
+</section>
+
+<!-- 4 비는 칸 -->
+<section class="slide" data-part="원리">
+  <h2>🎥 비는 칸이 <span class="r">중립이 아니다</span></h2>
+  <ul class="pts">
+    <li>정지 화면에선 카메라를 안 적으면 아무 구도나 골랐다. 영상에선 더 사납다 — <b>카메라 움직임을 안 적으면 모델이 카메라를 움직인다</b></li>
+    <li>가만히 있는 화면을 원하면 <b>"고정"이라고 반드시</b> 적어야 한다(비워 두는 건 "네가 정해라")</li>
+    <li>초보자 결과가 이유 없이 흔들리고 밀려 들어가는 이유가 대개 이것</li>
+  </ul>
+  <div class="hl">소리도 같다 — 소리 나오는 도구인데 안 적으면 <b>아무 소리나 얹는다</b>. 조용한 장면을 원하면 <b>조용하다고 적어야</b> 한다.</div>
+  <aside>모델이 배운 영상 대부분이 카메라가 움직이는 영화 footage입니다. 그래서 "정하라"고 하면 움직입니다.</aside>
+</section>
+
+<!-- 5 층으로 -->
+<section class="slide" data-part="원리">
+  <h2>🧱 여섯 칸이 <span class="g">층으로</span> 늘어난다</h2>
+  <p>피사체·환경·조명·스타일은 정지 화면과 같다. <b>달라지는 것은 둘</b>:</p>
+  <div class="grid2">
+    <div class="box"><h3 class="g">동작에 끝점이 필요</h3><p style="margin:0">"걸어간다"만 적으면 동작을 못 끝내고 늘어진다. <b>"걸어와 문 앞에서 멈춘다"</b>처럼 어디서 끝나는지를 주면 8~10초 클립이 깔끔히 닫힌다.</p></div>
+    <div class="box"><h3 class="b">카메라에 움직임 하나 더</h3><p style="margin:0">샷 크기·각도·렌즈에 <b>카메라가 어떻게 움직이는지</b>가 더해진다. 그래도 <b>셋을 넘기지 않는다</b>(샷 하나·움직임 하나·렌즈 하나).</p></div>
+  </div>
+  <div class="hl">길이도 정지 화면과 같은 <b>60~120단어</b>. 층이 늘었다고 분량까지 늘리면 지시끼리 부딪힌다.</div>
+  <aside>8~10초짜리 한 덩어리를 만드는 것이니, 그 안에서 시작하고 끝나는 동작이어야 합니다.</aside>
+</section>
+
+<!-- 6 두 번 적어보기 -->
+<section class="slide" data-part="원리">
+  <h2>🆚 같은 장면을 <span class="g">두 번</span> 적어 보면</h2>
+  <div class="plabel">❌ 빈 칸이 많은 쪽</div>
+  <pre class="no">공장에서 작업자가 라인을 점검하는 영상</pre>
+  <p style="margin:6px 0">→ 카메라가 정해지지 않아 <b>움직이고</b>, 동작에 끝이 없어 8초 내내 어정쩡하게 걷고, 빛·결이 매번 달라 <b>운에 맡기게</b> 된다.</p>
+  <div class="plabel">✅ 칸을 채운 쪽 (~80단어)</div>
+  <pre>Static locked-off camera, medium shot, 35mm lens. A factory worker
+in a white helmet walks along the inspection line from the right,
+stops at center frame, and leans in to read a gauge. Cool morning
+light from tall windows on the left; long soft reflections on the
+polished metal. Quiet industrial ambience, faint hum of ventilation.
+Photorealistic documentary footage, muted palette, subtle grain.</pre>
+  <div class="hl">카메라는 셋만(<b>고정·미디엄·35mm</b>), 동작에 <b>끝점</b>(중앙에서 멈춰 계기를 읽음), 그리고 <b>들리는 것</b>까지 한 줄.</div>
+  <aside>여든 단어쯤입니다. 빈 칸이 많으면 통제가 안 되고, 채우면 재현·수정이 가능해집니다.</aside>
+</section>
+
+<!-- 7 소리 -->
+<section class="slide" data-part="원리">
+  <h2>🔊 소리도 <span class="g">칸</span>이다</h2>
+  <ul class="pts">
+    <li>소리 나오는 도구면 <b>들리는 것을 적어야</b> 한다(안 적으면 아무 소리나 얹힘)</li>
+    <li>흔한 착각 — 조용한 장면에 소리 칸을 <b>비워 두면 조용해지지 않는다</b>. 카메라와 똑같다. 정적이 의미면 그 정적을 명시</li>
+  </ul>
+  <div class="chain">
+    <div class="cell" style="min-width:150px"><small>환경음</small><b>기계 소리·바람·웅성거림</b></div>
+    <div class="cell" style="min-width:150px"><small>동작음</small><b>발소리·문 닫힘</b></div>
+    <div class="cell" style="min-width:150px"><small>말소리</small><b>대사 내용까지</b></div>
+  </div>
+  <div class="hl">말소리는 <b>입 모양이 잘 안 맞는</b> 경우가 많으니, 인물이 화면에서 작게 나오게 잡는 편이 안전.</div>
+  <aside>무엇을 적을지 막막하면 환경음·동작음·말소리 세 갈래로 나눠 생각하면 됩니다.</aside>
+</section>
+
+<!-- 8 이미지→영상 -->
+<section class="slide" data-part="원리">
+  <h2>🖼️→🎞️ 이미 있는 그림에서 출발할 때</h2>
+  <p>실무에서 더 자주 쓰는 방식 — 마음에 드는 <b>정지 화면을 먼저 만들고 그 그림을 움직이게</b> 하는 것.</p>
+  <div class="big">이미 그림에 보이는 것은 <span class="y">다시 묘사하지 않는다</span><br><span class="y">움직임만</span> 적는다</div>
+  <ul class="pts">
+    <li>안전모 쓴 작업자가 서 있는 그림을 넣고 "안전모 쓴 작업자가 서 있고 왼쪽에서 빛이…"라고 <b>다시 적으면</b>, 모델은 그걸 <b>새로 그리라</b>는 지시로 읽어 애써 만든 그림이 바뀐다</li>
+    <li>넣은 그림이 이미 답이므로, 적을 것은 <b>"천천히 고개를 들어 정면을 본다"</b> 하나면 된다</li>
+  </ul>
+  <div class="hl">덤 — 손처럼 잘 무너지는 부분을 정지 화면에서 먼저 제대로 만들어 두면, 영상이 <b>그 상태를 유지</b>하는 편이 처음부터 만드는 것보다 쉽다.</div>
+  <aside>이 규칙(보이는 것 다시 묘사 X, 움직임만)을 어기는 사람이 아주 많습니다.</aside>
+</section>
+
+<!-- 9 길게=짧게 -->
+<section class="slide" data-part="원리">
+  <h2>✂️ 길게 만들려면 <span class="g">짧게 나눈다</span></h2>
+  <ul class="pts">
+    <li>지금 도구는 한 번에 <b>8~10초</b>. 그 이상 늘리면 뒤로 갈수록 무너진다</li>
+    <li>1분이 필요하면 1분을 요청하지 말고 <b>여덟 토막으로 나눠 만들고 이어 붙일 계획</b>을 먼저</li>
+    <li>토막 사이 연결은 <b>앞 토막의 마지막 프레임을 다음 토막의 출발 그림으로</b> → 인물·장소가 토막마다 달라 보이는 문제를 크게 줄인다</li>
+  </ul>
+  <div class="hl">현실적 제약 셋 — 한 편에 <b>몇 분씩</b> 걸림, 유료는 <b>크레딧 월 소멸</b>, 여러 번 고칠 계획이면 이 둘을 먼저 확인.</div>
+  <aside>정지 화면에서 배운 "요소가 넘치면 나눈다"가 영상에선 "길이가 넘치면 토막낸다"로 나타납니다.</aside>
+</section>
+
+<!-- 10 해볼 것 -->
+<section class="slide" data-part="원리">
+  <h2>🧪 해 볼 것 — <span class="g">세 편</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>동작만</b> — "작업자가 라인을 점검한다"</span></div>
+    <div class="st"><span class="n">2</span><span class="t">+ <b>카메라 고정 · 동작 끝점</b> — "고정된 카메라. 라인을 따라 걸어와 화면 중앙에서 멈춰 계기판을 들여다본다"</span></div>
+    <div class="st"><span class="n">3</span><span class="t">+ <b>조명·스타일</b>까지 채운다</span></div>
+  </div>
+  <div class="hl">세 편을 나란히 — 대개 <b>둘째 편에서 흔들림이 사라지고</b>, <b>셋째 편에서 분위기가 잡힌다</b>. 무엇이 안 채워졌을 때 무엇이 망가지는지를 몸으로 아는 것이 목적.</div>
+  <aside>정지 화면으로 했던 것과 같은 실험의 영상 버전입니다.</aside>
+</section>
+
+<!-- 11 핵심 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 5문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">영상은 정지 화면의 연장 — <b>같은 60~120단어</b>, 다만 칸이 층으로 늘어난다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>비는 칸이 중립이 아니다</b> — 카메라를 안 적으면 움직이고, 소리를 안 적으면 아무 소리나 얹힌다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>동작에 끝점</b>을 줘야 클립이 깔끔히 닫히고, 카메라 움직임도 <b>셋을 넘기지 않는다</b>.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">이미 있는 그림에서 출발하면 <b>보이는 것은 다시 묘사하지 말고 움직임만</b>.</span></div>
+    <div class="st"><span class="n">5</span><span class="t">길게는 <b>짧게 나눠 잇기</b>(마지막 프레임을 다음 출발로) — 모델 이름의 <b>B와 GB</b>도 헷갈리지 말 것.</span></div>
+  </div>
+  <aside>2번이 이 덱의 함정입니다 — 비워 두면 조용해지지도, 고정되지도 않습니다.</aside>
+</section>
+
+<!-- 12 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 영상에서 "비는 칸이 중립이 아니다"를 카메라·소리로 설명하면?</div>
+    <div class="q"><b>Q2.</b> 정지 화면과 달리 영상 프롬프트에서 <b>동작</b>에 꼭 필요한 것은?</div>
+    <div class="q"><b>Q3.</b> 이미 있는 그림을 움직일 때 <b>하지 말아야 할 것</b>은?</div>
+    <div class="q"><b>Q4.</b> 1분짜리를 만들려면? 토막 연결을 자연스럽게 하는 요령은?</div>
+    <div class="q"><b>Q5.</b> "1.3B 모델인데 패키지가 12GB"가 가능한 이유는?</div>
+  </div>
+  <aside>Q1·Q2가 핵심 — 비는 칸의 위험과 동작 끝점.</aside>
+</section>
+
+<!-- 13 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 카메라를 안 적으면 <b>모델이 움직이고</b>(배운 영상 대부분이 움직이는 footage), 소리를 안 적으면 <b>아무 소리나 얹힌다</b>. 고정·정적은 <b>명시</b>해야 한다.</div>
+    <div class="q a"><b>A2.</b> <b>끝점</b> — "걸어간다"가 아니라 "걸어와 문 앞에서 멈춘다". 8~10초 클립이 깔끔히 닫힌다.</div>
+    <div class="q a"><b>A3.</b> 그림에 <b>이미 보이는 것을 다시 묘사</b>하지 말 것 — 새로 그리라는 지시로 읽혀 그림이 바뀐다. <b>움직임만</b> 적는다.</div>
+    <div class="q a"><b>A4.</b> 1분을 요청하지 말고 <b>여덟 토막으로 나눠 잇기</b>. 앞 토막의 <b>마지막 프레임을 다음 토막의 출발 그림</b>으로 쓰면 일관성↑.</div>
+    <div class="q a"><b>A5.</b> <b>1.3B는 DiT 본체만</b>. 텍스트 인코더·VAE가 별도로 붙어 전체 패키지가 커진다(부품 합산).</div>
+  </div>
+  <aside>A1·A3를 기억하면 영상 초보의 흔한 실패 두 가지를 바로 피합니다.</aside>
+</section>
+
+<!-- 14 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>비는 칸은 "네가 정해라" 🎬</h1>
+    <div class="big" style="margin-top:26px">동작에 끝점, 카메라 움직임 하나, 소리 한 줄<br>길게는 <span class="y">짧게 나눠 잇는다</span><br><br>다음 — <span class="y">[과제] 원하는 포즈로 만들기</span></div>
+    <p class="sub" style="margin-top:24px">동영상도 만들 수 있을까? — 여기까지</p>
+  </div>
+  <aside>다음 덱에서 ControlNet 포즈로 "이 자세로 한 장" 도구를 직접 만들어 GitHub에 제출하고, 강의 5를 마무리합니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>
