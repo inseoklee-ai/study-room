@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>규칙을 짜는 기계에서 배우는 기계로 · 학습의 원리와 데이터의 숫자화</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.78rem,1.3vw,.96rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.9rem);
+    color:var(--ink);overflow:auto;max-height:54vh;white-space:pre;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 1 · AI는 어떻게 배우나 (1/3)</span>
+    <h1 style="margin:18px 0">규칙을 짜는 기계에서<br>배우는 기계로</h1>
+    <p class="sub">학습의 원리, 그리고 모든 데이터는 숫자다</p>
+  </div>
+  <aside>강의 1 "AI는 어떻게 배우나"의 첫 덱(소단원 1·2 통합)입니다. 규칙을 손으로 짜는 대신 데이터로 배운다는 발상, 그 학습이 실제로 무슨 계산인지, 그리고 글·그림이 어떻게 숫자가 되어 들어가는지를 봅니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 이 덱의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>큰 그림</small><b class="b">AI ⊃ ML ⊃ DL</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>학습이란</small><b class="g">예측·오차·조정</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gold)"><small>입력</small><b>데이터를 숫자로</b></div>
+  </div>
+  <ul class="pts">
+    <li>왜 규칙을 직접 짜는 대신 <b>데이터로 배우게</b> 하나</li>
+    <li>"배운다" = <b>예측 → 오차 → 조정</b>의 반복(경사하강), 결과는 <b>파라미터에 압축된 패턴</b></li>
+    <li>기계는 숫자만 다룬다 — 글은 <b>토큰·임베딩</b>, 그림은 <b>텐서</b>로</li>
+    <li>신경망 한 층 = <b>곱하고·더하고·비틀기</b></li>
+  </ul>
+  <div class="hl">🎯 강의 1 전체를 관통하는 한 줄 — <b>결과를 가르는 건 화려한 모델이 아니라 데이터</b>다. (다음 두 덱에서 직접 확인)</div>
+  <aside>강의 1은 3개 덱으로 나뉩니다 — ①원리(지금) ②세 가지 학습(회귀·분류·파인튜닝) ③규모와 데이터.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">인공지능의 학습이란?</h2>
+    <p style="margin-top:11px">규칙을 손으로 짜는 방식에서, 데이터로 패턴을 얻는 방식으로</p>
+    <span class="who">예측 · 오차 · 조정</span>
+  </div>
+  <aside>1959년 아서 새뮤얼 — "명시적으로 프로그래밍하지 않고도 컴퓨터가 배우게 하는 연구". 오늘 배울 모든 것이 이 한 문장 위에 섭니다.</aside>
+</section>
+
+<!-- 4 AI 큰 그림 -->
+<section class="slide" data-part="PART 1">
+  <h2>🌐 인공지능이라는 <span class="g">큰 그림</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:110px;border-color:var(--bl)"><small>가장 넓은 원</small><b class="b">인공지능(AI)</b></div>
+    <span class="ar">⊃</span>
+    <div class="cell" style="min-width:110px"><small>데이터로 배움</small><b>머신러닝</b></div>
+    <span class="ar">⊃</span>
+    <div class="cell" style="min-width:110px"><small>여러 층 신경망</small><b>딥러닝</b></div>
+    <span class="ar">⊃</span>
+    <div class="cell" style="min-width:110px;border-color:var(--gr)"><small>그 위에</small><b class="g">생성형 AI</b></div>
+  </div>
+  <ul class="pts">
+    <li>규칙을 손으로 짜 넣던 방식(옛 체스 프로그램·전문가 시스템)도 AI였다</li>
+    <li>오늘 열광하는 것들(사진 인식·글쓰기·번역)은 거의 다 <b>데이터로 배우는</b> 쪽에서 나왔다</li>
+    <li>챗봇·그림 생성 같은 생성형 AI도 대개 <b>딥러닝 위</b>에 선다</li>
+  </ul>
+  <div class="hl">오늘 파고들 곳이 이 그림의 <b>한복판</b> — 데이터로 배우는 머신러닝/딥러닝입니다.</div>
+  <aside>겹겹이 포개진 원: AI가 가장 넓고, 그 안에 ML, 다시 그 안에 DL, 그 위에 생성형 AI.</aside>
+</section>
+
+<!-- 5 왜 데이터로 -->
+<section class="slide" data-part="PART 1">
+  <h2>🤯 왜 규칙 대신 <span class="g">데이터</span>로?</h2>
+  <ul class="pts">
+    <li>개/고양이 규칙을 직접 써 보면 — "귀 뾰족=고양이"엔 폴드귀가, "수염 있음"엔 개도 반례. <b>예외가 예외를 부른다</b></li>
+    <li>스팸도 마찬가지 — '무료'·'당첨'을 막으면 '무 료'·'당.첨'으로 빠져나가, 규칙은 <b>술래잡기처럼 끝없이</b> 는다</li>
+  </ul>
+  <div class="big">그래서 방향을 뒤집는다<br><span class="y">예시(데이터)를 잔뜩 주고, 규칙은 기계가 스스로 찾게</span><small>이것이 인공지능의 "학습"</small></div>
+  <div class="hl">"배운다"를 <b>사람처럼 의미를 깨닫는 것</b>으로 받아들이면 곤란합니다. 정체는 다음 장에서.</div>
+  <aside>손글씨 '7'을 픽셀 규칙으로 정의하는 것도 같은 곤란입니다. 규칙 나열로는 세상의 예외를 다 못 담습니다.</aside>
+</section>
+
+<!-- 6 학습의 뿌리 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧬 학습의 <span class="g">뿌리</span> 세 장면</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>섀넌(1951) 예측 게임</b> — 소설을 한 글자씩 맞히기. 언어는 통계적으로 예측 가능하고, <b>얼마나 잘 예측하느냐가 정보량</b>. LLM의 <b>다음 토큰 예측</b>이 이 게임의 기계 버전.</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>로젠블랫(1958) 퍼셉트론</b> — 규칙 하나가 놀랄 만큼 단순. <b>예측해 보고, 틀리면 그 틀린 만큼 내부 숫자(가중치)를 살짝 고친다.</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>역전파(1986)</b> — 여러 겹 숫자에게 "네가 최종 오차에 얼마나 기여했나"를 뒤에서 앞으로 되짚어 알려 주고 그만큼 고친다. <b>오늘날 GPT 포함 거의 모든 신경망</b>의 학습 방식.</span></div>
+  </div>
+  <div class="hl">한 겹뿐이던 퍼셉트론은 복잡한 패턴을 못 배웠는데, <b>역전파</b>가 여러 겹을 학습 가능하게 만들며 그 벽을 넘었습니다.</div>
+  <aside>섀넌의 상대는 아내 베티였습니다. 앞 글자들을 보고 다음 글자를 예측하고, 틀리면 정답을 알려 주고 다음으로.</aside>
+</section>
+
+<!-- 7 학습 고리 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔁 학습 = 이 고리의 <span class="g">반복</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:110px"><small>재료</small><b>데이터 예시</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:90px;border-color:var(--bl)"><small></small><b class="b">예측</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px;border-color:var(--red)"><small>정답과 비교</small><b class="r">틀린 정도(오차)</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>줄이는 쪽으로</small><b class="g">가중치 조정</b></div>
+  </div>
+  <div class="big">오차를 <span class="y">언덕</span>으로 보면, 가장 낮은 골짜기를 향해<br>한 걸음씩 내려가는 셈 = <span class="y">경사하강</span><small>5 예측·정답 7 → 오차 +2 → 다음엔 5.3, 5.6… 정답에 다가감</small></div>
+  <div class="hl">"예측 → 오차 → 조정"을 수많은 예시에 반복하면 기계가 스스로 <b>"감"</b>을 잡습니다.</div>
+  <aside>신입 검토자가 계약서 1,000건과 선배 수정 이력을 보며 위험 조항의 감을 익히는 것과 같습니다. 차이는 그 감이 말과 숫자 사이의 거대한 확률 패턴이라는 점.</aside>
+</section>
+
+<!-- 8 결과물 -->
+<section class="slide" data-part="PART 1">
+  <h2>📦 학습의 결과물 — <span class="g">규칙집이 아니라 패턴</span></h2>
+  <ul class="pts">
+    <li>결과물은 규칙집이 아니라 <b>파라미터에 압축된 패턴</b></li>
+    <li>여기서 <b>"외운다" vs "일반화한다"</b>가 갈린다 — 우리가 원하는 건 새 입력에도 대응하는 일반화</li>
+    <li>다만 일반화는 <b>추정</b>이다 → <b class="r">모델은 자신 있게 틀릴 수 있다</b> (오늘 판단의 출발점)</li>
+  </ul>
+  <div class="hl">오늘 세 실습은 모두 <b>정답이 달린 예시</b>로 배운다 — 매출 붙은 카페 기록, 정답 숫자 붙은 손글씨, 개/고양이 라벨 붙은 사진. 이렇게 "입력+정답 쌍"으로 배우는 게 <b class="g">지도학습</b>.</div>
+  <aside>정답 없이 패턴만 묶는 비지도학습, 시행착오·보상으로 배우는 강화학습도 있지만, 가장 기본이자 오늘의 무대는 지도학습입니다.</aside>
+</section>
+
+<!-- 9 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">데이터를 숫자로 바꾸기</h2>
+    <p style="margin-top:11px">기계가 만질 수 있는 건 오직 숫자뿐</p>
+    <span class="who">토큰 · 임베딩 · 텐서</span>
+  </div>
+  <aside>무엇을 학습시키든 첫 단계는 늘 같습니다 — 대상을 숫자로 바꾸는 일. 글자도 그림도 직접은 못 다룹니다.</aside>
+</section>
+
+<!-- 10 글/그림을 숫자로 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔢 글도 그림도 <span class="g">숫자</span>로</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="b">📝 글</h3>
+      <p style="margin:0">문장을 의미 있는 조각 <b>토큰</b>으로 자르고, 각 토큰을 숫자 묶음 <b>벡터</b>로. 비슷한 맥락의 단어일수록 비슷한 벡터가 되게 맞춘 것이 <b class="g">임베딩</b>("이웃을 보면 뜻을 안다").</p>
+    </div>
+    <div class="box">
+      <h3 class="g">🖼️ 그림</h3>
+      <p style="margin:0">사진 = 점(픽셀)들의 격자, 각 점은 밝기·색 숫자. 손글씨 한 장(MNIST)은 28×28=<b>784개 숫자</b>, 컬러는 가로×세로×3. 이 숫자 덩어리가 <b class="g">텐서</b>.</p>
+    </div>
+  </div>
+  <div class="hl">학습이란 결국 <b>이 숫자들 사이의 관계(패턴)를 찾는 일</b>입니다.</div>
+  <aside>텐서는 벡터와 행렬을 한데 아우른 말입니다.</aside>
+</section>
+
+<!-- 11 벡터=점 -->
+<section class="slide" data-part="PART 2">
+  <h2>📍 벡터 = 공간 속의 <span class="g">점</span></h2>
+  <ul class="pts">
+    <li>벡터는 순서 있는 숫자 묶음 — 2개면 평면 위 점 (x,y), 3개면 3차원 점. 원점에서 화살표를 그으면 <b>방향·크기</b>로도 보인다</li>
+    <li><b>거리</b>로 비슷함을 잰다 — A(2,3)·B(2,4)는 붙어 있어(거리 1) 비슷, 멀리 떨어진 C(9,1)은 다름 (서울-인천 vs 서울-부산)</li>
+    <li><b>방향</b>(두 화살표의 각도)으로도 — 크기는 달라도 같은 쪽을 가리키면 "결이 같다" <i>(뒤 강의의 문서 검색에서 다시 만남)</i></li>
+  </ul>
+  <div class="hl">축을 늘리면 "공식적인 정도"·"시간 관련성" 같은 특징을 <b>동시에</b> 담는다. 핵심은 <b>점의 절대 위치가 아니라 점들 사이의 관계가 뜻을 만든다.</b></div>
+  <aside>실제 모델은 수백~수천 차원을 쓰므로 그림으로는 못 그리지만 직관은 그대로입니다.</aside>
+</section>
+
+<!-- 12 텐서 사다리 -->
+<section class="slide" data-part="PART 2">
+  <h2>🪜 텐서 사다리 — 한 숫자에서 사진까지</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px"><small>0차</small><b>스칼라<br>숫자 1개</b><small style="margin-top:4px;font-weight:400">매출 '7'</small></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>1차</small><b class="b">벡터<br>숫자 한 줄</b><small style="margin-top:4px;font-weight:400">[방문객,요일,날씨]</small></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--pp)"><small>2차</small><b class="p">행렬<br>숫자 격자</b><small style="margin-top:4px;font-weight:400">흑백 이미지</small></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>3차+</small><b class="g">텐서<br>격자를 쌓음</b><small style="margin-top:4px;font-weight:400">컬러 R/G/B 3장</small></div>
+  </div>
+  <div class="hl"><b>텐서 = "숫자를 몇 방향으로 늘어놓았나"를 일반화한 말</b>(0~2차 포함). 손글씨 한 장=28×28 행렬, 컬러 사진=높이×너비×3 텐서. 사진 여러 장을 한 번에(배치) 다루면 차원이 하나 더.</div>
+  <aside>어떤 데이터든 결국 이 숫자 덩어리가 되고, 학습은 그 안의 패턴을 찾는 일입니다.</aside>
+</section>
+
+<!-- 13 손글씨 숫자화 -->
+<section class="slide" data-part="PART 2">
+  <h2>👁️ 손글씨 '7'이 <span class="g">숫자</span>가 되는 모습</h2>
+  <p>숫자 '7'을 거칠게 8×8로 줄여 각 칸의 밝기(0=검정 배경, 클수록 밝은 획)를 적으면 — 모델이 "보는" 건 그림이 아니라 정확히 이 숫자들입니다.</p>
+  <pre>0    0    0    0    0    0    0    0
+0   200  220  230  230  220  200   0
+0    0    0    0    0   210  190   0
+0    0    0    0   200  210   0    0
+0    0    0   200  210   0    0    0
+0    0   190  210   0    0    0    0
+0    0   200  180   0    0    0    0
+0    0    0    0    0    0    0    0</pre>
+  <div class="hl">가로획 하나와 비스듬히 내려오는 획이 큰 숫자로 나타난다. 실제 MNIST는 28×28=784칸이지만 원리는 같다 — <b>이미지는 밝기 숫자의 격자(텐서)</b>이고, 학습은 이 배열에서 "7다움"의 패턴을 찾는 일.</div>
+  <aside>이렇게 숫자로 바뀐 데이터가 신경망의 층들로 들어가 "예측→오차→조정"을 겪습니다.</aside>
+</section>
+
+<!-- 14 신경망 층 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔎 신경망 한 층 = <span class="g">곱하고·더하고·비틀기</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>곱하기 (W)</small><b class="b">입력에 가중치</b><small style="margin-top:4px;font-weight:400">얼마나 중요한가</small></div>
+    <span class="ar">+</span>
+    <div class="cell" style="min-width:120px"><small>더하기 (b)</small><b>편향</b><small style="margin-top:4px;font-weight:400">기준점(영점) 이동</small></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:140px;border-color:var(--gr)"><small>비틀기</small><b class="g">활성화 함수</b><small style="margin-top:4px;font-weight:400">ReLU: 음수→0, 양수 통과</small></div>
+  </div>
+  <ul class="pts">
+    <li>식으로 쓰면 <code>Wx + b</code>, 그게 전부. 가중치는 학습하며 바뀌는 숫자, 편향은 저울 영점 맞추기</li>
+    <li>곱·덧셈만 쌓으면 전체가 <b>하나의 직선</b>으로 뭉개진다 → 세상의 구불구불한 패턴을 못 그림</li>
+    <li>그래서 층마다 <b>ReLU</b> 같은 작은 꺾임을 끼워, 직선들의 합을 <b>곡선까지</b> 그리게 한다</li>
+  </ul>
+  <div class="hl">한 층은 언제나 세 박자 — <b>곱하고(W)·더하고(b)·비틀기(활성화)</b>. 이 결과가 다음 층 입력이 되어 출력까지 이어진다. 실제 모델은 이 층을 <b>수백 겹, 숫자 수억 개</b>.</div>
+  <aside>예: 입력 [2,1]·W[0.5,-1]·b 0.2 → 2×0.5+1×(-1)+0.2 = 0.2 → ReLU 통과 0.2 → 다음 층 W₂ 3·b₂ -0.1 → ReLU(0.5)=0.5. 학습이란 이 W·b들을 오차만큼 조금씩 손보는 일.</aside>
+</section>
+
+<!-- 15 핵심 5문장 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 5문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">AI ⊃ 머신러닝 ⊃ 딥러닝. 오늘 열광하는 것들은 <b>데이터로 배우는</b> 쪽에서 나왔다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">규칙 나열은 예외 지옥 → 방향을 뒤집어 <b>예시를 주고 규칙을 스스로 찾게</b> 하는 게 학습.</span></div>
+    <div class="st"><span class="n">3</span><span class="t">학습 = <b>예측 → 오차 → 조정</b>의 반복(경사하강). 결과는 <b>파라미터에 압축된 패턴</b> — 그래서 자신 있게 틀릴 수 있다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">기계는 숫자만 — 글은 <b>토큰·임베딩</b>, 그림은 <b>텐서</b>. 벡터는 <b>공간 속 점</b>이고 관계(거리·방향)가 뜻을 만든다.</span></div>
+    <div class="st"><span class="n">5</span><span class="t">신경망 한 층 = <b>곱하고·더하고·비틀기</b>(Wx+b + ReLU).</span></div>
+  </div>
+  <aside>이 원리가 다음 덱의 세 실습(회귀·분류·파인튜닝)에서 그대로 눈에 보입니다.</aside>
+</section>
+
+<!-- 16 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 왜 규칙을 직접 짜는 대신 <b>데이터로 배우게</b> 하나? 개/고양이 예로.</div>
+    <div class="q"><b>Q2.</b> "배운다"를 <b>예측·오차·조정</b>으로 설명하면? 경사하강이란?</div>
+    <div class="q"><b>Q3.</b> 학습 결과물은 규칙집이 아니라 무엇인가? "자신 있게 틀린다"는 무슨 뜻?</div>
+    <div class="q"><b>Q4.</b> 글과 그림은 각각 어떤 숫자 형태(토큰·임베딩·텐서)로 기계에 들어가나?</div>
+    <div class="q"><b>Q5.</b> 신경망 한 층의 세 박자는? <b>ReLU</b>(활성화 함수)가 없으면 왜 곤란한가?</div>
+  </div>
+  <aside>Q3·Q5가 핵심입니다. 일반화의 한계, 그리고 비선형이 필요한 이유.</aside>
+</section>
+
+<!-- 17 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 규칙을 나열하면 예외가 예외를 부른다(폴드귀 고양이·'무 료' 스팸). 그래서 <b>예시를 주고 규칙을 스스로 찾게</b> 한다.</div>
+    <div class="q a"><b>A2.</b> 예측해 보고, 정답과의 <b>오차</b>를 재고, 오차가 줄어드는 쪽으로 <b>가중치를 조금씩</b> 민다. 오차 언덕의 골짜기로 한 걸음씩 = <b>경사하강</b>.</div>
+    <div class="q a"><b>A3.</b> <b>파라미터에 압축된 패턴</b>. 일반화는 추정이라, 학습 못 본 입력에도 그럴듯하게 답하지만 <b>틀린 답도 확신 있게</b> 내놓을 수 있다.</div>
+    <div class="q a"><b>A4.</b> 글 = <b>토큰</b>으로 자르고 <b>임베딩</b> 벡터로. 그림 = 픽셀 밝기의 격자, 즉 <b>텐서</b>(28×28 행렬, 컬러는 ×3).</div>
+    <div class="q a"><b>A5.</b> <b>곱하고(W)·더하고(b)·비틀기(활성화)</b>. ReLU가 없으면 층을 쌓아도 전체가 <b>하나의 직선</b>이라 곡선 패턴을 못 그린다.</div>
+  </div>
+  <aside>A2·A5를 자기 말로 설명할 수 있으면 학습의 뼈대를 잡은 것입니다.</aside>
+</section>
+
+<!-- 18 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>배우는 기계의 원리 🔁</h1>
+    <div class="big" style="margin-top:26px">규칙을 짜는 대신 <span class="y">데이터로</span><br>예측 → 오차 → 조정, 그리고 <span class="y">모든 것은 숫자</span><br><br>다음 — <span class="y">회귀·분류·파인튜닝</span>을 직접 돌려본다</div>
+    <p class="sub" style="margin-top:24px">규칙을 짜는 기계에서 배우는 기계로 — 여기까지</p>
+  </div>
+  <aside>다음 덱(2/3)에서 카페 매출(회귀)·MNIST(분류)·개고양이(파인튜닝)를 직접 돌리며 이 원리를 눈으로 확인합니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

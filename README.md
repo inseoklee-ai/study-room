@@ -28,14 +28,11 @@
 5. 메인 퀘스트 — 나만의 프로덕트 만들기
 
 ### 3. AI의 이해와 사용
-1. **AI는 어떻게 배우나** ⬅️ 준비 중 (0/7)
-   - ⬜ 1-①. 인공지능의 학습이란?
-   - ⬜ 1-②. 데이터를 숫자로 바꾸기
-   - ⬜ 1-③. 가장 작은 학습을 코드로 보기
-   - ⬜ 1-④. softmax와 MNIST로 분류하기
-   - ⬜ 1-⑤. 남이 배운 것을 물려받는 파인튜닝
-   - ⬜ 1-⑥. 왜 내 노트북으론 벅찰까
-   - ⬜ 1-⑦. 결국 데이터가 전부다
+1. **AI는 어떻게 배우나** ✅ 완결 · 7개 소단원을 **3개 덱으로 통합**
+   - ✅ ① 학습의 원리 (1-①·②: 인공지능의 학습이란 + 데이터를 숫자로) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/how-ai-learns/) · 📊 [PPT](how-ai-learns/how-ai-learns.pptx)
+   - ✅ ② 세 가지 학습 (1-③·④·⑤: 회귀·분류·파인튜닝) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/three-learnings/) · 📊 [PPT](three-learnings/three-learnings.pptx)
+   - ✅ ③ 규모와 데이터 (1-⑥·⑦: 왜 노트북으론 벅찰까 + 결국 데이터가 전부다) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/scale-and-data/) · 📊 [PPT](scale-and-data/scale-and-data.pptx)
+   - ℹ️ 내용이 이어지는 흐름이라 7개 소단원을 3덱으로 묶었습니다(원리 / 세 실습 / 규모·정리).
 2. **트랜스포머 — AI는 어떻게 언어를 배웠나** ✅ 완결 (8/8)
    - ✅ 2-①. 지금 이 모델은 어디서 왔을까 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/model-origin/) · 📊 [PPT](model-origin/model-origin.pptx)
    - ✅ 2-②. 이미지가 먼저 연 길 (CNN → ResNet) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/image-path/) · 📊 [PPT](image-path/image-path.pptx)
@@ -127,6 +124,9 @@
 > - 5-① https://inseoklee-ai.github.io/study-room/prompt-blanks/
 > - 5-② https://inseoklee-ai.github.io/study-room/denoise/
 > - 9 (Main Quest) https://inseoklee-ai.github.io/study-room/main-quest/
+> - 1-① 학습의 원리 https://inseoklee-ai.github.io/study-room/how-ai-learns/
+> - 1-② 세 가지 학습 https://inseoklee-ai.github.io/study-room/three-learnings/
+> - 1-③ 규모와 데이터 https://inseoklee-ai.github.io/study-room/scale-and-data/
 > - 3-① https://inseoklee-ai.github.io/study-room/local-llm/
 > - 3-② https://inseoklee-ai.github.io/study-room/quantization/
 > - 3-③ https://inseoklee-ai.github.io/study-room/run-local/

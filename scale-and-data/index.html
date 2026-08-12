@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>왜 내 노트북으론 벅찰까, 그리고 결국 데이터가 전부다</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.78rem,1.3vw,.96rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.9rem);
+    color:var(--ink);overflow:auto;max-height:54vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 1 · AI는 어떻게 배우나 (3/3)</span>
+    <h1 style="margin:18px 0">왜 내 노트북으론<br>벅찰까</h1>
+    <p class="sub">파라미터·GPU, 그리고 결국 데이터가 전부다</p>
+  </div>
+  <aside>강의 1의 마지막 덱(소단원 6·7 통합)입니다. 파인튜닝쯤 오면 노트북이 벅찬 이유(파라미터 규모·연산량·GPU)를 보고, 강의 전체를 "결국 데이터가 전부"로 매듭짓습니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 이 덱의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--red)"><small>PART 1</small><b class="r">왜 노트북으론 벅찰까<br>(파라미터·GPU)</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>PART 2</small><b class="g">결국 데이터가 전부다<br>(강의 1 정리)</b></div>
+  </div>
+  <ul class="pts">
+    <li>문제마다 <b>파라미터 개수·연산량</b>이 하늘과 땅 차이 → 그래서 GPU</li>
+    <li>LLM 사전학습은 <b>데이터센터급</b> — 그래서 실무는 대개 직접 훈련하지 않는다</li>
+    <li>GPU 없는 노트북에서 돌리는 길 — <b>Colab CLI</b>와 코딩 에이전트</li>
+    <li>세 실습을 관통한 결론 — <b>모델보다 데이터</b></li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 줄 — 학습은 <b>방대한 행렬 곱셈</b>이고, 활용가의 진짜 일은 좋은 <b>데이터를 모으고 검증</b>하는 것.</div>
+  <aside>이 덱으로 강의 1(AI는 어떻게 배우나)이 마무리됩니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">왜 내 노트북으론 벅찰까</h2>
+    <p style="margin-top:11px">학습되는 숫자(파라미터)와 연산량이 문제마다 천차만별</p>
+    <span class="who">파라미터 · 행렬곱 · GPU</span>
+  </div>
+  <aside>파인튜닝쯤 오면 "내 노트북으론 벅차다"가 느껴집니다. 왜일까요? 학습되는 숫자(파라미터)의 개수와 그에 따르는 연산량 때문입니다.</aside>
+</section>
+
+<!-- 4 파라미터 규모 -->
+<section class="slide" data-part="PART 1">
+  <h2>📏 파라미터 <span class="g">규모</span>의 천차만별</h2>
+  <table class="t">
+    <tr><th>오늘의 학습</th><th>파라미터(학습되는 숫자)</th><th>어디서 도나</th></tr>
+    <tr><td>카페 선형모델</td><td>2개 (w, b)</td><td>노트북에서 즉시</td></tr>
+    <tr><td>MNIST 분류기</td><td>수만 ~ 수십만</td><td>노트북 CPU로도 몇 분</td></tr>
+    <tr><td>ResNet18 파인튜닝</td><td>약 1,100만</td><td>GPU 권장(Colab 등)</td></tr>
+    <tr><td>대형 언어모델(LLM)</td><td>수십억 ~ 수천억</td><td>GPU 수백~수천 대, 데이터센터</td></tr>
+  </table>
+  <div class="hl">학습은 매 스텝 "예측→오차→조정"을 하는데, 그 계산의 대부분이 <b>방대한 행렬 곱셈</b>. 파라미터·데이터가 많을수록 곱셈 횟수가 <b>폭발적으로</b> 는다.</div>
+  <aside>LLM의 수천억 파라미터를 1초에 하나씩 세기만 해도 수천 년이 걸립니다. 학습은 이 숫자 전부를 수없이 조정하는 일이니, 데이터센터급 장비가 필요한 이유가 짐작됩니다.</aside>
+</section>
+
+<!-- 5 CPU vs GPU -->
+<section class="slide" data-part="PART 1">
+  <h2>⚙️ 그래서 <span class="g">GPU</span>를 쓴다</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="r">CPU</h3>
+      <p style="margin:0">복잡한 일을 <b>순서대로</b> 빠르게 처리하는 <b>큰 코어 몇 개</b>. 다재다능하지만 같은 계산을 대량 병렬로 하는 덴 불리.</p>
+    </div>
+    <div class="box">
+      <h3 class="g">GPU</h3>
+      <p style="margin:0">단순한 계산을 <b>동시에</b> 처리하는 <b>작은 코어 수천 개</b>. 행렬 곱셈처럼 "같은 계산을 엄청 많이 병렬로"에 딱.</p>
+    </div>
+  </div>
+  <div class="hl">행렬 곱셈이 병렬에 잘 맞는 건 그 안 수많은 곱셈이 <b>서로 독립</b>이라 순서 없이 한꺼번에 계산되기 때문. 그래서 GPU가 학습을 CPU보다 <b>수십~수백 배</b> 빠르게 끝낸다.</div>
+  <aside>개인 노트북엔 이런 GPU가 없으니 Colab 무료 GPU나 클라우드를 빌려 씁니다. 코딩 에이전트에게 "GPU 런타임에서 돌려 줘"라고 부탁하는 것도 이 때문.</aside>
+</section>
+
+<!-- 6 사전학습 비용 -->
+<section class="slide" data-part="PART 1">
+  <h2>💸 규모를 끝까지 밀면</h2>
+  <div class="big">LLM을 <span class="y">처음부터</span> 학습(사전학습)하려면<br>고성능 GPU 수천 대 · 수 주 · <span class="y">수백만~수억 달러</span></div>
+  <ul class="pts">
+    <li>그래서 현실의 실무는 대부분 <b>직접 훈련하지 않는다</b></li>
+    <li>이미 학습된 모델을 가져와(<b>파인튜닝</b>) 쓰거나 <b>API</b>로 부른다</li>
+    <li>오늘 파인튜닝을 체험한 이유 — "남이 배운 것을 물려받는" 감각 + 그 아래 <b>규모·비용의 현실</b>을 함께 알기</li>
+  </ul>
+  <div class="hl">원리를 아는 사람이 <b>"무엇을·어디서·어떻게 돌릴지"</b>만 지시하면 되는 시대 — 직접 훈련 코드를 쓰지 않아도.</div>
+  <aside>이 감각이 강의 1의 실용적 목적지입니다. 훈련하는 사람이 아니라, 훈련을 판단·지시하는 사람이 되는 것.</aside>
+</section>
+
+<!-- 7 Colab CLI -->
+<section class="slide" data-part="PART 1">
+  <h2>🖥️ <span class="g">Colab CLI</span>로 GPU 손에 넣기</h2>
+  <p>GPU 없는 내 노트북에서 실습을 돌리는 가장 손쉬운 길이 구글 코랩. 2026년 6월, 브라우저 탭 없이 명령어로 쓰는 <b>Colab CLI</b>(<code>google-colab-cli</code>)가 나왔습니다.</p>
+  <pre>pip install google-colab-cli        # 설치 (uv tool install 도 가능)
+colab run --gpu T4 train.py          # GPU VM 띄움 → 실행 → 자동 반납</pre>
+  <ul class="pts">
+    <li>무료는 보통 <b>T4</b>, 더 강한 A100·H100·TPU는 유료(Pro/Pro+)</li>
+    <li>핵심 — Colab CLI는 <b>AI 에이전트가 직접 쓰도록</b> 설계됨 → Claude Code·Codex 같은 에이전트가 이 명령을 대신 실행</li>
+  </ul>
+  <div class="hl">그래서 앞 덱의 "에이전트에게 프롬프트로 시킨다"가 말뿐이 아니라, <b>에이전트가 실제 GPU에서 코드를 돌리고 정확도를 받아오는 데까지</b> 이어진다.</div>
+  <aside>원리를 아는 사람이 무엇을·어디서·어떻게 돌릴지만 지시하면 됩니다. 훈련 코드를 손으로 쓰지 않아도.</aside>
+</section>
+
+<!-- 8 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">결국 데이터가 전부다</h2>
+    <p style="margin-top:11px">모델 구조보다 데이터가 결과를 가른다</p>
+    <span class="who">강의 1 정리</span>
+  </div>
+  <aside>오늘 우리는 인공지능이 "배운다"는 것을 세 번 직접 봤습니다 — 회귀·분류·파인튜닝.</aside>
+</section>
+
+<!-- 9 세 실습 관통 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧵 세 실습을 <span class="g">관통</span>하는 한 문장</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>회귀</small><b class="b">카페 매출<br>연속값 예측</b></div>
+    <div class="cell" style="min-width:130px;border-color:var(--pp)"><small>분류</small><b class="p">MNIST<br>softmax 확률</b></div>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>파인튜닝</small><b class="g">개/고양이<br>물려받기</b></div>
+  </div>
+  <div class="big">모델 구조보다 <span class="y">데이터가 결과를 가른다</span><small>데이터 10%↓ → 정확도↓ · 사전학습 특징 물려받기 → 적은 데이터로도 잘 됨</small></div>
+  <div class="hl">그래서 AI를 다루는 사람의 진짜 일은 <b>"좋은 모델 고르기"보다 좋은 데이터를 모으고 검증하는 것</b>에 가깝습니다.</div>
+  <aside>세 실습 모두 같은 "예측→오차→조정"이었고, 성능을 가른 건 언제나 데이터였습니다.</aside>
+</section>
+
+<!-- 10 활용가의 일 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧭 그래서 <span class="g">활용가</span>의 일은</h2>
+  <ul class="pts">
+    <li>앞으로 직접 학습을 돌릴 일은 많지 않다</li>
+    <li>하지만 원리를 봤기에 — 코딩 에이전트에게 <b>무엇을 시킬지</b>(무슨 데이터로·어떤 학습)</li>
+    <li>그리고 나온 결과의 <b>무엇을 의심할지</b>(데이터가 충분한가·정확도가 왜 이런가) 판단할 수 있다</li>
+  </ul>
+  <div class="big">다음 — 오늘 잠깐 스친 <span class="y">언어모델의 속</span><br>토큰과 컨텍스트, 그리고 <span class="y">트랜스포머</span></div>
+  <aside>강의 1에서 잡은 "학습=예측·오차·조정 / 데이터가 전부"라는 감각이, 강의 2 트랜스포머로 이어집니다.</aside>
+</section>
+
+<!-- 11 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 강의 1 <span class="g">핵심 정리</span></h2>
+  <table class="t">
+    <tr><th>핵심 질문</th><th>오늘의 답</th></tr>
+    <tr><td>"배운다"는 무엇인가</td><td>규칙을 손으로 짜는 대신, 데이터에서 <b>예측→오차→조정</b>을 반복해 패턴을 찾는 것</td></tr>
+    <tr><td>회귀와 분류의 차이</td><td>회귀는 연속값(매출), 분류는 어느 범주인지(<b>softmax 확률</b>)</td></tr>
+    <tr><td>softmax가 하는 일</td><td>여러 후보 점수를 <b>합이 1인 확률</b>로 바꿔 확신 정도와 함께 고르게</td></tr>
+    <tr><td>파인튜닝은 왜 쓰나</td><td>사전학습 특징을 물려받아 <b>적은 데이터·계산</b>으로 내 문제에</td></tr>
+    <tr><td>왜 GPU가 필요한가</td><td>학습은 방대한 <b>행렬 곱셈</b>, GPU가 대규모 병렬로 CPU보다 훨씬 빠름</td></tr>
+    <tr><td>활용가의 진짜 일은</td><td>모델 고르기보다 <b>좋은 데이터를 모으고 결과를 의심·검증</b>하는 것</td></tr>
+  </table>
+  <aside>강의 1(AI는 어떻게 배우나) 7개 소단원의 결론입니다.</aside>
+</section>
+
+<!-- 12 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 카페(2개)와 LLM(수천억)의 <b>파라미터 규모</b> 차이가 왜 "노트북으론 벅차다"로 이어지나?</div>
+    <div class="q"><b>Q2.</b> 학습에 <b>GPU</b>가 CPU보다 유리한 이유는? (행렬 곱셈의 어떤 성질 때문)</div>
+    <div class="q"><b>Q3.</b> LLM을 처음부터 학습하는 비용은? 그래서 <b>실무</b>는 대개 어떻게 하나?</div>
+    <div class="q"><b>Q4.</b> 강의 1 전체를 관통하는 <b>한 문장</b>은?</div>
+    <div class="q"><b>Q5.</b> "활용가의 진짜 일"은 무엇인가?</div>
+  </div>
+  <aside>Q4가 강의 1의 결론입니다 — 데이터가 결과를 가른다.</aside>
+</section>
+
+<!-- 13 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 학습은 파라미터·데이터에 비례해 <b>행렬 곱셈이 폭발</b>한다. 수천억 파라미터를 수없이 조정하려면 노트북 연산·메모리로는 감당이 안 된다.</div>
+    <div class="q a"><b>A2.</b> 행렬 곱셈 안 수많은 곱셈이 <b>서로 독립</b>이라 한꺼번에 계산 가능 → 작은 코어 수천 개의 GPU가 대규모 <b>병렬</b>로 처리.</div>
+    <div class="q a"><b>A3.</b> GPU 수천 대·수 주·<b>수백만~수억 달러</b>. 그래서 실무는 직접 훈련 대신 <b>파인튜닝하거나 API</b>로 부른다.</div>
+    <div class="q a"><b>A4.</b> <b>모델 구조보다 데이터가 결과를 가른다</b>(데이터 10%↓ 정확도↓, 사전학습 물려받기 적은 데이터로도↑).</div>
+    <div class="q a"><b>A5.</b> 모델 고르기보다 <b>좋은 데이터를 모으고, 결과를 의심·검증</b>하는 것. 원리를 알기에 무엇을 시키고 무엇을 의심할지 판단한다.</div>
+  </div>
+  <aside>A4·A5가 강의 1의 결론이자 실용적 태도입니다.</aside>
+</section>
+
+<!-- 14 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>결국 데이터가 전부다 📊</h1>
+    <div class="big" style="margin-top:26px">학습은 <span class="y">방대한 행렬 곱셈</span> → 그래서 GPU<br>그리고 성능을 가르는 건 <span class="y">데이터</span><br><br>다음 강의 — <span class="y">토큰·컨텍스트·트랜스포머</span></div>
+    <p class="sub" style="margin-top:24px">AI는 어떻게 배우나 — 강의 1 여기서 매듭</p>
+  </div>
+  <aside>🤔 회고 세 줄 — ① 머리: "규칙 대신 데이터로 배운다"를 오늘 본 예 하나로 내 말로 · ② 손: 데이터를 줄였을 때 정확도가 어떻게 바뀌었나(숫자로) · ③ 마음: 내 분야에서 "규칙으론 벅차지만 예시는 모을 수 있는" 문제 하나.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
