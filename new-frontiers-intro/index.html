@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI가 새로 연 곳들 · 여덟 갈래와 네 발상</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.77rem,1.28vw,.94rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.9rem);
+    color:var(--ink);overflow:auto;max-height:52vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 8 · AI가 새로 연 곳들 (①)</span>
+    <h1 style="margin:18px 0">여덟 갈래와<br>네 개의 발상</h1>
+    <p class="sub">챗봇 이야기 밖에서 · 같은 주에 다른 데서 벌어진 일들</p>
+  </div>
+  <aside>강의 8의 첫 덱(개요)입니다. AI로 진입 가능한 여덟 분야의 이름과, 그 밑에 깔린 네 발상, 그리고 무엇을 오늘 손에 넣을 수 있는지 가리는 다섯 조건을 먼저 세웁니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘 <span class="g">가져갈 것 셋</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>여덟 갈래의 이름</b>과 각 갈래에서 열어 볼 것 하나씩 — 둘은 끝까지 돌리고, 여섯은 주소·사양·막히는 자리가 손에 남는다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>밑에 깔린 발상은 넷뿐</b> — 내년에 새 분야가 열려도 어느 뼈대 위에 섰는지 보고 무엇을 기대할지 짐작한다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>자 두 개</b> — 기존보다 나은지 재는 자(기준선)와, 오늘 내 일에 쓸 수 있는지 가리는 자(라이선스)</span></div>
+  </div>
+  <div class="hl">🎯 이름을 알아 진입로를 열고 무엇을 기대할지 가늠했더라도, <b>이 둘을 못 대면 그 도구는 아직 손에 들어온 것이 아니다.</b></div>
+  <aside>워싱턴대의 자연에 없던 단백질 설계(노벨 화학상 2024), 딥마인드의 열흘치 예보 1분, 200달러대 로봇 팔 — 셋 다 같은 주에, 챗봇과 무관하게, 공개된 채로 일어났습니다.</aside>
+</section>
+
+<!-- 3 검색어가 없다 -->
+<section class="slide" data-part="개요">
+  <h2>🔎 왜 <span class="r">검색으로 못 마주치나</span></h2>
+  <ul class="pts">
+    <li>이유는 하나 — <b>그 분야를 부르는 이름을 모르면 검색창에 넣을 말이 없다.</b> 이름을 모르면 에이전트에게 시킬 수도 없다</li>
+    <li>"단백질 좀 만들어 줘"는 에이전트도 헤맨다. <b>"RFdiffusion으로 백본을 생성하고 ProteinMPNN으로 서열을 설계해 줘"</b>는 바로 붙는다</li>
+  </ul>
+  <div class="big">이름 = 검색어 = <span class="y">에이전트에게 던질 말</span><small>백본 = 사슬이 지나간 뼈대. 낱말 하나가 진입로를 연다</small></div>
+  <div class="hl">여덟이라 부르지만 안에서 다시 갈라진다 — 단백질은 <b>모양을 맞히는 쪽</b>과 <b>없던 것을 짓는 쪽</b>으로, 짓는 쪽은 다시 약이 되는 분자와 새 물질로. <b>큰 이름 여덟이 뼈대</b>, 갈라지는 자리는 그 자리에서 만나면 된다.</div>
+  <aside>공개된 코드도 모델 파일도 받을 수 있고 상당수는 무료 코랩에서 클릭 한 번으로 열립니다.</aside>
+</section>
+
+<!-- 4 Teachable Machine -->
+<section class="slide" data-part="개요">
+  <h2>🖐️ 눈금 하나 — <span class="g">학습에 딸려 오는 조건 셋</span></h2>
+  <p>Teachable Machine을 열어 <code>Class 1</code>에 편 손, <code>Class 2</code>에 주먹을 5초씩 찍고 학습을 누른다. 그 몇 초 동안 안에서 일어나는 일 하나 — 뜻 없던 숫자 뭉치(<b>가중치</b>)를 답이 어긋나는 만큼 조금씩 고친다. 그 숫자가 몇 개인지가 <b>매개변수</b> 수.</p>
+  <table class="t">
+    <tr><th>딸려 오는 조건</th><th>손으로 겪는 것</th></tr>
+    <tr><td>내 자료로 학습을 시켜야 시작</td><td>사진을 한 장도 안 찍으면 학습 버튼이 아예 안 눌린다</td></tr>
+    <tr><td>자료가 적으면 흔들린다</td><td>반마다 두세 장만 찍고 조명·배경을 바꾸면 금세 헷갈린다</td></tr>
+    <tr><td>일이 바뀌면 처음부터 다시</td><td>손 모양 대신 컵·병을 가르려면 버리고 새로 찍어야</td></tr>
+  </table>
+  <div class="hl">🎯 <b>오늘 볼 여덟 갈래는 이 조건을 하나씩 무너뜨린다</b> — 학습 단계를 건너뛰고, 스무 줄로도 안 무너지고, 한 모델이 표든 세포든 원자든 받는다. 그 셋을 한꺼번에 푼 것이 <b>기반 모델</b>.</div>
+  <aside>남이 학습시킨 모델을 받아 쓴다는 말은 그 숫자 뭉치를 파일로 내려받는다는 말입니다.</aside>
+</section>
+
+<!-- 5 네 발상 -->
+<section class="slide" data-part="개요">
+  <h2>🧩 밑에 깔린 <span class="g">네 개의 발상</span></h2>
+  <table class="t">
+    <tr><th>발상</th><th>한 줄</th></tr>
+    <tr><td class="b">기반 모델</td><td>남의 자료를 엄청 많이 미리 배워 두고, 내 자료는 <b>학습 없이 그냥 보여 주면</b> 즉석에서 답 (제로샷 · 맥락 내 학습)</td></tr>
+    <tr><td class="p">확산</td><td>깨끗한 것을 잡음으로 망가뜨렸다가, <b>뿌린 잡음을 알아맞히는 법</b>을 배워 거꾸로 걷어 내며 없던 것을 꺼낸다</td></tr>
+    <tr><td class="g">그래프 신경망</td><td>자료를 <b>점과 선(간선)</b>으로 보고, 각 점이 이웃 정보를 받아 자기 상태를 고치기를 반복</td></tr>
+    <tr><td class="r">검증 가능한 보상</td><td>사람이 채점하는 대신 <b>기계가 정답 여부를 확인할 수 있는 문제</b>에만 보상 — 채점이 자동이면 무한히 돌린다</td></tr>
+  </table>
+  <div class="hl">같은 뼈대가 분야를 갈아타며 되풀이된다 — 확산은 그림에서 시작해 <b>단백질 뼈대·약물 분자·결정 구조·로봇 동작</b>으로 그대로 옮겨 갔다.</div>
+  <aside>이 넷을 알아 두면 내년에 새 분야가 열렸을 때 어느 뼈대 위에 섰는지 보고 무엇을 기대할지 짐작할 수 있습니다. 이것이 오늘 둘째로 가져갈, 가장 오래 남는 것입니다.</aside>
+</section>
+
+<!-- 6 여덟 갈래 -->
+<section class="slide" data-part="개요">
+  <h2>🌐 <span class="g">여덟 갈래</span>와 밑에 깔린 발상</h2>
+  <table class="t" style="font-size:clamp(.72rem,1.2vw,.88rem)">
+    <tr><th>갈래</th><th>무엇을</th><th>주로 어느 발상</th></tr>
+    <tr><td>표를 읽는 기반모델</td><td>학습 없이 표·시계열을 읽는다</td><td class="b">기반 모델</td></tr>
+    <tr><td>유전체</td><td>세포 상태를 문장처럼 읽는다</td><td class="b">기반 모델</td></tr>
+    <tr><td>단백질</td><td>모양을 맞히고 없던 것을 짓는다</td><td class="b">기반+<span class="p">확산</span>·<span class="g">그래프</span></td></tr>
+    <tr><td>분자와 재료</td><td>약이 될 분자·새 결정</td><td class="p">확산</td></tr>
+    <tr><td>원자와 기상</td><td>힘과 날씨를 계산 대신 학습</td><td class="g">그래프</td></tr>
+    <tr><td>세포 영상</td><td>경계를 자동으로 딴다</td><td class="b">기반 모델</td></tr>
+    <tr><td>로봇의 행동</td><td>넷이 한자리에 겹친다</td><td class="b">기반+<span class="p">확산</span></td></tr>
+    <tr><td>채점되는 문제</td><td>채점이 자동이면 보상을 건다</td><td class="r">검증 가능한 보상</td></tr>
+  </table>
+  <div class="hl">여덟을 전부 손으로 돌리지 않는다 — <b>둘은 끝까지</b>(표·서열), 나머지 여섯도 혼자 열 수 있게 주소·사양·막히는 자리가 함께 있다. 단백질·기상·로봇 팔은 그 여섯 쪽.</div>
+  <aside>단백질은 모양을 맞히는 쪽이 기반 모델, 짓는 쪽이 확산과 그래프입니다. 한 갈래 안에서도 발상이 갈립니다.</aside>
+</section>
+
+<!-- 7 다섯 조건 -->
+<section class="slide" data-part="개요">
+  <h2>🚪 이 여덟만 남은 이유 — <span class="g">다섯 조건</span></h2>
+  <table class="t">
+    <tr><th>조건</th><th>거기서 걸린 것</th></tr>
+    <tr><td>설치가 단순한가</td><td>RFdiffusion2 — 별도 컨테이너 실행 환경 필요</td></tr>
+    <tr><td>가용 자원에서 도나</td><td>Cosmos — 가장 작은 등급도 26GB 넘게(무료 T4는 <b>약 15GB</b>)</td></tr>
+    <tr><td class="r">라이선스 문제가 없나</td><td>AlphaFold3 가중치 — 비상업 한정, 공유 금지</td></tr>
+    <tr><td class="r">유지보수되고 있나</td><td>FourCastNet — 옛 저장소가 2023 이후 정체(집을 옮긴 것)</td></tr>
+    <tr><td>빠르게 결과 확인되나</td><td>검증에 실험실이 필요한 것들</td></tr>
+  </table>
+  <div class="hl">앞의 셋은 <b>장비·시간을 더 쓰면 넘는다</b>. 뒤의 둘은 아니다 — <b class="r">라이선스는 돈으로도 못 넘고, 유지보수는 기다린다고 나아지지 않는다</b>. 이 둘이 가장 자주 발목을 잡는다.</div>
+  <aside>T4 사양은 16GB인데 코랩에서 찍으면 15,360MiB, 약 15GB로 나옵니다. 이보다 크게 요구하면 성능이 아무리 좋아도 오늘은 못 엽니다. 무료 코랩 카드가 T4입니다.</aside>
+</section>
+
+<!-- 8 라이선스 배지 함정 -->
+<section class="slide" data-part="개요">
+  <h2>⚠️ 초록 배지는 <span class="r">코드 하나</span>를 말한다</h2>
+  <ul class="pts">
+    <li>저장소 첫 화면의 초록색 라이선스 배지는 <b>코드에 대한 것</b> — 모델 파일(가중치)은 대개 다른 곳에 올라가고 조건도 따로다</li>
+    <li>그래서 라이선스 쪽이 오늘 가장 자주 발목을 잡는다. 실습에서 쓰려던 도구 하나가 정확히 이것 때문에 빠진다(TabPFN)</li>
+  </ul>
+  <div class="big">공개되었다는 말 ≠ <span class="y">오늘 내가 쓸 수 있다는 말</span><small>코드·가중치·기반 모델·학습 자료가 각각 다른 조건 — 마지막 덱에서 4계단으로 푼다</small></div>
+  <aside>배지가 아니라 LICENSE 파일과 모델 카드를 여는 이유가 여기 있습니다. 이 갈래를 통과하는 내내 같은 종류의 일이 반복됩니다.</aside>
+</section>
+
+<!-- 9 핵심 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이 덱의 <span class="g">핵심 정리</span></h2>
+  <table class="t">
+    <tr><th>개념</th><th>한 문장</th></tr>
+    <tr><td>이름 = 진입로</td><td>분야 이름을 알아야 검색도 에이전트 지시도 된다</td></tr>
+    <tr><td>학습 조건 셋</td><td>내 자료 필요·적으면 흔들림·바뀌면 처음부터 — <b>여덟 갈래가 이걸 무너뜨린다</b></td></tr>
+    <tr><td>네 발상</td><td>기반 모델·확산·그래프·검증 가능한 보상 — <b>가장 오래 남을 것</b></td></tr>
+    <tr><td>다섯 조건</td><td>손에 잡히느냐로 추림 — 앞 셋은 장비·시간, 뒤 둘(라이선스·유지보수)은 못 넘기도</td></tr>
+    <tr><td>자 두 개</td><td>기준선(나은지)과 라이선스(쓸 수 있는지)</td></tr>
+  </table>
+  <aside>이 개념들이 다음 다섯 덱에서 갈래별로 실제로 작동하는 모습을 봅니다.</aside>
+</section>
+
+<!-- 10 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> Teachable Machine에서 겪는 <b>학습에 딸려 오는 조건 셋</b>은?</div>
+    <div class="q"><b>Q2.</b> 밑에 깔린 <b>네 발상</b>의 이름과 각 한 줄 설명은?</div>
+    <div class="q"><b>Q3.</b> 왜 분야 <b>이름</b>을 아는 것이 검색·에이전트 지시에서 중요한가?</div>
+    <div class="q"><b>Q4.</b> 다섯 조건 중 <b>장비·시간으로 못 넘는</b> 둘은 무엇인가?</div>
+    <div class="q"><b>Q5.</b> 저장소 첫 화면의 <b>초록 배지</b>가 말하는 것과, 놓치기 쉬운 것은?</div>
+  </div>
+  <aside>Q2와 Q4가 이 강의 전체를 관통합니다.</aside>
+</section>
+
+<!-- 11 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> ①<b>내 자료로 학습시켜야 시작</b> ②<b>자료가 적으면 흔들림</b> ③<b>일이 바뀌면 처음부터</b>. 여덟 갈래가 이 셋을 하나씩 무너뜨린다.</div>
+    <div class="q a"><b>A2.</b> <b>기반 모델</b>(미리 배우고 학습 없이)·<b>확산</b>(잡음에서 거꾸로 걷어내며 만들기)·<b>그래프 신경망</b>(점과 선, 이웃끼리 주고받기)·<b>검증 가능한 보상</b>(채점되는 문제에만 보상).</div>
+    <div class="q a"><b>A3.</b> <b>이름을 모르면 검색창에 넣을 말이 없고</b> 에이전트도 헤맨다. 정확한 이름이 그대로 검색어이자 지시문 낱말.</div>
+    <div class="q a"><b>A4.</b> <b>라이선스</b>(돈으로도 못 넘음)와 <b>유지보수</b>(기다린다고 나아지지 않음). 앞의 셋(설치·자원·확인 속도)은 장비·시간으로 넘는다.</div>
+    <div class="q a"><b>A5.</b> 초록 배지는 <b>코드 하나</b>의 조건. 가중치·기반 모델·학습 자료는 각각 다른 곳에 다른 조건으로 놓여, 배지만 보면 못 쓸 것을 쓸 수 있다고 착각한다.</div>
+  </div>
+  <aside>A5의 4계단은 마지막 덱(open-vs-usable)에서 순서대로 확인합니다.</aside>
+</section>
+
+<!-- 12 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>여덟 갈래, 네 발상 🧭</h1>
+    <div class="big" style="margin-top:26px">이름을 알면 진입로가 열리고<br>발상 넷을 알면 <span class="y">새 분야도 읽힌다</span><br><br>다음 — 학습 없이 표를 읽는 기반 모델</div>
+    <p class="sub" style="margin-top:24px">AI가 새로 연 곳들 — 여덟 갈래와 네 발상</p>
+  </div>
+  <aside>다음 덱(tables-zeroshot)에서 첫 갈래를 손으로 엽니다. 이미 손에 있는 표 자료로 학습 없이 예측하고 분류하며, 표를 줄여 갈 때 옛 방법이 무너지는 지점을 찾습니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>

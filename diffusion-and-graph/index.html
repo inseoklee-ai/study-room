@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>없던 것을 만들고 자연을 배운다 · 확산과 그래프</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.77rem,1.28vw,.94rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.9rem);
+    color:var(--ink);overflow:auto;max-height:52vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 8 · AI가 새로 연 곳들 (⑥⑦)</span>
+    <h1 style="margin:18px 0">없던 것을 만들고,<br>자연을 배운다</h1>
+    <p class="sub">확산 — 분자·결정 · 그래프 — 원자·기상</p>
+  </div>
+  <aside>방금 확산으로 단백질 뼈대를 만들었습니다. 같은 뼈대가 두 번 더 갈아탑니다 — 약이 되는 분자와 새 물질. 그리고 그래프 신경망이 원자 사이 힘과 전지구 날씨로 주인공이 됩니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 두 발상, <span class="g">네 갈래</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="p">확산 (⑥)</h3><p style="margin:0"><b>약물 분자</b>(주머니에 맞는 것을 새로 그림)와 <b>결정 구조</b>(없던 물질). 흩뜨렸다 되돌리기 — 흩뜨리는 것만 바뀐다</p></div>
+    <div class="box"><h3 class="g">그래프 (⑦)</h3><p style="margin:0"><b>원자 사이 힘</b>과 <b>전지구 기상</b>. 방정식을 푸는 대신 학습으로. 점과 선, 이웃끼리 주고받기</p></div>
+  </div>
+  <div class="hl">🎯 한 줄 — 그림·단백질 뼈대·약물 분자·결정은 <b>분야도 자료도 다른데 계산의 뼈대가 같다</b>. "확산 기반"이라는 말을 보면 무엇을 기대할지 바로 안다: <b>없던 걸 만들되 쓸 만한지는 따로 확인</b>.</div>
+  <aside>픽셀, 원자 좌표, 분자의 결합, 결정 격자 — 무엇을 흩뜨렸다 되돌릴지만 바뀝니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">없던 분자와 없던 결정</h2>
+  <p style="margin-top:11px">주머니에 맞는 분자 · 없던 결정 구조</p><span class="who">⑥ 확산</span></div>
+  <aside>확산이 그림에서 시작해 단백질 뼈대로, 이제 약물 분자와 결정 구조로 갑니다.</aside>
+</section>
+
+<!-- 4 절차는 그대로 -->
+<section class="slide" data-part="PART 1">
+  <h2>♻️ 절차는 그대로, <span class="g">흩뜨리는 것만</span> 바뀐다</h2>
+  <table class="t">
+    <tr><th>분야</th><th>무엇을 흩뜨리나</th></tr>
+    <tr><td>그림</td><td>픽셀 값</td></tr>
+    <tr><td>단백질 뼈대</td><td>원자의 3차원 좌표</td></tr>
+    <tr><td>약이 될 분자</td><td>원자와 결합</td></tr>
+    <tr><td>새 결정</td><td>원자와 좌표와 격자</td></tr>
+  </table>
+  <div class="big">뿌린 잡음을 알아맞혀 <span class="y">거꾸로 걷어 낸다</span><small>뼈대가 넷 다 같다 — 새 분야에서 "확산 기반"을 보면 무엇을 기대할지 안다</small></div>
+  <aside>없던 것을 만들어 내되, 만든 것이 쓸 만한지는 따로 확인해야 한다는 것 — 이 사실 하나만 알아도 새 분야가 읽힙니다.</aside>
+</section>
+
+<!-- 5 주머니에 맞는 분자 -->
+<section class="slide" data-part="PART 1">
+  <h2>💊 주머니에 맞는 분자를 <span class="g">그려 낸다</span></h2>
+  <ul class="pts">
+    <li>오래된 방식은 <b>뒤지기</b> — 보유 화합물 수십만 개를 표적에 하나씩 붙여 보고 점수 좋은 걸 고른다(<b>가상 스크리닝</b>, 붙여 보는 계산이 <b>도킹</b>). 창고에 답이 없으면 없는 것</li>
+    <li>최근 방향이 바뀌었다 — <b>표적 홈 모양을 조건으로 주고 그 자리에 맞는 분자를 새로 그린다</b>(창고를 뒤지는 대신 맞춤으로 짓기). 여기에 확산</li>
+  </ul>
+  <div class="hl">분자는 돌려놓아도 같은 분자라, 모델이 두 성질을 갖춰야 한다 — 에너지·점수 같은 <b>방향 없는 답은 어떻게 돌려도 똑같이(불변)</b>, 힘·좌표 같은 <b>방향 가진 답은 30도 돌리면 정확히 30도 돌아(등변)</b>. 검색어에 <b>equivariant</b>가 붙어 있으면 이 성질을 갖췄다는 뜻.</div>
+  <aside>🔬 억지로 온갖 방향을 돌려 가며 보여 주면 값이 비싸고 안 본 각도에서 흔들립니다. 더 나은 길은 애초에 흔들릴 수 없게 — 거리·각도처럼 회전에 안 변하는 값만 재료로 쓰는 것. 이 공유 성질이 갈래들이 서로 빠르게 옮겨 붙는 이유이기도 합니다. 이 방향이 열린 건 홈과 리간드(결합 상대) 짝이 공개 DB에 수십만 건 쌓인 덕입니다.</aside>
+</section>
+
+<!-- 6 GenMol -->
+<section class="slide" data-part="PART 1">
+  <h2>🖱️ 설치 없이 눌러 보기 — <span class="g">GenMol</span></h2>
+  <ul class="pts">
+    <li>NVIDIA가 올려 둔 페이지는 <b>로그인·키 없이 Experience 탭에서 그대로</b> 돈다. 예제 중 실제 약 바리시티닙을 고르면 분자식 칸이 문자열로 채워진다(원자·결합을 알파벳·괄호로 한 줄에 적은 표준 표기)</li>
+    <li>맨 끝 <code>[*{20-20}]</code>가 새로 만들 조각 — 별표가 "여기를 채워라", 중괄호 두 숫자가 채울 길이(20-20이면 스무 토막). Run을 누르면 채운 분자들이 구조식으로, 점수가 색으로</li>
+  </ul>
+  <div class="hl">점수는 <b>QED</b> — 너무 크지 않은지, 기름·물 사이 성질이 적당한지 잣대를 합쳐 0~1로. <b>높다고 약이 된다는 뜻은 아니고</b> 먼저 볼 것을 고르는 자. 분자식만으로 계산돼 <b>나온 것들을 한눈에 줄 세운다</b>.</div>
+  <div class="box"><p style="margin:0"><b>조각을 고정한 채 나머지를 채우는 이 방식은 단백질 뼈대를 고정하고 서열을 입히는 것과 성격이 같다</b> — 이쪽도 확산인데 다루는 게 좌표가 아니라 글자. 글자열엔 잡음을 못 뿌리니 <b>글자를 무작위로 지웠다 되채운다</b>(discrete diffusion)</p></div>
+  <aside>개수 슬라이더 30은 서른 개를 만들라는 요청값이고, 중복·실패를 걸러낸 뒤라 화면엔 대개 열 개 안팎이 남습니다. 서른이 안 나와도 잘못 누른 게 아닙니다.</aside>
+</section>
+
+<!-- 7 DiffSBDD 낡음 + 도킹 -->
+<section class="slide" data-part="PART 1">
+  <h2>🕰️ 열린 것 ≠ <span class="r">오늘 도는 것</span> — 그리고 도킹</h2>
+  <ul class="pts">
+    <li>분자 생성 대표 <b>DiffSBDD</b>(코드 MIT, 가중치 CC BY 4.0)의 공식 코랩은 <b>2022년 판에 못 박혀</b> 있어, 코랩 파이썬이 3.12로 오른 지금 설치 15줄 중 7줄이 실패(rdkit 포함). <b>TabPFN에선 원인이 라이선스, 여기선 시간</b> — 저장소는 마지막 손질 날짜를 함께 본다</li>
+    <li>오늘 손에 잡히는 쪽은 <b>도킹</b> — 고전 방식 AutoDock Vina(아파치 2.0, 그래픽카드 불필요). <code>pip install vina meeko gemmi rdkit</code> 10초</li>
+  </ul>
+  <div class="hl">단백질·분자를 PDBQT 형식으로 바꾸고 <b>어디를 뒤질지 상자로 지정</b>해야 한다(잘못 잡으면 <code>The ligand is outside the grid box</code>). 시간은 분자가 가른다 — 작은 분자는 5초, 실제 약 이매티닙(회전 결합 7)은 권장 설정으로 6분 40초. <b>"그래픽카드 필요 없다"와 "몇 초에 끝난다"는 다르다.</b></div>
+  <aside>결과 자세마다 REMARK VINA RESULT: -12.770 처럼 점수가 붙습니다(음수일수록 강함). 그 숫자 하나를 믿지 말고, 결합이 이미 알려진 분자를 같은 상자에 넣어 받은 점수를 옆에 놓고 순위로 읽는 것이 기준선입니다. 낱말: 구조 기반 신약 설계·포켓 조건부 생성·도킹.</aside>
+</section>
+
+<!-- 8 없던 결정 -->
+<section class="slide" data-part="PART 1">
+  <h2>💎 없던 <span class="g">결정 구조</span>를 만든다 — MatterGen</h2>
+  <p>물질 찾기는 오래 시행착오였다(굽고 재고 다시 굽고). 2010년대에 컴퓨터로 후보를 미리 걸러 내는 방식이 자리 잡아 계산된 물질 수십만 건이 공개됐다 — 그래도 여전히 <b>뒤지기</b>(아는 구조를 조금 바꿔 보기)였다. MatterGen은 <b>결정 구조 자체를 생성</b>한다.</p>
+  <ul class="pts">
+    <li>어느 원소를 몇 개, 얼마만 한 상자에 어떤 좌표로 배치할지를 <b>한꺼번에</b>. "자기 성질이 이 정도인 물질"처럼 조건도 건다</li>
+    <li>결정은 같은 무늬가 무한 되풀이되는 구조, 그 무늬 하나가 담기는 상자가 <b>단위 격자</b>. 좌표는 상자 안에서만 뜻이 있고 상자도 늘거나 기운다 → <b>원자 종류·좌표·상자 모양 셋을 함께 흩뜨렸다 함께 되돌린다</b></li>
+  </ul>
+  <div class="hl">코드·가중치 모두 MIT, 최근 갱신 2026년 7월. <b>공식 코랩이 없어</b> 환경을 직접 만든다(무료 T4에서 넉넉, 설치 2분·생성 8분 — 되돌리기를 천 번 밟아서). 조건은 출처만 밝히면 돼 걸릴 것 없다.</div>
+  <aside>🔬 공식 코랩 없는 저장소를 코랩에서 열 때, uv venv와 uv pip install을 한 줄로 붙이고 mattergen-generate 앞에 .venv/bin/을 붙이며 unset UV_SYSTEM_PYTHON을 넣는 것이 요령입니다(코랩은 ! 줄마다 새 셸이라 가상환경이 다음 줄에 안 남음). 📚 A generative model for inorganic materials design, Nature 2025.</aside>
+</section>
+
+<!-- 9 결정 판정선 -->
+<section class="slide" data-part="PART 1">
+  <h2>📏 결정 <span class="g">판정선</span> — 있을 수 없는 것 걷어내기</h2>
+  <p>존재한 적 없는 결정 구조가 CIF 표준 파일로 여러 개 나온다. 3차원으로 띄우면 원자들이 규칙적으로 배열된 모습.</p>
+  <div class="big">가장 가까운 원자쌍이 <span class="y">0.5옹스트롬보다 멀 것</span><small>좋은 구조를 고르는 자가 아니라, 있을 수 없는 구조를 걷어 내는 자</small></div>
+  <div class="hl">원자 둘이 0.5옹스트롬보다 가까우면 결합이 아니라 <b>서로 겹쳐 놓인 것</b>이라 어떤 물질로도 안 만들어진다. 잘 나온 구조는 대체로 <b>2~3옹스트롬 대</b>, 결합 종류에 따라 1.5옹스트롬 언저리도 정상.</div>
+  <ul class="pts">
+    <li>생성된 게 진짜 만들어지는지는 이 도구가 답하지 않는다 — <b>계산상 안정해 보이는 것과 실험실에서 합성되는 것은 다르다</b>. 그 사이를 메우는 게 이어서 볼 원자간 퍼텐셜</li>
+  </ul>
+  <aside>재료 생성은 오늘 여덟 중 손이 가장 많이 갑니다. 시간이 빠듯하면 공식 코랩이 여럿인 원자·기상 쪽을 먼저 열고 이쪽은 나중에 돌리세요. 낱말: 결정 구조 생성·물성 조건부 생성·안정성 선별.</aside>
+</section>
+
+<!-- 10 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">자연을 계산하는 대신 배우는 길</h2>
+  <p style="margin-top:11px">관계를 자료로 · 원자 사이 힘 · 전지구 예보</p><span class="who">⑦ 그래프</span></div>
+  <aside>지금까지는 없던 것을 만드는 쪽이었습니다. 이 절은 성격이 다릅니다 — 원래 방정식을 풀어 얻던 답을 학습으로 대신 얻는 갈래이고, 그래프 신경망이 주인공입니다.</aside>
+</section>
+
+<!-- 11 Cora -->
+<section class="slide" data-part="PART 2">
+  <h2>🔗 관계를 <span class="g">자료로 쓴다</span> — 간선 하나 차이</h2>
+  <p>논문끼리 인용 관계를 정리한 연습용 자료 Cora — 논문 2,708편, 간선 10,556개. 각 논문은 어떤 단어가 나왔는지로 표현되고 일곱 주제로 분류. <b>정답이 붙은 논문은 140편뿐</b>이라, 관계를 안 쓰면 나머지 2,568편이 아무 단서도 못 준다.</p>
+  <table class="t">
+    <tr><th>모델 (매개변수 23,063로 동일)</th><th>인용</th><th>학습</th><th>시험 정확도</th></tr>
+    <tr><td>그래프 신경망</td><td>사용</td><td>3.7초</td><td><b>81.5%</b></td></tr>
+    <tr><td>같은 크기의 일반 신경망</td><td>무시</td><td>2.0초</td><td>56.4%</td></tr>
+  </table>
+  <div class="big">크기는 그대로, 간선만으로 <span class="y">25%포인트</span><small>이웃 논문의 주제를 참고해 라벨 없는 논문에서도 단서를 끌어온다</small></div>
+  <div class="hl">이것이 다음 두 갈래에서 벌어지는 일과 같다 — <b>원자 하나의 상태는 이웃 원자가, 대기 격자점 하나의 다음 값은 이웃 격자점이 정한다</b>. 관계가 답을 담은 자료에선 관계를 쓰는 것 자체가 큰 이득. <b>오늘 여덟 중 가장 싸게 손에 잡히는 자리이니 건너뛰지 말 것.</b></div>
+  <aside>pip install torch-geometric scipy, 그래픽카드 불필요. 라이브러리에 든 Cora를 그대로, 크기 같은 모델 둘을 200에폭씩(하나는 간선 사용, 하나는 버림). 간선을 버린 쪽이 몇 포인트 떨어지는지가 이 발상의 값입니다.</aside>
+</section>
+
+<!-- 12 원자간 퍼텐셜 -->
+<section class="slide" data-part="PART 2">
+  <h2>⚛️ 원자 사이의 힘을 <span class="g">학습으로</span> — CHGNet</h2>
+  <ul class="pts">
+    <li>물질 성질은 원자들이 서로 얼마나 세게 끌고 미는지에서 나온다. 제대로 구하려면 양자역학 계산(<b>밀도범함수이론, DFT</b>) — 정확한 대신 느리다(원자 몇백 개에 시간 단위, 수가 늘면 훨씬 가파르게)</li>
+    <li>최근 변화는 <b>여러 원소를 한 모델이 다 다루게 된 것</b> — 예전엔 실리콘용·물용 따로. 지금은 주기율표 대부분을 아우르는 하나를 받아 바로 쓴다. 이 계열이 <b>신경망 원자간 퍼텐셜</b></li>
+  </ul>
+  <div class="hl">그래프가 가장 자연스럽게 맞는 데 — 원자를 점, 가까운 쌍을 선으로. 각 원자가 이웃에게 "나는 어떤 원소·너와 이만큼"을 받아 상태를 고치기를 반복(<b>메시지 패싱</b>). <b>퍼텐셜 = 배치가 갖는 에너지</b>, 에너지가 내려가는 방향이 힘 → 힘 구하기와 퍼텐셜 구하기가 같은 말.</div>
+  <aside>🔬 이웃하고만 주고받는데 멀리까지 전해지는 건 반복 덕 — 한 번이면 이웃, 두 번이면 이웃의 이웃. 실무 모델은 대개 서너 겹. 다만 전하 띤 이온처럼 거리가 멀어도 천천히 약해지는 상호작용은 잘 안 잡혀, 최신 모델이 따로 장치를 붙입니다. 📚 CederGroupHub/chgnet, GitHub.</aside>
+</section>
+
+<!-- 13 구조 이완 -->
+<section class="slide" data-part="PART 2">
+  <h2>📉 <span class="g">구조 이완</span> 곡선을 본다</h2>
+  <ul class="pts">
+    <li>basics 노트북이 가장 짧은 진입로. <b>그래픽카드 없이도</b> <code>use_device='cpu'</code>로 돈다(작은 결정은 에너지·힘이 1초, 구조 이완도 몇 초)</li>
+    <li>노트북 예제 구조를 그대로, 자기 구조가 있으면 CIF 하나. 넣으면 에너지와 각 원자에 걸리는 힘이 숫자로</li>
+  </ul>
+  <div class="big">숫자 하나가 아니라 <span class="y">곡선의 생김새</span>가 판단 근거<small>계단처럼 내려가다 평평해지면 자리 잡음, 끝까지 출렁이면 수렴 안 됨 → 그 결과는 쓰지 말 것</small></div>
+  <div class="hl">막히면 — 같은 계열 MACE도 좋은데 <b>MIT인 것은 재료용 몇 개뿐이고 유기화학용·최신 범용판은 학술 전용</b>. 이름이 비슷해 눈으로 못 가리니 저장소 표의 라이선스 칸을 한 줄씩 보고 받는다. 낱말: 원자간 퍼텐셜·메시지 패싱·구조 이완·분자동역학·<b>ASE</b>(모델과 계산을 잇는 표준 인터페이스).</div>
+  <aside>구조 이완은 원자들이 조금씩 자리를 잡아 가며 에너지가 내려가는 과정입니다. CHGNet 라이선스는 BSD 3조항 계열인데 연구소 표준 문안이라 개선분 조항이 하나 더 붙습니다.</aside>
+</section>
+
+<!-- 14 기상 -->
+<section class="slide" data-part="PART 2">
+  <h2>🌦️ 슈퍼컴퓨터가 하던 예보를 <span class="g">학습으로</span></h2>
+  <p>날씨 예보는 오래 물리 방정식 풀이였다 — 지구를 격자로 나누고 각 칸의 기압·온도·바람을 놓고 유체 방정식을 시간 단계마다. 정확하지만 무거워 슈퍼컴퓨터를 운영. 2023년 딥마인드 <b>GraphCast</b>는 방정식을 안 풀고 <b>지난 수십 년치 관측을 배워</b> 열흘치 전지구 예보를 1분에 냈다.</p>
+  <ul class="pts">
+    <li>이름에 그래프가 든 이유 — 위도가 높을수록 칸이 촘촘해지는 왜곡을 피해 <b>구를 거의 균일하게 덮는 점들을 이웃끼리 선으로</b> 잇고, 원자간 퍼텐셜처럼 각 점이 이웃 정보를 받아 상태를 고치기를 반복. 다루는 게 원자에서 대기 격자점으로 바뀐 것뿐</li>
+    <li>출발 조건을 조금씩 흔들어 여러 번 돌려 답이 얼마나 흩어지는지 보는 것이 <b>앙상블 예보</b> — 답 하나가 아니라 답의 폭이 결과</li>
+  </ul>
+  <div class="hl">뒤집은 것은 <b>물리를 한 줄도 안 넣은 모델이 방정식 쪽과 겨룰 만하다는 결과</b> 하나. 바탕엔 유럽 기상 기관의 수십 년치 <b>재분석 자료(ERA5)</b>가 공개돼 있었다(관측만으론 빈 곳이 많은데 물리 모델로 메워 균일 격자로 정리).</div>
+  <aside>지역 농협 담당자가 골짜기 새벽 기온을 알고 싶을 때, 공개 모델·관측으로 좁은 구역을 여러 번 돌려 최저기온이 어느 범위에서 흔들리는지 확률로 봅니다.</aside>
+</section>
+
+<!-- 15 기상 라이선스 -->
+<section class="slide" data-part="PART 2">
+  <h2>📅 조건이 <span class="r">며칠 사이에</span> 바뀐다 — WeatherNext</h2>
+  <pre>August 6, 2026 UPDATE: The license for the model weights in this
+repository has been updated to permit commercial use.</pre>
+  <ul class="pts">
+    <li>가중치를 업무에 쓰는 것이 <b>2026년 8월 6일에 허용</b>됐다(코드 아파치, 가중치 출처 표시). 그런데 <b class="r">가중치 파일 안에 박힌 문구는 아직 옛 조건</b>이라, 모델 불러오는 셀이 화면에 비상업이 든 옛 라이선스를 그대로 찍는다</li>
+    <li><b>저장소 설명이 최신, 파일 안 문구가 낡은 것</b> — 화면에 찍힌 것과 문서가 갈릴 때 <b>어느 쪽이 최신인지 날짜로 확인</b>하는 것이 여기서 필요한 판단</li>
+  </ul>
+  <div class="hl">조금 오래된 블로그를 보고 "이건 연구용이라 못 쓴다"고 적어 두면 <b>그 메모가 며칠 만에 틀린 것</b>이 된다. 열 때 <b>런타임을 그래픽카드가 아니라 TPU로</b>(오늘 여덟 중 여기만) — 노트북 자신이 "무료 TPU에서 돌릴 유일한 모델"이라 적어 뒀다. 로그인·API 키 없이 공개 버킷에서 자료를 바로 가져온다.</div>
+  <aside>T4를 켜면 그대로는 안 됩니다(어텐션 계산 방식을 그래픽카드에서 라이브러리가 지원 안 함). 갈라진 폭이 좁으면 확신, 넓으면 예보 자체가 어려운 날 — 숫자 하나가 아니라 그 폭이 답입니다. 낱말: 기상 기반모델·앙상블 예보·재분석·ERA5.</aside>
+</section>
+
+<!-- 16 곁들여 -->
+<section class="slide" data-part="PART 2">
+  <h2>➕ 곁들여 <span class="g">둘</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="b">방정식을 신경망으로</h3><p style="margin:0">유체·열·구조 해석을 격자 계산 대신 학습으로. <b>자료가 아예 필요 없다</b> — 미분방정식·경계조건을 채점표로 써, 낸 답을 방정식에 도로 넣어 어긋남이 줄게. <b>정답표 없이 채점되는 구조</b>라 검증 가능한 보상과 닮았다(DeepXDE·neuraloperator). 발상은 2019~20년, 최근은 도구가 여문 것</p></div>
+    <div class="box"><h3 class="g">위성 영상 사전학습</h3><p style="margin:0">홍수·산불·작물 경계 찾기. 유럽 위성 영상이 아마존 클라우드에 <b>인증 없이 최신 장면까지</b>. 한 픽셀 10m라 넓은 것에 맞고 건물 한 채엔 성기다. 건물 윤곽은 항공 타일(0.13m)로 — 한 블록 90초에 경계 1,200여 개</p></div>
+  </div>
+  <div class="hl">위성 영상은 구름 90% 넘는 날도 흔하니 목록에서 구름 비율을 보고 고른다. segment-geospatial은 2026년 7월 판부터 지도 라이브러리가 필수 의존성에서 빠져, 안내대로만 하면 <code>import leafmap</code>에서 멈춘다 — <code>%pip install segment-geospatial leafmap localtileserver</code>로.</div>
+  <aside>PINN(물리 정보 신경망)은 관이 벽에서 속도 0, 판 끝 온도 얼마 같은 경계조건을 반드시 지키게 합니다.</aside>
+</section>
+
+<!-- 17 핵심 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이 덱의 <span class="g">핵심 정리</span></h2>
+  <table class="t">
+    <tr><th>개념</th><th>한 문장</th></tr>
+    <tr><td>확산의 이식성</td><td>그림·뼈대·분자·결정이 <b>흩뜨리는 것만 다르고 뼈대는 같다</b></td></tr>
+    <tr><td>포켓 조건부 생성</td><td>창고를 뒤지는 대신 <b>홈에 맞는 분자를 새로 그린다</b>. equivariant가 열쇠</td></tr>
+    <tr><td>MatterGen</td><td>없던 결정을 생성 — <b>0.5옹스트롬</b>은 있을 수 없는 것을 걷어내는 자</td></tr>
+    <tr><td>그래프의 이득</td><td>간선만 써도 25%포인트 — <b>관계가 답을 담은 자료</b>(원자·대기)</td></tr>
+    <tr><td>퍼텐셜·기상</td><td>느린 방정식을 학습으로. 구조 이완은 <b>곡선</b>, 기상은 <b>답의 폭</b></td></tr>
+    <tr><td>조건은 움직인다</td><td>기상 가중치가 며칠 사이 상업 허용 — <b>날짜로 확인</b></td></tr>
+  </table>
+  <aside>확산과 그래프가 여기서 정점을 찍고, 다음 덱에서 로봇(넷이 겹침)과 검증 가능한 보상(넷째 발상)으로 갑니다.</aside>
+</section>
+
+<!-- 18 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 그림·단백질·분자·결정의 확산이 <b>공유하는 뼈대</b>와, 분야마다 바뀌는 것은?</div>
+    <div class="q"><b>Q2.</b> 신약에서 <b>뒤지기(가상 스크리닝)</b>와 <b>포켓 조건부 생성</b>의 차이는?</div>
+    <div class="q"><b>Q3.</b> MatterGen 결과의 <b>0.5옹스트롬</b> 판정선은 무엇을 거르나?</div>
+    <div class="q"><b>Q4.</b> Cora에서 크기가 같은데 <b>간선 하나로 25%포인트</b>가 오른 이유는?</div>
+    <div class="q"><b>Q5.</b> WeatherNext에서 화면에 찍힌 라이선스와 저장소 설명이 다를 때 <b>어느 쪽</b>을 믿나?</div>
+  </div>
+  <aside>Q1과 Q4가 두 발상의 핵심입니다.</aside>
+</section>
+
+<!-- 19 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 뼈대 = <b>뿌린 잡음을 알아맞혀 거꾸로 걷어 내며 만들기</b>. 바뀌는 것은 흩뜨리는 대상 — 픽셀·원자 좌표·원자와 결합·원자와 좌표와 격자.</div>
+    <div class="q a"><b>A2.</b> 뒤지기는 <b>가진 것 안에서만</b> 고른다(창고에 없으면 없음). 포켓 조건부 생성은 <b>홈 모양을 조건으로 맞는 분자를 새로 그린다</b>.</div>
+    <div class="q a"><b>A3.</b> 원자 둘이 0.5옹스트롬보다 가까우면 결합이 아니라 <b>서로 겹쳐 놓인 것</b>이라 어떤 물질로도 안 만들어진다 — 있을 수 없는 구조를 걷어낸다(좋은 것 고르는 자 아님).</div>
+    <div class="q a"><b>A4.</b> 정답이 140편뿐이라, <b>이웃 논문의 주제를 참고해 라벨 없는 논문에서도 단서를 끌어온다</b>. 관계가 답을 담은 자료에선 관계를 쓰는 것 자체가 이득.</div>
+    <div class="q a"><b>A5.</b> <b>날짜로 확인해 최신 쪽</b>(저장소 설명 2026-08-06 상업 허용). 파일 안 문구가 낡아 화면에 옛 라이선스가 찍히는 것.</div>
+  </div>
+  <aside>A5는 "한 번 확인한 답에 유효기간이 있다"의 실물 사례입니다.</aside>
+</section>
+
+<!-- 20 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>흩뜨렸다 되돌리고, 관계를 쓴다 ⚛️</h1>
+    <div class="big" style="margin-top:26px">확산은 흩뜨리는 것만 바꿔 갈아타고<br>그래프는 <span class="y">이웃끼리 주고받아</span> 자연을 배운다<br><br>다음 — 몸을 얻은 모델과 채점되는 보상</div>
+    <p class="sub" style="margin-top:24px">없던 것을 만들고 자연을 배운다 — 여기까지</p>
+  </div>
+  <aside>다음 덱(body-and-reward)에서 네 발상이 로봇의 행동에 한자리에 겹치고, 마지막 발상인 검증 가능한 보상이 제자리에서 풀립니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>

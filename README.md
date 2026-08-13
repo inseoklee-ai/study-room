@@ -144,18 +144,18 @@
    - ✅ 7-⑧. [과제] 공개할 수 있는 공간을 골라 올립니다 — 🖥️ [7-⑦ 덱에 포함](https://inseoklee-ai.github.io/study-room/judge-and-submit/#11)
    - ✅ 7-⑨. 도구는 바뀌고 고르는 눈은 남습니다 (라이선스) — 🖥️ [7-⑦ 덱에 포함](https://inseoklee-ai.github.io/study-room/judge-and-submit/#16)
    - ✅ 📦 프로젝트 제출 (루브릭) — 🖥️ [7-⑦ 덱에 포함](https://inseoklee-ai.github.io/study-room/judge-and-submit/#22)
-8. **AI가 새로 연 곳들** ⬅️ 준비 중 (0/11)
-   - ⬜ 8-①. 같은 주에 다른 데서 벌어진 일들
-   - ⬜ 8-②. 학습 없이 표를 읽는 모델
-   - ⬜ 8-③. 스무 줄짜리 표로 붙어 보기
-   - ⬜ 8-④. 서열을 읽던 모델이 간 곳
-   - ⬜ 8-⑤. 서열 하나로 구조 받아 보기
-   - ⬜ 8-⑥. 없던 분자와 없던 결정
-   - ⬜ 8-⑦. 자연을 계산하는 대신 배우는 길
-   - ⬜ 8-⑧. 몸을 얻은 모델
-   - ⬜ 8-⑨. 채점이 되는 곳에 걸리는 보상
-   - ⬜ 8-⑩. 공개된 것과 오늘 쓸 수 있는 것
-   - ⬜ 8-⑪. 안 갈 데를 아는 것도 지도입니다
+8. **AI가 새로 연 곳들** ✅ 완결 (11/11) · 11개 소단원을 **6개 덱으로 통합**
+   - ✅ 8-①. 같은 주에 다른 데서 벌어진 일들 (여덟 갈래·네 발상) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/new-frontiers-intro/) · 📊 [PPT](new-frontiers-intro/new-frontiers-intro.pptx)
+   - ✅ 8-②. 학습 없이 표를 읽는 모델 (제로샷·맥락 내 학습) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/tables-zeroshot/) · 📊 [PPT](tables-zeroshot/tables-zeroshot.pptx)
+   - ✅ 8-③. 스무 줄짜리 표로 붙어 보기 (실습) — 🖥️ [8-② 덱에 포함](https://inseoklee-ai.github.io/study-room/tables-zeroshot/#10)
+   - ✅ 8-④. 서열을 읽던 모델이 간 곳 (유전체·단백질) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/sequence-to-structure/) · 📊 [PPT](sequence-to-structure/sequence-to-structure.pptx)
+   - ✅ 8-⑤. 서열 하나로 구조 받아 보기 (실습·세포 영상) — 🖥️ [8-④ 덱에 포함](https://inseoklee-ai.github.io/study-room/sequence-to-structure/#9)
+   - ✅ 8-⑥. 없던 분자와 없던 결정 (확산) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/diffusion-and-graph/) · 📊 [PPT](diffusion-and-graph/diffusion-and-graph.pptx)
+   - ✅ 8-⑦. 자연을 계산하는 대신 배우는 길 (그래프·원자·기상) — 🖥️ [8-⑥ 덱에 포함](https://inseoklee-ai.github.io/study-room/diffusion-and-graph/#10)
+   - ✅ 8-⑧. 몸을 얻은 모델 (VLA 로봇) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/body-and-reward/) · 📊 [PPT](body-and-reward/body-and-reward.pptx)
+   - ✅ 8-⑨. 채점이 되는 곳에 걸리는 보상 (GRPO·Lean) — 🖥️ [8-⑧ 덱에 포함](https://inseoklee-ai.github.io/study-room/body-and-reward/#9)
+   - ✅ 8-⑩. 공개된 것과 오늘 쓸 수 있는 것 (라이선스 4계단) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/open-vs-usable/) · 📊 [PPT](open-vs-usable/open-vs-usable.pptx)
+   - ✅ 8-⑪. 안 갈 데를 아는 것도 지도입니다 (마무리) — 🖥️ [8-⑩ 덱에 포함](https://inseoklee-ai.github.io/study-room/open-vs-usable/#9)
 9. **[Main Quest] AI 적용 판단 (PoC)** ✅ 완결 · 7개 소단원을 **통합 1덱**으로 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/main-quest/) · 📊 [PPT](main-quest/main-quest.pptx)
    - 9-①. 도구 학습에서 적용 판단으로 · 9-②. AI를 적용할 업무 유형 · 9-③. 후보 선정
    - 9-④. 예시 하나(사진 검색기) · 9-⑤. 예시 둘(스쿼트 보조도구)
@@ -212,6 +212,12 @@
 > - 7-⑤ https://inseoklee-ai.github.io/study-room/shrink-and-publish/
 > - 7-⑥ https://inseoklee-ai.github.io/study-room/thirty-years-3d/
 > - 7-⑦⑧⑨ https://inseoklee-ai.github.io/study-room/judge-and-submit/
+> - 8-① https://inseoklee-ai.github.io/study-room/new-frontiers-intro/
+> - 8-②③ https://inseoklee-ai.github.io/study-room/tables-zeroshot/
+> - 8-④⑤ https://inseoklee-ai.github.io/study-room/sequence-to-structure/
+> - 8-⑥⑦ https://inseoklee-ai.github.io/study-room/diffusion-and-graph/
+> - 8-⑧⑨ https://inseoklee-ai.github.io/study-room/body-and-reward/
+> - 8-⑩⑪ https://inseoklee-ai.github.io/study-room/open-vs-usable/
 >
 > 📊 **PPT**: 각 강의 폴더의 `<폴더명>.pptx` (예: `vlm/vlm.pptx`). GitHub 저장소나 라이브 사이트에서 내려받아 PowerPoint로 열 수 있습니다.
 >

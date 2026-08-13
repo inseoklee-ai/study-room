@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>서열을 읽고 짓는다 · 유전체·단백질·세포</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.77rem,1.28vw,.94rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.9rem);
+    color:var(--ink);overflow:auto;max-height:52vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 8 · AI가 새로 연 곳들 (④⑤)</span>
+    <h1 style="margin:18px 0">서열을 읽고,<br>짓는다</h1>
+    <p class="sub">유전체 · 단백질 구조 예측과 설계 · 세포 영상</p>
+  </div>
+  <aside>표에서 통한 발상이 옆으로 번진 첫 곳이 생명입니다. DNA도 단백질도 글자가 한 줄로 늘어선 서열(DNA 네 글자·단백질 스무 글자)이라, 문장용 구조가 거의 그대로 옮겨 갔습니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 세 방향과 <span class="g">두 실습</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>읽기</small><b class="b">서열을 읽는다<br>유전체·구조</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--pp)"><small>짓기</small><b class="p">방향을 뒤집어<br>없던 걸 짓는다</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>실습</small><b class="g">구조 받고·설계<br>세포도 센다</b></div>
+  </div>
+  <ul class="pts">
+    <li>밑바탕은 <b>기반 모델</b> — 남의 서열·구조를 잔뜩 미리 배우고 내 것 하나엔 학습 없이 답. 다만 입력이 <b>서열 하나가 아니라 그 친척들까지</b></li>
+    <li>짓는 쪽엔 <b>확산</b>(RFdiffusion 뼈대)과 <b>그래프</b>(ProteinMPNN 서열)가 겹친다</li>
+  </ul>
+  <div class="hl">🎯 한 줄 — 만든 것을 <b>다시 예측기에 넣어 채점하는 고리</b>가 설계를 쓸 만하게 만든다. 실험할 후보를 수천에서 몇십으로 줄인다.</div>
+  <aside>무료 그래픽카드는 늘 잡히지는 않습니다. 실습은 길을 둘로 나눠 둘 다 결과물이 남게 합니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">서열을 읽던 모델이 간 곳</h2>
+  <p style="margin-top:11px">세포를 읽는다 · 모양을 맞힌다 · 방향을 뒤집는다</p><span class="who">④ 이론</span></div>
+  <aside>셋을 봅니다 — 서열을 읽는 것, 서열에서 모양을 얻는 것, 방향을 뒤집어 없던 것을 만드는 것.</aside>
+</section>
+
+<!-- 4 유전체 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧬 세포 상태를 <span class="g">문장처럼</span> 읽는다</h2>
+  <ul class="pts">
+    <li>그전엔 유전자 하나하나를 따로 봤다(많이 켜졌나 적게 켜졌나 통계로). 문제는 <b>세포 안에서 유전자들이 서로 영향을 주고받는데</b> 그 관계를 손으로 다 적을 수 없었다는 것</li>
+    <li>Geneformer는 세포 하나에서 <b>유전자를 발현량 순으로 줄 세워 그 순서를 문장처럼</b> 다룬다(발현량 절대치는 측정 조건에 크게 흔들려도 순위는 덜 움직여서). 정상 인간 세포 <b>1억 400만 개분</b>을 학습</li>
+  </ul>
+  <div class="box"><p style="margin:0">🔬 장면 — 세포 치료제 회사 분석 담당자가 환자 조직에서 세포 3천 개를 뽑는다(학습엔 턱없이 적다). 미리 배운 모델에 보여 주고 "정상 쪽으로 되돌리려면 어느 유전자를 건드려야?"를 묻는다. 모델이 후보 순위를 내면 <b>실험 대상을 수만에서 열 개로</b> 줄인다</p></div>
+  <div class="hl">이 갈래가 열린 건 세포 하나하나의 발현을 재는 측정법이 2010년대에 값이 크게 떨어진 덕 — <b>구조가 바뀌기보다 먹일 것이 쌓인 게 먼저</b>. 낱말: 유전체 기반모델 · 단일세포 전사체 · 제로샷 세포 주석.</div>
+  <aside>📚 ctheodoris/Geneformer, Hugging Face(아파치 2.0). 모델 카드 본문 한가운데에 튜토리얼 코랩 주소가 짧게 걸려 있고, examples 폴더 노트북은 코랩용이 아니라 저장소를 통째로 받아 돌리는 것입니다. GPU가 필요합니다.</aside>
+</section>
+
+<!-- 5 Evo2 장비·라이선스 -->
+<section class="slide" data-part="PART 1">
+  <h2>🚧 조건은 열렸는데 <span class="r">장비로 막힌다</span></h2>
+  <ul class="pts">
+    <li>가장 화제인 <b>Evo 2</b>(DNA 자체를 백만 염기 단위로, 아파치 2.0)는 무료 코랩에서 안 돈다 — 막는 건 라이선스가 아니라 <b>카드</b></li>
+    <li>70억짜리는 가중치만 13.8GB라 올리는 것만으로 무료 카드가 거의 다 차고, 10억짜리(2.7GB)는 <b>서버용 카드에만 있는 FP8 계산 방식</b>을 써서 오히려 못 쓴다</li>
+  </ul>
+  <div class="big">조건이 완전히 열려 있는데 <span class="y">장비 하나로 막히는 자리</span><small>이름만 알아 두고, 오늘 열어 보는 건 Geneformer 쪽으로</small></div>
+  <div class="hl">라이선스도 갈래 안에서 갈린다 — Nucleotide Transformer는 <b>코드 저장소부터 비상업</b>, DNABERT-2는 코드가 아파치인데 <b>모델 카드에 라이선스 항목이 아예 없다</b>. 유전체는 오늘 손으로 안 돌린다(카드에 주소가 있으니 각자).</div>
+  <aside>FP8은 숫자를 8비트로 짧게 줄여 빠르게 계산하는 대신 하드웨어가 알아들어야 하는 방식입니다. requires FP8 via Transformer Engine 줄을 만나면 그 대안 둘도 같은 벽(카드 세대·자리)에 부딪힙니다.</aside>
+</section>
+
+<!-- 6 서열에서 모양 -->
+<section class="slide" data-part="PART 1">
+  <h2>🎗️ 서열에서 <span class="g">모양</span>으로 — AlphaFold2</h2>
+  <p>단백질은 아미노산 사슬이 저절로 접혀 3차원 덩어리가 되고 <b>그 접힌 모양이 기능을 정한다</b>. 서열은 실험실에서 쉽게 읽는데 모양은 아니었다 — 2021년 전까진 구조 하나가 몇 달~몇 년짜리 실험(결정이 안 자라면 아예 못 봄). AlphaFold2가 서열만 넣으면 실험급 정확도로 모양을 냈다(노벨 화학상 2024).</p>
+  <div class="hl">핵심 재료는 <b>진화</b> — 같은 단백질을 여러 종에서 찾아 나란히 세우면(<b>다중서열정렬</b>) 멀리 떨어진 두 자리가 <b>함께 변해 온 흔적</b>이 보인다. 접힌 상태에서 맞닿아 있어 접촉을 유지하려 함께 진화한 것 → 3차원 힌트.</div>
+  <ul class="pts">
+    <li><b>왜 지금인가</b> — 발상은 오래됐고, 공개 서열이 수억 건으로 늘어 신호가 뽑히고 구조가 알려진 단백질이 수십만 개 쌓여 정답지가 생겼다</li>
+    <li>표 쪽과 다른 점 — <b>입력이 서열 하나가 아니라 그 친척들까지</b>. 친척을 얼마나 잘 찾아오느냐가 결과를 가른다. 손에 잡히는 건 <b>ColabFold</b>(무거운 정렬을 빠른 검색 서버로 대신, MIT)</li>
+  </ul>
+  <aside>친척 검색을 건너뛰고 서열 하나만 넣는 ESMFold도 있습니다(빠른 대신 정확도 약간 낮음, 정렬 서버가 붐빌 때 우회로). 낱말: 구조 예측·다중서열정렬(MSA)·pLDDT.</aside>
+</section>
+
+<!-- 7 AF3 함정 -->
+<section class="slide" data-part="PART 1">
+  <h2>🕳️ 노트북 안에서 <span class="r">글과 값이 어긋난다</span></h2>
+  <ul class="pts">
+    <li>ColabFold 목록의 AlphaFold3 노트북은 어느 가중치로 돌릴지 고르게 돼 있다 — 하나는 다른 연구실이 조건을 열어 둔 것, 다른 하나는 <b>구글이 낸 실물</b></li>
+    <li><b class="r">첫 코드 셀 기본값이 실물 쪽으로 켜져 있는데</b>, 바로 밑 설명은 "끄면 무료로 열린 가중치를 쓴다"고 적혀 있어 꺼져 있으리라 짐작하기 쉽다</li>
+  </ul>
+  <div class="big">설명을 믿지 말고 <span class="y">체크박스를 직접 보라</span><small>그대로 돌리면 실물 쪽 약관 — 비영리·비상업 한정, "구글에서 직접 받은 경우만", 산출물도 임상 아님</small></div>
+  <div class="hl">이름만 보고 "코랩에서 AlphaFold3를 돌렸다"고 말하면 <b>무엇을 돌렸는지가 흐려진다.</b> 노트북 안에서 글과 값이 어긋나는 자리다.</div>
+  <aside>📚 sokrypton/ColabFold, GitHub · google-deepmind/alphafold3, GitHub.</aside>
+</section>
+
+<!-- 8 방향 뒤집기 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔄 방향을 <span class="p">뒤집는다</span> — 없던 것을 짓기</h2>
+  <p>신약·효소를 만드는 사람에게 진짜 필요한 건 반대다 — <b>원하는 기능이 먼저 있고 그 기능을 하는 단백질을 만들어야</b>. 자연에서 고르는 게 아니라 없던 걸 짓는 <b>계산 단백질 설계</b>.</p>
+  <div class="chain">
+    <div class="cell" style="min-width:110px;border-color:var(--pp)"><small>RFdiffusion</small><b class="p">잡음→뼈대<br>확산</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px;border-color:var(--gr)"><small>ProteinMPNN</small><b class="g">뼈대→서열<br>그래프·역접힘</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gold)"><small>ColabFold</small><b>다시 예측해<br>의도한 모양?</b></div>
+  </div>
+  <ul class="pts">
+    <li>원자 3차원 좌표를 흩뜨렸다 되돌리면 접힌 뼈대로 모인다(<b>확산</b>, 데이비드 베이커 노벨상). 뼈대는 길일 뿐 — 각 자리에 스무 아미노산 중 무엇을 놓을지가 남고 그걸 <b>ProteinMPNN</b>이(원자를 점으로, 이웃끼리 쪽지 = <b>그래프·메시지 패싱</b>, 구조→서열이라 <b>역접힘</b>)</li>
+  </ul>
+  <div class="hl"><b>만든 서열을 다시 구조 예측기에 넣어 의도한 모양이 나오는지 본다</b> — 나오면 후보, 아니면 버림. 이 고리가 <b>검증 가능한 보상</b>의 첫 얼굴(여기선 거르는 데만). 바이오 회사가 표적 바인더를 하룻밤에 수백 개 뽑아 몇십 개만 합성.</div>
+  <aside>🔬 뼈대와 서열을 나누는 이유 — 앞쪽은 연속 좌표라 확산이, 뒤쪽은 스무 개 중 하나 고르기(이산)라 그래프가 맞다. 나누면 뼈대 하나에 서열 여럿을 뽑아 합성 쉬운 것을 고를 수 있다. 낱말: 계산 단백질 설계·백본 생성·역접힘·바인더 설계.</aside>
+</section>
+
+<!-- 9 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">서열 하나로 구조 받아 보기</h2>
+  <p style="margin-top:11px">답 아는 것으로 · 색을 읽고 · 방향을 뒤집는다</p><span class="who">⑤ 실습</span></div>
+  <aside>서열 하나를 넣어 구조를 받고, 여유가 되면 방향을 뒤집어 없던 뼈대를 만든 다음 다시 예측기에 넣어 채점합니다. 무료 그래픽카드는 늘 잡히지 않아 길을 둘로 나눕니다.</aside>
+</section>
+
+<!-- 10 두 길 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔀 두 길, 둘 다 <span class="g">결과물이 남는다</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="b">위쪽 (T4 잡힘)</h3><p style="margin:0">서열→구조 예측, 여유 되면 설계까지. <b>CPU로도 같은 구조·같은 확신도</b>가 나온다 — 다른 건 시간뿐(모델 하나·되풀이 한 번으로 줄여도 짧은 단백질 9분)</p></div>
+    <div class="box"><h3 class="g">아래쪽 (T4 안 잡힘)</h3><p style="margin:0">공개 주소로 구조 하나(로그인·카드 없이 30초), 이어서 <b>그래픽카드 없이 세포 영상 분할</b></p></div>
+  </div>
+  <div class="hl">그래픽카드가 안 잡히는 건 여러분 잘못이 아니다 — <b>무료 자원이 늘 잡히지 않는다는 것도 이 갈래를 다룰 때 필요한 감각</b>. 시작 전 런타임 유형부터 확인.</div>
+  <aside>위쪽이 궁금하면 집에서 켜 두고 다른 일을 하는 편이 낫습니다. 수업 안에서 그래픽카드를 못 받았으면 아래쪽으로 갑니다.</aside>
+</section>
+
+<!-- 11 1단계 -->
+<section class="slide" data-part="PART 2">
+  <h2>1️⃣ <span class="g">답을 아는 것</span>으로 먼저 — 유비퀴틴</h2>
+  <p>처음 보는 단백질로 시작하면 나온 구조가 맞는지 판단할 근거가 없다. 구조가 잘 알려진 것으로 먼저. <b>유비퀴틴</b>(아미노산 76개, 거의 모든 진핵생물이 가진 것)이 그런 서열이다.</p>
+  <pre>MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG</pre>
+  <div class="hl">⚠️ UniProt엔 이 76개짜리 단독 항목이 없다 — 이 단위가 <b>아홉 번 되풀이된 685개짜리 전구체</b>로 등록돼 있어, 거기서 복사하면 실습이 어긋난다. 위 서열을 그대로. 맨 위 <code>query_sequence</code>의 예시를 지우고 붙인 뒤 <code>런타임 → 모두 실행</code>.</div>
+  <aside>여러 종의 비슷한 서열을 찾아 나란히 세우는 단계가 시간의 대부분인데, 이 노트북은 그 검색을 빠른 서버로 대신합니다. 셀을 중간부터 실행하면 앞 셀이 만든 변수가 없어 멈춥니다.</aside>
+</section>
+
+<!-- 12 2단계 색 -->
+<section class="slide" data-part="PART 2">
+  <h2>2️⃣ <span class="g">색을 읽는다</span> — pLDDT</h2>
+  <p>3차원 구조가 뜨고 마우스로 돌아간다. 여기서 멈추면 절반만 하고 나오는 것 — <b>자리마다 칠해진 색이 나머지 절반</b>. 모델은 자리마다 얼마나 확신하는지(<b>pLDDT</b>, 0~100)를 함께 낸다. 파란 쪽 믿을 만하고 노랑·주황은 자신 없음.</p>
+  <table class="t">
+    <tr><th>pLDDT</th><th>해석</th></tr>
+    <tr><td>90 초과</td><td>결합 부위를 따질 만큼 정확</td></tr>
+    <tr><td>70~90</td><td>뼈대는 잘 맞는 자리</td></tr>
+    <tr><td>50~70 / 50 미만</td><td>조심 / 흐물거려 해석 안 함</td></tr>
+  </table>
+  <div class="hl">유비퀴틴은 몸통이 거의 파랗고 <b>사슬 뒤쪽 끝 서너 자리만 노랑·주황</b> — 다른 단백질에 붙을 때 쓰는 꼬리라 실제로도 흐물거린다. <b>모델이 자신 없는 자리가 실제로 흔들리는 자리와 겹치는지</b>를 보는 게 이 단계.</div>
+  <aside>겹쳐 보는 건 에이전트에게: "방금 구조와 PDB 등록 유비퀴틴을 겹쳐 평균 원자 거리 차이(RMSD)를 계산하고, pLDDT 70 미만 잔기를 뽑아 줘." RMSD는 이 계열 정확도 표준 자(단위 옹스트롬, 작을수록 겹침, 한 자릿수 초반이면 잘 맞음).</aside>
+</section>
+
+<!-- 13 3단계 뒤집기 -->
+<section class="slide" data-part="PART 2">
+  <h2>3️⃣ 여유가 되면 <span class="p">방향을 뒤집는다</span></h2>
+  <ul class="pts">
+    <li>처음엔 조건을 걸지 말고 <b>길이 100짜리 뼈대를 아무 조건 없이 하나</b>(조건 걸었다 이상하면 원인이 여럿). 뼈대가 나오면 한 셀 더 내려가면 <b>되돌려 채점하는 고리가 이미 노트북 안에</b></li>
+    <li>그 셀이 서열 여덟 개를 뽑고 각각 예측기에 넣어 원래 뼈대와 얼마나 겹치는지까지 잰다 — <code>plddt:0.903 rmsd:0.610</code>. <b>pLDDT는 0~1로 나오니 100을 곱해</b>(0.903=90.3)</li>
+  </ul>
+  <div class="hl">두 숫자로 남길지 버릴지 — 거리 차이 <b>2옹스트롬 아래</b>, 신뢰도는 <b>단량체 70·바인더 80 이상</b>이 관례. 조건 없는 길이 100은 이 도구가 가장 잘하는 일이라 <b>여덟 개가 거의 다 통과</b> — 무더기로 떨어지면 어딘가 어긋난 것. <b>조건이 붙으면 두 선을 넘는 수가 눈에 띄게 준다.</b></div>
+  <aside>겹치면 그 서열이 실제로 그 모양으로 접힐 가능성이 있다는 뜻, 안 겹치면 서열이 모양을 못 지탱하니 버립니다. 만든 것을 다른 도구로 되돌려 채점하는 이 고리가 설계를 쓸 만하게 만드는 부분입니다.</aside>
+</section>
+
+<!-- 14 아래쪽 길 -->
+<section class="slide" data-part="PART 2">
+  <h2>🌐 아래쪽 길 — 서열 하나로 <span class="g">공개 주소에서</span></h2>
+  <p>그래픽카드를 못 받았어도 삼십 초면 구조 하나는 손에 받고 간다. 친척을 안 찾고 서열 하나로 접는 쪽이 공개 주소로 열려 있어 로그인·카드 없이 한 줄.</p>
+  <pre>curl -X POST --data "MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG" https://api.esmatlas.com/foldSequence/v1/pdb/ -o ubq.pdb</pre>
+  <div class="big">방법이 다른 두 모델이 <span class="y">같은 세 자리</span>를 짚는다<small>한쪽은 여러 종 정렬까지, 한쪽은 서열 하나 — 흔들린다고 지목한 꼬리가 같다</small></div>
+  <div class="hl">1초쯤에 파일이 떨어지고, 자리마다 확신도는 <b>0~1로 적혀 100을 곱해 읽는다</b>. 평균 90쯤, 70 아래는 사슬 뒤쪽 끝 <b>셋</b>뿐 — <b>그 꼬리가 실제로 흐물거린다는 근거가 하나 더 붙는다.</b> 그래픽카드를 못 받은 것이 이 판단을 막지 못한다.</div>
+  <aside>남의 서버를 빌리는 것이라 붐비면 느려지거나 안 될 수 있습니다. 열려 있다는 말과 지금 이 자리에서 돌아간다는 말이 갈리는 자리가 여기에도 있습니다.</aside>
+</section>
+
+<!-- 15 세포 무엇을 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔬 세포 영상 — <span class="g">무엇을 시키는지</span> 먼저</h2>
+  <p>사진 한 장을 영역 여럿으로 쪼개는 것이 <b>분할</b>(segmentation). 밝기 문턱을 잡던 고전 방법은 세포가 겹치거나 모양이 제각각이면 무너졌고, 그래서 사진마다 값을 손으로 맞췄다(현미경·염색법이 바뀌면 또 안 맞음).</p>
+  <div class="grid2">
+    <div class="box"><h3 class="b">그대로 쓰는 길</h3><p style="margin:0">모델을 손대지 않고 <b>내 자료를 보여 주기만</b>. 표를 통째로 밀어 넣던 그 방식</p></div>
+    <div class="box"><h3 class="g">이어 학습시키는 길</h3><p style="margin:0">그 모델을 출발점 삼아 <b>내 분야 자료로 조금 더</b>. 맨바닥보다 자료·시간이 자릿수 다르게 적게</p></div>
+  </div>
+  <div class="hl">세포 쪽은 <b>이어 학습으로 만들어졌고 여러분은 그 결과물을 그대로 쓰는 길로 받는다</b> — 이미지에서 무엇이든 오려 내는 큰 모델을 현미경용으로 이어 학습시킨 것이 지금 판. 온갖 현미경 사진을 미리 배운 모델에 내 사진 한 장을 보여 주면 값 맞출 필요 없이 경계가 나온다.</div>
+  <aside>🔬 장면 — 원료 안전성 시험 담당자가 배양 접시 24칸 사진에서 칸마다 살아 있는 세포를 센다. 예전엔 눈으로 세거나 문턱 맞추느라 오후가 갔고, 지금은 24장을 한 번에 넣고 이상한 칸만 다시 봅니다.</aside>
+</section>
+
+<!-- 16 cellpose -->
+<section class="slide" data-part="PART 2">
+  <h2>🧫 돌려 보고 <span class="g">판단</span>한다 — cellpose</h2>
+  <pre>cellpose로 세포 영상 분할을 해 주세요. GPU 없이 CPU로 고정.
+- 사진은 skimage.data.human_mitosis() 를 쓰되 왼쪽 위 128픽셀만 잘라
+  넣으세요: skimage.data.human_mitosis()[:128, :128]
+- 모델 준비 시간과 한 장 처리 시간을 따로 재서 찍고
+- 찾은 개수를 알려 주고, 넣은 사진 위에 윤곽선을 겹쳐 그린 그림을 저장</pre>
+  <p style="margin:0">설치 <code>pip install cellpose</code> 뒤 <b>세션을 다시 시작</b>(수치 라이브러리를 높은 판으로 올려, 안 하면 <code>cannot import name '_center'...</code>). 128픽셀 조각 한 장에 약 3분(원본 512픽셀은 30분 가까이), 최대 메모리 2.2GB, 핵 25개 안팎.</p>
+  <table class="t">
+    <tr><th>볼 것 (윤곽선 그림을 눈으로)</th></tr>
+    <tr><td>붙은 핵 둘을 하나로 묶었나 · 하나를 둘로 쪼갰나 · 가장자리 걸친 것 처리 · 먼지를 핵으로 셌나</td></tr>
+  </table>
+  <div class="hl">가장자리에 걸린 걸 셀지 말지는 <b>도구가 대신 못 정한다</b>. 개수만 받아 표에 옮기면 이 넷이 전부 안 보인다 — 그림을 함께 보게 시키는 줄이 그래서 있다.</div>
+  <aside>이 모델은 CPU에서 사진 넓이에 거의 비례해 시간을 먹어, 한 변을 절반 줄이면 시간은 세 배쯤 줄어듭니다. 원본을 통째로 보려면 그래픽카드를 켜는 쪽이 확실합니다.</aside>
+</section>
+
+<!-- 17 cellpose 라이선스 -->
+<section class="slide" data-part="PART 2">
+  <h2>⚖️ 코드·가중치·학습 자료가 <span class="r">따로 논다</span></h2>
+  <ul class="pts">
+    <li>코드는 BSD 3조항으로 자유로운데, 저장소 설명이 <b>딸려 오는 학습된 모델은 비상업 조건 자료로 학습됐다</b>고 밝힌다. 그런데 정작 <b>가중치가 올라간 곳의 조건 표시는 BSD 3조항</b></li>
+    <li><b class="r">학습 자료의 조건이 가중치까지 따라오는지를 저장소가 답해 주지 않는다</b> — 회사 제품에 넣을 거면 이 자리가 걸리고, 답이 안 적혀 있다는 사실 자체를 법무에 넘기는 게 빠르다</li>
+  </ul>
+  <div class="hl">배지도 어긋난다 — README를 눈으로 보면 배지에 BSD 3조항인데, 원문을 열면 그 옆에 <code>Licence: GPL v3</code>라는 옛 글자가 남아 있다. <b>배지는 설정을 읽어 자동 생성, 옆 글자는 사람이 적은 것</b>이라 둘이 어긋난다. 조건을 볼 때 배지가 아니라 <b>LICENSE 파일과 모델 카드</b>를 여는 이유.</div>
+  <aside>코드와 가중치와 학습 자료의 조건이 따로 논다는 것을 실물로 보여 주는 사례입니다.</aside>
+</section>
+
+<!-- 18 안 될 때 -->
+<section class="slide" data-part="PART 2">
+  <h2>🩹 안 될 때</h2>
+  <table class="t">
+    <tr><th>증상</th><th>무엇을</th></tr>
+    <tr><td>그래픽카드가 안 잡힌다</td><td>흔한 일. 아래쪽 길로. 시간이 지나 다시 시도해도</td></tr>
+    <tr><td>서열 검색이 오래 멈춤</td><td>검색 서버가 붐빔. 기다리거나 ESMFold 노트북으로</td></tr>
+    <tr><td>구조가 온통 노랗다</td><td>잘못이 아니라 모델이 자신 없다는 뜻 — 그 자체가 결과</td></tr>
+    <tr><td>세포 분할이 3분 넘음</td><td>사진을 안 잘랐을 것. <code>[:128, :128]</code> 확인(원본은 29분)</td></tr>
+    <tr><td><code>numpy</code> 알 수 없는 오류</td><td>설치 뒤 세션 재시작을 안 함 — 재시작하고 설치 셀 다음부터</td></tr>
+    <tr><td>핵이 너무 적게 잡힘</td><td>크기 자동인지 확인, 안 되면 대략 지름을 직접 지정</td></tr>
+  </table>
+  <aside>중간 셀부터 실행하면 변수가 없다고 나옵니다 — 이 노트북들은 위에서부터 순서대로 돌려야 합니다.</aside>
+</section>
+
+<!-- 19 핵심 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이 덱의 <span class="g">핵심 정리</span></h2>
+  <table class="t">
+    <tr><th>개념</th><th>한 문장</th></tr>
+    <tr><td>서열은 문장</td><td>DNA·단백질은 글자 서열이라 문장용 구조가 그대로 옮겨 간다</td></tr>
+    <tr><td>구조 예측</td><td>진화(여러 종 정렬)에서 3차원 힌트 — <b>친척을 얼마나 찾느냐</b>가 결과를 가른다</td></tr>
+    <tr><td>pLDDT</td><td>자리마다 확신도 — <b>어느 부분을 믿고 의심할지</b>를 자리 단위로</td></tr>
+    <tr><td>방향 뒤집기</td><td>확산(뼈대)+그래프(서열), <b>되돌려 채점하는 고리</b>로 후보를 줄인다</td></tr>
+    <tr><td>세포 분할</td><td>이어 학습된 걸 그대로 받아 씀 — <b>개수만 말고 윤곽 그림을 본다</b></td></tr>
+    <tr><td>조건이 따로</td><td>코드·가중치·학습 자료가 <b>따로 논다</b>(cellpose·AF3·Evo2)</td></tr>
+  </table>
+  <aside>확산과 그래프가 여기서 얼굴을 내밀었고, 다음 덱에서 그 둘이 분자·재료·원자·기상으로 그대로 번집니다.</aside>
+</section>
+
+<!-- 20 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> Geneformer가 세포를 "문장처럼" 다룬다는 게 무슨 뜻인가? 왜 발현량이 아니라 <b>순위</b>인가?</div>
+    <div class="q"><b>Q2.</b> 구조 예측에서 <b>진화(다중서열정렬)</b>가 왜 3차원 힌트가 되나?</div>
+    <div class="q"><b>Q3.</b> <b>pLDDT</b>가 있어서 이 도구가 실무에 쓰이는 이유는?</div>
+    <div class="q"><b>Q4.</b> 없던 단백질을 지을 때 확산과 그래프를 <b>나누는</b> 이유, 그리고 되돌려 채점하는 고리의 역할은?</div>
+    <div class="q"><b>Q5.</b> Evo 2가 조건은 열렸는데 무료 코랩에서 못 도는 이유는?</div>
+  </div>
+  <aside>Q3과 Q4가 이 갈래의 핵심입니다.</aside>
+</section>
+
+<!-- 21 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 세포 하나에서 <b>유전자를 발현량 순으로 줄 세워 그 순서를 문장처럼</b> 다룬다. 발현량 절대치는 측정 조건에 크게 흔들려도 <b>순위는 덜 움직여서</b>.</div>
+    <div class="q a"><b>A2.</b> 여러 종에서 <b>멀리 떨어진 두 자리가 함께 변해 온 흔적</b>은 접힌 상태에서 맞닿아 있어 접촉을 유지하려 함께 진화한 것 → 두 자리가 3차원에서 가깝다는 힌트.</div>
+    <div class="q a"><b>A3.</b> 구조를 통째로 믿거나 안 믿거나가 아니라 <b>어느 부분을 믿고 어느 부분을 의심할지를 자리 단위로</b> 알 수 있어서.</div>
+    <div class="q a"><b>A4.</b> 뼈대는 <b>연속 좌표라 확산</b>, 서열은 <b>스무 개 중 하나 고르기(이산)라 그래프</b>가 맞다. 되돌려 채점하는 고리는 <b>실험할 후보를 수천에서 몇십으로</b> 줄인다.</div>
+    <div class="q a"><b>A5.</b> 라이선스가 아니라 <b>카드</b> — 70억짜리는 13.8GB라 자리가 안 남고, 10억짜리는 서버 카드에만 있는 <b>FP8</b>을 써서 못 쓴다.</div>
+  </div>
+  <aside>A4의 "되돌려 채점"은 네 번째 발상(검증 가능한 보상)의 첫 얼굴입니다.</aside>
+</section>
+
+<!-- 22 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>읽고, 짓고, 되돌려 채점한다 🎗️</h1>
+    <div class="big" style="margin-top:26px">서열에서 모양을, 방향을 뒤집어 없던 것을<br>만든 것을 <span class="y">예측기에 되돌려</span> 거른다<br><br>다음 — 같은 뼈대가 분자·재료·원자·기상으로</div>
+    <p class="sub" style="margin-top:24px">서열을 읽고 짓는다 — 여기까지</p>
+  </div>
+  <aside>다음 덱(diffusion-and-graph)에서 확산이 약물 분자·결정 구조로, 그래프가 원자 사이 힘·전지구 기상으로 갈아탑니다. 흩뜨리는 것만 바뀝니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>
