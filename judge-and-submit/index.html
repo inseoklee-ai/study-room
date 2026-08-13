@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>안 될 때, 더 낫게, 고르는 눈 · 판정·과제·마무리</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.77rem,1.28vw,.94rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.9rem);
+    color:var(--ink);overflow:auto;max-height:52vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 7 · 공간을 다루는 AI (⑦⑧⑨+제출)</span>
+    <h1 style="margin:18px 0">안 될 때, 더 낫게,<br>고르는 눈</h1>
+    <p class="sub">검은 자리 · PSNR/SSIM/LPIPS · 과제 · 라이선스 · 마무리</p>
+  </div>
+  <aside>강의 7의 마지막 덱입니다. 판정하는 눈(⑦)과 과제(⑧), 그리고 도구가 바뀌어도 남는 것(⑨)과 제출 루브릭을 묶었습니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 이 덱의 <span class="g">세 자리</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--red)"><small>⑦</small><b class="r">안 될 때·더 낫게<br>검은 자리·PSNR</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>⑧</small><b class="b">과제<br>공개할 공간</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>⑨+제출</small><b class="g">고르는 눈<br>라이선스</b></div>
+  </div>
+  <ul class="pts">
+    <li>도구는 계속 바뀐다 — 남는 것은 <b>주소 하나와 무엇을 갈아 끼울지 고르는 눈</b></li>
+    <li>페이지는 다시 안 만든다 — <b>파일만 갈아 끼우면</b> 된다</li>
+  </ul>
+  <div class="hl">🎯 한 줄 — <b>유명한 것과 쓸 수 있는 것은 다르다.</b> 크기는 곱셈으로 세고, 남이 잰 숫자는 조건과 함께 읽는다.</div>
+  <aside>강의 7 전체(①~⑨)의 매듭이 이 덱에서 지어집니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">안 될 때와 더 낫게</h2>
+  <p style="margin-top:11px">검은 자리 · 촬영 실패 · 세 가지 자 · 개선 3길</p><span class="who">⑦</span></div>
+  <aside>화면을 열어 크게 돌려 보면 아직 검은 자리가 남아 있습니다. 처음에 눈에 담아 둔 그것이고, 여기서 이유를 풉니다.</aside>
+</section>
+
+<!-- 4 검은 자리 -->
+<section class="slide" data-part="PART 1">
+  <h2>⬛ 검은 자리 — <span class="g">안 찍힌 면에는 값이 없다</span></h2>
+  <ul class="pts">
+    <li>24장을 찍었어도 <b>카메라가 그쪽을 안 지나갔다</b> — 깊이 지도는 카메라가 본 면 한 겹만 준다. 소파 뒷면은 찍히지도 않았다</li>
+    <li>찍히지 않은 것에 값이 있을 리 없고, 값이 없으면 놓을 알갱이도 없다 — <b>그릴 게 없어서 검은 것이지 잘못 그려서가 아니다</b></li>
+  </ul>
+  <div class="big">소파 뒤 · 천장 구석 · <span class="y">걸어 들어온 쪽의 벽</span><small>방에 들어서며 찍기 시작하면 등 뒤가 되는 면이 한 번도 안 찍힌다</small></div>
+  <div class="hl">메우는 길 둘 — <b>그쪽을 지나가며 한 번 더 찍기</b>(빠르고 정직), 없는 걸 지어내게 하기(끝에서 이름만). 앞의 것이 훨씬 낫다.</div>
+  <aside>여러분 화면에서 검은 곳이 어디일지는 대개 짐작이 갑니다.</aside>
+</section>
+
+<!-- 5 이렇게 찍으면 안 나옴 -->
+<section class="slide" data-part="PART 1">
+  <h2>🚫 이렇게 찍으면 <span class="r">안 나온다</span> — 셋</h2>
+  <table class="t">
+    <tr><th>실패</th><th>왜</th></tr>
+    <tr><td>제자리에서 몸만 돌리기</td><td><b>가장 크게 무너짐.</b> 렌즈가 안 움직여 시차가 안 쌓임 — 퍼진 정도 <b>0.1 아래면 사실상 한자리</b>(걸어 다니면 0.3)</td></tr>
+    <tr><td>너무 빨리 움직이기</td><td>번진 사진에선 같은 지점을 못 찾아 어긋남을 못 잰다</td></tr>
+    <tr><td>매끈한 단색 면</td><td>잡을 표식이 없다. 유리·거울은 더 나빠 — 비친 상이 카메라 따라 움직여 <b>점이 방 밖으로 날아간다</b></td></tr>
+  </table>
+  <div class="hl">그래서 각 축 위아래 <b>0.5% 밖으로 튄 점을 버리는</b> 걸음이 앞에 있다 — 점 몇 개가 장면 전체를 몇 배로 키운다. 폰 화질은 <b>1080p</b>로(4K는 100MB 넘어 올리기만 한참).</div>
+  <aside>퍼진 정도가 0.1 아래로 나오면 화면 볼 것도 없이 몇 걸음 더 다니며 다시 찍는 게 가장 빠른 길입니다.</aside>
+</section>
+
+<!-- 6 무엇으로 재나 -->
+<section class="slide" data-part="PART 1">
+  <h2>📏 잘됐는지를 <span class="g">무엇으로 재나</span> — 자 셋</h2>
+  <p>새 시점 합성 재는 법은 정해져 있다 — <b>찍어 둔 사진 몇 장을 일부러 빼 놓고</b> 나머지로만 만든 뒤, 빼 놓은 각도의 화면을 만들게 해서 <b>감춰 둔 진짜 사진과 나란히 견준다</b>(한 번도 못 본 각도라 정직한 시험).</p>
+  <table class="t">
+    <tr><th>자</th><th>무엇을 재나</th><th>좋은 쪽</th></tr>
+    <tr><td>PSNR</td><td>화소 값이 원본과 얼마나 다른가(데시벨)</td><td>높을수록</td></tr>
+    <tr><td>SSIM</td><td>밝기보다 무늬·형태가 얼마나 닮았나</td><td>높을수록</td></tr>
+    <tr><td>LPIPS</td><td>신경망 특징으로 사람 눈에 얼마나 비슷한가</td><td><b>낮을수록</b></td></tr>
+  </table>
+  <div class="hl">PSNR의 데시벨은 <b>배수를 로그로 눌러 적는 눈금</b> — 값이 3 오르면 어긋남이 절반, 6 오르면 4분의 1. 그래서 <b>30→33과 33→36의 값어치가 같다</b>.</div>
+  <aside>📚 세 자를 나란히 푼 글: 이미지/비디오 품질 평가 지표(PSNR·SSIM·MOS·LPIPS), velog.</aside>
+</section>
+
+<!-- 7 왜 셋 + 못 재는 -->
+<section class="slide" data-part="PART 1">
+  <h2>🤔 왜 <span class="g">셋이나</span> 필요하고, 무엇은 <span class="r">못 재나</span></h2>
+  <ul class="pts">
+    <li>화소를 하나씩 빼서 재면 <b>살짝 흐린 그림이 유리</b>하다(모든 화소를 조금씩만 틀림). 무늬는 살아 있는데 위치가 밀린 그림은 화소 차이가 크게 나온다</li>
+    <li>그런데 사람 눈엔 <b>흐린 쪽이 훨씬 거슬리고</b> 밀린 쪽은 못 알아챈다 → 그래서 LPIPS로 다시 재면 <b>순위가 뒤집히는 일이 흔하다</b>. 논문이 셋을 나란히 싣는 이유</li>
+  </ul>
+  <div class="big"><span class="y">셋 다 감춰 둔 진짜 사진이 있어야 한다</span><small>그러니 검은 자리(아무도 안 찍은 면)는 이 자들로 못 잰다 — 대어 볼 사진이 없다</small></div>
+  <div class="hl">문턱도 없다 — 장면·해상도가 바뀌면 숫자가 통째로 움직인다. <b>조건을 똑같이 맞춰 놓고 잰 두 값의 차이만 뜻이 있다.</b> 오늘 만든 걸 판정하는 자는 여전히 <b>눈</b>(검은 점=작은 알갱이, 구멍=성긴 점, 앞뒤 뒤집힘=정렬 순서, 천장이 발밑=부호). 자 이름은 <b>남이 낸 결과를 읽기 위해서</b>.</div>
+  <aside>정지 화면 한 장을 재는 것이라, 각도를 바꿀 때의 밝기 변화 같은 성질은 시점을 갈라 여러 각도에서 따로 재야 잡힙니다. 📚 LPIPS: The Unreasonable Effectiveness of Deep Features, arXiv:1801.03924.</aside>
+</section>
+
+<!-- 8 더 낫게 1 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔧 더 낫게 · 길 1 — <span class="g">재서 채우는 대신 배우게</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>우리가 한 것 (재서 채우기)</h3><p style="margin:0">모델이 준 좌표 그대로, 크기는 규칙 하나로, 색은 사진에서. <b>한 번 계산하면 끝이라 빠르다</b></p></div>
+    <div class="box"><h3 class="g">배우게 하기</h3><p style="margin:0">그려 보고 → 실제 사진과 견주고 → 어긋난 만큼 값을 고친다. 없는 곳엔 <b>쪼개고</b>, 쓸모없으면 <b>지운다</b></p></div>
+  </div>
+  <ul class="pts">
+    <li>둘이 갈리는 곳이 <b>카메라가 안 지나간 곳</b> — 재서 채우면 비어 있고, 학습을 걸면 알갱이가 옮겨 다니며 어느 정도 메운다</li>
+    <li><b>각도별 색 45칸도 채워진다</b> → 알갱이가 236~248바이트가 되고, 줄일 때 그 180바이트를 자를지가 고를 거리로 생긴다</li>
+  </ul>
+  <div class="hl">🔎 검색어는 <b>gsplat</b>(Apache-2.0) — 알갱이를 학습으로 만드는 계산 커널. 원 논문 구현과 결과는 같은 계열, 조건만 다르다.</div>
+  <aside>📚 nerfstudio-project/gsplat, GitHub. 값만 고치는 게 아니라 개수 자체를 바꾸는 게 핵심입니다 — 서로 다른 방향으로 당겨지는 알갱이는 쪼개고, 흐린 알갱이는 지웁니다.</aside>
+</section>
+
+<!-- 9 더 낫게 2 -->
+<section class="slide" data-part="PART 1">
+  <h2>📱 더 낫게 · 길 2 — <span class="g">폰 앱으로</span> 만드는 자리를 옮긴다</h2>
+  <ul class="pts">
+    <li>찍어서 알갱이 파일 만들기까지를 <b>폰 안에서</b> 끝내는 앱 — <b>Scaniverse</b>(한국 스토어 무료·한국어). 둘레를 돌면 찍히고 무거운 계산도 폰에서, <code>.spz</code>·<code>.ply</code>로 내보냄. <b>받는 쪽은 이미 내 주소에 있으니 파일만 갈아 끼운다</b></li>
+    <li>단 2026년 4월부터 갈래가 둘 — <b>폰 안 처리는 지금도 무료</b>, 새로 붙은 클라우드 처리는 계정 몫을 깎는다</li>
+  </ul>
+  <div class="hl"><b>Polycam</b>도 한국어·촬영 무료지만, 요금제를 열면 <b>무료로 내보내는 건 <code>.gltf</code> 하나</b>이고 스플랫 파일은 위 등급부터. <b>앱 소개에 형식 이름이 죽 적혀 있어도 무료로 되는지는 요금제 쪽을 봐야 한다.</b></div>
+  <aside>📚 Scaniverse(App Store·Google Play), Polycam Pricing. 열었을 때 어느 쪽으로 들어가고 있는지를 보십시오.</aside>
+</section>
+
+<!-- 10 더 낫게 3 -->
+<section class="slide" data-part="PART 1">
+  <h2>🛠️ 더 낫게 · 길 3 — <span class="g">방을 보는 것에서 고치는 것으로</span></h2>
+  <table class="t">
+    <tr><th>일</th><th>이름 · 무엇</th></tr>
+    <tr><td>물체를 잡아내기</td><td><b>3차원 분할</b> — 카메라 위치가 이미 나와 있어 화면에 칠한 표시를 알갱이에 되짚어 붙인다. 알갱이마다 소속을 다는 <b>정체성 부호</b>, 말로 부르는 <b>개방 어휘 분할</b></td></tr>
+    <tr><td>지우고 뒤 메우기</td><td><b>3차원 인페인팅</b> — 어려운 건 그림 실력이 아니라 <b>일관성</b>(옆으로 돌아도 안 어긋나야)</td></tr>
+    <tr><td class="r">아무도 안 찍은 곳 지어내기</td><td><b>안 보인 자리</b>(unseen region) — 참고할 화소가 한 장도 없다. <b>되찾는 게 아니라 지어내는 일이라 물어볼 상대가 없다</b></td></tr>
+  </table>
+  <div class="hl">🔬 이름만 — SAGS·Gaussian Grouping·<b>GaussianCut</b>(추가 학습 없이 곧바로)·GScream·GaussianEditor·AuraFusion360·Inpaint360GS. 그리고 <b>SAM 3</b>("빨간 의자"라고 적으면 전부 오려 냄)·<b>SAM 3D</b>(사진 한 장을 물체별 입체로, 오늘과 같은 <code>.ply</code>).</div>
+  <aside>대부분 추가 최적화를 돌려 무료 등급 GPU에 바로 얹을 물건은 아닙니다. SAM 3D는 문서가 요구하는 그래픽 메모리가 32GB부터이고 자체 라이선스라 회사 일엔 열어 읽어야 합니다.</aside>
+</section>
+
+<!-- 11 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">공개할 수 있는 공간을 골라 올립니다</h2>
+  <p style="margin-top:11px">망설임 없는 것을 하나 · 네 걸음</p><span class="who">⑧ 과제</span></div>
+  <aside>주소에 올라간 게 자기 방이면 링크 보낼 때마다 망설이게 됩니다. 과제는 그 망설임이 없는 것을 하나 만드는 일입니다. 페이지는 이미 있으니 새로 만들 게 없고, 바뀌는 건 찍는 자리와 그 자리를 고르는 판단입니다.</aside>
+</section>
+
+<!-- 12 1단계 -->
+<section class="slide" data-part="PART 2">
+  <h2>1️⃣ <span class="g">찍어도 되는 곳</span> — 두 조건을 동시에</h2>
+  <div class="grid2">
+    <div class="box"><h3 class="b">남에게 보여도 되는 곳</h3><p style="margin:0">주소를 아는 누구나 연다 — 얼굴·번호판·문패·손님·서류가 들어오면 곤란. 사유지·미술관·매장은 촬영 제한 확인(안 되면 딴 데로)</p></div>
+    <div class="box"><h3 class="g">시차가 쌓이는 곳</h3><p style="margin:0">벽·물건이 가까워 몇 걸음에 크게 밀리고 무늬가 넘치는 곳. <b>전망대 먼 풍경은 둘 다 사라진다</b> — 둘레를 돌 수 있거나 감싸인 자리를</p></div>
+  </div>
+  <ul class="pts">
+    <li>밖에서 새로 생기는 함정 둘 — <b>움직이는 것</b>(사람·나뭇잎·물은 그 자리에서 어긋남)과 <b>빛</b>(해를 마주 보면 하얗게 날아가 무늬가 없다. 등지고 돌거나 흐린 날)</li>
+  </ul>
+  <div class="hl">서로 다른 조건이라 <b>하나만 맞으면 과제가 안 끝난다.</b></div>
+  <aside>매끈한 유리벽·잔잔한 물·하늘·고른 잔디는 어디서든 안 나옵니다 — 잡을 무늬가 없어 같은 지점을 못 찾습니다.</aside>
+</section>
+
+<!-- 13 고를 만한 곳 -->
+<section class="slide" data-part="PART 2">
+  <h2>📍 고를 만한 곳 <span class="g">예시</span></h2>
+  <table class="t">
+    <tr><th>곳</th><th>왜 나오나</th><th>조심할 것</th></tr>
+    <tr><td>공원 조형물·정자</td><td>둘레를 한 바퀴 돌 수 있어 시차가 크게</td><td>받침의 이름, 옆 벤치 사람</td></tr>
+    <tr><td>벽화·간판 있는 골목</td><td>벽이 가까워 크게 밀리고 무늬 많음</td><td>주택가면 문패·호수</td></tr>
+    <tr><td>야외 계단참·난간</td><td>형태 뚜렷, 그늘·빛이 갈려 무늬가 삼</td><td>오르내리는 사람</td></tr>
+    <tr><td>열린 로비·통로</td><td>실내라 빛 고르고 벽이 가까움</td><td>촬영 정책과 사람</td></tr>
+  </table>
+  <div class="hl">📷 찍는 규칙은 그대로 — <b>걸어 다니며 15~20초, 천천히, 1080p.</b> 대상 둘레를 한 바퀴, 감싸인 자리면 안에서 크게 원을 그리며.</div>
+  <aside>정리 안 된 곳이 오히려 무늬가 많아 잘 나옵니다.</aside>
+</section>
+
+<!-- 14 2~4단계 -->
+<section class="slide" data-part="PART 2">
+  <h2>2️⃣3️⃣4️⃣ 찍어서 → <span class="g">형식 셋 비교</span> → 올리고 제출</h2>
+  <ul class="pts">
+    <li><b>2단계</b> — 앞 노트를 처음부터 다시 돌린다(24장 뽑기 → 점 → 알갱이 .ply). 판정도 그대로: 퍼진 정도 <b>0.1 아래면 다시 찍기</b></li>
+    <li><b>3단계</b> — <code>.compressed.ply</code>·<code>.sog</code>·<code>.spz</code> 셋으로 변환해 <b>파일 크기·알갱이 개수·알갱이당 바이트</b> 표로. 셋 다 <b>알갱이 개수가 같아야</b>(다르면 솎아 낸 것)</li>
+    <li><b>4단계</b> — 줄인 파일을 올리고 Pages를 켜 <b>Pages 주소 + 저장소 주소</b> 두 줄 제출. 보내기 전 <code>/scene.sog</code>로 파일이 직접 내려오는지 확인</li>
+  </ul>
+  <pre>my-open-space/
+├── index.html      앞에서 만든 페이지 그대로
+├── scene.sog       줄인 알갱이 파일
+├── README.md       주소·고른 근거·촬영값·형식표·안 나온 자리
+└── shots/viewer.png  화면 갈무리 한 장</pre>
+  <div class="hl">README에 채울 것 — <b>공개해도 되는 근거</b>, 길이·1080p·24장, <b>퍼진 정도(0.1 기준선)</b>, 나온 점, 형식별 크기·개수·<b>알갱이당 바이트</b>, 폰 첫 화면 초, <b>안 나온 자리와 이유</b>.</div>
+  <aside>저장소를 새로 만들어도, 이미 있는 저장소에 폴더를 더해도 됩니다. 100MiB 넘는 파일은 애초에 안 올라갑니다.</aside>
+</section>
+
+<!-- 15 채점 -->
+<section class="slide" data-part="PART 2">
+  <h2>✅ 무엇을 보고 <span class="g">채점하나</span> — 셋</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>주소가 열리고 남에게 보낼 수 있나</b> — 폰에서 뜨는지, 남의 얼굴·문패가 안 들어갔는지, 고른 근거가 README에 한 줄</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>눈이 아니라 숫자로 판정했나</b> — 퍼진 정도·알갱이당 바이트·형식별 크기와 개수. <code>.ply</code>÷개수가 68이면 각도별 색이 빈 것(정상)</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>안 나온 자리를 설명할 수 있나</b> — 검은 얼룩·앞뒤 뒤집힘을 <b>시차·정렬 순서</b> 같은 낱말로</span></div>
+  </div>
+  <div class="big">끝까지 못 가도 괜찮다<small>주소에 올라간 건 그대로 남는다 — 어디서 왜 막혔는지 설명할 수 있으면 충분하다</small></div>
+  <aside>제출은 파일 또는 URL 중 하나로만, 제출 후 수정 불가입니다.</aside>
+</section>
+
+<!-- 16 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">도구는 바뀌고 고르는 눈은 남습니다</h2>
+  <p style="margin-top:11px">무엇이 어디에 남나 · 라이선스 · 다음에 볼 셋</p><span class="who">⑨ + 프로젝트 제출</span></div>
+  <aside>주소에 방 하나가 올라가 있고, 그 페이지는 파일 이름 하나만 가리킵니다. 더 나은 파일이 생기면 그 파일만 갈아 끼우면 됩니다.</aside>
+</section>
+
+<!-- 17 무엇이 어디에 -->
+<section class="slide" data-part="PART 3">
+  <h2>💾 무엇이 <span class="g">어디에 남았나</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="r">콜랩 — 사라진다</h3><p style="margin:0">올린 영상·프레임 24장·점 320만·217.5MB 중간 파일이 <b>세션 안에만</b>. 다시 하려면 영상부터. 단 <b>저절로 안 꺼진다</b> — <code>colab stop</code>이나 런타임 끊기(안 끄면 기계를 계속 문다)</p></div>
+    <div class="box"><h3 class="g">공개 주소 — 남는다</h3><p style="margin:0">15.3MB 파일은 <b>지우기 전까지 그 자리</b>. 링크를 안 알려 줘도 <b>주소를 아는 사람은 들어온다</b>. 그려 놓으면 사람이 알아보는 건 사진과 똑같다</p></div>
+  </div>
+  <div class="hl">방을 찍는 건 <b>그 짧은 시간에 든 것을 전부 찍는 것</b> — 문서·명패·우편물이 함께 올라갔을 수 있다. <b>한 번 열어 천천히 돌려 보고, 걸리면 치우고 다시 찍어 파일만 갈아 끼운다.</b> 배우는 데엔 무엇을 찍었는지가 상관없다.</div>
+  <aside>그래서 마지막으로 다룰 것이 고르는 눈입니다 — 갈아 끼울 파일을 어디서 어떻게 만들지는 계속 달라지는데, 무엇을 봐야 하는지는 안 달라집니다.</aside>
+</section>
+
+<!-- 18 라이선스 표 -->
+<section class="slide" data-part="PART 3">
+  <h2>⚖️ 오늘 쓴 것들의 <span class="g">조건</span></h2>
+  <table class="t">
+    <tr><th>무엇</th><th>라이선스</th><th>회사 일에</th></tr>
+    <tr><td>MapAnything <code>-apache</code> 판</td><td>Apache-2.0</td><td>됨. <b>-apache 안 붙은 판은 비상업</b></td></tr>
+    <tr><td>three.js · Spark · splat-transform</td><td>MIT</td><td>됨</td></tr>
+    <tr><td>gsplat (학습으로 만드는 길)</td><td>Apache-2.0</td><td>됨</td></tr>
+    <tr><td class="r">원본 3D 가우시안 스플래팅 구현</td><td class="r">자체 연구용 조건</td><td class="r"><b>안 됨</b></td></tr>
+  </table>
+  <div class="big"><span class="y">원본 구현만 안 된다</span>는 그 줄이 오늘 가져갈 것</div>
+  <aside>자기 서비스에 붙일 사람에게는 이 표가 곧 판단 근거입니다.</aside>
+</section>
+
+<!-- 19 유명한 게 못 쓰는 것 -->
+<section class="slide" data-part="PART 3">
+  <h2>🏆 <span class="r">제일 유명한 것</span>이 못 쓰는 것이다</h2>
+  <ul class="pts">
+    <li>안 된다고 적힌 그것이 이 방식을 처음 내놓은 <b>논문의 구현</b>(별 2만 개 넘고 검색하면 제일 먼저) — <b>"연구·평가 목적으로만"</b>, 상업이면 기관에 먼저 연락</li>
+    <li>같은 함정이 복원 모델에도 — <b>이름 뒤 낱말 하나</b>(-apache)가 조건을 가른다. 크기별로 갈리기도(큰 거 받으면 비상업). 조건과 별개로 <b>이름·소속 신청·승인 관문</b>도 있다</li>
+  </ul>
+  <div class="box">
+    <p style="margin:0">🌍 사진·글에서 입체를 만드는 한 모델의 조건 문서 — <b>"THIS LICENSE ... DOES NOT APPLY IN THE EUROPEAN UNION, UNITED KINGDOM AND SOUTH KOREA"</b> — 허용 지역에서 <b class="r">한국이 빠져 있다</b>.</p>
+  </div>
+  <div class="hl">가져갈 것은 결론이 아니라 <b>조건 문서에 이런 문장이 있을 수 있다는 사실</b>. 업무에 쓸 것이면 법무 검토를. 깨끗한 대안도 있다 — <b>TRELLIS.2</b>(코드·가중치 MIT, 단 메모리 24GB↑). <b>모르고 쓰면 문제, 알고 고르면 대안이 있다.</b></div>
+  <aside>🔬 코드와 가중치가 갈리고(코드는 상업 OK인데 가중치는 비상업), 겉 라벨만 보면 안 되며(MIT 안에 연구용 덩어리), 저장소 자동 판정은 틀립니다 — 파일을 열어 읽는 것 말고 방법이 없습니다. 📚 graphdeco-inria/gaussian-splatting · Tencent-Hunyuan/Hunyuan3D-2 · microsoft/TRELLIS.2.</aside>
+</section>
+
+<!-- 20 형식은 바뀌고 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔄 형식은 <span class="g">계속 바뀐다</span> — 그래도 다시 만들 건 적다</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>페이지는 안 만든다</b> — 새 형식은 확장자→형식 이름 대응표에 <b>한 줄 더하면</b> 끝. .sog 하나 때문에 만든 그 표</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>판정 방법도 안 바뀐다</b> — <b>파일 크기 ÷ 알갱이 개수</b>는 형식이 무엇이든 통한다. 앞뒤 뒤집힘, 폰 몇 초도</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>바뀌는 건 변환 명령 한 줄</b> — 도구를 갈아엎지 말고 그 한 줄만 바꿔 크기·개수를 앞의 것과 나란히 적어 견준다</span></div>
+  </div>
+  <div class="big">바뀌는 것은 <span class="y">변환 명령 한 줄</span>뿐</div>
+  <aside>더 작게 담는 방법이 나오면 도구가 먼저 지원하고 남들이 옮겨 갑니다. 그때 다시 만들 게 생각보다 적습니다.</aside>
+</section>
+
+<!-- 21 다음에 볼 셋 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧭 다음에 무엇을 보든 <span class="g">이 셋을 본다</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>웹에 올릴 것은 크기부터 센다</b> — 알갱이당 바이트로 크기가 곱셈으로 나오고, 무엇이 비었는지가 나눗셈으로 갈린다. 크기(기다림)와 개수(부드러움)는 다른 축</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>유명한 것과 쓸 수 있는 것은 다르다</b> — 조건 문서를 연다. 판별·코드/가중치·지역·승인 관문이 갈린다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>남이 잰 숫자는 조건과 함께, 자기 것은 자기 기계에서</b> — 형식·장면마다 배수가 다르고 폰 첫 화면은 기종·회선마다 다르다</span></div>
+  </div>
+  <div class="hl">이 셋은 공간 도구에만 해당하는 게 아니다 — 새 도구를 만날 때마다 <b>같은 곳에서 같은 것</b>을 확인한다. 도구는 바뀌고, 남는 건 <b>주소 하나와 고르는 눈</b>.</div>
+  <aside>들고 나가는 것 — 내 주소에서 도는 방, 판단하는 말(검은 얼룩·알갱이 바이트·무엇이 느린지), 시키는 말(0차 구면 조화·사원수·시그모이드·INRIA 형식·알갱이 반지름).</aside>
+</section>
+
+<!-- 22 루브릭 -->
+<section class="slide" data-part="PART 3">
+  <h2>📋 프로젝트 제출 <span class="g">루브릭</span></h2>
+  <table class="t">
+    <tr><th>학습목표</th><th>평가기준</th></tr>
+    <tr><td>원하는 기능을 서비스에 적절히 최적화</td><td>웹에서 <b>원활하게 3D 이미지를 탐색</b>할 수 있는가</td></tr>
+    <tr><td>AI로 이미지를 3D로 변환</td><td>이미지가 <b>적절하게 3D로 변환</b>되었는가</td></tr>
+    <tr><td>웹으로 3D 서비스를 업로드</td><td>실제 3D 이미지가 <b>웹으로 제출</b>되었는가</td></tr>
+  </table>
+  <div class="hl">제출 방식 — <b>파일 또는 URL 중 한 가지로만</b>(ZIP·PDF·이미지, 최대 5MB), <b>제출 후 수정 불가</b>. 파일이 5MB를 넘거나 .sog면, <b>URL 제출</b>(Pages 주소 + 저장소 주소)이 이 과제에 맞다.</div>
+  <aside>웹 탐색·변환·업로드 셋이 각각 실습의 ⑤·③④·⑤에 대응합니다.</aside>
+</section>
+
+<!-- 23 강의 7 핵심 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 강의 7 <span class="g">전체 핵심</span></h2>
+  <table class="t">
+    <tr><th>배운 것</th><th>한 문장</th></tr>
+    <tr><td>사진과 거리</td><td>셔터가 버린 <b>거리(위치 3칸)</b>를 계산으로 되찾는 일</td></tr>
+    <tr><td>그릇과 알갱이</td><td>스플랫 알갱이 = 반투명 타원. 62값 중 <b>구면 조화가 73%</b></td></tr>
+    <tr><td>실습 세 걸음</td><td>걸어 찍어 점 → 62칸 채워 알갱이 → 줄여서 주소에. <b>화면 전에 숫자로 판정</b></td></tr>
+    <tr><td>일곱 갈래</td><td>막힘·풀이·<b>내준 것</b>으로 읽는다. 오늘 건 가장 나중 길</td></tr>
+    <tr><td>판정하는 눈</td><td>PSNR·SSIM·LPIPS는 <b>진짜 사진이 있어야</b>. 검은 자리는 못 잰다</td></tr>
+    <tr><td>고르는 눈</td><td>크기는 곱셈, <b>유명≠쓸 수 있음</b>(조건 문서), 속도는 어느 기계</td></tr>
+  </table>
+  <aside>도구는 바뀌고, 남는 것은 주소 하나와 무엇을 갈아 끼울지 고르는 눈입니다.</aside>
+</section>
+
+<!-- 24 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 크게 돌리면 <b>검은 자리</b>가 남는 이유와, 메우는 가장 빠른 길은?</div>
+    <div class="q"><b>Q2.</b> PSNR·SSIM·LPIPS를 <b>셋이나</b> 쓰는 이유와, 이 자들이 <b>못 재는 것</b>은?</div>
+    <div class="q"><b>Q3.</b> 과제에서 찍을 곳이 만족해야 할 <b>두 조건</b>은?</div>
+    <div class="q"><b>Q4.</b> 콜랩과 공개 주소 중 <b>무엇이 남고 무엇이 사라지나</b>? 그래서 조심할 것은?</div>
+    <div class="q"><b>Q5.</b> "제일 유명한 것이 못 쓰는 것"은 무슨 뜻이며, 조건 문서에서 <b>갈리는 것</b>들은?</div>
+  </div>
+  <aside>Q2와 Q5가 이 덱의 핵심입니다.</aside>
+</section>
+
+<!-- 25 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> <b>카메라가 그쪽을 안 지나가</b> 값이 없다 — 그릴 게 없어서 검은 것. 메우는 가장 빠른 길은 <b>그쪽을 지나가며 한 번 더 찍기</b>(지어내기보다 정직).</div>
+    <div class="q a"><b>A2.</b> 화소로 재면 흐린 게 유리한데 사람 눈엔 흐린 쪽이 거슬려 <b>LPIPS로 재면 순위가 뒤집힌다</b>. 셋 다 <b>감춰 둔 진짜 사진</b>이 필요해 검은 자리는 못 잰다.</div>
+    <div class="q a"><b>A3.</b> <b>남에게 보여도 되는 곳</b>(얼굴·문패·서류 없음)이면서 <b>시차가 쌓이는 곳</b>(벽·물건이 가깝고 무늬 많음). 하나만 맞으면 과제가 안 끝난다.</div>
+    <div class="q a"><b>A4.</b> <b>콜랩은 세션과 함께 사라지고</b>(안 끄면 기계를 계속 뭄), <b>공개 주소는 지우기 전까지 남는다</b>(주소 아는 사람은 들어옴). 찍기 전 한 바퀴 훑고 걸리면 파일만 갈아 끼운다.</div>
+    <div class="q a"><b>A5.</b> 별 2만 개짜리 <b>원본 구현이 연구·평가용이라 상업엔 못 쓴다</b>. 조건 문서는 <b>판별·코드/가중치·지역·승인 관문</b>으로 갈리고, 자동 라벨은 틀리니 열어 읽어야 한다.</div>
+  </div>
+  <aside>A5는 이 강의가 반복해 온 "유명한 것과 쓸 수 있는 것은 다르다"의 결론입니다.</aside>
+</section>
+
+<!-- 26 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>고르는 눈은 남는다 🧭</h1>
+    <div class="big" style="margin-top:26px">검은 자리는 안 찍힌 것 · 판정엔 진짜 사진이<br><span class="y">유명 ≠ 쓸 수 있음</span> · 크기는 곱셈으로<br><br>강의 7 [프로젝트] 공간을 다루는 AI — 매듭</div>
+    <p class="sub" style="margin-top:24px">안 될 때, 더 낫게, 고르는 눈 — 여기까지</p>
+  </div>
+  <aside>강의 7 완결. 폰 영상 하나에서 3차원 장면을 만들어 공개 주소에 올리기까지, 만드는 손놀림보다 나온 것을 판단하고 고르는 눈을 손으로 익혔습니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>

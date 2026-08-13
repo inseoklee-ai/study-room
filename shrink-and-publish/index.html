@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>줄여서 내 주소에 · 압축·렌더러·배포</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.77rem,1.28vw,.94rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.9rem);
+    color:var(--ink);overflow:auto;max-height:52vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 7 · 공간을 다루는 AI (⑤)</span>
+    <h1 style="margin:18px 0">줄여서<br>내 주소에</h1>
+    <p class="sub">217.5MB → 15.3MB · Spark 렌더러 · GitHub Pages</p>
+  </div>
+  <aside>강의 7의 실습 마지막 걸음(⑤)입니다. 파일을 웹에 올릴 크기로 줄이고, 브라우저에서 그리게 만들어, 아무나 여는 공개 주소에 올립니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 이 덱의 <span class="g">길</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:110px"><small>손에 있는 것</small><b>217.5MB<br>.ply</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px;border-color:var(--gold)"><small>줄이기</small><b>15.3MB<br>.sog</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px;border-color:var(--bl)"><small>화면에</small><b class="b">Spark<br>렌더러</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px;border-color:var(--gr)"><small>공개 주소</small><b class="g">GitHub<br>Pages</b></div>
+  </div>
+  <ul class="pts">
+    <li>줄이는 건 취향이 아니라 <b>지나가야 하는 관문</b> — 이 크기는 안 올라간다</li>
+    <li>화면에 시간의 절반을 쓴다 — <b>떴다고 제대로 된 게 아니다</b></li>
+  </ul>
+  <div class="hl">🎯 한 줄 — <b>파일 크기는 기다림을, 알갱이 수는 부드러움을</b> 정한다. 두 축을 헷갈리면 엉뚱한 데를 손댄다.</div>
+  <aside>여기까지 오면 오늘의 도착점입니다. 그래픽 장치를 못 받았어도 데모 파일로 이 걸음들을 그대로 밟을 수 있습니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">줄여서 올리기</h2>
+  <p style="margin-top:11px">100MiB 관문 · 형식 넷 · 두 축</p><span class="who">압축</span></div>
+  <aside>파일 하나가 217.5MB입니다. 여기서 올리면 된다고 말하고 싶지만, 안 됩니다.</aside>
+</section>
+
+<!-- 4 100MiB -->
+<section class="slide" data-part="PART 1">
+  <h2>🚧 <span class="r">100MiB</span>에서 걸린다</h2>
+  <ul class="pts">
+    <li>올릴 곳은 <b>GitHub Pages</b> — 코드를 올리면 그대로 웹 주소가 된다(서버·빌드 없음). 그런데 <b>파일 하나가 100MiB 넘으면 아예 안 받는다</b>(약 105MB). 우리 파일은 두 배가 넘는다</li>
+    <li>올라간다고 끝도 아니다 — 링크 받은 사람 브라우저가 <b>통째로 내려받아야</b> 화면이 뜬다</li>
+  </ul>
+  <div class="big">12초 만에 뜨느냐, <span class="y">3분 가까이 빈 화면</span>이냐<small>10Mbps에서 217.5MB는 3분, 15MB는 12초 — 여기에 링크가 열리느냐 닫히느냐가 걸린다</small></div>
+  <div class="hl">코드로 어떻게 해 볼 종류가 아니라 <b>통과해야 지나가는 관문</b>. 여기서 크기가 그대로 <b>기다리는 시간</b>이 된다.</div>
+  <aside>MiB는 1,024를 거듭 곱해 세는 단위라 흔히 쓰는 MB로는 약 105MB입니다. 📚 About large files on GitHub, GitHub Docs.</aside>
+</section>
+
+<!-- 5 npx -->
+<section class="slide" data-part="PART 1">
+  <h2>⚡ 명령 한 줄로 <span class="g">열네 배</span></h2>
+  <pre>npx -y @playcanvas/splat-transform@latest -w scene.ply scene.sog</pre>
+  <ul class="pts">
+    <li>변환 도구는 따로 설치 안 함 — <b>한 번 쓰고 마는 도구</b>라 받아서 바로 실행. Node.js가 필요한데 코랩엔 이미 있다</li>
+    <li><code>-w</code>를 빼지 말 것 — 여러 번 돌리는데 같은 이름이 있으면 거기서 멈춘다. Node.js 판이 높아 <b>경고가 뜨지만 동작은 정상</b></li>
+  </ul>
+  <div class="big"><span class="y">217.5MB → 15.3MB</span><small>28초, 14.2배. 못 올라가던 파일이 관문을 통과했고 10Mbps에서 12초면 뜬다</small></div>
+  <aside>📚 playcanvas/splat-transform, GitHub. 점을 만든 그 자리(코랩)에서 그대로 치는 게 가장 빠릅니다.</aside>
+</section>
+
+<!-- 6 형식 넷 -->
+<section class="slide" data-part="PART 1">
+  <h2>📦 형식이 <span class="g">넷</span> — 알갱이는 하나도 안 버린다</h2>
+  <table class="t">
+    <tr><th>형식</th><th>크기(100만 개)</th><th>원본 대비</th><th>변환 시간</th></tr>
+    <tr><td>.ply 무압축</td><td>68.0MB</td><td>1배</td><td>0.4초</td></tr>
+    <tr><td>.splat</td><td>32.0MB</td><td>2.1배</td><td>1초</td></tr>
+    <tr><td>.compressed.ply</td><td>16.3MB</td><td>4.2배</td><td>5초</td></tr>
+    <tr><td><b>.sog</b></td><td><b>5.0MB</b></td><td><b>13.6배</b></td><td>9초</td></tr>
+  </table>
+  <div class="hl">네 형식 다 <b>알갱이 100만 개가 그대로 100만 개</b> — 줄어든 건 값을 적는 방식뿐. 가장 흔한 수단이 <b>양자화</b>(자릿수를 몇 단계로 나눠 어느 칸인지만 적음). 뭉갤수록 작아지고 조금 어긋나는데, 알갱이 하나의 몫이 작아 눈에 잘 안 띈다.</div>
+  <aside>.compressed.ply는 형식은 두고 자릿수만 줄여 4배에서 멈춥니다. .splat은 알갱이 하나를 32바이트로 못 박은 초기 형식이라 파일 크기 ÷ 32 = 알갱이 개수입니다.</aside>
+</section>
+
+<!-- 7 sog -->
+<section class="slide" data-part="PART 1">
+  <h2>🖼️ .sog — <span class="g">숫자를 이미지로 바꿔</span> 사진 압축기에</h2>
+  <ul class="pts">
+    <li>자리·크기·회전·색을 <b>각각 WebP 이미지로</b> 바꾼다 — 알갱이 100만 개의 자리 값을 1000×1000 격자에 채우면 그것이 곧 그림 한 장(화소 색 자리에 좌표가 든 셈)</li>
+    <li><b>사진은 이웃 화소 색이 서로 비슷하고, 사진 압축기는 그 비슷함을 줄이도록 만들어졌다</b> — 자리끼리·회전끼리 모은 격자도 이웃이 비슷하니 그대로 먹는다</li>
+  </ul>
+  <div class="big">사진 압축이 수십 년 쌓은 것을 <span class="y">3차원 자료가 빌려 쓴다</span></div>
+  <div class="hl">위 표는 100만 개라 13.6배, 우리 파일은 320만 개라 14.2배 — <b>같은 형식이라도 몇 배 줄어드느냐는 장면과 알갱이 개수를 함께 봐야 하는 값.</b></div>
+  <aside>📚 Splat File Formats, PlayCanvas Developer Site.</aside>
+</section>
+
+<!-- 8 점 줄이기 -->
+<section class="slide" data-part="PART 1">
+  <h2>✂️ 점을 줄이는 건 <span class="g">그다음</span>이다</h2>
+  <table class="t">
+    <tr><th>점 개수</th><th>.ply</th><th>.sog</th><th>화면</th></tr>
+    <tr><td>250,000</td><td>17.0MB</td><td><b>1.4MB</b></td><td>구멍이 숭숭</td></tr>
+    <tr><td>1,000,000</td><td>68.0MB</td><td><b>5.0MB</b></td><td>어두운 곳에 검은 점</td></tr>
+    <tr><td>2,000,000</td><td>136.0MB</td><td><b>9.5MB</b></td><td>거의 메워짐</td></tr>
+    <tr><td><b>전부</b></td><td>227.2MB</td><td><b>15.0MB</b></td><td><b>물건이 또렷</b></td></tr>
+  </table>
+  <div class="hl">점을 <b>전부 쓴 줄</b>이 웹에 얹을 크기이고 <b>거기서 가장 또렷</b>하다 — 방 하나 크기면 점을 솎을 이유가 없다. <b>형식을 먼저 바꾸고, 그래도 크면 그때 점을 줄인다</b>(점 쪽은 화면이 성겨지는 대가가 따라옴).</div>
+  <aside>더 넓은 공간을 찍었거나 사진을 많이 넣어 형식만으로 안 떨어지면 그때 점을 줄이고 K를 함께 올립니다.</aside>
+</section>
+
+<!-- 9 두 축 -->
+<section class="slide" data-part="PART 1">
+  <h2>⚖️ 기다림과 부드러움은 <span class="g">다른 축</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="b">파일 크기 → 기다림</h3><p style="margin:0">첫 화면이 뜨기까지의 시간. <b>형식을 바꿔</b> 크기를 줄이면 열네 배로 짧아진다</p></div>
+    <div class="box"><h3 class="g">알갱이 수 → 부드러움</h3><p style="margin:0">뜬 뒤 매끄럽게 도는가. 그리는 쪽이 매번 상대하는 건 파일이 아니라 <b>화면에 늘어놓을 알갱이 개수</b></p></div>
+  </div>
+  <div class="big">오래 기다린다 → <span class="y">형식</span>을 바꾼다<br>뚝뚝 끊긴다 → <span class="y">알갱이 수</span>를 줄인다</div>
+  <div class="hl">.ply 217.5MB든 .sog 15.3MB든 <b>알갱이는 3,197,944개로 똑같다</b> — 형식 변환은 적어 두는 방식을 바꿀 뿐 알갱이를 덜어 내지 않는다. 그래서 <b>변환으로 기다림은 줄었지만 부드러움은 그대로</b>.</div>
+  <aside>느리다고 할 때 어디를 손대야 하는지가 이 구분에서 나옵니다.</aside>
+</section>
+
+<!-- 10 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">화면에 띄우고 주소를 켠다</h2>
+  <p style="margin-top:11px">정렬 순서 · Spark · GitHub Pages · 폰</p><span class="who">렌더러와 배포</span></div>
+  <aside>파일을 화면에 띄우기 전에, 그리는 쪽에서 무슨 일이 벌어지는지 봅니다. 알갱이가 반투명이라 생기는 문제 하나가 여기서 드러납니다.</aside>
+</section>
+
+<!-- 11 어떻게 그리나 -->
+<section class="slide" data-part="PART 2">
+  <h2>🎨 알갱이를 <span class="g">어떻게 그리나</span> — 네 걸음</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>원근 투영</b> — 3차원 좌표를 깊이로 나눠 눌러 화면 좌표로. 멀수록 작게 찍히고, 타원이 눌려 얼룩이 된다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>셰이더</b> — 그 계산을 그래픽 장치가 수천 개씩 동시에. 알갱이 하나를 받아 화면 좌표를 내는 작은 프로그램</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>깊이 버퍼</b> — 같은 화소에 겹치면 가장 가까운 것만 남기고 버림. <b>불투명한 것</b>이면 이걸로 끝</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b class="r">그런데 알갱이는 반투명</b> — 버릴 게 아니라 섞어야(알파 블렌딩). 깊이 버퍼는 못 쓴다</span></div>
+  </div>
+  <div class="hl">남는 길은 하나 — <b>먼 것부터 가까운 것 순으로 줄 세워 차례로 바른다.</b> 셀로판지 빨강·파랑·노랑 순서와 노랑·파랑·빨강 순서가 다른 색이 되는 그 이치.</div>
+  <aside>불투명한 것만 그린다면 줄을 세울 이유가 없습니다. 표 하나로 끝날 일을 매번 300만 개 줄 세우기로 치르는 이유가 반투명 하나입니다.</aside>
+</section>
+
+<!-- 12 정렬 순서 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔀 <span class="g">정렬 순서</span> — 카메라가 돌면 통째로 바뀐다</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px"><small>카메라 왼쪽</small><b>청록 → 보라 → 파랑<br>순으로 바른다</b></div>
+    <span class="ar">↔</span>
+    <div class="cell" style="min-width:150px;border-color:var(--red)"><small>오른쪽으로 돌면</small><b class="r">파랑 → 보라 → 청록<br>순으로 뒤집힌다</b></div>
+  </div>
+  <ul class="pts">
+    <li>정면에서 앞이던 알갱이가 반대편으로 돌면 뒤가 된다 → 화면 한 번 그릴 때마다 <b>320만 개를 다시 줄 세운다</b></li>
+    <li>이 줄 세우기가 스플랫에서 <b>가장 무거운 작업 중 하나</b>이고, 렌더러들이 갈리는 곳</li>
+  </ul>
+  <div class="big">줄 세우기가 어긋나면 <span class="y">뒤 알갱이가 앞을 덮는다</span><small>화면을 열고 각도를 크게 여러 번 바꿔 보는 이유가 이것</small></div>
+  <aside>살짝 돌려서는 안 보입니다. 크게 틀어야 정렬 순서가 제대로인지 드러납니다.</aside>
+</section>
+
+<!-- 13 Spark -->
+<section class="slide" data-part="PART 2">
+  <h2>🔌 렌더러를 하나 물린다 — <span class="g">Spark</span></h2>
+  <p>브라우저는 스플랫을 기본으로 못 그린다. 웹 3D 대표 라이브러리 <b>three.js</b>의 기본 렌더러는 삼각형용이라 알갱이를 못 그린다. 그래서 three.js 위에 얹는 스플랫 렌더러 <b>Spark</b>(MIT)를 붙인다.</p>
+  <div class="grid2">
+    <div class="box"><h3 class="g">형식</h3><p style="margin:0">.ply·압축 ply·.spz·.splat·.ksplat·<b>.sog</b>를 전부 읽는다 — 오늘 만든 것도 나중에 받아 온 것도 변환 없이</p></div>
+    <div class="box"><h3 class="b">창구</h3><p style="margin:0">오래된 <b>WebGL2</b>에서 돈다(거의 모든 폰). 최신 WebGPU는 빠르지만 안 열리는 브라우저가 있다 — <b>누가 열 수 있느냐</b>가 갈린다</p></div>
+  </div>
+  <div class="hl">빌드 도구는 안 쓴다 — 브라우저 표준 <b>import map</b>으로 CDN에서 바로 불러오면 <b>파일 한 장짜리 정적 페이지</b>로 끝. 마지막에 폰으로 여는 오늘 조건에선 WebGL2 선택이 결정적.</div>
+  <aside>📚 sparkjsdev/spark, GitHub. 어느 창구를 쓰느냐가 곧 누가 그 화면을 열 수 있느냐를 정합니다.</aside>
+</section>
+
+<!-- 14 지시문 뷰어 -->
+<section class="slide" data-part="PART 2">
+  <h2>📝 지시문 — <span class="g">뷰어 페이지</span></h2>
+  <pre>스플랫 파일 하나를 띄우고 마우스로 돌려 볼 정적 페이지를 만들어 주세요.
+- three.js + @sparkjsdev/spark, 둘 다 CDN import map, 빌드 도구 없이 index.html 한 파일
+- 같은 폴더 파일을 읽되 파일 이름을 맨 위 한 줄에서 바꾸게
+- Spark 전용 렌더러를 만들어 장면에 넣기(이 한 줄 빼면 검은 화면, 오류도 안 남)
+- 확장자를 그대로 형식 이름으로 넘기지 말고 대응표를 두기(.sog의 안쪽 이름은 pcsogszip)
+- OrbitControls로 회전·확대·이동, 감쇠 켜기
+- 다 불러온 뒤 알갱이 덩어리 크기를 Spark가 주는 자로 재서 카메라를 그 앞에
+  (three.js 바깥 상자는 알갱이에 빈 상자를 돌려줌)
+- 거꾸로 서면 위아래 뒤집기 단추 하나
+- 왼쪽 위에 단계 목록 5개(라이브러리·렌더러·받기·풀기·크기 재기), 실패 단계엔 무엇을 볼지
+- 파일 크기·받는 시간·알갱이 개수를 화면에</pre>
+  <div class="hl"><b>단계 목록을 띄우라는 줄</b>이 값어치가 가장 크다 — 막혔을 때 어느 줄을 봐야 하는지가 곧바로 갈린다. 없으면 남는 단서가 검은 화면 하나.</div>
+  <aside>OrbitControls는 three.js에 딸려 오는 조작기입니다. 마우스와 손가락 입력을 한 경로로 받아 터치도 그대로 됩니다.</aside>
+</section>
+
+<!-- 15 함정 둘 -->
+<section class="slide" data-part="PART 2">
+  <h2>🕳️ <span class="r">오류를 안 내는</span> 함정이 둘</h2>
+  <div class="grid2">
+    <div class="box"><h3 class="r">1. 검은 화면</h3><p style="margin:0"><b>전용 렌더러를 장면에 안 넣으면</b> 파일도 받아지고 알갱이 개수도 찍히는데 화면만 검다. 그릴 것이 다 올라간 채 그릴 부품만 빠져 오류를 낼 이유가 없다. <b>개수 맞는데 검으면 여기부터</b></p></div>
+    <div class="box"><h3 class="r">2. .sog 안쪽 이름</h3><p style="margin:0">파일은 <code>scene.sog</code>인데 렌더러가 아는 이름은 <code>pcsogszip</code>. 확장자를 그대로 넘기면 <code>Invalid file type: sog</code></p></div>
+  </div>
+  <div class="hl">그래서 확장자를 형식 이름으로 옮기는 <b>대응표</b>가 필요 — <code>ply·spz·splat·ksplat</code>은 그대로, <code>sog</code>만 <code>pcsogszip</code>으로.</div>
+  <aside>둘 다 오류를 안 내서 미리 아는 것과 아닌 것의 차이가 큽니다. 지침 묶음의 함정 목록에 그대로 들어 있습니다.</aside>
+</section>
+
+<!-- 16 판단 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔍 나온 것을 <span class="g">무엇으로 판단</span>하나</h2>
+  <table class="t">
+    <tr><th>확인할 것</th><th>어떻게</th></tr>
+    <tr><td>개수 표시·실제와 맞나</td><td>만들 때 센 개수와 대조</td></tr>
+    <tr><td class="r">개수 맞는데 화면이 검다</td><td>전용 렌더러를 안 넣은 것 — 오류 안 나니 여기부터</td></tr>
+    <tr><td>검지도 않은데 안 보인다</td><td>카메라가 엉뚱한 데를 봄 — 크기 재는 자를 바꾼다</td></tr>
+    <tr><td>놓았을 때 부드럽게 멈추나</td><td>감쇠. 뚝 끊기면 안 켠 것</td></tr>
+    <tr><td class="r">각도 크게 틀 때 앞뒤 안 뒤집히나</td><td><b>정렬 순서</b> — 살짝은 안 보이니 크게 여러 번</td></tr>
+    <tr><td>방이 바로 서 있나</td><td>천장이 위면 부호 뒤집기가 들어간 것</td></tr>
+  </table>
+  <div class="hl"><b>여기에 시간의 절반을 쓴다</b> — 화면이 떴다는 것만으로는 제대로 됐는지 알 수 없다. 각도를 크게 틀 때 앞뒤가 뒤집히는지가 <b>스플랫에만 있는 판단 기준</b>.</div>
+  <aside>검지도 않은데 안 보이는 건 three.js가 알갱이에 빈 상자를 돌려줘 카메라 놓을 자리 계산이 안 서는 것. 마우스를 크게 끌었을 때 뭔가 지나가면 이쪽입니다.</aside>
+</section>
+
+<!-- 17 Pages -->
+<section class="slide" data-part="PART 2">
+  <h2>🌐 깃허브에 올리고 <span class="g">주소를 켠다</span> — 네 걸음</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>저장소를 하나 만든다</b> — 공개로 만들어야 주소가 열린다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>파일 둘을 올린다</b> — <code>index.html</code>과 <code>scene.sog</code>, 같은 폴더에</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>설정에서 Pages를 켠다</b> — 기본 가지의 최상위를 고른다</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>주소를 확인한다</b> — 몇 분 안에 <code>사용자이름.github.io/저장소이름</code></span></div>
+  </div>
+  <div class="hl">서버 프로그램도 데이터베이스도 빌드 과정도 없다 — 파일을 그대로 내려주기만 해서 <b>정적</b>. 계정 만들기부터 올리기까지 <b>전부 에이전트에게 맡겨도 된다</b>.</div>
+  <aside>여기가 오늘의 도착점이라 여기까지는 다 같이 갑니다. 바로 안 열리면 잠시 기다렸다 새로고침합니다.</aside>
+</section>
+
+<!-- 18 폰 -->
+<section class="slide" data-part="PART 2">
+  <h2>📱 <span class="g">폰으로</span> 그 주소를 연다</h2>
+  <p>남에게 링크를 보내면 대부분 폰으로 연다. 지금까지 확인한 건 전부 노트북 — 회선도 그래픽 장치도 다르다.</p>
+  <table class="t">
+    <tr><th>확인할 것</th><th>어떻게</th></tr>
+    <tr><td>첫 화면까지 몇 초</td><td>화면에 찍힌 시간. 느리면 30초까지 — <b>안 기다리고 고장으로 판정하기 쉽다</b></td></tr>
+    <tr><td>각도 크게 틀 때 앞뒤</td><td>손가락으로 크게 여러 번</td></tr>
+    <tr><td>손가락 따라 부드럽나</td><td>뚝뚝 끊기면 알갱이 수를 줄이라는 신호</td></tr>
+    <tr><td>파일이 직접 내려받아지나</td><td>주소 뒤 <code>/scene.sog</code>를 붙여 본다</td></tr>
+    <tr><td class="r">남에게 보여도 되는 장면인가</td><td>띄운 문서·명패·우편물이 들어갔는지</td></tr>
+  </table>
+  <div class="hl">폰에서 열리는 것 자체가 <b>고른 렌더러가 오래된 창구(WebGL2) 위에서 돌기 때문</b>. 걸리는 게 있으면 그쪽을 치우고 다시 찍어 <b>파일만 갈아 끼운다</b>(페이지는 그대로).</div>
+  <aside>주소를 아는 사람은 링크를 안 알려 줘도 들어옵니다.</aside>
+</section>
+
+<!-- 19 임베드 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧩 내 서비스의 <span class="g">한 페이지로</span> 붙인다 <small>(시간 남는 분만)</small></h2>
+  <p>파일 두 개뿐이라 <b>이미 돌아가는 사이트에 그대로 얹힌다</b>. 페이지를 통째로 <code>/scene/</code>에 두거나, 상세 페이지의 한 칸으로 넣는다. 칸으로 넣으면 고칠 것이 있다.</p>
+  <pre>지금 페이지를 다른 페이지 안에 끼워 넣을 수 있게 고쳐 주세요.
+- 창 전체가 아니라 지정한 요소 안에만 그리기(요소 크기 따라 바뀌게)
+- 마우스 휠은 페이지 스크롤에 넘기고, 확대는 두 손가락·단추로만
+- 화면 밖으로 스크롤돼 안 보이는 동안엔 그리기를 멈추기
+- 다 불러오기 전엔 대표 사진 한 장을 대신</pre>
+  <div class="hl"><b>휠을 페이지 스크롤에 넘기라는 줄</b>을 빼면 — 끼운 화면이 휠을 먹어 <b>페이지 스크롤이 거기서 멈춘다</b>. 남의 페이지에 들어가는 화면이 제일 자주 저지르는 실수.</div>
+  <aside>안 보일 때 그리기를 멈추라는 줄은 배터리·발열. 대표 사진을 먼저 보이라는 줄은 첫인상 — 빈 칸은 고장으로 보이고 사진 한 장이 있으면 기다립니다.</aside>
+</section>
+
+<!-- 20 핵심 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이 덱의 <span class="g">핵심 정리</span></h2>
+  <table class="t">
+    <tr><th>개념</th><th>한 문장 + 판단</th></tr>
+    <tr><td>100MiB 관문</td><td>217.5MB는 안 올라간다 — 줄이는 건 취향이 아니라 통과할 관문</td></tr>
+    <tr><td>형식 넷</td><td>알갱이는 안 버리고 <b>적는 방식만</b> 바꾼다. .sog는 이미지로 바꿔 사진 압축기에</td></tr>
+    <tr><td>순서</td><td><b>형식 먼저, 그래도 크면 점</b> — 점 쪽은 화면이 성겨지는 대가</td></tr>
+    <tr><td>두 축</td><td>크기=기다림, 알갱이 수=부드러움. 손댈 곳이 다르다</td></tr>
+    <tr><td>정렬 순서</td><td>반투명이라 <b>먼 것부터 줄 세워</b> 바른다. 카메라 돌면 다시</td></tr>
+    <tr><td>Spark·배포</td><td>WebGL2라 폰에서 열린다. Pages는 파일 둘로 끝. <b>화면에 시간의 절반</b></td></tr>
+  </table>
+  <aside>뒤에 오는 건 전부 이 파일 하나를 더 나은 것으로 갈아 끼우는 일 — 페이지는 다시 안 만듭니다.</aside>
+</section>
+
+<!-- 21 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 파일을 <b>줄이는 게 왜</b> 취향이 아니라 반드시 지나갈 관문인가?</div>
+    <div class="q"><b>Q2.</b> 형식 넷이 <b>알갱이를 안 버린다</b>는 건 무슨 뜻이며, .sog는 어떻게 그렇게 작아지나?</div>
+    <div class="q"><b>Q3.</b> <b>기다림과 부드러움</b>은 각각 무엇이 정하고, 느릴 때 어디를 손대나?</div>
+    <div class="q"><b>Q4.</b> 알갱이가 <b>반투명이라</b> 생기는 문제와, 그래서 매번 하는 일은?</div>
+    <div class="q"><b>Q5.</b> 화면이 검은데 <b>개수는 맞을 때</b> 가장 먼저 볼 곳은?</div>
+  </div>
+  <aside>Q3과 Q4가 이 덱의 핵심입니다.</aside>
+</section>
+
+<!-- 22 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> GitHub Pages가 <b>100MiB 넘는 파일을 아예 안 받고</b>, 올라가도 브라우저가 통째로 받아야 떠서 크기가 그대로 기다림이 된다 — 12초 vs 3분에 링크가 열리느냐 닫히느냐가 걸린다.</div>
+    <div class="q a"><b>A2.</b> 알갱이 개수는 그대로, <b>값을 적는 방식만</b> 바꾼다(양자화 등). .sog는 자리·크기·회전·색을 <b>이미지로 바꿔</b> 이웃 비슷함을 줄이는 사진 압축기에 태운다.</div>
+    <div class="q a"><b>A3.</b> <b>파일 크기가 기다림</b>(형식으로 줄임), <b>알갱이 수가 부드러움</b>(수로 줄임). 오래 기다리면 형식, 뚝뚝 끊기면 알갱이 수.</div>
+    <div class="q a"><b>A4.</b> 뒤엣것과 <b>섞여야</b> 해서 깊이 버퍼를 못 쓴다 → <b>먼 것부터 가까운 것 순으로 줄 세워</b> 바른다. 카메라가 돌 때마다 320만 개를 다시 줄 세운다.</div>
+    <div class="q a"><b>A5.</b> <b>전용 렌더러(Spark)를 장면에 안 넣은 것</b> — 그릴 것은 다 올라갔는데 그릴 부품이 빠져 오류가 안 난다.</div>
+  </div>
+  <aside>A4의 정렬 순서는 각도를 크게 틀어 앞뒤가 뒤집히는지로 확인합니다.</aside>
+</section>
+
+<!-- 23 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>내 주소에서 도는 방 🌐</h1>
+    <div class="big" style="margin-top:26px">14배로 줄이고 · Spark로 그리고<br>공개 주소에 올려 <span class="y">폰으로 확인</span><br><br>여기까지가 오늘의 도착점 — 파일만 갈아 끼우면 된다</div>
+    <p class="sub" style="margin-top:24px">줄여서 내 주소에 — 실습 완료</p>
+  </div>
+  <aside>실습 세 걸음(③④⑤)이 끝났습니다. 다음 두 덱은 이 10.6초가 나오기까지 서른 해 동안 난 길들(⑥)과, 안 될 때·더 낫게·고르는 눈(⑦⑧⑨)입니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>

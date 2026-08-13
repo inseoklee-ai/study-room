@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사진이 버린 거리를 되찾는다 · 개념과 그릇</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.77rem,1.28vw,.94rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.9rem);
+    color:var(--ink);overflow:auto;max-height:52vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 7 · 공간을 다루는 AI (①②)</span>
+    <h1 style="margin:18px 0">사진이 버린 거리를<br>되찾는다</h1>
+    <p class="sub">돌려 볼 수 있는 한 덩어리 · 그릇 넷과 알갱이 하나</p>
+  </div>
+  <aside>강의 7의 첫 덱입니다. 폰 영상 하나에서 3차원 장면을 만들어 웹에 올리는 프로젝트의 개념 토대(① 도입 + ② 그릇과 이론)를 묶었습니다. 오늘 배울 것 대부분은 만드는 손놀림이 아니라, 에이전트에게 던질 낱말과 나온 것을 판단하는 눈입니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘 갈 길 — <span class="g">네 걸음</span></h2>
+  <div class="chain">
+    <div class="cell"><small>①</small><b>찍는다<br>폰 15초</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="border-color:var(--bl)"><small>②</small><b class="b">점이 된다<br>320만 개</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="border-color:var(--gold)"><small>③</small><b>알갱이가 된다<br>부피·투명도</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="border-color:var(--gr)"><small>④</small><b class="g">줄여서<br>내 주소에</b></div>
+  </div>
+  <ul class="pts">
+    <li>이번 덱은 <b>①②</b> — 왜 이 일이 성립하는지와 <b>담는 그릇 넷</b>, 그리고 <b>알갱이 하나 안의 값</b></li>
+    <li>코드는 에이전트가 쓴다 — 이론의 목적은 <b>지시문에 넣을 낱말</b>과 <b>판단하는 눈</b>을 쥐여 주는 것</li>
+  </ul>
+  <div class="hl">🎯 한 줄 — <b>셔터가 닫힐 때 버려진 것이 거리</b>이고, 오늘 하는 일은 <b>재는 장비 없이 사진에서 그 거리를 계산으로 되찾는 것</b>.</div>
+  <aside>실습(③④⑤)과 이론 심화(⑥), 판단·과제·마무리(⑦⑧⑨)는 뒤 덱으로 이어집니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">셔터가 닫힐 때 사라지는 것</h2>
+  <p style="margin-top:11px">사진은 거리를 버린다 · 되찾으면 무엇이 달라지나</p><span class="who">① 도입</span></div>
+  <aside>먼저 완성된 화면 하나를 손으로 만져 보는 데서 시작합니다.</aside>
+</section>
+
+<!-- 4 데모 -->
+<section class="slide" data-part="PART 1">
+  <h2>🖼 폰 15초 영상 하나에서 — <span class="g">돌려 볼 수 있는 방</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px"><small>입력</small><b>폰으로 걸으며<br>15~20초</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>결과 파일</small><b class="g">15.3MB<br>알갱이 3,197,944개</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px"><small>화면</small><b>마우스로 돌리고<br>휠로 가까이</b></div>
+  </div>
+  <ul class="pts">
+    <li>영상이 아니다 — 재생 순서가 없다. 디자이너가 깎은 입체도 아니다. <b>폰으로 방을 걸어 다니며 찍은 영상 하나에서 나왔다</b></li>
+    <li>크게 돌리면 <b>아무것도 없는 검은 자리</b>가 드러난다 — 고장이 아니다(마지막 덱에서 이유를 푼다)</li>
+  </ul>
+  <div class="hl">📐 화면엔 <b>14.6MB</b>, 본문엔 <b>15.3MB</b> — 다른 파일이 아니라 <b>1024로 세느냐 1000으로 세느냐</b>의 차이. 어긋나 있으면 정상.</div>
+  <aside>오늘 각자 자기 방으로 이런 화면을 하나씩 만들어 공개 주소에 올립니다. 링크를 보내면 상대 브라우저에서 열리는, 여러분 것인 주소입니다.</aside>
+</section>
+
+<!-- 5 사진은 거리를 버린다 -->
+<section class="slide" data-part="PART 1">
+  <h2>📷 사진은 <span class="r">거리를 버린다</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px"><small>셔터 앞</small><b>3차원 공간<br>컵 30cm·벽 3m</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--red)"><small>격자에 눌림</small><b class="r">칸마다 R·G·B<br>빛의 세기만</b></div>
+  </div>
+  <ul class="pts">
+    <li>3차원이 2차원으로 눌리면서 <b>없어진 것이 정확히 거리</b> — 컵 화소와 벽 화소는 파일 안에서 <b>똑같은 자격의 세 숫자</b></li>
+    <li>무엇이 앞이고 뒤인지, 30cm에서 왔는지 3m에서 왔는지 <b>사진은 기록하지 않는다</b></li>
+  </ul>
+  <div class="big">오늘 하는 일 = <span class="y">버려진 그 거리를 되찾는 일</span></div>
+  <aside>렌즈를 지나 납작한 격자 위에 눌리는 순간 거리는 어디에도 안 적힙니다.</aside>
+</section>
+
+<!-- 6 되찾으면 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔁 되찾아 놓으면 <span class="g">무엇이 달라지나</span></h2>
+  <table class="t">
+    <tr><th>자리</th><th>사진 여러 장으로는</th><th>돌려 볼 한 덩어리면</th></tr>
+    <tr><td>중고 거래</td><td>흠집·꺾임 각도 물을 때마다 더 찍어 보냄</td><td>이 왕복이 통째로 사라진다</td></tr>
+    <tr><td>부동산 매물</td><td>평면도+사진 10장에도 "현관→거실 몇 걸음"이 안 보임</td><td>돌려 보며 거리를 가늠</td></tr>
+    <tr><td>수리 매뉴얼</td><td>뒤에서 손 넣는 부품은 그 각도 사진이 없음</td><td>원하는 각도로 돌려 봄</td></tr>
+  </table>
+  <div class="hl">셋 다 같은 요구 — <b>평면 사진 여러 장 대신 돌려 볼 수 있는 한 덩어리를 달라</b>는 것. 사원 수레를 훑는 3D 스캐너는 거리를 <b>직접 재는</b> 비싼 장비지만, 오늘은 반대로 <b>재는 장비 없이 사진에서 계산으로 되찾는다</b>.</div>
+  <aside>거리를 직접 재는 장비(라이다·3D 스캐너)는 값비싸고 무거워 현장에만 놓입니다. 사진에서 되찾는 쪽은 폰 하나면 됩니다.</aside>
+</section>
+
+<!-- 7 오늘 갈 길 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧭 네 걸음 전부 <span class="g">손을 쓴다</span> — 다만 코드는 안 쓴다</h2>
+  <ul class="pts">
+    <li>폰으로 15~20초 → 사진 24장 뽑아 모델에 → 방이 <b>3차원 점 300만 개</b>로 → 점에 부피·투명도 줘 <b>알갱이</b>로 → <b>웹에 올릴 크기로 줄여</b> 내 주소에</li>
+    <li>코드는 <b>코딩 에이전트에게 시키고</b>, 나온 것을 <b>판단하는 쪽에 시간을</b> 쓴다</li>
+  </ul>
+  <div class="grid2">
+    <div class="box"><h3 class="g">시키는 말</h3><p style="margin:0">메시·포인트클라우드·복셀·<b>가우시안 스플랫</b> (담는 그릇 넷), 그리고 불투명도·크기·회전·<b>구면 조화</b> (알갱이 값)</p></div>
+    <div class="box"><h3 class="b">판단하는 말</h3><p style="margin:0"><b>정렬 순서·시차</b> — 시키는 말은 틀려도 다시 시키면 되지만, <b>판단하는 말을 모르면 잘못 나온 걸 잘 나온 걸로 보고 지나간다</b></p></div>
+  </div>
+  <div class="hl">이름을 쓰면 원하는 것이 나오고, 안 쓰면 엉뚱한 것이 나온다 — 이론을 앞에 몰아 둔 목적이 이것.</div>
+  <aside>판단하는 말이 오히려 오늘 더 중요합니다. 시키는 말은 틀려도 다시 시키면 되지만, 판단을 못 하면 실패를 알아채지 못합니다.</aside>
+</section>
+
+<!-- 8 산출물 -->
+<section class="slide" data-part="PART 1">
+  <h2>📦 오늘 남길 <span class="g">산출물 셋</span></h2>
+  <table class="t">
+    <tr><th>산출물</th><th>완료 기준</th></tr>
+    <tr><td>내 방 점 무더기</td><td>15~20초 영상에서 점 300만 개 안팎 + 카메라 위치 24개, <b>걸어 다니며 찍혔는지가 숫자 하나로 갈림</b></td></tr>
+    <tr><td>내 방 알갱이 파일</td><td>점을 알갱이로 바꾼 파일이 손에 있고, <b>알갱이 하나가 몇 바이트인지</b> 말할 수 있음</td></tr>
+    <tr><td>내 주소에서 도는 방</td><td>줄인 파일이 내 정적 주소에 올라가 있고, <b>폰으로 그 주소를 열어 봤음</b></td></tr>
+  </table>
+  <div class="hl">챙길 것 넷 — <b>찍을 폰·노트북·구글 계정·깃허브 계정</b>. 무대는 둘 — 계산을 빌리는 <b>코랩</b>(영상이 올라감)과 아무나 여는 <b>정적 주소</b>(파일이 나감).</div>
+  <aside>무대가 바뀌는 자리마다 무엇이 내 손을 떠나 어디로 가는지가 함께 걸립니다. 마지막 덱에서 이 흐름을 다시 짚습니다.</aside>
+</section>
+
+<!-- 9 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">무엇에 담고 무엇이라 부르나</h2>
+  <p style="margin-top:11px">그릇 넷 · NeRF에서 스플랫으로 · 알갱이 62값</p><span class="who">② 이론 한복판</span></div>
+  <aside>방을 찍으면 색을 가진 3차원 점 300만 개가 나오는데, 점만으로는 화면이 안 채워집니다. 무엇으로 바꿔 그릴지를 손을 쓰기 전에 정해 둡니다.</aside>
+</section>
+
+<!-- 10 그릇 4 -->
+<section class="slide" data-part="PART 2">
+  <h2>🫙 3차원을 담는 <span class="g">그릇이 넷</span></h2>
+  <table class="t">
+    <tr><th>담는 방식</th><th>무엇으로</th><th>강한 쪽 / 약한 쪽</th><th>어디에</th></tr>
+    <tr><td>메시</td><td>정점 + 삼각형</td><td>가볍고 고치기 쉽다 / 털·연기·유리에 약함</td><td>게임·영화·3D 인쇄</td></tr>
+    <tr><td>포인트 클라우드</td><td>위치·색만 가진 점</td><td>장비가 그대로 냄 / <b>점은 크기가 없어 틈으로 뒤가 비침</b></td><td>측량·라이다·건설</td></tr>
+    <tr><td>복셀</td><td>격자 칸마다 값</td><td>속까지 담음 / 한 변 2배면 <b>8배</b></td><td>의료 영상·시뮬레이션</td></tr>
+    <tr><td><b>가우시안 스플랫</b></td><td>퍼지는 반투명 타원 알갱이</td><td>흐린 경계·반투명·반짝임 / <b>편집 적고 파일 큼</b></td><td>사진에서 되찾은 장면</td></tr>
+  </table>
+  <div class="hl">이 이름들이 그대로 요청이 된다 — "메시로", "포인트 클라우드로", "스플랫으로"는 <b>다른 주문</b>이고 나오는 물건도 여는 프로그램도 다르다. <b>오늘 쓸 것은 맨 아래 것.</b></div>
+  <aside>3D 인쇄기에 넣을 것이면 메시, 재서 도면에 쓸 것이면 포인트 클라우드, 속까지 담아야 하면 복셀, 사진처럼 보이는 화면이 목적이면 스플랫입니다.</aside>
+</section>
+
+<!-- 11 점 vs 알갱이 -->
+<section class="slide" data-part="PART 2">
+  <h2>⚫→🔵 점과 <span class="g">알갱이</span>는 무엇이 다른가</h2>
+  <div class="grid2">
+    <div class="box"><h3 class="b">점 (포인트 클라우드)</h3><p style="margin:0">위치·색만. <b>크기가 없다</b> — 화면에 찍어도 넓이 없는 한 자리. 점 사이가 벌어지면 <b>틈으로 뒤가 비친다</b></p></div>
+    <div class="box"><h3 class="g">알갱이 (스플랫)</h3><p style="margin:0">점에 <b>부피와 투명도</b>를 붙인 것. 찍히면 <b>가운데가 진하고 가장자리로 옅어지는 얼룩</b>. 겹쳐 바르면 틈이 메워지고 경계가 부드럽다</p></div>
+  </div>
+  <ul class="pts">
+    <li>모양은 공이 아니라 <b>눌리고 기울어진 타원</b> — 벽·바닥 같은 평면은 납작한 알갱이 몇 개로 덮는 게 효율적</li>
+    <li><b>반투명</b>하다 — 뒤엣것을 가리지 않고 섞인다. 이 성질 하나가 뒤에서 정렬 순서 문제를 만든다</li>
+  </ul>
+  <div class="hl">오늘 갈 길은 표 위에서 <b>포인트 클라우드 → 스플랫으로 가는 한 칸</b>. 메시로 안 가는 이유 — 점을 삼각형으로 이으려면 경계를 정해야 하는데 사진에서 되찾은 점엔 경계가 깨끗하지 않다. 알갱이는 그 결정을 아예 안 한다.</div>
+  <aside>점·알갱이를 삼각형으로 덮어 메시로 되돌리는 일에는 표면 복원(surface reconstruction)이라는 이름이 따로 있습니다. 3D 인쇄기에 넣고 싶어지면 그때 쓸 말입니다.</aside>
+</section>
+
+<!-- 12 무엇을 하느냐 축 -->
+<section class="slide" data-part="PART 2">
+  <h2>🎯 무엇을 <span class="g">하느냐</span>에도 이름이 있다</h2>
+  <ul class="pts">
+    <li>마우스를 끄는 동안 브라우저가 <b>찍힌 적 없는 각도를 그때그때 만들어 내는 일</b> = <b class="g">새 시점 합성</b>(novel view synthesis) — 오늘의 주인공</li>
+    <li>반대쪽 끝 = 사진 한 장으로 <b>찍히지도 않은 뒷면까지 지어내는 일</b> = <b class="r">사진에서 3차원 만들어 내기</b>(image-to-3D)</li>
+  </ul>
+  <div class="grid2">
+    <div class="box"><h3 class="g">되찾는 쪽 (오늘)</h3><p style="margin:0">사진에 있던 것을 되찾음 → 이상하면 <b>모자란 곳을 다시 찍으면 됨</b></p></div>
+    <div class="box"><h3 class="r">지어내는 쪽</h3><p style="margin:0">없던 것을 지어냄 → <b>맞는지 물어볼 상대가 없어진다</b></p></div>
+  </div>
+  <div class="hl">이름이 그대로 검색어다 — "사진으로 3d 만들기"는 앱 광고가 나오고, 정확한 이름으로 검색하면 <b>논문과 코드 저장소</b>가 나온다. 에이전트도 같다.</div>
+  <aside>이름을 정확히 부르면 그 분야가 쓰는 도구를 가져옵니다. 원어와 함께 익혀 두는 편이 낫습니다.</aside>
+</section>
+
+<!-- 13 NeRF -->
+<section class="slide" data-part="PART 2">
+  <h2>🧠 2020 · NeRF — <span class="g">장면을 함수 하나에 외우게</span></h2>
+  <ul class="pts">
+    <li>작은 신경망에 숫자 5개(좌표 3 + 보는 각도 2)를 넣으면 <b>그 점의 불투명도와 색</b>을 내놓는다 — 이 신경망 하나가 곧 장면</li>
+    <li>그림을 그리려면 광선을 쏘고 점을 수십 개 찍어 <b>점마다 신경망에 물어본다</b> → 반투명·반사·잎 사이 빛까지 그럴듯</li>
+  </ul>
+  <div class="big">한 장 그리는 데 신경망 호출 <span class="y">수억 번</span><small>당시 화질 최고 계열이 한 프레임에 10초 — 초당 30장 도는 화면은 못 만든다</small></div>
+  <div class="hl">빛이 뿜어져 나오는 장(radiance field)을 신경망이 들고 있어 <b>NeRF</b>. 표면이란 개념이 없어 표면으로 표현하기 어려운 것이 오히려 자연스러웠다. 남은 문제는 <b>속도</b>.</div>
+  <aside>📚 NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis, arXiv:2003.08934. 1920×1080은 화소 약 200만 개, 화소마다 광선, 광선마다 점 수십 개, 점마다 신경망 호출입니다.</aside>
+</section>
+
+<!-- 14 3DGS -->
+<section class="slide" data-part="PART 2">
+  <h2>🪄 2023 · 가우시안 스플래팅 — <span class="g">물어보는 대신 찍어 바른다</span></h2>
+  <ul class="pts">
+    <li>뒤집은 것은 <b>계산이 흐르는 방향</b> — NeRF는 화소가 공간을 찾아갔고, 이쪽은 <b>공간의 알갱이를 화면 쪽으로 눌러 찍는다</b></li>
+    <li>눌러 찍어 겹쳐 바르는 일은 <b>그래픽 장치가 30년간 해 온 바로 그 일</b> — 신경망 호출을 평범한 작업으로 바꿔치기</li>
+  </ul>
+  <table class="t">
+    <tr><th>방법</th><th>렌더 속도(9장면 평균)</th><th>학습 시간</th></tr>
+    <tr><td>가우시안 스플래팅 (7,000걸음)</td><td><b>160 fps</b></td><td>6분 25초</td></tr>
+    <tr><td>가우시안 스플래팅 (30,000걸음)</td><td><b>134 fps</b></td><td>41분 33초</td></tr>
+    <tr><td>화질 앞세운 NeRF 계열</td><td>0.06 fps</td><td><b>48시간</b></td></tr>
+  </table>
+  <div class="hl">splat = 붓을 튀겨 자국 남기기, 가우시안 = 가운데 진하고 옅어지는 종 모양 분포. <b>속도 주장을 보면 어느 기계에서 잰 값인지부터 찾는다</b> — 이 논문은 <b>A6000</b>(48GB, 노트북에 없는 카드).</div>
+  <aside>📚 3D Gaussian Splatting for Real-Time Radiance Field Rendering, arXiv:2308.04079. 도구로서는 스플랫 쪽으로 넘어갔지만, 빛의 장이라는 사고 틀과 앞에서부터 색·불투명도를 쌓는 계산은 NeRF에서 물려받았습니다. 바뀐 건 그 장을 무엇이 들고 있느냐입니다.</aside>
+</section>
+
+<!-- 15 62값 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔢 스플랫 알갱이 하나 안엔 <span class="g">무엇이</span></h2>
+  <table class="t">
+    <tr><th>무엇</th><th>개수</th><th>무엇을 정하나</th></tr>
+    <tr><td>위치</td><td>3</td><td>공간의 어디에</td></tr>
+    <tr><td>법선</td><td>3</td><td>칸만 잡고 안 씀(0으로 채움)</td></tr>
+    <tr><td>기본 색</td><td>3</td><td>어느 각도에서든 공통인 색</td></tr>
+    <tr><td><b>구면 조화</b></td><td><b>45</b></td><td><b>보는 각도에 따라 색이 어떻게 달라지나</b></td></tr>
+    <tr><td>불투명도</td><td>1</td><td>얼마나 진하게 쌓이나</td></tr>
+    <tr><td>크기</td><td>3</td><td>세 방향 각각 얼마나 길쭉한가</td></tr>
+    <tr><td>회전</td><td>4</td><td>그 길쭉한 방향이 어디를 향하나</td></tr>
+  </table>
+  <div class="hl">합쳐 실수 62개, 하나 4바이트 → <b>알갱이 하나 248바이트</b>. 이 중 <b>구면 조화 180바이트 = 73%</b>. <span class="r">파일이 큰 이유는 형태가 아니라 각도에 따른 색 변화</span> — 마지막에 이 막대를 잘라 낸다.</div>
+  <aside>크기 셋과 회전 넷이 함께 타원을 만듭니다. 크기가 세 축의 길이를, 회전이 그 축의 방향을 정해 공이 아니라 눌리고 기울어진 타원이 됩니다.</aside>
+</section>
+
+<!-- 16 구면조화 -->
+<section class="slide" data-part="PART 2">
+  <h2>🌐 구면 조화가 <span class="g">하는 일</span></h2>
+  <p>코팅된 잡지 표지 — 정면엔 인쇄 색, 고개를 기울이면 형광등 반사로 흰 띠. <b>같은 면인데 보는 방향이 바뀌니 색이 바뀐다.</b> 금속·유리·젖은 바닥이 다 그렇다. 색을 하나로 못 박으면 이런 표면이 죽어 밋밋한 물감 덩어리가 된다.</p>
+  <div class="hl">발상은 소리와 같다 — 복잡한 소리를 여러 순음의 합으로 쪼개듯, <b>구 위의 색 무늬를 미리 정해 둔 기본 무늬 여러 장의 합으로 쪼개고 각 장이 얼마나 섞였는지만 적어 둔다.</b> 그 기본 무늬가 구면 조화, 섞인 정도가 계수.</div>
+  <ul class="pts">
+    <li>차수별 장수 — 0차 1장(밋밋), 1차 3장, 2차 5장, 3차 7장. <b>높은 차수까지 쓰면 조금만 기울여도 색이 달라지는 표면까지</b> 담긴다</li>
+    <li>여기선 3차까지 = 16장. 0차 1장은 기본 색으로 뺐으니 남는 15장 × RGB 3 = <b>45개</b></li>
+  </ul>
+  <div class="big"><span class="y">0차 계수 하나만</span> 남기면 방향에 상관없는 색 하나 = 기본 색</div>
+  <aside>🔬 62개는 수학적으로 공분산 행렬(자유도 6)을 크기 3 + 회전 4로 쪼갠 것. 회전을 넷으로 두는 건 사원수(quaternion)라 특정 자세에서 축이 겹치는 고장이 없어서. 불투명도·크기는 시그모이드·로그를 거쳐 저장해 값이 3.2나 음수로 보여도 정상입니다.</aside>
+</section>
+
+<!-- 17 못 채우는 칸 -->
+<section class="slide" data-part="PART 2">
+  <h2>🕳️ 사진이 <span class="r">못 채우는 칸</span>이 셋</h2>
+  <table class="t">
+    <tr><th>칸</th><th>근거가 있나</th></tr>
+    <tr><td>색 (기본 색 3)</td><td>사진에 그대로 찍혀 있다</td></tr>
+    <tr><td>불투명도·크기·회전</td><td>근거는 없어도 <b>규칙을 세워 정할 수 있다</b></td></tr>
+    <tr><td>구면 조화 45</td><td>각도별 색 변화라 <b>비워 두면 된다</b></td></tr>
+    <tr><td class="r">위치 3</td><td class="r">사진이 안 준다. 규칙으로도 못 정한다 — <b>아무 데나 찍으면 다른 방</b></td></tr>
+  </table>
+  <div class="big">셔터가 닫힐 때 버려진 것이 <span class="y">정확히 그 위치 세 칸</span><small>화소는 색을 주지, 어디에서 온 색인지는 말해 주지 않는다</small></div>
+  <div class="hl">그래서 다음 일이 저절로 정해진다 — <b>방을 찍어 그 세 칸에 넣을 숫자부터 받아 온다.</b> 3차원 점 하나가 곧 그 세 칸. 다음 덱에서 폰을 꺼낸다.</div>
+  <aside>색·불투명도·크기·회전·구면 조화는 채우거나 비울 수 있지만, 위치만은 방을 실제로 찍어 재야 나옵니다.</aside>
+</section>
+
+<!-- 18 핵심 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이 덱의 <span class="g">핵심 정리</span></h2>
+  <table class="t">
+    <tr><th>개념</th><th>한 문장</th></tr>
+    <tr><td>사진과 거리</td><td>3차원이 2차원으로 눌리며 <b>거리가 버려진다</b> — 오늘 그걸 계산으로 되찾는다</td></tr>
+    <tr><td>그릇 넷</td><td>메시·포인트클라우드·복셀·스플랫 — <b>이름이 그대로 주문</b>. 오늘은 스플랫</td></tr>
+    <tr><td>점 vs 알갱이</td><td>점은 크기가 없고, 알갱이는 <b>부피·투명도를 붙인 반투명 타원 얼룩</b></td></tr>
+    <tr><td>NeRF → 스플랫</td><td>물어보기(느림) → <b>찍어 바르기(GPU가 잘하는 일, 실시간)</b></td></tr>
+    <tr><td>알갱이 62값</td><td>구면 조화 45가 <b>73%</b> — 파일이 큰 건 형태가 아니라 각도별 색</td></tr>
+    <tr><td>못 채우는 칸</td><td><b>위치 3칸</b>만은 방을 찍어 재야 나온다</td></tr>
+  </table>
+  <aside>이 개념들이 다음 덱들에서 지시문 낱말과 판단 기준으로 그대로 쓰입니다.</aside>
+</section>
+
+<!-- 19 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> "사진은 거리를 버린다"는 무슨 뜻이고, 오늘 하는 일은 무엇인가?</div>
+    <div class="q"><b>Q2.</b> 담는 그릇 넷 중 <b>오늘 쓰는 것</b>은 무엇이며, 왜 메시로는 안 가나?</div>
+    <div class="q"><b>Q3.</b> 점과 <b>알갱이</b>의 결정적 차이는? 알갱이가 표면처럼 보이는 이유는?</div>
+    <div class="q"><b>Q4.</b> NeRF에서 가우시안 스플래팅으로 넘어가며 <b>뒤집은 것</b>은 무엇인가?</div>
+    <div class="q"><b>Q5.</b> 알갱이 하나 248바이트 중 <b>73%</b>를 차지하는 것과, 사진이 못 채우는 칸은?</div>
+  </div>
+  <aside>Q1과 Q5가 이 덱의 뼈대입니다.</aside>
+</section>
+
+<!-- 20 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 3차원이 2차원 격자로 눌리며 <b>칸마다 RGB만 남고 거리는 안 적힌다</b>. 오늘 하는 일은 재는 장비 없이 <b>사진에서 그 거리를 계산으로 되찾는 것</b>.</div>
+    <div class="q a"><b>A2.</b> <b>가우시안 스플랫</b>. 메시는 점을 삼각형으로 이으려면 경계를 정해야 하는데 사진에서 되찾은 점엔 경계가 깨끗하지 않다 — 알갱이는 그 결정을 안 하고 <b>화면에 겹쳐 바르면 된다</b>.</div>
+    <div class="q a"><b>A3.</b> 점은 <b>크기가 없어</b> 틈으로 뒤가 비치고, 알갱이는 <b>부피·투명도를 붙인 얼룩</b>이라 겹쳐 바르면 틈이 메워지고 가장자리가 흐려 경계가 부드럽게 이어진다.</div>
+    <div class="q a"><b>A4.</b> <b>계산이 흐르는 방향</b>. NeRF는 화소가 공간을 찾아가 점마다 신경망에 물어봤고, 스플래팅은 <b>공간의 알갱이를 화면으로 눌러 찍어</b> GPU가 잘하는 일로 바꿨다.</div>
+    <div class="q a"><b>A5.</b> <b>구면 조화 45개(180바이트)</b>가 73% — 파일이 큰 건 형태가 아니라 각도별 색. 사진이 못 채우는 칸은 <b>위치 3칸</b>, 방을 찍어 재야 나온다.</div>
+  </div>
+  <aside>A4·A5를 설명할 수 있으면 뒤 실습 덱의 지시문이 왜 그렇게 생겼는지가 보입니다.</aside>
+</section>
+
+<!-- 21 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>거리를 되찾는다 🧭</h1>
+    <div class="big" style="margin-top:26px">사진은 거리를 버리고 · 알갱이로 되찾는다<br>그릇은 <span class="y">스플랫</span> · 못 채우는 칸은 <span class="y">위치 셋</span><br><br>다음 — 방을 찍어 그 세 칸을 받아 온다</div>
+    <p class="sub" style="margin-top:24px">사진이 버린 거리를 되찾는다 — 개념과 그릇</p>
+  </div>
+  <aside>다음 덱(찍어서 점으로, 점을 알갱이로)에서 폰을 꺼내 코랩에서 점을 만들고, 62칸을 채워 알갱이 파일을 얻습니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>

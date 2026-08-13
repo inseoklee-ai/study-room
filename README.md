@@ -133,17 +133,17 @@
    - ✅ 6-⑥. 목소리를 만든다는 것 (합성·복제·라이선스) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/voice-synthesis/) · 📊 [PPT](voice-synthesis/voice-synthesis.pptx)
    - ✅ 6-⑦. 회의록을 자동으로 정리해 봅니다 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/meeting-notes/) · 📊 [PPT](meeting-notes/meeting-notes.pptx)
    - ✅ 6-⑧. 중간을 남겨야 되짚을 수 있습니다 (강의 정리) — 🖥️ [6-⑦ 덱에 포함](https://inseoklee-ai.github.io/study-room/meeting-notes/#11)
-7. **[프로젝트] 공간을 다루는 AI** ⬅️ 준비 중 (0/9)
-   - ⬜ 7-①. 셔터가 닫힐 때 사라지는 것
-   - ⬜ 7-②. 무엇에 담고 무엇이라 부르나
-   - ⬜ 7-③. 방을 찍어 점으로
-   - ⬜ 7-④. 점을 알갱이로
-   - ⬜ 7-⑤. 줄여서 내 주소에
-   - ⬜ 7-⑥. 서른 해 동안 난 길들
-   - ⬜ 7-⑦. 안 될 때와 더 낫게
-   - ⬜ 7-⑧. [과제] 공개할 수 있는 공간을 골라 올립니다
-   - ⬜ 7-⑨. 도구는 바뀌고 고르는 눈은 남습니다
-   - 📦 프로젝트 제출
+7. **[프로젝트] 공간을 다루는 AI** ✅ 완결 (10/10) · 9개 소단원 + 제출을 **5개 덱으로 통합**
+   - ✅ 7-①. 셔터가 닫힐 때 사라지는 것 (거리·그릇 넷) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/spatial-ai-intro/) · 📊 [PPT](spatial-ai-intro/spatial-ai-intro.pptx)
+   - ✅ 7-②. 무엇에 담고 무엇이라 부르나 (알갱이 62값·구면조화) — 🖥️ [7-① 덱에 포함](https://inseoklee-ai.github.io/study-room/spatial-ai-intro/#9)
+   - ✅ 7-③. 방을 찍어 점으로 (시차·코랩·MapAnything) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/capture-to-points/) · 📊 [PPT](capture-to-points/capture-to-points.pptx)
+   - ✅ 7-④. 점을 알갱이로 (62칸 채우기·크기 규칙) — 🖥️ [7-③ 덱에 포함](https://inseoklee-ai.github.io/study-room/capture-to-points/#16)
+   - ✅ 7-⑤. 줄여서 내 주소에 (압축·Spark·Pages) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/shrink-and-publish/) · 📊 [PPT](shrink-and-publish/shrink-and-publish.pptx)
+   - ✅ 7-⑥. 서른 해 동안 난 길들 (SfM·SLAM·NeRF·피드포워드) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/thirty-years-3d/) · 📊 [PPT](thirty-years-3d/thirty-years-3d.pptx)
+   - ✅ 7-⑦. 안 될 때와 더 낫게 (검은 자리·PSNR/SSIM/LPIPS) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/judge-and-submit/) · 📊 [PPT](judge-and-submit/judge-and-submit.pptx)
+   - ✅ 7-⑧. [과제] 공개할 수 있는 공간을 골라 올립니다 — 🖥️ [7-⑦ 덱에 포함](https://inseoklee-ai.github.io/study-room/judge-and-submit/#11)
+   - ✅ 7-⑨. 도구는 바뀌고 고르는 눈은 남습니다 (라이선스) — 🖥️ [7-⑦ 덱에 포함](https://inseoklee-ai.github.io/study-room/judge-and-submit/#16)
+   - ✅ 📦 프로젝트 제출 (루브릭) — 🖥️ [7-⑦ 덱에 포함](https://inseoklee-ai.github.io/study-room/judge-and-submit/#22)
 8. **AI가 새로 연 곳들** ⬅️ 준비 중 (0/11)
    - ⬜ 8-①. 같은 주에 다른 데서 벌어진 일들
    - ⬜ 8-②. 학습 없이 표를 읽는 모델
@@ -207,6 +207,11 @@
 > - 6-⑤ https://inseoklee-ai.github.io/study-room/omni-llm/
 > - 6-⑥ https://inseoklee-ai.github.io/study-room/voice-synthesis/
 > - 6-⑦⑧ https://inseoklee-ai.github.io/study-room/meeting-notes/
+> - 7-①② https://inseoklee-ai.github.io/study-room/spatial-ai-intro/
+> - 7-③④ https://inseoklee-ai.github.io/study-room/capture-to-points/
+> - 7-⑤ https://inseoklee-ai.github.io/study-room/shrink-and-publish/
+> - 7-⑥ https://inseoklee-ai.github.io/study-room/thirty-years-3d/
+> - 7-⑦⑧⑨ https://inseoklee-ai.github.io/study-room/judge-and-submit/
 >
 > 📊 **PPT**: 각 강의 폴더의 `<폴더명>.pptx` (예: `vlm/vlm.pptx`). GitHub 저장소나 라이브 사이트에서 내려받아 PowerPoint로 열 수 있습니다.
 >

@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>서른 해 동안 난 길들 · 공간을 다루는 일곱 갈래</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.77rem,1.28vw,.94rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.9rem);
+    color:var(--ink);overflow:auto;max-height:52vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">단원 3 · 강의 7 · 공간을 다루는 AI (⑥)</span>
+    <h1 style="margin:18px 0">서른 해 동안<br>난 길들</h1>
+    <p class="sub">10.6초가 나오기까지 · 공간을 다루는 일곱 갈래</p>
+  </div>
+  <aside>사진 24장이 점 320만 개로 풀리는 데 10.6초가 걸렸습니다. 처음부터 10.6초였던 게 아닙니다. 같은 일을 하려고 사람들이 서른 해 가까이 서로 다른 길을 냈고, 방금 쓴 건 가장 나중에 난 길입니다. 그 길들을 거슬러 올라갑니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 갈래마다 <span class="g">물을 것 셋</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--red)"><small>1</small><b class="r">무엇이<br>막혔나</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>2</small><b class="b">어떻게<br>풀었나</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gold)"><small>3</small><b>무엇을 대신<br>내줬나</b></div>
+  </div>
+  <ul class="pts">
+    <li><b>셋째가 제일 중요</b> — 공짜로 풀린 건 하나도 없어서, 무엇을 내주고 얻었는지를 알아야 그 길이 내 조건에 맞는지가 갈린다</li>
+    <li>일곱 갈래 — <b>SfM · MVS · SLAM · 복셀 · NeRF · 가우시안 스플래팅 · 피드포워드</b></li>
+  </ul>
+  <div class="hl">🎯 갈래마다 <b>실제로 어디서 돌아가고 있는지</b>도 함께 짚는다 — 이름과 원리만 쥐면 막상 쓸 데를 만났을 때 그 이름이 안 떠오른다.</div>
+  <aside>이 덱은 순수 이론입니다. 손을 쓰는 실습(③④⑤)은 앞 덱들에 있습니다.</aside>
+</section>
+
+<!-- 3 SfM -->
+<section class="slide" data-part="PART 1">
+  <h2>📷 SfM — <span class="g">카메라가 어디 있었는지부터</span></h2>
+  <ul class="pts">
+    <li><b class="r">막힘</b> — 시차를 거리로 바꾸려면 <b>두 사진이 각각 어디서 찍혔는지</b>가 필요한데, 카메라 위치도 사진에 안 적혀 있다</li>
+    <li><b class="b">풀이</b> — 사진마다 <b>특징점</b>(모서리 등)을 뽑아 두 장씩 짝짓고, 짝이 모이면 <b>연립방정식</b>으로. 계산이 낸 자리와 실제 찍힌 자리가 맞아떨어지도록 카메라·점 위치를 정한다(어긋남 합이 최소가 되게)</li>
+  </ul>
+  <div class="hl"><b class="r">내준 것 = 시간.</b> 200장으로 세 걸음 차례로 돌리면 <b>12분</b>, 나오는 점은 <b>8천 개 남짓</b>(오늘은 24장에 10.6초, 320만 개). GPU가 붙어도 널리 쓰는 COLMAP 실행 파일은 <b>CPU로만</b> 돈다. <b>되풀이 무늬는 틀린 짝이 그럴듯해 검사를 통과</b> — 안 나오는 것보다 잘못 나오는 게 알아채기 어렵다.</div>
+  <aside>이름은 structure from motion, 오래 기본값으로 쓴 도구가 COLMAP. 이 걸음은 그 자체가 목적이기보다 다른 것의 앞단으로 훨씬 많이 돕니다 — NeRF도 실제 장면은 카메라 위치를 COLMAP으로 얻습니다. 📚 Structure-from-Motion Revisited, CVPR 2016.</aside>
+</section>
+
+<!-- 4 MVS -->
+<section class="slide" data-part="PART 1">
+  <h2>🧱 MVS — <span class="g">8천 개로는 방을 못 보여 준다</span></h2>
+  <ul class="pts">
+    <li><b class="r">막힘</b> — 8천 개는 사진 한 장 화소 수에도 못 미친다(<b>희소</b>). 짝이 확실한 곳에만 점이 선다</li>
+    <li><b class="b">풀이</b> — 카메라 위치를 이제 아니, 한 화소를 골라 "2미터 앞이라 치면 옆 사진 어디?"를 계산해 가서 닮았나 확인. 후보 거리를 훑어 가장 잘 맞는 걸 깊이로 채택하고 모든 화소에 반복 → <b>조밀</b>해진다</li>
+  </ul>
+  <div class="hl"><b class="r">내준 것</b> — 계산량이 화소×후보거리×이웃사진으로 <b>곱으로 불어난다</b>. <b>닮았는지를 보는 방식이라 볼 게 없으면 무너진다</b>(흰 벽·유리·금속). 각도 따라 색이 변하는 표면은 두 사진에서 다른 색이라 닮았다 판정 불가 — <b>구면 조화로 담으려던 그 성질이 여기선 걸림돌</b>.</div>
+  <aside>이름은 multi-view stereo. SfM+MVS를 묶으면 사진측량(photogrammetry) — 사원 수레 사진의 장비는 직접 쟀지만, 사진측량은 같은 결과를 사진과 계산으로 얻습니다. 장비를 못 들고 가는 곳에선 유일한 길입니다.</aside>
+</section>
+
+<!-- 5 SLAM -->
+<section class="slide" data-part="PART 1">
+  <h2>🤖 SLAM — <span class="g">다 찍고 푸는 걸로는 안 되는 데</span></h2>
+  <ul class="pts">
+    <li><b class="r">막힘</b> — 위 둘은 <b>사진을 다 모아 놓고 한꺼번에 푼다</b>. 그런데 로봇 청소기는 다음 바퀴 전에, 머리에 쓰는 기기는 고개 돌리는 그 순간에 위치를 알아야 한다 — <b>지금 당장</b></li>
+    <li><b class="b">풀이</b> — 들어오는 장면마다 위치를 갱신하며 지도도 함께 키운다(<b>simultaneous localization and mapping</b>). 지도가 있어야 위치를 알고 위치를 알아야 지도를 그리는데, 둘 다 없이 시작해 서로를 밀어 올린다</li>
+  </ul>
+  <div class="hl">열쇠말 둘 — 대표 장면만 남기는 <b>키프레임</b>, 한 바퀴 돌아 어긋남을 한 번에 당겨 맞추는 <b>루프 클로저</b>. <b class="r">내준 것 = 지도가 성기다</b>(실시간 예산). 부딪히지 않기엔 충분해도 남에게 보여 줄 화면은 못 된다.</div>
+  <aside>ORB-SLAM(특징점, 큰 각도차에서 루프 닫기), LSD-SLAM(특징점 없이 밝기 직접, CPU 실시간), DROID-SLAM(갱신을 신경망이 다듬음). 📚 arXiv:1502.00956 · TUM CV Group · arXiv:2108.10869.</aside>
+</section>
+
+<!-- 6 SLAM 어디 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧹 SLAM은 <span class="g">어디에</span> — 그리고 자주 틀리는 것</h2>
+  <ul class="pts">
+    <li>가장 가까운 곳이 <b>로봇 청소기</b> — SLAM이 없으면 방 안을 무작위로 돌아 바닥을 다 못 청소한다. 창고 로봇·배송 드론·<b>증강현실 기기</b>(폰이 특징점으로 제 위치를 아는 inside-out tracking)도</li>
+    <li>레이저로 직접 재는 <b>라이다 SLAM</b>(정확)과 카메라 그림만 쓰는 <b>시각적 SLAM</b>(싸고 색·무늬까지)으로 갈린다</li>
+  </ul>
+  <div class="big"><span class="y">자율주행차는 SLAM의 예로 흔히 잘못 든다</span><small>양산 자율주행은 정밀지도(HD map)를 미리 만들어 넣고, 차는 그 위에서 위치만 찾는다 — SLAM의 M이 차 안에선 안 돈다</small></div>
+  <div class="hl">갈라 놓은 값어치 — 미리 만드는 지도는 시간 들여 다듬고 사람이 확인할 수 있고, 그러면 차 안엔 가벼운 계산만 남는다. <b>동시에 해야 하는 일인지를 먼저 묻는 것</b>이 여기서 가져갈 판단.</div>
+  <aside>지도 만드는 일은 그 일만 하는 차량이 미리 돕니다. 📚 ARCore Fundamental concepts · MATLAB SLAM 소개 · High-Definition Map Generation, arXiv:2206.05400.</aside>
+</section>
+
+<!-- 7 복셀 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧊 복셀 — <span class="g">점을 격자에 담아</span> 합성곱을 건다</h2>
+  <ul class="pts">
+    <li><b class="r">막힘</b> — <b>점에는 이웃이 안 적혀 있다.</b> 사진은 격자라 합성곱이 도는데, 점 무더기는 순서도 없고 개수도 제각각이고 옆이 누군지도 없다</li>
+    <li><b class="b">풀이</b> — 공간을 같은 크기 칸으로 잘라 점을 나눠 담는다. 칸이 되면 이웃이 정해져 <b>3차원 합성곱</b>을 그대로 건다. <b>새 계산을 발명하지 않고 이미 잘 도는 계산을 걸 형태로 바꾼 것</b></li>
+  </ul>
+  <table class="t">
+    <tr><th>이름</th><th>같은 문제를 다르게</th></tr>
+    <tr><td>VoxelNet</td><td>칸의 점들을 특징으로 바꾸는 층 — 처음부터 끝까지 학습</td></tr>
+    <tr><td>SECOND</td><td>표면에만 얇게 붙어 <b>대부분 빈 칸</b> → 빈 칸 건너뛰기</td></tr>
+    <tr><td>PointPillars</td><td>축 하나를 접어 세로 기둥으로 눌러 2차원처럼</td></tr>
+    <tr><td>CenterPoint</td><td>상자 대신 <b>중심점 하나</b>로 — 방향 맞히는 골칫거리 제거</td></tr>
+  </table>
+  <div class="hl"><b class="r">내준 것</b> — 한 변 2배면 칸이 <b>8배</b>, 게다가 대부분 빈 칸. 요즘은 상자 대신 <b>칸마다 무엇이 찼는지 채우는 점유 예측</b>(Occ3D·TPVFormer) — 종류를 몰라도 "저기가 비어 있지 않다"는 말할 수 있어서.</div>
+  <aside>자율주행 라이다 인식과 의료 영상(몸을 저며 찍는 장비는 칸 단위 값을 냄)이 이 그릇. 표면만으론 못 하는 일, 속이 얼마나 찼는지를 물어야 하는 일에 놓입니다. 📚 arXiv:1711.06396 · 1812.05784 · 2006.11275 · 2304.14365.</aside>
+</section>
+
+<!-- 8 NeRF -->
+<section class="slide" data-part="PART 1">
+  <h2>🧠 NeRF — <span class="g">표면이 있다는 전제가 안 통하는 것들</span></h2>
+  <ul class="pts">
+    <li><b class="r">막힘</b> — 지금까지 갈래는 <b>경계가 있다고 본다</b>(화소마다 거리 하나, 점을 삼각형으로, 칸이 찼나 비었나). 유리·머리카락·연기·커튼엔 그 면이 없어 한 화소에 앞뒤가 섞인다</li>
+    <li><b class="b">풀이</b> — 장면을 작은 신경망에 외우게 하고, 광선을 따라 색·불투명도를 쌓아 화소를 만든다. <b>면을 정하는 일 자체를 안 하니 반투명이 자연스럽다</b></li>
+  </ul>
+  <div class="hl"><b class="r">내준 것 = 시간</b>, 그리고 시간표에 안 적히는 것 하나 — <b>이 방식도 카메라 위치는 스스로 못 푼다.</b> 원 논문도 실제 장면은 COLMAP으로 얻는다 → <b>앞의 12분이 그대로 앞에 붙는다</b>.</div>
+  <aside>앞 덱(spatial-ai-intro)에서 자세히 다뤘습니다. 여기선 일곱 갈래 안에서의 자리만 짚습니다.</aside>
+</section>
+
+<!-- 9 3DGS -->
+<section class="slide" data-part="PART 1">
+  <h2>🪄 가우시안 스플래팅 — <span class="g">실시간이 됐고 조건 하나는 남았다</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--red)"><small>막힘</small><b>화소마다<br>신경망 호출</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>풀이</small><b class="b">알갱이를<br>눌러 찍어 바르기</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>내준 것</small><b>파일 크기<br>248바이트×수백만</b></div>
+  </div>
+  <div class="hl"><b class="r">그대로 남은 조건이 둘</b> — ①장면마다 <b>학습을 처음부터 다시</b> 돌린다(방 하나 더 = 다시 몇십 분) ②이 방식도 <b>앞단에 SfM이 있어야</b> 한다(사진에서 얻은 점을 알갱이 출발점으로 삼는 게 논문의 첫째 장치, 그 점이 곧 SfM의 희소 점 무더기).</div>
+  <div class="big">여러분이 <span class="y">217.5MB를 15.3MB로</span> 줄이느라 한 걸음을 통째로 쓴 이유</div>
+  <aside>앞 덱에서 다뤘습니다. 남은 조건 둘이 다음 갈래(피드포워드)가 풀려는 문제입니다.</aside>
+</section>
+
+<!-- 10 피드포워드 -->
+<section class="slide" data-part="PART 1">
+  <h2>⚡ 피드포워드 복원 — <span class="g">아예 학습시켜 버린 쪽</span></h2>
+  <ul class="pts">
+    <li><b class="r">막힘</b> — 앞의 남은 둘. 특히 <b>흰 벽에서 SfM이 무너지면 뒤가 통째로 안 돈다</b> — 첫 단추가 사진의 성질에 걸려 있다</li>
+    <li><b class="b">풀이</b> — 장면마다 새로 풀지 말고 <b>사진을 넣으면 곧바로 점이 나오게 미리 학습</b>. 되풀이 다듬는 고리가 없어 <b>피드포워드</b></li>
+  </ul>
+  <table class="t">
+    <tr><th>이름</th><th>무엇을</th></tr>
+    <tr><td>DUSt3R</td><td>사진 두 장 → 같은 좌표계 점 지도 두 장. 보정값·자세 입력 안 받음</td></tr>
+    <tr><td>MASt3R</td><td>짝 맞추기를 2차원 아닌 <b>3차원에서</b></td></tr>
+    <tr><td>VGGT</td><td>여러 장을 한 번에 → 자세·깊이·점·추적을 함께(H100에 스무 장 0.31초)</td></tr>
+    <tr><td><b>MapAnything</b></td><td><b>여러분이 방금 쓴 것</b> — 사진만도, 아는 값과 함께도. 미터 단위</td></tr>
+  </table>
+  <div class="hl"><b class="r">내준 것 셋</b> — ①<b>본 적 있는 것에 기댄다</b>(계산이 아니라 기억이라, 흰 벽 깊이는 재서가 아니라 채운 값. <b>되찾은 것과 채워 넣은 것이 겉으론 구별 안 됨</b>) ②덩치(194초·4.91GB, 사진 늘리면 메모리에 먼저 걸림) ③조건이 저마다 다름(-apache 이야기).</div>
+  <aside>갈라 놨던 걸음들이 하나로 합쳐지는 곳마다 들어갑니다. 오늘 프로그램 하나만 돌리고 끝난 이유가 이것. 📚 arXiv:2312.14132 · 2406.09756 · 2503.11651 · 2509.13414.</aside>
+</section>
+
+<!-- 11 두 길 겹쳐 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔭 두 길을 <span class="g">겹쳐 놓으면</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="r">오래 쓰인 길</h3><p style="margin:0">사진 → 특징점 뽑기 → 짝 맞추기 → 자리 풀기 → <b>성긴 점 8천 개</b> → 조밀하게 → 장면마다 학습<br><small>200장에 12분</small></p></div>
+    <div class="box"><h3 class="g">오늘 걸은 길</h3><p style="margin:0">사진 → <b>미리 학습해 둔 모델을 한 번 통과</b> → 조밀한 점 320만 개<br><small>24장에 10.6초 · 최대 메모리 6.74GB</small></p></div>
+  </div>
+  <div class="big">걸음이 줄어든 것이지 <span class="y">계산이 없어진 게 아니다</span><small>위쪽 세 상자가 아래쪽 상자 하나 안으로 접혀 들어갔다</small></div>
+  <div class="hl">볼 것은 배수가 아니라 <b>상자의 개수</b> — 찍은 것도 달라 두 시간을 배수로 말할 수 없다. <b>상자가 줄면 막힐 곳도 함께 준다.</b></div>
+  <aside>피드포워드가 SfM·MVS·장면별 학습이라는 상자 셋을 모델 하나로 접었습니다.</aside>
+</section>
+
+<!-- 12 일곱 갈래 표 -->
+<section class="slide" data-part="PART 1">
+  <h2>📋 일곱 갈래를 <span class="g">한 장에</span></h2>
+  <table class="t" style="font-size:clamp(.68rem,1.1vw,.82rem)">
+    <tr><th>갈래</th><th>푼 문제</th><th>치른 값</th><th>어디에</th></tr>
+    <tr><td>SfM</td><td>카메라가 어디 있었나</td><td>매끈한 면·되풀이 무늬에 무너짐. 200장 12분</td><td>사진측량, 아래 둘의 앞단</td></tr>
+    <tr><td>MVS</td><td>성긴 점을 조밀하게</td><td>계산량 곱으로. 볼 무늬·색 변화에 약함</td><td>사진측량의 형태 얻기</td></tr>
+    <tr><td>SLAM</td><td>움직이며 그 순간에 위치+지도</td><td>실시간 예산에 지도가 성김</td><td>로봇청소기·창고·드론·AR</td></tr>
+    <tr><td>복셀</td><td>점을 격자에 담아 3D 합성곱</td><td>한 변 2배면 8배, 대부분 빈 칸</td><td>자율주행 라이다·의료 영상</td></tr>
+    <tr><td>NeRF</td><td>표면 없는 것·반투명·새 각도</td><td>느림, 카메라 위치는 SfM에서</td><td>공간 통째로 돌려 보기</td></tr>
+    <tr><td>가우시안 스플래팅</td><td>그리기를 GPU가 잘하는 일로</td><td>파일 큼, 장면마다 학습, 앞단 SfM</td><td>매물·상품, 폰 스캔 기본</td></tr>
+    <tr><td>피드포워드</td><td>미리 배워 한 번 통과</td><td>본 것에 기댐, 가중치 무거움</td><td>위 걸음들을 한 모델로. 오늘</td></tr>
+  </table>
+  <aside>이 표는 내년이면 한 줄이 더 붙습니다. 그래서 남는 것은 표가 아니라 표를 읽는 방법입니다.</aside>
+</section>
+
+<!-- 13 물을 것 셋 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧭 새 이름을 만나면 <span class="g">물을 것 셋</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>무엇이 막혀서 나온 것인가</b> — 앞엣것이 못 하던 일을 찾으면 어디에 강한지가 저절로 나온다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>무엇을 내주고 풀었나</b> — 새것이 모든 면에서 이기는 경우는 드물다. 이 값을 못 치르는 조건이면 옛길이 답</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>그 속도는 어느 기계에서 잰 값인가</b> — 이 대목에서만 A6000·H100·T4 셋이 나왔다. 조건 안 밝힌 속도는 자기 계획에 못 넣는다</span></div>
+  </div>
+  <div class="big">도구는 계속 바뀌고, <span class="y">남는 것은 표를 읽는 방법</span></div>
+  <aside>오늘 쓴 길은 SfM 걸음을 통째로 지웠지만 대신 4.91GB 가중치와 학습에서 본 것에 기대는 성질을 떠안았습니다. 이제 화면으로 돌아갑니다 — 아직 안 풀린 게 하나 남아 있습니다(검은 자리).</aside>
+</section>
+
+<!-- 14 핵심 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이 덱의 <span class="g">핵심 정리</span></h2>
+  <table class="t">
+    <tr><th>가져갈 것</th><th>한 문장</th></tr>
+    <tr><td>물을 것 셋</td><td>막힘 · 풀이 · <b>내준 것</b> — 셋째가 그 길이 내 조건에 맞는지를 가른다</td></tr>
+    <tr><td>SfM·MVS</td><td>카메라 위치 되찾기 + 조밀하게. <b>매끈한 면·되풀이 무늬에 무너진다</b></td></tr>
+    <tr><td>SLAM</td><td><b>동시에 해야 하나</b>를 먼저 묻는다 — 자율주행은 지도를 미리 만든다</td></tr>
+    <tr><td>복셀</td><td>점을 격자에 담아 <b>이미 잘 도는 계산</b>을 건다. 속을 물을 때</td></tr>
+    <tr><td>NeRF→스플랫</td><td>반투명이 자연스럽다 → 실시간. 둘 다 앞단 SfM이 필요했다</td></tr>
+    <tr><td>피드포워드</td><td>상자를 하나로 접었다 — 대신 <b>본 것에 기대고 무겁다</b></td></tr>
+  </table>
+  <aside>일곱 갈래가 전부 같은 목표(사진에서 공간 되찾기)를 서로 다르게 푼 것이고, 오늘 쓴 건 가장 나중 길입니다.</aside>
+</section>
+
+<!-- 15 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 새 방식을 만날 때 <b>물을 것 셋</b>은? 왜 셋째가 제일 중요한가?</div>
+    <div class="q"><b>Q2.</b> SfM과 MVS는 각각 무엇을 하며, <b>공통으로 무너지는</b> 조건은?</div>
+    <div class="q"><b>Q3.</b> 자율주행차가 <b>SLAM의 예로 잘못 드는</b> 이유는?</div>
+    <div class="q"><b>Q4.</b> 피드포워드 복원이 <b>내준 것 셋</b> 중, "되찾은 것과 채운 것이 구별 안 된다"는 무슨 뜻인가?</div>
+    <div class="q"><b>Q5.</b> 속도 주장을 볼 때 <b>반드시 확인</b>할 것은? (A6000·H100·T4)</div>
+  </div>
+  <aside>Q1과 Q4가 이 덱의 뼈대입니다.</aside>
+</section>
+
+<!-- 16 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> <b>무엇이 막혔나 · 어떻게 풀었나 · 무엇을 대신 내줬나.</b> 공짜로 풀린 건 없어서, 내준 것을 알아야 그 길이 내 조건에 맞는지가 갈린다.</div>
+    <div class="q a"><b>A2.</b> SfM은 <b>카메라 위치</b>를 되찾고, MVS는 성긴 점을 <b>조밀하게</b> 만든다. 둘 다 <b>매끈한 단색 면·되풀이 무늬</b>(볼 무늬가 없는 곳)에서 무너진다.</div>
+    <div class="q a"><b>A3.</b> 양산 자율주행은 <b>정밀지도(HD map)를 미리 만들어 넣고</b> 차는 그 위에서 위치만 찾는다 — 지도 만들기(M)가 차 안에선 안 돈다.</div>
+    <div class="q a"><b>A4.</b> 잘 맞히는 게 계산이 아니라 <b>기억</b>이라, 흰 벽 깊이는 재서가 아니라 "이런 장면은 대개 이렇더라"로 <b>채운 값</b> — 겉으론 되찾은 값과 구별이 안 된다.</div>
+    <div class="q a"><b>A5.</b> <b>어느 기계에서 잰 값인가.</b> A6000·H100은 노트북에 없는 카드라, 조건을 안 밝힌 속도는 자기 계획에 넣을 수 없다.</div>
+  </div>
+  <aside>A4는 지어내는 쪽(image-to-3D)으로 갈수록 더 심해집니다 — 맞는지 물어볼 상대가 없어집니다.</aside>
+</section>
+
+<!-- 17 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>서른 해가 한 상자로 🔭</h1>
+    <div class="big" style="margin-top:26px">막힘 · 풀이 · <span class="y">내준 것</span> 셋으로 읽는다<br>도구는 바뀌고 <span class="y">표를 읽는 눈</span>은 남는다<br><br>이제 화면으로 — 아직 안 풀린 검은 자리 하나</div>
+    <p class="sub" style="margin-top:24px">서른 해 동안 난 길들 — 일곱 갈래</p>
+  </div>
+  <aside>다음 덱(안 될 때, 더 낫게, 고르는 눈)에서 검은 자리의 이유를 풀고, PSNR·SSIM·LPIPS로 판정하고, 과제와 라이선스·마무리까지 갑니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>
