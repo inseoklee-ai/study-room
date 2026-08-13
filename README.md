@@ -17,15 +17,15 @@
 
 ### 2. AIFFEL_LMS
 **중단원 ①**
-1. 바이브코딩을 위한 작업대 마련하기
-   - ①-1. AI에게 일을 맡길 작업대를 차린다는 것
-   - ①-2. 내 작업대 상태 확인하기
-   - ①-3. 첫 프로젝트 폴더와 파일 만들기
-   - ①-4. 바이브 코딩 루프 한 번 돌리기
-   - ①-5. 터미널 vs 셸 vs 커널 vs 프롬프트 — 이름의 역사부터 명령이 움직이는 길까지
-   - ①-6. 실습 1 — 터미널로 폴더를 탐험하고 만들기
-   - ①-7. 실습 2 — AI에게 폴더 정리를 맡기고 검토하기
-   - ①-8. 실습 3 — 직접 한 것과 AI에게 맡긴 것 비교 회고
+1. **바이브코딩을 위한 작업대 마련하기** ✅ 완결 (8/8) · 8개 소단원을 **4개 덱으로 통합**
+   - ✅ ①-1. AI에게 일을 맡길 작업대를 차린다는 것 (다섯 도구) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/workbench-setup/) · 📊 [PPT](workbench-setup/workbench-setup.pptx)
+   - ✅ ①-2. 내 작업대 상태 확인하기 (설치·버전 검증) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/first-loop/) · 📊 [PPT](first-loop/first-loop.pptx)
+   - ✅ ①-3. 첫 프로젝트 폴더와 파일 만들기 — 🖥️ [①-2 덱에 포함](https://inseoklee-ai.github.io/study-room/first-loop/#8)
+   - ✅ ①-4. 바이브 코딩 루프 한 번 돌리기 — 🖥️ [①-2 덱에 포함](https://inseoklee-ai.github.io/study-room/first-loop/#11)
+   - ✅ ①-5. 터미널 vs 셸 vs 커널 vs 프롬프트 (CS 심화) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/terminal-anatomy/) · 📊 [PPT](terminal-anatomy/terminal-anatomy.pptx)
+   - ✅ ①-6. 실습 1 — 터미널로 폴더를 탐험하고 만들기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/terminal-practice/) · 📊 [PPT](terminal-practice/terminal-practice.pptx)
+   - ✅ ①-7. 실습 2 — AI에게 폴더 정리를 맡기고 검토하기 — 🖥️ [①-6 덱에 포함](https://inseoklee-ai.github.io/study-room/terminal-practice/#6)
+   - ✅ ①-8. 실습 3 — 직접 한 것과 AI에게 맡긴 것 비교 회고 — 🖥️ [①-6 덱에 포함](https://inseoklee-ai.github.io/study-room/terminal-practice/#9)
 2. [프로젝트] 웹페이지를 이루는 세 겹 & 게임 만들기
    - ②-1. AI는 잘 만드는데, 내 말은 왜 안 통할까
    - ②-2. 세 겹을 나누어 이해하기 — 이름에 담긴 사연
@@ -218,6 +218,10 @@
 > - 8-⑥⑦ https://inseoklee-ai.github.io/study-room/diffusion-and-graph/
 > - 8-⑧⑨ https://inseoklee-ai.github.io/study-room/body-and-reward/
 > - 8-⑩⑪ https://inseoklee-ai.github.io/study-room/open-vs-usable/
+> - 대2-①1 https://inseoklee-ai.github.io/study-room/workbench-setup/
+> - 대2-①2~4 https://inseoklee-ai.github.io/study-room/first-loop/
+> - 대2-①5 https://inseoklee-ai.github.io/study-room/terminal-anatomy/
+> - 대2-①6~8 https://inseoklee-ai.github.io/study-room/terminal-practice/
 >
 > 📊 **PPT**: 각 강의 폴더의 `<폴더명>.pptx` (예: `vlm/vlm.pptx`). GitHub 저장소나 라이브 사이트에서 내려받아 PowerPoint로 열 수 있습니다.
 >

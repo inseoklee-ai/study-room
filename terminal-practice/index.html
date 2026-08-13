@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>터미널 실습 · 탐험·AI 협업·비교 회고</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.77rem,1.28vw,.94rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.9rem);
+    color:var(--ink);overflow:auto;max-height:52vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 바이브코딩 작업대 ⑥⑦⑧</span>
+    <h1 style="margin:18px 0">터미널 실습 3종</h1>
+    <p class="sub">폴더 탐험 · AI에게 정리 맡기기 · 비교 회고</p>
+  </div>
+  <aside>앞 덱의 지도(터미널·셸·커널·프롬프트)를 이제 손으로 씁니다. 안전한 연습 폴더에서 시작해, AI 협업으로 넘어가고, 직접 한 것과 비교합니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 실습 <span class="g">세 걸음</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px"><small>실습 1</small><b>손으로<br>폴더 탐험·생성</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>실습 2</small><b class="b">AI에게 정리<br>dry-run·승인</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>실습 3</small><b class="g">직접 vs AI<br>비교 회고</b></div>
+  </div>
+  <ul class="pts">
+    <li>목표는 파일을 '치우는' 게 아니라 <b>분류 계획을 먼저 내고 내가 승인하는 협업</b></li>
+    <li>두 방식 중 하나가 항상 낫지 않다 — <b>어느 쪽이든 실행 결과 검토는 내 책임</b></li>
+  </ul>
+  <div class="hl">🎯 한 줄 — <b>명령을 친 사실이 아니라 출력으로 확인</b>한다. 이동할 때마다 <code>pwd</code>와 <code>ls</code>를 번갈아.</div>
+  <aside>중요한 파일이 있거나 실제 바탕화면이 부담스러우면 terminal-practice 연습 폴더에서만 연습합니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">터미널로 폴더를 탐험하고 만들기</h2>
+  <p style="margin-top:11px">안전 규칙 · 명령 · 세 단계</p><span class="who">⑥ 실습 1</span></div>
+  <aside>처음에는 바탕화면의 실제 파일 대신 terminal-practice 연습 폴더에서 실행합니다. 삭제 명령은 쓰지 않고, 공백이 있는 이름은 따옴표로 감쌉니다.</aside>
+</section>
+
+<!-- 4 명령 표 -->
+<section class="slide" data-part="PART 1">
+  <h2>🎒 안전 규칙과 <span class="g">기본 명령</span></h2>
+  <table class="t">
+    <tr><th>명령</th><th>하는 일</th></tr>
+    <tr><td><code>pwd</code></td><td>지금 있는 폴더의 전체 경로 출력</td></tr>
+    <tr><td><code>ls</code></td><td>현재 폴더 안 파일·폴더 이름 보기</td></tr>
+    <tr><td><code>cd 폴더이름</code></td><td>지정 폴더로 이동(<code>cd ..</code>는 한 단계 위)</td></tr>
+    <tr><td><code>mkdir 폴더이름</code></td><td>새 폴더 만들기</td></tr>
+    <tr><td><code>touch 파일이름</code></td><td>빈 파일 만들기(또는 수정 시각 갱신)</td></tr>
+    <tr><td><code>mv 원본 대상</code></td><td>이동·이름 바꾸기 — <b>실행 전 원본·대상을 꼭 읽는다</b></td></tr>
+  </table>
+  <div class="hl">🪟 <b>Windows PowerShell</b> — <code>pwd·ls·cd·mkdir·mv</code>는 같은 이름으로 동작. 둘만 다르다: <code>touch</code>가 없어 <code>ni 파일이름</code>, 폴더 여럿은 <code>mkdir ideas, assets, archive</code>처럼 쉼표.</div>
+  <aside>안전 규칙 — 처음에는 삭제 명령(rm)을 쓰지 않고 연습 폴더에서만. 실제 중요한 파일에는 연습이 끝날 때까지 적용하지 않습니다.</aside>
+</section>
+
+<!-- 5 세 단계 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧭 세 단계 — <span class="g">출력으로 확인</span></h2>
+  <pre># 1단계 — 내 위치를 보고 연습 공간 만들기
+pwd
+ls
+mkdir terminal-practice
+cd terminal-practice
+mkdir ideas assets archive
+ls
+
+# 2단계 — 파일을 만들고 이동하기
+touch ideas/landing-page.txt          # PowerShell: ni ideas/landing-page.txt
+mkdir assets/images
+mv ideas/landing-page.txt assets/images/landing-page.txt
+ls assets/images                       # landing-page.txt가 보일 때만 성공
+
+# 3단계 — 길을 잃었을 때 돌아오기
+cd ..
+pwd
+ls</pre>
+  <div class="hl"><code>mv</code> 뒤 <code>ls assets/images</code>에 <code>landing-page.txt</code>가 보일 때만 성공 — <b>명령을 친 사실이 아니라 출력으로 확인</b>. <code>cd ..</code>는 상위 폴더로. 화면 이름만 믿지 말고 이동할 때마다 <code>pwd</code>·<code>ls</code>를 번갈아.</div>
+  <aside>이미 "File exists"가 나오면 같은 이름의 폴더가 있다는 뜻이니 ls로 확인하고 다음 단계로 갑니다. 현재 위치가 불안하면 pwd부터, mv는 대상 경로를 한 글자씩 확인한 뒤 실행합니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">AI에게 폴더 정리를 맡기고 검토하기</h2>
+  <p style="margin-top:11px">dry-run · 체크리스트 · 승인</p><span class="who">⑦ 실습 2</span></div>
+  <aside>목표는 AI가 파일을 "치우게" 하는 것이 아니라, 분류 계획을 먼저 내고 내가 승인하는 협업입니다. 실제 바탕화면이 부담스러우면 terminal-practice에서만.</aside>
+</section>
+
+<!-- 7 dry-run 프롬프트 -->
+<section class="slide" data-part="PART 2">
+  <h2>🤝 <span class="g">dry-run</span>으로 계획부터 받는다</h2>
+  <pre>현재 작업 폴더의 파일과 폴더를 읽고 정리 계획을 세워줘.
+규칙:
+1. 삭제 명령(rm 등)은 절대 실행하지 마.
+2. 먼저 dry-run으로 파일별 '현재 위치 → 제안 위치' 목록과 분류 기준만.
+3. 이동은 내가 목록을 검토하고 '승인'이라고 답한 뒤에만 실행해.
+4. 이름을 추측하지 말고, 확장자와 현재 이름을 근거로 분류해.
+5. 실행 뒤에는 이동한 목록과 남은 파일 목록을 보여줘.</pre>
+  <div class="hl"><code>dry-run</code>은 실제 변경 없이 "무엇을 할지" 미리 보여 주는 실행 계획. AI가 먼저 <code>mv</code>를 실행하려 하면 <b>"아직 실행하지 말고 dry-run 목록만 보여줘"</b>라고 바로 중단시킨다.</div>
+  <aside>규칙 4가 특히 중요 — 이름을 추측해 분류하면 엉뚱한 폴더로 갑니다. 확장자와 현재 이름을 근거로 삼게 합니다.</aside>
+</section>
+
+<!-- 8 체크리스트 -->
+<section class="slide" data-part="PART 2">
+  <h2>✅ 산출물 <span class="g">검토 체크리스트</span></h2>
+  <table class="t">
+    <tr><th>확인할 것</th><th>통과 기준</th></tr>
+    <tr><td>이동 전 dry-run</td><td>각 파일의 현재 위치·제안 위치가 목록으로 있다</td></tr>
+    <tr><td>삭제 방지</td><td>삭제 명령·제안이 없고 보류 파일은 그대로</td></tr>
+    <tr><td>분류 기준</td><td>확장자·용도 등 읽을 수 있는 기준, 애매한 파일은 질문</td></tr>
+    <tr><td>경로 안전</td><td>작업 폴더 밖을 안 건드리고 중요한 폴더를 통째로 안 옮김</td></tr>
+    <tr><td>실행 후 확인</td><td><code>ls</code>·목록으로 이동 결과와 남은 항목을 보여줌</td></tr>
+  </table>
+  <pre>계획을 검토했어. .png와 .jpg만 images 폴더로 옮기고,
+확장자를 알 수 없는 파일과 프로젝트 폴더는 그대로 둬.
+삭제·이름 변경은 하지 마. 실행 후 이동 전후 목록을 비교해 보여줘.</pre>
+  <div class="hl">승인은 <b>범위를 좁혀</b> 준다 — 무엇만 옮기고 무엇은 그대로 둘지, 무엇은 하지 말지.</div>
+  <aside>애매한 파일은 AI가 질문하게 하는 것이 핵심입니다. 승인이라고 답하기 전까지 이동은 실행되지 않습니다.</aside>
+</section>
+
+<!-- 9 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">직접 한 것과 AI에게 맡긴 것 비교 회고</h2>
+  <p style="margin-top:11px">두 방식의 강점 · 마무리 3문장</p><span class="who">⑧ 실습 3</span></div>
+  <aside>두 방식 중 하나가 항상 낫지는 않습니다. 직접 명령은 현재 위치와 각 파일을 세밀하게 이해하게 하고, AI 협업은 반복적인 목록화·계획 작성 속도를 높입니다.</aside>
+</section>
+
+<!-- 10 비교 회고 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔎 비교 <span class="g">회고</span></h2>
+  <table class="t">
+    <tr><th>비교 질문</th><th>직접 한 것</th><th>AI에게 맡긴 것</th></tr>
+    <tr><td>무엇을 어떻게 옮길지</td><td><code>mkdir·mv</code>를 한 줄씩 결정</td><td>dry-run 목록을 받고 승인</td></tr>
+    <tr><td>내가 확인한 증거</td><td><code>pwd·ls</code> 출력</td><td>AI 목록 + 내가 실행한 <code>ls</code></td></tr>
+    <tr><td>강점</td><td>위치·각 파일을 <b>세밀하게 이해</b></td><td>목록화·계획 작성 <b>속도</b></td></tr>
+  </table>
+  <div class="big"><span class="y">어느 쪽이든 실행 결과 검토는 내 책임</span></div>
+  <ul class="pts">
+    <li>✍️ 마무리 3문장 — ①<code>pwd</code>가 알려 준 "내 위치"는 어디였나 ②AI dry-run에서 <b>내가 멈추거나 수정한 제안</b>은 무엇이고 왜였나 ③다음에 Node 버전을 바꿔야 하면 <code>nvm</code>을 어떻게 쓸지 한 문장</li>
+  </ul>
+  <aside>"가장 불안했던 지점"과 "다음번 더 명확히 할 규칙"을 직접·AI 각각에 대해 적어 두면 다음 협업의 규칙이 됩니다.</aside>
+</section>
+
+<!-- 11 핵심 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이 덱의 <span class="g">핵심 정리</span></h2>
+  <table class="t">
+    <tr><th>개념</th><th>한 문장</th></tr>
+    <tr><td>안전 규칙</td><td>삭제 명령 없이 <b>연습 폴더</b>에서 — 공백 이름은 따옴표</td></tr>
+    <tr><td>출력으로 확인</td><td>명령을 친 사실이 아니라 <b><code>ls</code> 출력</b>으로. 이동마다 pwd·ls</td></tr>
+    <tr><td>dry-run</td><td>AI에게 <b>계획부터 받고 승인 뒤에만 실행</b>. rm 금지</td></tr>
+    <tr><td>승인은 범위 좁히기</td><td>무엇만·무엇은 그대로·무엇은 하지 말지</td></tr>
+    <tr><td>두 방식</td><td>직접=세밀한 이해, AI=속도 — <b>검토는 항상 내 책임</b></td></tr>
+  </table>
+  <aside>이로써 대단원 2 중단원① 강 1 "바이브코딩을 위한 작업대 마련하기"를 손으로 완주했습니다.</aside>
+</section>
+
+<!-- 12 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> <code>mv</code>로 파일을 옮긴 뒤 "성공"을 <b>무엇으로</b> 확인하나?</div>
+    <div class="q"><b>Q2.</b> AI에게 폴더 정리를 맡길 때 <b>dry-run</b>을 먼저 요구하는 이유는?</div>
+    <div class="q"><b>Q3.</b> 실습의 목표는 "AI가 치우게" 하는 것인가? 아니라면 무엇인가?</div>
+    <div class="q"><b>Q4.</b> 직접 조작과 AI 협업은 각각 <b>어디에 강한가</b>?</div>
+    <div class="q"><b>Q5.</b> 두 방식 어느 쪽이든 <b>변하지 않는 책임</b>은?</div>
+  </div>
+  <aside>Q2와 Q5가 이 실습의 협업 원칙입니다.</aside>
+</section>
+
+<!-- 13 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 대상 폴더에서 <code>ls</code>를 실행해 <b>그 파일이 실제로 보일 때만</b> — 명령을 친 사실이 아니라 출력으로 확인.</div>
+    <div class="q a"><b>A2.</b> 실제 변경 전에 <b>"무엇을 할지"를 미리 목록으로</b> 보여 줘, 내가 검토·승인한 뒤에만 이동이 실행되게 하려고. rm은 금지시킨다.</div>
+    <div class="q a"><b>A3.</b> 아니다 — <b>분류 계획을 먼저 내고 내가 승인하는 협업</b>. AI가 먼저 mv를 하려 하면 중단시킨다.</div>
+    <div class="q a"><b>A4.</b> 직접은 <b>현재 위치·각 파일을 세밀하게 이해</b>, AI는 <b>목록화·계획 작성 속도</b>.</div>
+    <div class="q a"><b>A5.</b> <b>실행 결과 검토는 내 책임</b> — 어느 쪽으로 하든 변하지 않는다.</div>
+  </div>
+  <aside>A5가 이 강의 전체를 관통하는 태도입니다 — 지시하고, 확인하고, 판단한다.</aside>
+</section>
+
+<!-- 14 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>손으로 완주했다 🎒</h1>
+    <div class="big" style="margin-top:26px">출력으로 확인하고 · dry-run으로 계획받고<br>승인으로 <span class="y">범위를 좁힌다</span><br><br>바이브코딩 작업대 마련하기 — 매듭</div>
+    <p class="sub" style="margin-top:24px">터미널 실습 3종 — 여기까지</p>
+  </div>
+  <aside>대단원 2 중단원① 강 1 완결. 작업대 개념 → 설치·첫 파일·루프 → 터미널 CS → 실습 3종까지, 지시·확인·판단의 협업 감각을 손으로 익혔습니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>

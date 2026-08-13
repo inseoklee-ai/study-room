@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>터미널 vs 셸 vs 커널 vs 프롬프트</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.77rem,1.28vw,.94rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.9rem);
+    color:var(--ink);overflow:auto;max-height:52vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 바이브코딩 작업대 ⑤</span>
+    <h1 style="margin:18px 0">터미널 vs 셸 vs<br>커널 vs 프롬프트</h1>
+    <p class="sub">이름의 역사부터 명령이 움직이는 길까지</p>
+  </div>
+  <aside>처음 터미널을 열면 검은 창·커서·낯선 기호가 한 덩어리처럼 보여 "터미널에 명령어를 쳤다"고 말하게 됩니다. 이 한 문장 안에는 서로 다른 네 역할이 섞여 있습니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 용어 시험이 아니라 <span class="g">지도</span></h2>
+  <div class="chain">
+    <div class="cell"><small>끝</small><b>터미널<br>글자 입출력 창</b></div>
+    <div class="cell" style="border-color:var(--bl)"><small>껍데기</small><b class="b">셸<br>명령을 해석</b></div>
+    <div class="cell" style="border-color:var(--red)"><small>알맹이</small><b class="r">커널<br>자원 중개</b></div>
+    <div class="cell" style="border-color:var(--gold)"><small>재촉</small><b>프롬프트<br>입력 대기 표시</b></div>
+  </div>
+  <div class="hl">🎯 이 구분은 <b>command not found가 왜 나왔는지, 설치한 도구를 왜 못 찾는지, Claude Code가 어느 층에서 멈췄는지</b>를 더 정확하게 읽기 위한 지도다.</div>
+  <aside>세 층(터미널·셸·명령)을 분리해 말하면 문제를 훨씬 빨리 설명할 수 있습니다.</aside>
+</section>
+
+<!-- 3 이름의 역사 -->
+<section class="slide" data-part="CS">
+  <h2>📜 이름의 역사 — <span class="g">끝·껍데기·알맹이·재촉</span></h2>
+  <table class="t">
+    <tr><th>이름</th><th>뜻과 유래</th></tr>
+    <tr><td>터미널</td><td>통신에서 선로의 <b>끝단</b>(말단 장치). 1960~70년대 대형 컴퓨터에 연결하던 키보드·화면·텔레타이프. 오늘 macOS Terminal 등은 그 입출력을 재현하는 <b>에뮬레이터</b> — 명령의 뜻은 보통 해석하지 않는다</td></tr>
+    <tr><td>셸</td><td>커널을 감싼 바깥 <b>껍데기</b>. 사람이 쓴 글을 해석해 프로그램을 실행. Thompson(1971)·Bourne(<code>/bin/sh</code>, 1977)·bash(1989)·zsh</td></tr>
+    <tr><td>커널</td><td><b>알맹이·핵심</b>. CPU·메모리·파일·네트워크 자원을 프로그램이 쓰게 중개하는 운영체제의 중심. 보통 직접 문장을 쓰지 않는다</td></tr>
+    <tr><td>프롬프트</td><td>'재촉' — 셸이 <b>"입력을 기다린다"</b>고 내보내는 표시(<code>$ % user@computer:~$</code>). <b>명령어가 아니라 복사 대상이 아니다</b></td></tr>
+  </table>
+  <div class="hl">셸은 한 앱 이름이 아니라 <b>명령을 해석하는 프로그램의 계열</b>. 문서에 <code>% pwd</code>라면 <code>%</code>는 예시 프롬프트이고 실제 입력할 것은 <code>pwd</code>.</div>
+  <aside>달걀의 알맹이(커널)와 껍데기(셸)를 떠올리면 됩니다. 셸이 사람 글을 해석해 프로그램을 실행하고, 그 프로그램과 커널이 만나는 길을 마련합니다.</aside>
+</section>
+
+<!-- 4 층 지도 PTY -->
+<section class="slide" data-part="CS">
+  <h2>🔌 층 사이엔 <span class="g">PTY</span>가 있다</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px"><small>창</small><b>터미널 앱<br>(master 쪽)</b></div>
+    <span class="ar">↔</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gold)"><small>가상 문자 장치</small><b>PTY<br>master·slave</b></div>
+    <span class="ar">↔</span>
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>해석</small><b class="b">셸<br>(slave 쪽)</b></div>
+  </div>
+  <ul class="pts">
+    <li>터미널과 셸은 <b>직접 손을 잡지 않는다</b> — master·slave로 짝을 이룬 <b>PTY</b>(pseudoterminal, 의사 터미널)를 통해 글자를 주고받는다</li>
+    <li>이 구조 덕분에 창 속 프로그램은 여전히 <b>전통적인 물리 터미널에 연결된 것처럼</b> 동작한다</li>
+  </ul>
+  <div class="hl">터미널과 셸은 <b>같은 것이 아니며</b>, 프롬프트는 셸이 터미널에 그려 달라고 한 작은 안내문이다.</div>
+  <aside>터미널 앱은 보통 master 쪽, 셸은 옛 물리 터미널처럼 보이는 slave 쪽을 사용합니다.</aside>
+</section>
+
+<!-- 5 7단계 -->
+<section class="slide" data-part="CS">
+  <h2>⚙️ <span class="g">pwd 한 줄</span>이 거치는 일곱 단계</h2>
+  <div class="steps" style="font-size:.92em">
+    <div class="st"><span class="n">1</span><span class="t"><b>터미널이 키 입력을 받는다</b> — p·w·d·Enter를 화면에 보이고 PTY master로 전달('창'의 일)</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>PTY가 셸에 글자를 넘긴다</b> — 화면에 보인다고 아직 실행된 건 아니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>셸이 문장을 파싱한다</b> — 공백·따옴표·변수·파이프(<code>|</code>)·리디렉션(<code>&gt;</code>) 문법 해석</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>명령의 위치를 찾는다</b> — 외부 프로그램이면 <code>$PATH</code>를 앞에서부터. 단 pwd는 <b>내장 명령(builtin)</b>이기도</span></div>
+    <div class="st"><span class="n">5</span><span class="t"><b>fork와 exec로 새 프로그램 시작</b> — 자기 복제(fork) 뒤 실행 파일 올리기(exec). 셸은 남고 새 프로그램은 독립</span></div>
+    <div class="st"><span class="n">6</span><span class="t"><b>시스템 콜로 커널에 요청</b> — 파일 읽기·현재 디렉터리 확인은 커널에. 커널이 권한 확인 후 자원 중개</span></div>
+    <div class="st"><span class="n">7</span><span class="t"><b>stdout이 화면에 돌아온다</b> — 결과가 PTY를 거쳐 터미널로. pwd의 경로 한 줄이 이렇게 온 결과</span></div>
+  </div>
+  <div class="hl">모든 명령이 똑같이 복제되는 건 아니다(내장/외부/파이프에 따라 다름). 그러나 <b>"창이 곧 명령어"보다 훨씬 정확한 기본 모형</b>.</div>
+  <aside>pwd가 내장 명령일 수 있어 which pwd의 결과와 실제 실행 방식이 언제나 같다고 단정하면 안 됩니다.</aside>
+</section>
+
+<!-- 6 흔한 오해 -->
+<section class="slide" data-part="CS">
+  <h2>🙅 흔한 오해 — <span class="r">검은 창 하나가 전부</span></h2>
+  <ul class="pts">
+    <li>가장 흔한 오해 = <b>"터미널 = 검은 창 = 명령어"</b>. 검은색은 꾸미기일 뿐 — 밝은 테마 Windows Terminal도, VS Code 아래 패널도 터미널이 될 수 있다</li>
+    <li>세 층은 다르다 — 터미널은 <b>글자 입출력 인터페이스</b>, 셸은 <b>그 글자로 된 명령을 해석하는 프로그램</b>, 명령은 <b>실제로 실행되는 내장 기능 또는 별도 프로그램</b></li>
+  </ul>
+  <div class="hl">오류도 이 지도로 나눈다 — <b>창이 안 열리면</b> 터미널 앱 문제, <b><code>command not found</code></b>는 셸의 명령 탐색 또는 설치 문제, <b><code>Permission denied</code></b>는 커널이 관리하는 권한 규칙.</div>
+  <aside>세 층을 분리해 말하면 문제를 더 빨리 설명할 수 있습니다.</aside>
+</section>
+
+<!-- 7 바꿀 수 있다 -->
+<section class="slide" data-part="CS">
+  <h2>🔄 터미널과 셸은 <span class="g">서로 바꿀 수 있다</span></h2>
+  <ul class="pts">
+    <li>같은 macOS Terminal 창에서도 <code>bash</code>를 실행하면 bash 세션을 시작할 수 있고, 같은 zsh를 iTerm2·macOS Terminal·VS Code 터미널에서 쓸 수 있다</li>
+    <li>그래서 <b>"iTerm2를 설치했으니 bash가 설치됐다"거나 "VS Code를 열었으니 셸이 바뀌었다"는 결론은 틀리다</b> — 조합이 자유롭다(iTerm2+zsh, VS Code 터미널+bash 모두 가능)</li>
+  </ul>
+  <div class="hl">또 하나의 오해 — <b>프롬프트 기호를 명령에 포함하는 것</b>. <code>$ npm --version</code>에서 <code>$</code>는 설명 표시일 수 있으니 복사할 땐 <code>npm --version</code>만. 프롬프트는 사용자 이름·폴더·Git 브랜치까지 보이게 바꿀 수 있어 <b>사람마다 다르게 보이는 게 정상</b>.</div>
+  <aside>기본 로그인 셸을 바꾸는 설정도 있습니다.</aside>
+</section>
+
+<!-- 8 실습 관찰 -->
+<section class="slide" data-part="CS">
+  <h2>🔬 실습 관찰 — <span class="g">각 층을 직접 찾기</span></h2>
+  <pre>echo $SHELL     # 로그인 셸로 설정된 경로 (지금 실행 중과 반드시 같진 않음)
+echo $0         # 현재 실행 중인 셸 이름
+tty             # 현재 세션이 연결된 터미널 장치 경로 (예: /dev/ttys001)
+which pwd       # $PATH를 따라 찾은 pwd 위치 (type pwd 도 함께)
+echo $PATH      # 외부 명령을 찾을 때 순서대로 보는 디렉터리 목록</pre>
+  <div class="hl">🪟 <b>Windows PowerShell</b>은 위가 그대로 안 돈다 — <code>$PSVersionTable</code>(지금 셸 확인)·<code>Get-Command pwd</code>(어디서 찾았나)·<code>$env:Path</code>(탐색 경로). <b>관찰 포인트는 같다 — 지금 내 셸이 무엇이고, 명령을 어디서 찾는가.</b></div>
+  <ul class="pts">
+    <li>Node·Claude Code를 설치했는데 <code>command not found</code>가 나오면, 설치 실패뿐 아니라 <b>실행 파일이 <code>$PATH</code> 목록에 없는 경우</b>도 살핀다</li>
+  </ul>
+  <aside>이 명령들은 컴퓨터를 바꾸지 않고 정보만 출력합니다. echo $SHELL과 echo $0이 다르거나 답이 달라도 정상일 수 있습니다. 출력 원문과 "무엇을 기대했는지"를 함께 AI에게 보여 주면 추측 명령을 줄입니다.</aside>
+</section>
+
+<!-- 9 Claude Code 어디 -->
+<section class="slide" data-part="CS">
+  <h2>📍 Claude Code는 <span class="g">어디에 있는가</span></h2>
+  <div class="big">터미널도, 셸도, 커널도 아니다<small>일반적으로 <span class="y">셸 위에서 실행되는 프로그램</span></small></div>
+  <ul class="pts">
+    <li>터미널 창에서 <code>claude</code>를 입력하면 셸이 <code>$PATH</code>에서 <code>claude</code>를 찾아 새 프로세스를 실행한다. Claude Code는 <b>그 셸 환경과 권한 안에서</b> 파일을 읽고 명령 실행을 요청하고 결과·오류를 보여준다</li>
+    <li>AI가 "명령을 실행했다"고 말할 때도, 실제로는 <b>이 여러 층을 지나는 것</b></li>
+  </ul>
+  <div class="hl"><b>AI가 강력해도 권한과 현재 작업 폴더를 초월하지는 않는다</b> — 그래서 오류 한 줄·<code>pwd</code>·<code>echo $SHELL</code>·실행한 명령을 함께 주는 습관이 안전하고 재현 가능한 도움을 요청하는 방법.</div>
+  <aside>이 구분이 협업에서 특히 유용합니다.</aside>
+</section>
+
+<!-- 10 오류를 층으로 -->
+<section class="slide" data-part="CS">
+  <h2>🩺 오류를 <span class="g">층으로 나눠</span> 본다</h2>
+  <table class="t">
+    <tr><th>증상</th><th>먼저 의심할 층</th></tr>
+    <tr><td><code>claude: command not found</code></td><td>설치 또는 <b><code>$PATH</code>(셸의 명령 탐색)</b></td></tr>
+    <tr><td><code>EACCES</code>·<code>Permission denied</code></td><td><b>운영체제가 관리하는 파일 권한</b>(커널)</td></tr>
+    <tr><td>글자가 깨지거나 창 자체가 멈춤</td><td><b>터미널 앱·인코딩·PTY 연결</b></td></tr>
+  </table>
+  <div class="big">한 줄의 오류가 <span class="y">어느 층의 문제인지</span> 갈린다<small>세 층을 분리해 설명하면 AI도 다음 행동을 좁힌다</small></div>
+  <aside>오류 한 줄, pwd, echo $SHELL, 실행한 명령을 함께 주는 습관이 재현 가능한 도움을 부릅니다.</aside>
+</section>
+
+<!-- 11 핵심 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이 덱의 <span class="g">핵심 정리</span></h2>
+  <table class="t">
+    <tr><th>층</th><th>한 문장</th></tr>
+    <tr><td>터미널</td><td><b>글자 입출력 창</b>(에뮬레이터) — 명령의 뜻은 보통 해석하지 않는다</td></tr>
+    <tr><td>셸</td><td>사람 글을 해석해 <b>프로그램을 실행</b>하는 프로그램 계열(zsh·bash)</td></tr>
+    <tr><td>커널</td><td>자원을 중개하는 <b>알맹이</b> — 시스템 콜로 요청받는다</td></tr>
+    <tr><td>프롬프트</td><td>입력 대기 표시 — <b>복사 대상이 아니다</b>(<code>$ %</code>)</td></tr>
+    <tr><td>PTY·7단계</td><td>창≠셸, 그 사이 PTY. pwd 한 줄이 <b>일곱 단계</b>를 거친다</td></tr>
+    <tr><td>Claude Code</td><td><b>셸 위 프로그램</b> — 권한·작업 폴더를 초월하지 않는다</td></tr>
+  </table>
+  <aside>다음 덱에서 이 지도를 손으로 — 터미널로 폴더를 탐험·생성하고, AI에게 정리를 맡기고, 직접 한 것과 비교합니다.</aside>
+</section>
+
+<!-- 12 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> <b>터미널·셸·커널·프롬프트</b>의 역할을 한 줄씩 구분하면?</div>
+    <div class="q"><b>Q2.</b> 터미널과 셸 사이의 <b>PTY</b>는 무엇을 하나?</div>
+    <div class="q"><b>Q3.</b> <code>$ npm --version</code>에서 <b><code>$</code></b>를 복사하면 안 되는 이유는?</div>
+    <div class="q"><b>Q4.</b> <code>command not found</code>와 <code>Permission denied</code>는 각각 <b>어느 층</b>을 의심하나?</div>
+    <div class="q"><b>Q5.</b> Claude Code는 이 층들 중 <b>어디에</b> 있나?</div>
+  </div>
+  <aside>Q4가 오류를 층으로 나눠 읽는 실전 감각입니다.</aside>
+</section>
+
+<!-- 13 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 터미널=<b>글자 입출력 창</b>, 셸=<b>명령을 해석·실행</b>, 커널=<b>자원 중개(알맹이)</b>, 프롬프트=<b>입력 대기 표시</b>(명령어 아님).</div>
+    <div class="q a"><b>A2.</b> 터미널과 셸은 직접 안 잡고 <b>master·slave 짝의 가상 문자 장치(PTY)</b>로 글자를 주고받아, 창 속 프로그램이 물리 터미널에 연결된 것처럼 동작하게 한다.</div>
+    <div class="q a"><b>A3.</b> <code>$</code>는 <b>입력 대기 프롬프트(설명 표시)</b>일 뿐 명령의 일부가 아니다 — 실제 입력할 것은 <code>npm --version</code>.</div>
+    <div class="q a"><b>A4.</b> <code>command not found</code>는 <b>셸의 명령 탐색($PATH)·설치</b>, <code>Permission denied</code>는 <b>커널이 관리하는 파일 권한</b>.</div>
+    <div class="q a"><b>A5.</b> <b>셸 위에서 실행되는 프로그램</b> — 셸이 $PATH에서 claude를 찾아 실행하며, 셸의 권한·작업 폴더 안에서 동작한다.</div>
+  </div>
+  <aside>A5를 이해하면 AI가 "실행했다"고 할 때도 여러 층을 지난다는 것이 보입니다.</aside>
+</section>
+
+<!-- 14 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>한 문장, 네 역할 🗺️</h1>
+    <div class="big" style="margin-top:26px">창≠셸≠커널≠프롬프트<br>오류 한 줄이 <span class="y">어느 층의 문제인지</span> 갈린다<br><br>다음 — 이 지도를 손으로, 터미널 실습 3종</div>
+    <p class="sub" style="margin-top:24px">터미널 vs 셸 vs 커널 vs 프롬프트 — 여기까지</p>
+  </div>
+  <aside>다음 덱(terminal-practice)에서 안전한 연습 폴더로 pwd·ls·cd·mkdir·mv를 손으로 익히고, AI에게 폴더 정리를 dry-run으로 맡겨 검토·승인하고, 직접 한 것과 비교 회고합니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>
