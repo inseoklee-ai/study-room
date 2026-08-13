@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>웹페이지를 이루는 세 겹 · HTML·CSS·JS</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  @media(max-width:780px){.grid2,.grid3{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.77rem,1.28vw,.94rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.9rem);
+    color:var(--ink);overflow:auto;max-height:52vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 세 겹 &amp; 게임 ①②</span>
+    <h1 style="margin:18px 0">웹페이지를 이루는<br>세 겹</h1>
+    <p class="sub">HTML·CSS·JavaScript · 이름에 담긴 사연</p>
+  </div>
+  <aside>웹페이지는 하나의 덩어리처럼 보이지만, 성격이 다른 세 가지가 겹쳐 있습니다 — 무엇이 있는지(구조), 어떻게 보이는지(표현), 무엇이 바뀌는지(동작). 문법을 깊이 파지 않고, 세 겹으로 나눠 보는 눈을 만듭니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 세 겹을 <span class="g">나눠 보는 눈</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:140px;border-color:var(--gr)"><small>구조</small><b class="g">HTML<br>무엇이 있는지</b></div>
+    <div class="cell" style="min-width:140px;border-color:var(--bl)"><small>표현</small><b class="b">CSS<br>어떻게 보이는지</b></div>
+    <div class="cell" style="min-width:140px;border-color:var(--pp)"><small>동작</small><b class="p">JavaScript<br>무엇이 바뀌는지</b></div>
+  </div>
+  <ul class="pts">
+    <li>이렇게 보면 <b>AI가 만든 화면에서 고칠 곳을 더 정확히 짚고</b>, 결과가 기대와 다를 때 어느 쪽을 다시 볼지 판단하기 좋다</li>
+    <li>셋은 한 사람이 한 날 설계한 세트가 아니라 <b>서로 다른 시기에 다른 문제를 풀며 태어난 도구들</b></li>
+  </ul>
+  <div class="hl">🎯 핵심 한 문장 — <b>웹페이지는 구조(HTML)·표현(CSS)·동작(JS) 세 겹이고, 셋을 나눠 AI에게 지시하면 원하는 화면을 빠르게 만들고 고칠 수 있다.</b></div>
+  <aside>겹을 지정하면 AI가 손댈 범위가 좁아지고, 이미 괜찮은 부분이 덜 흔들립니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">세 겹은 각자 맡은 일이 다르다</h2>
+  <p style="margin-top:11px">이름과 생김새 · 겹별 검토 질문</p><span class="who">① 개념</span></div>
+  <aside>문법을 외울 필요는 없습니다. "아, 이렇게 생겼구나" 정도만 보고 넘어갑니다.</aside>
+</section>
+
+<!-- 4 세 겹 코드 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧱 세 겹의 <span class="g">생김새</span></h2>
+  <div class="plabel">🟢 HTML — 무엇이 담기나 (태그로 <b>의미</b>를 붙임: h1=제목, button=버튼)</div>
+  <pre>&lt;h1&gt;내 첫 웹페이지&lt;/h1&gt;
+&lt;button&gt;시작하기&lt;/button&gt;</pre>
+  <div class="plabel">🔵 CSS — 어떻게 보일지 (색·간격·크기·배치)</div>
+  <pre>h1 { color: blue; text-align: center; }</pre>
+  <div class="plabel">🟣 JS — 무엇이 바뀔지 (누르면 화면이 달라지는 반응)</div>
+  <pre>button.addEventListener('click', () =&gt; {
+  alert('안녕하세요!');
+});</pre>
+  <div class="hl">지금은 "세 겹은 각자 맡은 일이 다르다"는 감각만 챙기면 충분. 내력은 다음 파트에서.</div>
+  <aside>HTML은 제목·문단·버튼 같은 정보에 의미를 붙이고, CSS는 그것이 어떻게 보일지, JavaScript는 사용자가 무언가 했을 때 무엇이 바뀔지를 정합니다.</aside>
+</section>
+
+<!-- 5 겹별 검토 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔧 겹을 <span class="g">지정해 지시</span>하고 판단한다</h2>
+  <table class="t">
+    <tr><th>겹</th><th>AI에게 시킬 때</th><th>결과 판단 질문</th></tr>
+    <tr><td class="g">HTML</td><td>"제목·안내 카드·버튼을 의미에 맞게 배치해줘"</td><td>필요한 정보·업무 용어가 빠지지 않았나</td></tr>
+    <tr><td class="b">CSS</td><td>"모바일에서도 읽히게 간격·색·글자 크기 조정"</td><td>눈이 어디로 가나, 깨지는 구간은 없나</td></tr>
+    <tr><td class="p">JS</td><td>"버튼을 누르면 화면 내용이 바뀌게"</td><td>클릭·입력·상태 변화가 기대대로인가</td></tr>
+  </table>
+  <div class="hl">🤔 세 문제를 어느 겹으로? — ①안내 문구가 업무 말과 안 맞음 = <b class="g">HTML</b> ②카드가 모바일에서 글자 겹침 = <b class="b">CSS</b> ③버튼 눌러도 반응 없음 = <b class="p">JS</b>. 현장선 섞이지만 <b>첫 진단을 나누면 다음 지시가 구체화</b>된다.</div>
+  <aside>"페이지를 고쳐줘"는 어디를 고칠지 안 정한 요청, "카드 정보는 그대로 두고 모바일 간격만 조정해줘"는 겹을 지정한 요청입니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">이름에 담긴 사연</h2>
+  <p style="margin-top:11px">HTML·CSS·JS의 역사 · 박스모델 · 프론트/백엔드</p><span class="who">② 내력</span></div>
+  <aside>각 겹이 왜 따로 존재하는지를 알면 AI 출력에서 어디를 봐야 하는지가 분명해집니다. 세 겹은 각각 다른 시기에 다른 문제를 풀기 위해 태어났습니다.</aside>
+</section>
+
+<!-- 7 HTML 역사 -->
+<section class="slide" data-part="PART 2">
+  <h2>📄 HTML — <span class="g">잃어버린 문서</span>에서 시작</h2>
+  <ul class="pts">
+    <li>1980년대 말 CERN — 수천 연구자가 다른 컴퓨터·프로그램으로 문서를 만들어, 사람이 떠나면 자료 위치도 사라졌다. 팀 버너스리가 1989년 제안 — <b>문서 속 단어에서 다른 문서로 바로 건너뛰게 연결하자</b>(하이퍼텍스트). 상사의 메모: "막연하지만 흥미롭다"</li>
+    <li>1993년 CERN이 <b>웹 기술을 로열티 없이 공개</b> — 그래서 웹은 특정 회사 제품이 아니라 모두의 기반이 됐다(오늘 HTML을 공짜로 쓰는 이유)</li>
+  </ul>
+  <div class="hl"><b>H</b>yper<b>T</b>ext <b>M</b>arkup <b>L</b>anguage — '마크업'은 편집자가 원고 여백에 "여기는 제목"이라 표시하던 관행. <code>&lt;h1&gt;</code>=가장 높은 제목, <code>&lt;button&gt;</code>=누르는 버튼처럼 <b>정보의 의미를 표시</b>한다. 검토 기준은 꾸밈이 아니라 <b>정보</b>.</div>
+  <aside>병원 안내 페이지에 '진료 안내'·'예약'은 있는데 창구에서 하루에도 수십 번 답하는 '진단서 발급'이 빠졌다면 — 이 누락은 코딩이 아니라 현장을 아는 눈에만 보입니다. 그래서 이 겹의 최종 검토자는 여러분입니다. 최초 웹사이트 http://info.cern.ch 는 지금도 접속됩니다.</aside>
+</section>
+
+<!-- 8 CSS 역사 -->
+<section class="slide" data-part="PART 2">
+  <h2>🎨 CSS — <span class="g">"제목 색을 전부 바꿔주세요"</span>의 악몽</h2>
+  <ul class="pts">
+    <li>초기엔 꾸밈 태그를 본문 곳곳에 직접 끼웠다 — 문서 수백 개에서 "제목 색을 전부 바꿔주세요"가 오면 <b>모든 문서를 하나하나</b> 고쳐야 했다(내용과 꾸밈이 한 덩어리)</li>
+    <li>1994년 호콘 비움 리가 인쇄에서 힌트 — 기사와 조판 규칙을 따로 관리하듯, <b>꾸밈 규칙을 문서 밖 스타일시트로 분리</b>. 1996년 표준</li>
+  </ul>
+  <div class="hl"><b>C</b>ascading(폭포처럼 층층이) <b>S</b>tyle <b>S</b>heets — 기본·사이트·페이지 규칙이 겹칠 때 <b>어느 쪽이 이기는지 우선순위가 폭포처럼 정해져</b> 있다는 뜻. 2003 CSS Zen Garden이 상징 — <b>같은 HTML에 CSS만 바꿔</b> 일본 정원도, 잡지 표지도(내용은 한 글자도 안 바뀜).</div>
+  <aside>검토 기준은 정보가 아니라 읽히는 방식 — 눈이 어디로 먼저 가나, 모바일 폭에서 깨지나. AI에겐 "예쁘게"보다 "모바일 390px에서도 카드가 한 열로 읽히게"처럼 관찰 가능한 조건이 낫습니다.</aside>
+</section>
+
+<!-- 9 박스모델 -->
+<section class="slide" data-part="PART 2">
+  <h2>📦 CSS를 말로 고치는 <span class="g">최소 지도 — 박스모델</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px"><small>content</small><b>실제 내용<br>글·이미지·버튼</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>padding</small><b class="b">안쪽 여백<br>내용↔테두리</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px"><small>border</small><b>테두리</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gold)"><small>margin</small><b>바깥 여백<br>다른 상자와</b></div>
+  </div>
+  <div class="hl">지금은 <b>안쪽 여백은 padding, 바깥쪽 여백은 margin</b>이라는 차이만. <code>gap</code>은 flex·grid로 나란히 놓은 <b>요소 사이 간격</b>. 카드 폭엔 <code>box-sizing: border-box</code>를 함께 쓰면 지정한 <code>width</code> 안에 padding·border까지 포함돼 예상보다 넓어지는 일이 준다.</div>
+  <div class="box"><p style="margin:0"><b>단어장 대신 일상어로</b> — "카드 바깥에 여백이 필요해"(margin)·"버튼 글자가 테두리에 너무 붙어"(padding)·"버튼들이 서로 너무 붙어"(gap)·"카드에 테두리를"(border). <b>"어느 요소"와 "모바일에서도"를 함께</b> 말하면 확인하기 좋다</p></div>
+  <aside>속성명을 암기할 필요 없습니다 — 눈에 보이는 문제를 일상어로 말하면 AI가 CSS 속성으로 번역합니다. "카드 내용은 바꾸지 말고 바깥 간격만 조정하고, 어떤 CSS를 바꿨는지 알려줘"처럼.</aside>
+</section>
+
+<!-- 10 JS 역사 -->
+<section class="slide" data-part="PART 2">
+  <h2>⚡ JavaScript — <span class="g">열흘 만에</span> 태어난 언어</h2>
+  <ul class="pts">
+    <li>1995 넷스케이프가 <b>페이지가 사용자 행동에 그 자리에서 반응</b>할 언어를 원했다 — 브렌던 아이크가 첫 버전을 열흘 남짓에. Mocha→LiveScript→<b>JavaScript</b>(마지막 개명은 Java 인기에 올라탄 마케팅, 둘은 이름만 닮은 남남 = "햄과 햄스터")</li>
+    <li>첫 임무는 <b>폼 검증</b> — 느린 모뎀 시절 제출 버튼 누르기 전에 브라우저가 "이메일 형식이 아닙니다"라고 그 자리에서. JS가 처음 쓸모를 증명한 장면</li>
+  </ul>
+  <div class="hl">JS가 맡는 건 <b>시간에 따라 변하는 것</b> — 클릭·입력·필터·토글. 검토 기준 하나: <b>"무엇을 누르면 무엇이 바뀌어야 하는가"가 기대대로인가</b>. 2005 구글 지도가 결정적 — 페이지를 새로 고치지 않고 데이터를 주고받는 <b>AJAX</b>로 웹이 '문서'에서 '애플리케이션'으로.</div>
+  <aside>겉모습은 Java를 닮았지만(경영진 요구) 속은 학술 언어 Scheme 계열 — 이 어색한 동거가 오해의 뿌리. 지도를 끄는 손을 따라가며 동시에 데이터를 받는 게 어떻게 가능한지는 다음 덱(CS)에서 답합니다.</aside>
+</section>
+
+<!-- 11 세 겹 내력 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧩 세 겹의 <span class="g">내력이 지시의 언어</span>가 된다</h2>
+  <table class="t">
+    <tr><th>겹</th><th>태어난 문제</th><th>검토 기준</th></tr>
+    <tr><td class="g">HTML</td><td>흩어진 정보를 의미 있게 연결하기</td><td>정보·용어가 빠지지 않았나</td></tr>
+    <tr><td class="b">CSS</td><td>내용과 꾸밈이 붙어 수정이 번지는 문제</td><td>읽히나, 깨지는 폭은 없나</td></tr>
+    <tr><td class="p">JS</td><td>눌러도 반응 없는 정적 문서</td><td>행동 뒤 변화가 기대대로인가</td></tr>
+  </table>
+  <div class="hl">웹은 처음부터 세 겹으로 설계된 게 아니라 <b>30년에 걸쳐 문제를 하나씩 풀며</b> 지금 모양이 됐다. 각 겹이 태어난 이유가 다르니 맡은 일·검토 기준도 다르다 — <b>겹을 지정하면 AI가 손댈 범위가 좁아지고 괜찮은 부분이 덜 흔들린다</b>.</div>
+  <aside>내용·표현·동작을 나누는 발상은 웹만의 것이 아닙니다 — 데이크스트라가 1974년 부른 관심사의 분리(separation of concerns). 측면을 나누면 측면마다 판단 기준이 생깁니다.</aside>
+</section>
+
+<!-- 12 관심사 분리 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧠 CS 교양 — <span class="g">관심사의 분리</span></h2>
+  <ul class="pts">
+    <li>데이크스트라(1974) — 복잡한 문제는 <b>한 번에 한 측면에만 집중하고 나머지는 접어두는</b> 태도가 관심사의 분리. 통째로 붙들면 어디부터 손댈지 모르지만, 나누면 측면마다 판단 기준이 생긴다</li>
+    <li>협업에도 이어진다 — 콘텐츠 담당자는 문구, 디자이너는 표현, 개발자는 동작. <b>AI와 일할 때도 관심사를 나눠 말하면 AI도 한 측면에 집중</b>한다</li>
+  </ul>
+  <div class="box"><p style="margin:0">🔍 모바일에서 버튼 둘이 겹칠 때, 어느 요청이 나은가?<br><b>A.</b> ".nav-button에 flex-wrap: wrap이랑 min-width: 120px를 줘"<br><b>B.</b> "버튼 두 개가 겹쳐 누르기 어려워. <b>글자는 그대로 두고</b> 버튼이 줄바꿈되게 고쳐줘"</p></div>
+  <div class="hl"><b>B를 권한다</b> — A는 해법(속성명)을 사람이 지정했는데, 추측한 명세는 틀려도 AI가 따른다. B는 <b>관찰(겹침)·기대(줄바꿈)·지킬 것(글자)</b>을 나눠 말했다. <b>해법 고르기는 AI의 몫으로 남긴다.</b></div>
+  <aside>고칠 관심사와 건드리지 말 관심사를 분리한 것입니다.</aside>
+</section>
+
+<!-- 13 프론트/백엔드 -->
+<section class="slide" data-part="PART 2">
+  <h2>🍽️ CS 교양 — <span class="g">프론트엔드와 백엔드</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="g">프론트엔드 (홀·메뉴판)</h3><p style="margin:0">사용자가 브라우저에서 직접 만나는 쪽 — <b>HTML·CSS·JS</b>. 무엇을 보고, 누르고, 입력하나</p></div>
+    <div class="box"><h3 class="b">백엔드 (주방·창고·장부)</h3><p style="margin:0">화면 뒤 처리 — 서버·API·데이터 저장·권한. 입력이 <b>어디 저장되고 누가 다시 보나</b>(뒤 강의)</p></div>
+  </div>
+  <div class="hl">홀만 있으면 음식이 안 나오고, 주방만 있으면 뭘 주문할지 모른다 — <b>두 쪽이 함께 움직일 때</b> 경험이 이어진다. 웹은 로그인·결제·검색이 늘며 <b>보이는 쪽과 처리하는 쪽을 나눠</b> 설계하게 됐다.</div>
+  <ul class="pts">
+    <li>바이브 코딩에서도 — "업무 카드가 모바일에서 한 열로"는 <b>프론트엔드</b>, "상담 기록을 저장하고 작성자만 수정하게"는 <b>백엔드</b>. 섞어 던지면 화면은 됐는데 저장이 빠지기도</li>
+  </ul>
+  <aside>오늘은 프론트엔드의 세 겹을 먼저 익히고, 백엔드·API는 뒤 강의에서 다룹니다.</aside>
+</section>
+
+<!-- 14 핵심 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이 덱의 <span class="g">핵심 정리</span></h2>
+  <table class="t">
+    <tr><th>개념</th><th>한 문장</th></tr>
+    <tr><td>세 겹</td><td>구조(HTML)·표현(CSS)·동작(JS) — <b>겹을 지정하면 지시가 좁아진다</b></td></tr>
+    <tr><td>HTML</td><td>잃어버린 문서를 연결(하이퍼텍스트) — 검토는 꾸밈 아닌 <b>정보</b></td></tr>
+    <tr><td>CSS</td><td>내용과 꾸밈의 분리(폭포처럼 우선순위) — 검토는 <b>읽히는 방식</b></td></tr>
+    <tr><td>박스모델</td><td>안쪽=padding, 바깥=margin, 사이=gap. <b>일상어로 말하면 AI가 번역</b></td></tr>
+    <tr><td>JavaScript</td><td>행동 뒤 변화 — 검토는 <b>"무엇을 누르면 무엇이 바뀌나"</b></td></tr>
+    <tr><td>관심사 분리·프론트/백</td><td>측면을 나눠 말한다 / 화면은 프론트, 저장은 백엔드</td></tr>
+  </table>
+  <aside>다음 덱에서 "지도를 끄면서 동시에 데이터를 받는" 게 어떻게 가능한지 — 동기·비동기·프로세스·스레드·코어를 봅니다.</aside>
+</section>
+
+<!-- 15 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 세 겹은 각각 무엇을 담당하고, <b>겹을 지정해</b> 지시하면 뭐가 좋은가?</div>
+    <div class="q"><b>Q2.</b> HTML의 검토 기준이 "꾸밈"이 아니라 <b>"정보"</b>인 이유는?</div>
+    <div class="q"><b>Q3.</b> CSS의 <b>"캐스케이딩"</b>과 CSS Zen Garden이 보여준 것은?</div>
+    <div class="q"><b>Q4.</b> 박스모델에서 <b>padding과 margin</b>의 차이는?</div>
+    <div class="q"><b>Q5.</b> 프론트엔드 요청과 <b>백엔드 요청</b>의 예를 하나씩 든다면?</div>
+  </div>
+  <aside>Q1이 이 강의 전체의 도구입니다.</aside>
+</section>
+
+<!-- 16 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> HTML=구조(무엇이), CSS=표현(어떻게 보일지), JS=동작(무엇이 바뀔지). 겹을 지정하면 <b>AI가 손댈 범위가 좁아져 괜찮은 부분이 덜 흔들린다</b>.</div>
+    <div class="q a"><b>A2.</b> HTML은 정보에 <b>의미를 표시</b>하는 마크업이라 — 필요한 정보·업무 용어(예: 진단서 발급)가 빠졌는지는 <b>현장을 아는 눈</b>에만 보인다.</div>
+    <div class="q a"><b>A3.</b> 여러 규칙이 겹칠 때 <b>우선순위가 폭포처럼 정해져</b> 이긴다는 뜻. Zen Garden은 <b>같은 HTML에 CSS만 바꿔</b> 전혀 다른 화면(내용은 그대로)을 보여줬다.</div>
+    <div class="q a"><b>A4.</b> <b>padding = 안쪽 여백</b>(내용↔테두리), <b>margin = 바깥쪽 여백</b>(다른 상자와). gap은 나란히 놓은 요소 사이.</div>
+    <div class="q a"><b>A5.</b> 프론트: "업무 카드가 모바일에서 한 열로". 백엔드: "상담 기록을 저장하고 <b>작성자만 수정하게</b>". 섞어 던지면 한쪽이 빠질 수 있다.</div>
+  </div>
+  <aside>세 겹을 나눠 말하는 습관이 AI 협업의 정확도를 올립니다.</aside>
+</section>
+
+<!-- 17 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>세 겹으로 본다 🧱</h1>
+    <div class="big" style="margin-top:26px">구조·표현·동작을 나눠 지시하면<br><span class="y">고칠 곳이 좁아진다</span><br><br>다음 — 웹이 멈추지 않는 이유(동기·비동기·코어)</div>
+    <p class="sub" style="margin-top:24px">웹페이지를 이루는 세 겹 — 여기까지</p>
+  </div>
+  <aside>다음 덱(concurrency-cs)에서 구글 지도가 손을 따라오며 데이터를 받는 원리 — JS가 한 명의 일꾼(싱글 스레드)인데도 화면이 멈추지 않는 비동기·이벤트 루프·프로세스·스레드·코어를 봅니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>

@@ -26,14 +26,14 @@
    - ✅ ①-6. 실습 1 — 터미널로 폴더를 탐험하고 만들기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/terminal-practice/) · 📊 [PPT](terminal-practice/terminal-practice.pptx)
    - ✅ ①-7. 실습 2 — AI에게 폴더 정리를 맡기고 검토하기 — 🖥️ [①-6 덱에 포함](https://inseoklee-ai.github.io/study-room/terminal-practice/#6)
    - ✅ ①-8. 실습 3 — 직접 한 것과 AI에게 맡긴 것 비교 회고 — 🖥️ [①-6 덱에 포함](https://inseoklee-ai.github.io/study-room/terminal-practice/#9)
-2. [프로젝트] 웹페이지를 이루는 세 겹 & 게임 만들기
-   - ②-1. AI는 잘 만드는데, 내 말은 왜 안 통할까
-   - ②-2. 세 겹을 나누어 이해하기 — 이름에 담긴 사연
-   - ②-3. [오늘의 CS] 동기·비동기, 프로세스·스레드·코어
-   - ②-4. AI로 게임 만들기: 테트리스에서 내 게임까지
-   - ②-5. 바이브 코딩 루프: 계획하고, 만들고, 다듬기
-   - ②-6. 과제 — 나만의 게임을 웹에 올리고 링크 제출하기
-   - 📦 프로젝트 제출
+2. **[프로젝트] 웹페이지를 이루는 세 겹 & 게임 만들기** ✅ 완결 (7/7) · 6개 소단원 + 제출을 **3개 덱으로 통합**
+   - ✅ ②-1. AI는 잘 만드는데, 내 말은 왜 안 통할까 (세 겹) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/three-layers/) · 📊 [PPT](three-layers/three-layers.pptx)
+   - ✅ ②-2. 세 겹을 나누어 이해하기 — 이름에 담긴 사연 — 🖥️ [②-1 덱에 포함](https://inseoklee-ai.github.io/study-room/three-layers/#6)
+   - ✅ ②-3. [오늘의 CS] 동기·비동기, 프로세스·스레드·코어 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/concurrency-cs/) · 📊 [PPT](concurrency-cs/concurrency-cs.pptx)
+   - ✅ ②-4. AI로 게임 만들기: 테트리스에서 내 게임까지 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/build-and-deploy-game/) · 📊 [PPT](build-and-deploy-game/build-and-deploy-game.pptx)
+   - ✅ ②-5. 바이브 코딩 루프: 계획하고, 만들고, 다듬기 — 🖥️ [②-4 덱에 포함](https://inseoklee-ai.github.io/study-room/build-and-deploy-game/#8)
+   - ✅ ②-6. 과제 — 나만의 게임을 웹에 올리고 링크 제출하기 — 🖥️ [②-4 덱에 포함](https://inseoklee-ai.github.io/study-room/build-and-deploy-game/#12)
+   - ✅ 📦 프로젝트 제출 (루브릭) — 🖥️ [②-4 덱에 포함](https://inseoklee-ai.github.io/study-room/build-and-deploy-game/#14)
 
 **중단원 ②**
 1. 오늘 써볼 프레임워크는?
@@ -222,6 +222,9 @@
 > - 대2-①2~4 https://inseoklee-ai.github.io/study-room/first-loop/
 > - 대2-①5 https://inseoklee-ai.github.io/study-room/terminal-anatomy/
 > - 대2-①6~8 https://inseoklee-ai.github.io/study-room/terminal-practice/
+> - 대2-②1·2 https://inseoklee-ai.github.io/study-room/three-layers/
+> - 대2-②3 https://inseoklee-ai.github.io/study-room/concurrency-cs/
+> - 대2-②4~6 https://inseoklee-ai.github.io/study-room/build-and-deploy-game/
 >
 > 📊 **PPT**: 각 강의 폴더의 `<폴더명>.pptx` (예: `vlm/vlm.pptx`). GitHub 저장소나 라이브 사이트에서 내려받아 PowerPoint로 열 수 있습니다.
 >
