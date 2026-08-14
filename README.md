@@ -36,14 +36,14 @@
    - ✅ 📦 프로젝트 제출 (루브릭) — 🖥️ [②-4 덱에 포함](https://inseoklee-ai.github.io/study-room/build-and-deploy-game/#14)
 
 **중단원 ②**
-1. 오늘 써볼 프레임워크는?
-   - ①-1. .js?" — 검색창에서 길을 잃는 순간
-   - ①-2. 버튼 하나 고치려다 서른 곳을 손댄 날
-   - ①-3. 프레임워크, 몇 개나 알아야 할까
-   - ①-4. AI와 함께 PRD 만들기
-   - ①-5. 백엔드 없이 프론트엔드 만들기
-   - ①-6. CS 교양 — API가 하는 일 이해하기
-   - ①-7. 쇼핑몰을 운영해보고 싶다!
+1. **오늘 써볼 프레임워크는?** ✅ 완결 (7/7) · 7개 소단원을 **4개 덱으로 통합**
+   - ✅ ①-1. .js?" — 검색창에서 길을 잃는 순간 (프레임워크란) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/why-frameworks/) · 📊 [PPT](why-frameworks/why-frameworks.pptx)
+   - ✅ ①-2. 버튼 하나 고치려다 서른 곳을 손댄 날 (세 문제) — 🖥️ [①-1 덱에 포함](https://inseoklee-ai.github.io/study-room/why-frameworks/#3)
+   - ✅ ①-3. 프레임워크, 몇 개나 알아야 할까 (판단 축) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/choose-framework/) · 📊 [PPT](choose-framework/choose-framework.pptx)
+   - ✅ ①-4. AI와 함께 PRD 만들기 — 🖥️ [①-3 덱에 포함](https://inseoklee-ai.github.io/study-room/choose-framework/#8)
+   - ✅ ①-5. 백엔드 없이 프론트엔드 만들기 (목업 데이터) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/mock-and-api/) · 📊 [PPT](mock-and-api/mock-and-api.pptx)
+   - ✅ ①-6. CS 교양 — API가 하는 일 이해하기 (REST·GraphQL) — 🖥️ [①-5 덱에 포함](https://inseoklee-ai.github.io/study-room/mock-and-api/#8)
+   - ✅ ①-7. 쇼핑몰을 운영해보고 싶다! (종합·PRD 과제) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/shopping-mall-prd/) · 📊 [PPT](shopping-mall-prd/shopping-mall-prd.pptx)
 2. [프로젝트] 백엔드 — 화면 뒤에서 일어나는 일들
    - ②-1. 화면 뒤에 서버가 필요한 이유
    - ②-2. 네트워크 기본기 — 주소가 화면이 되기까지
@@ -225,6 +225,10 @@
 > - 대2-②1·2 https://inseoklee-ai.github.io/study-room/three-layers/
 > - 대2-②3 https://inseoklee-ai.github.io/study-room/concurrency-cs/
 > - 대2-②4~6 https://inseoklee-ai.github.io/study-room/build-and-deploy-game/
+> - 대2-중②1-①② https://inseoklee-ai.github.io/study-room/why-frameworks/
+> - 대2-중②1-③④ https://inseoklee-ai.github.io/study-room/choose-framework/
+> - 대2-중②1-⑤⑥ https://inseoklee-ai.github.io/study-room/mock-and-api/
+> - 대2-중②1-⑦ https://inseoklee-ai.github.io/study-room/shopping-mall-prd/
 >
 > 📊 **PPT**: 각 강의 폴더의 `<폴더명>.pptx` (예: `vlm/vlm.pptx`). GitHub 저장소나 라이브 사이트에서 내려받아 PowerPoint로 열 수 있습니다.
 >

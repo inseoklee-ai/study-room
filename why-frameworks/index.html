@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>프레임워크는 왜 이렇게 많을까 · 세 문제</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.77rem,1.28vw,.94rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.9rem);
+    color:var(--ink);overflow:auto;max-height:52vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 프레임워크 ①②</span>
+    <h1 style="margin:18px 0">프레임워크는<br>왜 이렇게 많을까</h1>
+    <p class="sub">뼈대라는 뜻 · 반복·변화·연결이라는 세 문제</p>
+  </div>
+  <aside>검색창에 "프론트엔드 프레임워크 추천"을 넣으면 React·Vue·Svelte·Angular·Next.js가 쏟아집니다. "이걸 다 알아야 하나요?"의 답은 아니요 — 다만 왜 많아졌는지 알아야 AI 추천도 판단할 수 있습니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 문법이 아니라 <span class="g">뜻과 판단</span></h2>
+  <ul class="pts">
+    <li>건축의 철골·비계처럼 <b>프레임워크(framework) = 뼈대·틀</b>. 웹서비스에서 반복되는 일을 미리 정리해 둔 <b>개발 골조</b></li>
+    <li>부품 상자(라이브러리)와 다르다 — 프레임워크는 <b>"이렇게 화면을 나누고 연결하자"는 약속</b>까지 준다(제어의 역전: 프레임워크가 흐름을 쥐고 내 코드를 불러 준다)</li>
+  </ul>
+  <div class="hl">🎯 핵심 한 문장 — <b>종류가 수십 개지만 비전공자가 다 배울 필요는 없다. 큰 그림을 잡고, 내 상황을 AI에게 설명해 추천받고, 그 근거를 판단하는 것이 선택법.</b></div>
+  <div class="big">💡 오늘의 산출물은 코드가 아니다<small>"내 조건에서 어떤 게 맞는지"를 AI에게 제대로 물을 <span class="y">선택 프롬프트와 평가표</span></small></div>
+  <aside>혼자 빠르게 만드는 데도 도움이 되지만, 여러 사람이 오래 고칠 때 더 큰 힘을 냅니다 — 누가 들어와도 어느 폴더를 봐야 하는지 짐작할 수 있으니까요. 의사의 EMR, 변호사의 사건관리 SaaS처럼 검증된 틀 위에 우리 절차를 얹는 것과 같습니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">버튼 하나 고치려다 서른 곳을 손댄 날</h2>
+  <p style="margin-top:11px">반복·변화·연결 · 컴포넌트·상태·라우팅</p><span class="who">② 세 문제</span></div>
+  <aside>프레임워크는 개발자를 괴롭히려는 이름표가 아니라, 화면이 커질 때 반복해서 터지는 문제를 줄이려고 생겼습니다.</aside>
+</section>
+
+<!-- 4 역사 -->
+<section class="slide" data-part="PART 1">
+  <h2>📜 반복을 덜어내는 <span class="g">20년</span></h2>
+  <table class="t">
+    <tr><th>시기</th><th>도구 · 풀려던 문제</th></tr>
+    <tr><td>2006 jQuery</td><td>브라우저마다 다른 JS를 덮어줌("적게 쓰고 더 많이") — 화면이 늘면 여전히 뒤엉킴</td></tr>
+    <tr><td>2010 AngularJS·Backbone</td><td>화면을 <b>구조적으로 나누자</b> — 데이터가 바뀌면 화면도 규칙적으로</td></tr>
+    <tr><td>2013 React</td><td>화면을 <b>컴포넌트</b>로 나눔 · "어떻게"가 아니라 "무엇이어야"를 선언(<b>선언형 UI</b>)</td></tr>
+    <tr><td>2014 Vue</td><td>컴포넌트 사고를 받되 <b>점진적으로</b> 배우게</td></tr>
+    <tr><td>2016~ Svelte·Solid·Qwik</td><td>각자 다른 병목(컴파일러·반응형 성능·서버 상태 이어받기)</td></tr>
+  </table>
+  <div class="hl">여기까진 다 <b>프론트엔드(화면)</b> 프레임워크. 백엔드에도 같은 이유로 Django·FastAPI·Spring·Express·Rails가 있다. 공통 질문은 하나 — <b>"규모가 커질 때 반복되는 일을 어떻게 줄일 것인가?"</b> (오늘은 프론트엔드로 좁힘)</div>
+  <aside>이름이 바뀌어도 풀려는 문제는 같았습니다.</aside>
+</section>
+
+<!-- 5 세 문제 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧩 커질 때 생기는 <span class="g">세 문제</span></h2>
+  <table class="t">
+    <tr><th>문제</th><th>순수 웹 코드에서</th><th>개발자 말</th></tr>
+    <tr><td>반복</td><td>비슷한 카드·폼·버튼을 여러 곳에 <b>복사</b></td><td class="g">컴포넌트 — 재사용 조각</td></tr>
+    <tr><td>변화</td><td>선택값·로딩·실패·완료를 여러 코드가 <b>따로</b> 바꿈</td><td class="b">상태 — 지금의 현재값</td></tr>
+    <tr><td>연결</td><td>화면이 늘수록 어느 주소에 어떤 화면인지 헷갈림</td><td class="p">라우팅 — 주소별 화면</td></tr>
+  </table>
+  <ul class="pts">
+    <li><b>컴포넌트</b> — 같은 카드 30개면, 복사해 두면 배지 하나 추가에 30곳을 고쳐야. 컴포넌트는 <b>설계를 한 곳에 두고 데이터만 바꿔</b> 부른다</li>
+    <li><b>상태</b> — 필터를 바꾸면 목록·결과 수·안내 문구가 함께 바뀌어야. 손으로 흩어 놓으면 <b>한 곳은 바뀌고 한 곳은 예전 값</b>인 버그</li>
+    <li><b>라우팅</b> — <code>/search</code>·<code>/profile</code>처럼 주소와 화면을 연결. 커지면 주소 체계가 <b>길 찾기이자 작업 지도</b></li>
+  </ul>
+  <aside>낯선 말 같아도 방금 표의 문제를 다른 이름으로 부르는 것에 가깝습니다.</aside>
+</section>
+
+<!-- 6 순수 JS -->
+<section class="slide" data-part="PART 1">
+  <h2>👀 눈으로 — 순수 JS는 <span class="r">복사 30번, 수정 30번</span></h2>
+  <pre>&lt;!-- 카드 하나를 직접 적고, 같은 구조를 30번 복사... --&gt;
+&lt;div class="expert-card"&gt;
+  &lt;h3&gt;김민준 변호사&lt;/h3&gt;
+  &lt;p class="badge"&gt;형사전문 15년&lt;/p&gt;
+&lt;/div&gt;
+
+// 동적으로 만들어도 구조를 문자열로 직접 조립
+experts.forEach(expert =&gt; {
+  card.innerHTML = `&lt;h3&gt;${expert.name}&lt;/h3&gt;
+    &lt;p class="badge"&gt;${expert.badge}&lt;/p&gt;`;
+});
+// 배지에 아이콘을 추가하려면? 이 코드를 다시 찾아 고쳐야</pre>
+  <div class="hl">배지 디자인을 바꾸려면 <b>30곳을 모두 찾아 고쳐야</b> 한다. "어떤 요소를 찾아 → 어떻게 바꿀지"를 개발자가 일일이 적는다.</div>
+  <aside>도메인에 맞게 환자 카드·사건 카드·광고 성과 박스로 바꿔 생각해도 됩니다.</aside>
+</section>
+
+<!-- 7 React 컴포넌트 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧩 React — <span class="g">한 번 만들고, 데이터만 바꿔</span></h2>
+  <pre>// ExpertCard.jsx: 카드 설계를 "한 번" 만든다
+function ExpertCard({ name, badge, bio }) {
+  return (
+    &lt;div className="expert-card"&gt;
+      &lt;h3&gt;{name}&lt;/h3&gt;
+      &lt;p className="badge"&gt;{badge}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+
+// 데이터만 바꿔 여러 번 부른다
+{experts.map(expert =&gt; (
+  &lt;ExpertCard key={expert.name} {...expert} /&gt;
+))}</pre>
+  <div class="big">배지에 아이콘을 추가하려면? <span class="y">ExpertCard 한 곳만</span><small>30개 카드가 모두 바뀐다 — 이것이 모듈화·재사용의 힘</small></div>
+  <div class="hl">💡 오늘 외울 필요 없다 — 핵심은 <b>순수 JS는 30번 복사, 컴포넌트는 한 번 만들고 데이터만 바꿔 쓴다</b>. 이 차이가 "프레임워크가 왜 생겼는가"의 가장 직접적인 답.</div>
+  <aside>코드를 당장 이해하지 않아도 괜찮습니다.</aside>
+</section>
+
+<!-- 8 상태가 터지는 순간 -->
+<section class="slide" data-part="PART 1">
+  <h2>💥 상태 — <span class="g">필터를 바꾸면 함께 바뀌어야</span></h2>
+  <p>"형사전문" 필터를 고르면 <b>한 곳이 아니라 다섯 곳</b>이 바뀌어야 한다 — 필터 버튼 표시·결과 목록·결과 수·빈 결과 안내·페이지 제목.</p>
+  <table class="t">
+    <tr><th>순수 JS 위험</th><th>상태가 있으면</th></tr>
+    <tr><td>목록만 바꾸고 <b>카운트를 안 바꿈</b></td><td>같은 상태를 공유해 일관됨</td></tr>
+    <tr><td>빈 결과 문구 조건을 빠뜨림</td><td>상태가 비면 자동 표시</td></tr>
+  </table>
+  <pre>const [selectedFilter, setSelectedFilter] = useState('all');
+// 상태에서 파생 — 개발자가 따로 안 바꿈
+const filtered = selectedFilter === 'all'
+  ? experts
+  : experts.filter(e =&gt; e.specialty === selectedFilter);
+// 결과 수, 빈 안내, 목록이 filtered에서 모두 자동으로</pre>
+  <div class="hl">개발자는 <code>selectedFilter</code>를 바꾸는 한 줄만 적는다 — <b>한 곳을 바꾸면 연결된 곳이 모두 일관되게 바뀌는 것</b>이 상태 관리의 가장 큰 이점.</div>
+  <aside>도메인으로 — 환자 목록에서 "당뇨" 필터를 고르면 목록·결과 수·차트·문구가 다 바뀌어야. 이런 "한 값이 여러 곳을 당겨 바꾸는" 상황이 많을수록 상태 관리의 이점이 커집니다.</aside>
+</section>
+
+<!-- 9 추상화 모듈화 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧠 CS 교양 — <span class="g">추상화와 모듈화</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="b">추상화 (abstraction)</h3><p style="margin:0">복잡한 속을 감추고 <b>필요한 조작만 밖으로</b>. 자동차는 엔진을 몰라도 페달·핸들만. 프레임워크는 손 많이 가는 <b>DOM 조작을 손잡이 뒤로</b> — "무엇이어야 한다"만 적는 <b>선언형 UI</b></p></div>
+    <div class="box"><h3 class="g">모듈화 (modularity)</h3><p style="margin:0">큰 덩어리를 <b>갈아 끼울 수 있는 조각</b>으로. 레고처럼 — <b>컴포넌트</b>가 이것. 조각 사이 약속만 지키면 한 조각을 고쳐도 다른 게 안 무너진다</p></div>
+  </div>
+  <div class="hl">💡 AI에게 좋은 지시는 이 두 언어로 된다 — "카드를 <b>컴포넌트로</b> 만들어 재사용해"(모듈화), "검색 결과가 바뀌면 목록이 <b>따라 바뀌게</b>"(상태=추상화). <b>무엇을 조각으로 나누고 무엇을 상태로 둘지는 여러분이 판단</b> — 이 판단이 문법보다 오래 쓸모 있다.</div>
+  <aside>📖 1972년 데이비드 파나스 — "서로 관련된 것끼리가 아니라 바뀌어야 할 이유가 같은 것끼리 모아라". 50년 뒤 React 컴포넌트·Vue 파일 구조·Svelte 컴파일 단위에 살아 있습니다. 도구는 바뀌어도 복잡함을 조각으로 나누는 생각은 그대로.</aside>
+</section>
+
+<!-- 10 가상 DOM -->
+<section class="slide" data-part="PART 1">
+  <h2>🏗️ 가상 DOM — <span class="g">설계도를 먼저, 차이만 칠하기</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="r">직접 칠하기 (실제 DOM)</h3><p style="margin:0">벽 하나하나 붓을 들고 — 벽이 100개면 손이 100번</p></div>
+    <div class="box"><h3 class="g">설계도에 먼저 (가상 DOM)</h3><p style="margin:0">리모델링 뒤를 <b>설계도에 그리고, 지금 집과 나란히 놓아 다른 점만</b> — 바뀐 벽이 3개면 붓은 3번</p></div>
+  </div>
+  <ul class="pts">
+    <li>React — ①메모리 위 <b>가상 DOM</b>(설계도)을 그리고 ②실제 DOM과 비교 ③<b>바뀐 부분만</b> 적용(이 과정이 <b>재조정</b>)</li>
+  </ul>
+  <div class="hl">⚠️ 오해 — 가상 DOM이 <b>항상 가장 빠른 건 아니다</b>. Svelte처럼 컴파일 때 미리 알아내면 비교가 필요 없어 더 빠를 수도. 가상 DOM의 강점은 "가장 빠르다"가 아니라 <b>"개발자가 직접 DOM을 안 만져도 된다"는 편의성</b>(일관성·개발 효율).</div>
+  <aside>📖 2000년대 브라우저는 DOM을 연속으로 건드리면 매번 화면을 다시 계산하는 레이아웃 스래싱을 겪었습니다. 가상 DOM은 "한 번에 모아서 바꾸자"는 해결책이었습니다.</aside>
+</section>
+
+<!-- 11 핵심 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이 덱의 <span class="g">핵심 정리</span></h2>
+  <table class="t">
+    <tr><th>개념</th><th>한 문장</th></tr>
+    <tr><td>프레임워크</td><td>반복되는 일을 미리 정리한 <b>개발 골조</b>(약속까지 준다)</td></tr>
+    <tr><td>세 문제</td><td>반복·변화·연결 = <b>컴포넌트·상태·라우팅</b></td></tr>
+    <tr><td>컴포넌트</td><td>설계를 한 곳에 두고 <b>데이터만 바꿔</b> 재사용 — 한 곳 고치면 다 바뀜</td></tr>
+    <tr><td>상태</td><td>한 값을 바꾸면 <b>연결된 곳이 모두 일관되게</b> 바뀐다</td></tr>
+    <tr><td>추상화·모듈화</td><td>복잡함을 감추고(추상화) 조각으로 나눠(모듈화) 반복을 줄인다</td></tr>
+    <tr><td>가상 DOM</td><td>설계도와 현실의 차이만 칠하기 — <b>편의성이 강점</b>(항상 최속은 아님)</td></tr>
+  </table>
+  <aside>다음 덱에서 이 눈으로 프레임워크를 고르는 법 — 판단 축·AI 친화도·AI와 PRD 대화를 봅니다.</aside>
+</section>
+
+<!-- 12 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 라이브러리와 <b>프레임워크</b>의 차이(제어의 역전)는?</div>
+    <div class="q"><b>Q2.</b> 프레임워크가 풀려는 <b>세 문제</b>와 개발자 용어는?</div>
+    <div class="q"><b>Q3.</b> 같은 카드 30개에서 <b>컴포넌트</b>가 주는 이점은?</div>
+    <div class="q"><b>Q4.</b> 필터를 바꿀 때 <b>상태</b>가 있으면 무엇이 달라지나?</div>
+    <div class="q"><b>Q5.</b> 가상 DOM이 <b>"항상 가장 빠르다"가 아닌</b> 이유와, 진짜 강점은?</div>
+  </div>
+  <aside>Q2가 이 강의 전체의 뼈대입니다.</aside>
+</section>
+
+<!-- 13 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 라이브러리는 <b>내가 필요할 때 불러 쓰지만</b>, 프레임워크는 <b>전체 흐름을 쥐고 있다가 내 코드를 불러 준다</b>(제어의 역전) — "이렇게 나누고 연결하자"는 약속까지.</div>
+    <div class="q a"><b>A2.</b> <b>반복·변화·연결</b> = <b>컴포넌트</b>(재사용 조각)·<b>상태</b>(현재값)·<b>라우팅</b>(주소별 화면).</div>
+    <div class="q a"><b>A3.</b> 설계를 <b>한 곳에</b> 두고 데이터만 바꿔 부르므로, 배지 하나 추가에 <b>컴포넌트 한 곳만</b> 고치면 30개가 다 바뀐다.</div>
+    <div class="q a"><b>A4.</b> 한 상태에서 목록·결과 수·빈 안내·제목이 <b>파생</b>돼, 한 곳을 바꾸면 <b>연결된 곳이 모두 일관되게</b> 바뀐다(한쪽만 예전 값인 버그 방지).</div>
+    <div class="q a"><b>A5.</b> Svelte처럼 컴파일 때 미리 알아내면 비교가 필요 없어 더 빠를 수도. 진짜 강점은 <b>개발자가 직접 DOM을 안 만져도 되는 편의성</b>(일관성·효율).</div>
+  </div>
+  <aside>A2를 쥐면 프레임워크를 문법 묶음이 아니라 문제 해결 도구로 볼 수 있습니다.</aside>
+</section>
+
+<!-- 14 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>이름보다 문제를 본다 🧩</h1>
+    <div class="big" style="margin-top:26px">반복·변화·연결을 컴포넌트·상태·라우팅으로<br>복잡함을 <span class="y">조각으로 나눠</span> 줄인다<br><br>다음 — 그래서 무엇을 고르나(판단 축·PRD)</div>
+    <p class="sub" style="margin-top:24px">프레임워크는 왜 이렇게 많을까 — 여기까지</p>
+  </div>
+  <aside>다음 덱(choose-framework)에서 "다 알아야 하나?"의 정직한 답 — 판단 축·AI 친화도·인기≠정답, 그리고 AI와 대화하며 PRD를 만드는 법을 봅니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>

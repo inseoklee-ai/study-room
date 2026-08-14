@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>쇼핑몰을 운영해보고 싶다! · 종합과 과제</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.92rem,1.52vw,1.1rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)} .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:80px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)} .qa .q.a{border-left-color:var(--gold)} .qa .q.a b{color:var(--gold)}
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.77rem,1.28vw,.94rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)} table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 12px 12px 0;
+    padding:12px 15px;font-family:"SF Mono",Consolas,"D2Coding",monospace;font-size:clamp(.72rem,1.1vw,.9rem);
+    color:var(--ink);overflow:auto;max-height:52vh;white-space:pre-wrap;line-height:1.5;margin:8px 0}
+  code{font-family:Consolas,"D2Coding",monospace;background:var(--bg2);padding:1px 5px;border-radius:5px;font-size:.9em;color:var(--gr)}
+  .plabel{font-size:.78rem;color:var(--soft);font-weight:700;margin:6px 0 2px}
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR"><button class="btn" onclick="tgN()">🗒 학습노트 (S)</button><button class="btn" onclick="tgT()">🌗</button></div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 프레임워크 ⑦ + 과제</span>
+    <h1 style="margin:18px 0">쇼핑몰을<br>운영해보고 싶다!</h1>
+    <p class="sub">정의 → 판단 → 데이터 · 그리고 내 PRD 과제</p>
+  </div>
+  <aside>흩어진 지식은 잊힙니다. 온라인 쇼핑몰 하나를 놓고 오늘 배운 세 가지를 한 흐름으로 꿰어 봅니다. 아직 코드는 한 줄도 안 짜고 — AI에게 무엇을 시킬지 준비하는 단계입니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 만들기 전 <span class="g">준비 세 단계</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px"><small>1</small><b>서비스를<br>한 줄로 정한다</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>2</small><b class="b">프레임워크를<br>추천받고 판단</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>3</small><b class="g">목업 데이터를<br>만든다</b></div>
+  </div>
+  <ul class="pts">
+    <li>쇼핑몰의 <b>장바구니·결제·주문은 백엔드가 필요</b> — 나중에. 오늘은 <b>백엔드 없이 만들 수 있는 부분</b>(상품을 보여 주는 화면)까지</li>
+  </ul>
+  <div class="hl">🎯 한 줄 — <b>정의 → 판단 → 데이터</b>. 이 세 가지가 있으면 실제로 화면을 만들 때 헤매지 않는다.</div>
+  <aside>이 세 단계를 쇼핑몰로 함께 해본 뒤, 과제에서 내 주제로 다시 합니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">쇼핑몰로 세 가지를 꿴다</h2>
+  <p style="margin-top:11px">정의 · 판단 · 목업</p><span class="who">⑦ 종합</span></div>
+  <aside>지금까지 배운 걸 흩어진 지식으로 두면 잊힙니다. 하나의 예시로 한 흐름으로 꿰어 봅니다.</aside>
+</section>
+
+<!-- 4 1단계 -->
+<section class="slide" data-part="PART 1">
+  <h2>1️⃣ 서비스를 <span class="g">한 줄로</span> 정하기</h2>
+  <table class="t">
+    <tr><th>항목</th><th>쇼핑몰 예시</th></tr>
+    <tr><td>무엇을</td><td>수제 디저트를 파는 작은 온라인 가게</td></tr>
+    <tr><td>누구를 위해</td><td>선물용 케이크를 찾는 20~30대</td></tr>
+    <tr><td>핵심 화면 3개</td><td>① 상품 목록 ② 상품 상세 ③ 장바구니</td></tr>
+  </table>
+  <div class="big">이 세 줄이 <span class="y">뒤의 모든 요청의 뼈대</span><small>"쇼핑몰 만들어 줘"보다 "수제 디저트 상품 목록·상세·장바구니 화면"이 AI에게 훨씬 잘 통한다</small></div>
+  <div class="hl">거창할 필요 없이 딱 <b>세 가지 — 무엇을 / 누구를 위해 / 핵심 화면 3개</b>.</div>
+  <aside>지난 강의(게임 만들기)에서 보이는 것·상태·규칙으로 나눈 것과 같은 발상입니다 — 흐릿한 것을 또렷하게.</aside>
+</section>
+
+<!-- 5 2단계 -->
+<section class="slide" data-part="PART 1">
+  <h2>2️⃣ 프레임워크 <span class="g">추천받고 판단</span></h2>
+  <pre>나는 수제 디저트를 파는 작은 온라인 쇼핑몰을 만들려고 해.
+- 화면: 상품 목록, 상품 상세, 장바구니
+- 검색에 잘 노출되면 좋겠어 (선물 검색으로 유입)
+- 자료와 예제가 많은 프레임워크를 선호해
+- 나중에 결제·주문 기능을 백엔드로 붙일 계획이야
+
+이 조건에 맞는 후보를 2~3개 추천하고,
+각각의 장단점과 "이런 경우엔 오히려 별로"인 상황도 알려줘.</pre>
+  <ul class="pts">
+    <li>보통 <b>Next.js</b>를 첫 후보로 답한다(검색 노출·자료 많음). 멈추지 말고 — 후보를 <b>하나만</b> 미나? <b>왜</b> 없이 "제일 좋아요"만? 내 조건을 <b>반영</b>했나?</li>
+  </ul>
+  <div class="hl"><b>판단을 3문장으로 남긴다</b> — "Next.js를 골랐다. ①선물 검색 유입이 중요한데 검색 노출에 유리, ②비전공자 참고할 한국어 자료·예제 많음, ③나중에 백엔드를 같은 틀에서 붙이기 쉬움." <b>이 3문장이 "유행 따라"와 "조건 보고"를 가른다.</b></div>
+  <aside>"뭐가 좋아요?"가 아니라 조건을 줍니다. 1단계에서 정한 내용을 그대로 넣습니다.</aside>
+</section>
+
+<!-- 6 3단계 -->
+<section class="slide" data-part="PART 1">
+  <h2>3️⃣ <span class="g">목업 데이터</span> 만들기</h2>
+  <pre>수제 디저트 쇼핑몰의 상품 목록에 쓸 목업 데이터를 만들어줘.
+상품 6개, 각각 JSON 배열로:
+id, name, price(원), category(케이크/쿠키/음료),
+image(설명용 텍스트), soldOut(true/false)</pre>
+  <pre>[
+ {"id":1,"name":"딸기 생크림 케이크","price":32000,
+  "category":"케이크","soldOut":false},
+ {"id":3,"name":"얼그레이 밀크티","price":6500,
+  "category":"음료","soldOut":true}
+]</pre>
+  <div class="hl">이 데이터만 있으면 상품 목록 화면을 진짜처럼 만들 수 있다. <b>나중에 백엔드가 생기면 이 가짜 데이터를 진짜 API 호출 한 줄로 바꾸면 된다 — 화면 코드는 그대로 둔 채로.</b></div>
+  <aside>여기까지가 "만들기 전 준비" — 정의 → 판단 → 데이터. 이 셋이 있으면 실제로 화면을 만들기 시작할 때 헤매지 않습니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">내 서비스를 AI와 함께 준비하기</h2>
+  <p style="margin-top:11px">PRD 한 장 · 체크 · 회고</p><span class="who">📝 과제 + 프로젝트 제출</span></div>
+  <aside>내가 앞으로 만들 웹서비스의 PRD를 씁니다. 이 서비스에 백엔드·데이터베이스·AI 도구를 한 겹씩 붙여 나가게 됩니다 — 오늘 정한 이 서비스가 그 출발점이자 씨앗입니다.</aside>
+</section>
+
+<!-- 8 과제 PRD -->
+<section class="slide" data-part="PART 2">
+  <h2>📝 제출물 — <span class="g">PRD 한 장</span></h2>
+  <table class="t">
+    <tr><th>항목</th><th>내가 채울 것</th></tr>
+    <tr><td>① 서비스 한 줄</td><td>무엇을 / 누구를 위해 / 핵심 화면 3개</td></tr>
+    <tr><td>② 프레임워크 판단</td><td>AI에게 조건 주고 받은 추천 + <b>"왜 골랐나" 3문장</b></td></tr>
+    <tr><td>③ 목업 데이터</td><td>핵심 목록에 쓸 가짜 데이터(JSON, 5개 이상)</td></tr>
+  </table>
+  <div class="hl">✅ 제출 전 체크 — 정의가 <b>"쇼핑몰"처럼 뭉뚱그리지 않고</b> 무엇을 누구에게인지 또렷한가 · 프레임워크 이유가 "유행"이 아니라 <b>내 조건</b>에 근거하나 · 목업 필드가 화면에 보여줄 정보와 맞나 · <b>백엔드가 필요한 기능(결제·로그인·저장)과 지금 만들 부분을 구분</b>했나.</div>
+  <div class="box"><p style="margin:0">🌱 이 PRD는 완벽하지 않아도 된다 — 앞으로 만들며 계속 고쳐 나갈 거니까. 지금은 <b>"내가 무엇을 만들지"를 내 말로 적어 두는 것</b>이 목표. 쇼핑몰이 아니어도 됨(맛집 지도·독서 기록·반려동물 커뮤니티 등 "목록·상세 화면이 있는 서비스")</p></div>
+  <aside>제출은 파일 또는 URL 중 하나로만, 제출 후 수정 불가. PRD 문서를 파일로 올리거나 문서 링크로 제출합니다.</aside>
+</section>
+
+<!-- 9 회고 + 핵심 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 강 전체 <span class="g">핵심 정리</span></h2>
+  <table class="t">
+    <tr><th>배운 것</th><th>한 문장</th></tr>
+    <tr><td>프레임워크의 이유</td><td>반복·상태·협업을 <b>추상화·모듈화</b>로 줄이려 발전 — 이름보다 문제를 본다</td></tr>
+    <tr><td>생태계의 다양성</td><td>각자 다른 조건을 겨냥 — <b>전부 배우지 말고 후보를 좁힌다</b></td></tr>
+    <tr><td>AI 추천 활용</td><td>정답보다 <b>후보·근거·반대 조건</b>을 정리하게 — 내 조건을 프롬프트로</td></tr>
+    <tr><td>목업 데이터</td><td>백엔드 없이 <b>진짜 응답과 같은 구조의 가짜</b>로 화면·테스트</td></tr>
+    <tr><td>API의 역할</td><td>프론트↔백은 <b>API(JSON)로 대화</b>, REST가 표준 — GET·POST를 안다</td></tr>
+  </table>
+  <div class="hl">🤔 회고 — 프레임워크를 "배울 이름 목록"이 아니라 <b>"문제를 푸는 선택지"</b>로 본 지점은? 추상화·모듈화로 내 프로젝트에서 덜어질 반복은? 검색 결과가 쏟아질 때 <b>덜 압도되게 하는 나만의 기준</b> 하나는?</div>
+  <aside>이로써 대단원 2 중단원② 강 1 "오늘 써볼 프레임워크는?"을 완주했습니다.</aside>
+</section>
+
+<!-- 10 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> "만들기 전 준비"의 <b>세 단계</b>는?</div>
+    <div class="q"><b>Q2.</b> 1단계 "서비스 한 줄"에 들어가는 <b>세 가지</b>는?</div>
+    <div class="q"><b>Q3.</b> 프레임워크 <b>판단 3문장</b>이 가르는 것은 무엇인가?</div>
+    <div class="q"><b>Q4.</b> 쇼핑몰에서 <b>오늘 만들 수 있는 부분</b>과 나중으로 미루는 부분은?</div>
+    <div class="q"><b>Q5.</b> PRD 과제에서 제출물 <b>세 항목</b>은?</div>
+  </div>
+  <aside>Q3이 이 강의가 반복 강조한 "조건 보고 고르기"입니다.</aside>
+</section>
+
+<!-- 11 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> ①<b>서비스를 한 줄로 정의</b> ②<b>프레임워크를 추천받고 판단</b> ③<b>목업 데이터 만들기</b> — 정의 → 판단 → 데이터.</div>
+    <div class="q a"><b>A2.</b> <b>무엇을 / 누구를 위해 / 핵심 화면 3개</b>. "쇼핑몰"보다 "수제 디저트 목록·상세·장바구니"가 AI에게 잘 통한다.</div>
+    <div class="q a"><b>A3.</b> <b>"유행 따라 골랐다"와 "조건 보고 골랐다"</b>를 가른다 — 왜 이 선택이 내 조건에 맞는지를 근거로 남긴다.</div>
+    <div class="q a"><b>A4.</b> <b>상품을 보여 주는 화면(목록·상세)</b>은 백엔드 없이 목업으로. <b>장바구니·결제·주문·로그인</b>은 백엔드가 필요해 나중에.</div>
+    <div class="q a"><b>A5.</b> ①<b>서비스 한 줄</b> ②<b>프레임워크 판단(추천+3문장)</b> ③<b>목업 데이터(JSON 5개 이상)</b>.</div>
+  </div>
+  <aside>이 PRD가 앞으로 백엔드·DB·AI 도구를 붙여 나갈 서비스의 씨앗입니다.</aside>
+</section>
+
+<!-- 12 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>정의·판단·데이터 🛒</h1>
+    <div class="big" style="margin-top:26px">세 가지를 한 흐름에 꿰고<br>내 서비스 <span class="y">PRD 한 장</span>을 씨앗으로 남긴다<br><br>오늘 써볼 프레임워크는? — 매듭</div>
+    <p class="sub" style="margin-top:24px">쇼핑몰을 운영해보고 싶다! — 여기까지</p>
+  </div>
+  <aside>대단원 2 중단원② 강 1 완결. 프레임워크가 왜 많은지·어떻게 고르는지·백엔드 없이 화면부터 만드는 법을 익히고, 앞으로 기능을 붙여 나갈 내 서비스의 PRD를 준비했습니다.</aside>
+</section>
+
+</div>
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  document.getElementById('deck').addEventListener('click',function(e){if(e.target.closest('.btn'))return;go(e.clientX<innerWidth*0.32?-1:1)});
+  var h=parseInt((location.hash||'').replace('#',''),10);if(h>0&&h<=S.length)i=h-1;draw();
+</script>
+</body>
+</html>
