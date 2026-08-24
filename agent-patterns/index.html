@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>에이전트 설계 패턴과 복잡도 · 실패가 증명할 때만 다음 단계로</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 거대 언어모델과 프롬프트 · ⑨</span>
+    <h1 style="margin:18px 0">에이전트 설계 패턴과<br>복잡도</h1>
+    <p class="sub">실패가 증명할 때만 다음 복잡도로 — 그리고 강의 전체를 한 줄로</p>
+  </div>
+  <aside>이 소단원은 이 중단원의 마지막이자 강의 종합 정리입니다. "에이전트를 써야 하는가"가 아니라 "지금 실패의 원인을 줄이려면 어느 정도의 구조가 필요한가"를 묻습니다. 복잡도의 사다리 0~3단계를 정리하고, 복잡도가 성능과 같은 축이 아니라는 사실과 운영 비용까지 살핀 뒤, 강의 전체를 한 줄로 꿰며 마칩니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>PART 1</small><b>복잡도의 사다리</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>PART 2</small><b class="g">복잡도 ≠ 성능</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>PART 3</small><b>운영 비용</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--pp)"><small>마무리</small><b class="p">한 줄로 꿰기</b></div>
+  </div>
+  <ul class="pts">
+    <li>실행 구조의 <b>0~3단계 사다리</b> — 단일 호출 · 연결된 흐름 · 평가자-수정자 루프 · 자율 에이전트</li>
+    <li>각 단계의 실례와, 다음 단계로 올라갈 <b>이탈 신호</b></li>
+    <li><b>복잡도는 성능과 같은 축이 아니다</b> — 작은 하네스와 벤더 수치를 읽는 법</li>
+    <li><b>운영 비용도 설계의 일부</b> — 그리고 강의 전체를 한 문장으로</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 구조는 이름·유행이 아니라 <b>실패 증거</b>로 고른다.</div>
+  <aside>사다리는 높은 단계가 더 좋은 설계라는 순위표가 아니라, 실패 증거에 따라 선택할 구조의 범위입니다. 네 파트를 지나면 "이 실행은 어떤 조건 위에서 돌아가는가"를 스스로 물을 수 있게 됩니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">복잡도의 사다리</h2>
+    <p style="margin-top:11px">순위표가 아니라, 실패 증거로 고르는 구조의 범위</p>
+    <span class="who">단일 호출 · 연결된 흐름 · 평가자-수정자 루프 · 자율 에이전트</span>
+  </div>
+  <aside>과업마다 필요한 실행 구조는 다릅니다. 분류·형식 변환은 한 번의 호출로 끝날 수 있고, 근거를 확인하고 오류를 고쳐 시험을 통과해야 하는 과업은 여러 단계·관측을 요구할 수 있습니다.</aside>
+</section>
+
+<!-- 4 핵심 질문 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧭 질문은 <span class="g">"써야 하는가"</span>가 아니다</h2>
+  <ul class="pts">
+    <li>중요한 질문 = "에이전트를 써야 하는가"가 아니라 — <b>지금 성공 기준을 못 채우는 원인이 무엇이며, 그 원인을 줄이려면 어느 정도의 구조가 필요한가</b></li>
+    <li>복잡한 구조는 기능을 더하지만 동시에 <b>비용·지연·실패 경로</b>를 늘린다</li>
+    <li>호출이 늘면 어느 단계가 틀렸는지 추적해야 하고, 도구 권한이 늘면 <b>경계</b>도 설계해야 한다</li>
+  </ul>
+  <div class="hl">사다리는 높은 단계가 더 좋은 설계라는 순위가 아니라, <b>실패 증거에 따라 선택할 구조의 범위</b>다.</div>
+  <aside>설계 결정은 "가장 높은 단계를 구현할 수 있는가"가 아니라 "현재 실패를 가장 작은 변경으로 줄일 수 있는가"입니다. 단순한 설계가 성공 기준을 충족하면 그 단순함은 부족이 아니라 검증된 선택입니다.</aside>
+</section>
+
+<!-- 5 사다리 0~3 chain -->
+<section class="slide" data-part="PART 1">
+  <h2>🪜 복잡도 사다리 <span class="g">0~3단계</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--gy)"><small>0단계</small><b>단일 호출<br>+ 좋은 지시·맥락</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>1단계</small><b class="b">연결된 흐름<br>체인·라우팅</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gold)"><small>2단계</small><b>평가자-수정자<br>루프</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>3단계</small><b class="g">자율 에이전트</b></div>
+  </div>
+  <div class="hl">지시·맥락은 <b>모든 단계의 기초</b>. 도구는 외부 사실 확인·상태 변경 때 행동 공간을 넓히고, 루프는 결과를 관찰해 <b>멈춤·재시도</b>를 정한다.</div>
+  <aside>이 네 단계는 위로 갈수록 실행의 통제권이 코드에서 모델 쪽으로 조금씩 옮겨갑니다. 하지만 오른쪽이 더 낫다는 뜻은 아닙니다. 각 단계로 올라가려면 그 단계가 필요하다는 실패 증거가 있어야 합니다.</aside>
+</section>
+
+<!-- 6 사다리 상세 표 -->
+<section class="slide" data-part="PART 1">
+  <h2>📋 각 단계는 <span class="g">언제</span> 고르나</h2>
+  <table class="t">
+    <tr><th>단계</th><th>무엇을 하나</th><th>필요 증거 (올라갈 근거)</th></tr>
+    <tr><td>0 · 단일 호출</td><td>입력 하나 → 결과 하나, 후속 행동 불필요 (분류·요약·형식 변환)</td><td>대표 입력·통과 기준으로 확인. 검색·예시도 이 단계의 입력 개선</td></tr>
+    <tr><td>1 · 연결된 흐름</td><td>한 호출 출력을 다음 입력으로, 또는 입력 유형에 따라 경로 선택 (<b>코드가 순서를 정함</b>)</td><td>여러 산출물을 <b>순서대로</b> 만들어야 하거나, 유형마다 다른 전문 맥락이 필요하다는 관찰</td></tr>
+    <tr><td>2 · 평가자-수정자 루프</td><td>결과를 평가하고 기준 미달이면 피드백과 함께 재생성</td><td><b>무엇을 검사하는지·통과와 중단·최대 시도 횟수</b>가 정해짐. 자동 검사 가능한 과업</td></tr>
+    <tr><td>3 · 자율 에이전트</td><td>모델이 도구 호출·탐색 순서·다음 단계를 어느 정도 선택</td><td>단계 수·정보원을 <b>미리 예측하기 어렵다</b>는 증거</td></tr>
+  </table>
+  <div class="hl">2단계는 "더 잘해 봐"가 아니라 <b>기계적 확인 기준</b>이 먼저다. 3단계의 자율성 ≠ 통제 없음 — 예산·시간·승인 지점·종료 조건을 <b>하네스가 정한다.</b></div>
+  <aside>2단계에서 검사가 불명확하거나 평가자가 비일관이면 같은 오류만 반복됩니다. 3단계에서 "모델이 다음 단계를 고른다"는 사실이 오류 책임을 모델에 넘기는 근거가 될 수는 없습니다.</aside>
+</section>
+
+<!-- 7 각 단계 실례 -->
+<section class="slide" data-part="PART 1">
+  <h2>🛠️ 각 단계의 <span class="g">실례</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">0</span><span class="t"><b>문의 분류·회의록 요약·자유서술→JSON</b> — "세 레이블 중 하나 출력, 근거 문장 인용" 지시면 결과를 받음. 흔들린다고 곧바로 검토자를 붙이지 말고 레이블 정의 중복·원문 누락부터</span></div>
+    <div class="st"><span class="n">1</span><span class="t"><b>초안 → 검토 → 수정</b> — 검토는 초안 없이, 수정은 검토 없이 불가. 중요한 건 세 번 부른 사실이 아니라 <b>입력의 연결</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>테스트 통과까지 코드 수정</b> — 모델 수정안 → 테스트 러너가 실패 이름·메시지·종료 상태 반환 → 다음 수정. 평가는 자기 칭찬이 아니라 <b>기계가 검사할 신호</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>저장소 실패 원인 찾기</b> — 로그 읽고 관련 파일 열지·테스트 재현할지·문서 검색할지를 <b>관측에 따라</b>. 권한·범위·승인·중단 조건 명시</span></div>
+  </div>
+  <aside>1단계의 근거는 "초안 품질이 부족하다"는 관찰이지 "여러 번 생각하면 좋아질 것"이 아닙니다. 2단계에서 검사 불가능한 "더 설득력 있는 문장"을 무한 재작성시키는 건 근거가 약한 적용입니다.</aside>
+</section>
+
+<!-- 8 이탈 신호 -->
+<section class="slide" data-part="PART 1">
+  <h2>🚦 다음 단계로 가는 <span class="g">이탈 신호</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">0→1</span><span class="t">형식·사실을 다 줬는데 같은 유형에서 <b>누락·근거 없는 답이 반복</b> → 검토 단계를 붙인다</span></div>
+    <div class="st"><span class="n">1→2</span><span class="t">앞 오류가 그대로 전달되고, <b>검사 결과가 있어야 수정 판정</b>이 가능하다 → 루프</span></div>
+    <div class="st"><span class="n">2→3</span><span class="t">고정 루프로 예외마다 도구·순서를 미리 못 정하고, <b>관측에 따라 탐색·실행·중단을 선택</b>해야 한다는 기록이 쌓임</span></div>
+  </div>
+  <div class="hl">어느 단계든 <b>실패의 이름·빈도, 추가한 조건, 그 조건이 줄인 실패</b>를 함께 남기지 않으면 사다리를 오른 근거가 없다.</div>
+  <aside>이탈 신호는 위로만 향하지 않습니다. 뒤에서 보듯 추가한 구조가 실패를 못 줄이면 제거해 더 낮은 단계로 내려오는 것도 정당한 결정입니다.</aside>
+</section>
+
+<!-- 9 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">복잡도 ≠ 성능</h2>
+    <p style="margin-top:11px">짧은 코드가 높은 점수를, 높은 점수가 곧 내 업무는 아니다</p>
+    <span class="who">mini-SWE-agent · 벤더 벤치마크</span>
+  </div>
+  <aside>복잡한 프레임워크가 곧 더 좋은 성능이라는 등식은 성립하지 않습니다. Anthropic "Building effective agents"도 성공한 구현은 복잡한 프레임워크보다 단순·조합 가능한 패턴을 썼다고 정리합니다.</aside>
+</section>
+
+<!-- 10 mini-SWE-agent -->
+<section class="slide" data-part="PART 2">
+  <h2>🧱 작은 하네스 — <span class="g">mini-SWE-agent</span></h2>
+  <ul class="pts">
+    <li>약 <b>100줄 최소 구성</b>으로 파일을 읽고 수정한 뒤 검증 명령을 실행하는 mini-SWE-agent가 <b>높은 Verified 성능</b>을 보인 사례</li>
+    <li>→ 복잡도와 성능을 <b>같은 축에 놓을 수 없다</b></li>
+    <li>중요한 건 짧은 코드 자체가 아니라 — <b>과업에 필요한 도구·명령·검사 결과가 빠짐없이 연결됐는가</b></li>
+  </ul>
+  <div class="big">역할 분담·기억 버퍼를 더하기 전에<br><span class="y">실패한 변경을 확인할 테스트</span>와<br><span class="y">변경 범위를 제한하는 하네스</span>를 먼저<small>복잡도를 더하는 것이 아니라, 필요한 연결이 빠졌는지를 먼저 본다</small></div>
+  <aside>더 많은 구성요소가 있다고 더 잘 푸는 것이 아닙니다. 짧은 코드라도 도구·명령·검사가 과업에 맞게 연결되면 강할 수 있고, 그것이 복잡도와 성능을 분리해서 봐야 하는 이유입니다.</aside>
+</section>
+
+<!-- 11 벤더 벤치마크 -->
+<section class="slide" data-part="PART 2">
+  <h2>📊 벤더 <span class="g">벤치마크 수치</span>를 읽는 법</h2>
+  <table class="t">
+    <tr><th>출처</th><th>수치</th><th>함께 읽어야 할 것</th></tr>
+    <tr><td>Codex 발표 · codex-1</td><td><b>72.1%</b></td><td rowspan="2">각각 <b>벤더가 구성한 하네스·평가 조건</b>에서 나온 수치. 저장소 상태·도구·시간 예산·Verified 판정 검사를 함께 읽어야 함</td></tr>
+    <tr><td>Claude 4 System Card</td><td><b>72.5% · 72.7%</b></td></tr>
+  </table>
+  <div class="hl">"같은 모델도 <b>입력·도구·루프</b>가 달라지면 다른 실행" — 이 원칙이 <b>수치를 읽는 자리</b>에도 그대로 적용된다. 그래서 이 수치는 <b>자신의 업무에 바로 옮길 수 없다.</b></div>
+  <aside>비슷해 보이는 72%대 수치들도 서로 다른 하네스·평가 조건의 산물입니다. 점수만 떼어 비교하면 그 조건을 지워버리게 됩니다. 자신의 과업에서는 자신의 대표 입력·성공 기준으로 다시 확인해야 합니다.</aside>
+</section>
+
+<!-- 12 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">운영 비용도 설계의 일부</h2>
+    <p style="margin-top:11px">체감상 빨라 보이는 자동화와 실제 완료시간을 구분한다</p>
+    <span class="who">METR RCT · 되돌릴 수 있는 실험</span>
+  </div>
+  <aside>도구 호출 하나를 더 허용하면 토큰·대기시간뿐 아니라 인증·권한 검토·장애 대응·로그 보관·사람 예외 승인 시간이 함께 늘어납니다. 비용은 성능 지표 옆에 반드시 함께 놓아야 합니다.</aside>
+</section>
+
+<!-- 13 METR -->
+<section class="slide" data-part="PART 3">
+  <h2>⏱️ METR — <span class="g">체감과 실제는 다르다</span></h2>
+  <ul class="pts">
+    <li><b>METR 무작위 대조실험</b> — 숙련 개발자 <b>16명</b>이 20분~4시간짜리 이슈를 다룰 때</li>
+    <li>당시 도구 사용 조건이 평균 <b>19% 더 오래</b> 걸렸다고 보고</li>
+    <li>모든 업무·이후 도구에 일반화할 순 없지만 — 강한 단서다</li>
+  </ul>
+  <div class="big">체감상 빨라 보이는 자동화와<br><span class="y">실제 완료시간을 구분해 측정</span>하라<small>METR RCT: 도구 사용 조건이 평균 19% 더 오래 걸렸다</small></div>
+  <aside>흥미롭게도 참가자들의 체감과 측정된 완료시간이 어긋났다는 점이 이 실험의 핵심 단서입니다. 자동화가 느낌상 빨라 보여도 실제 시간은 그 반대일 수 있으므로, 인상 대신 측정으로 확인해야 합니다.</aside>
+</section>
+
+<!-- 14 되돌릴 수 있는 실험 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔄 사다리는 <span class="g">되돌릴 수 있는 실험</span></h2>
+  <ul class="pts">
+    <li>사다리는 한 방향으로 쌓는 계획표가 아니다 — 추가한 검색·기억·재시도·자율 권한이 특정 실패를 <b>못 줄이거나 비용·위험이 이익보다 크면 제거</b>해 더 낮은 단계로</li>
+    <li>각 변경 <b>전후</b>에 성공률·오류 유형·토큰·대기시간·도구 실패·사람 개입을 비교하고, <b>제거 뒤 실패 재발</b>도 확인</li>
+    <li><b>측정값을 한 줄로 줄이지 않기</b> — 해결률 하나만 남기면 비용·위험이 사라진다</li>
+  </ul>
+  <div class="hl">승인이 <b>드문 예외</b>에만 몰려 있으면, 평균 자동화율은 그 예외의 피해를 설명하지 못한다. → 복잡도는 <b>신념이 아니라 운영 기록</b>을 따라 움직인다.</div>
+  <aside>같은 성공 기준 아래 입출력 토큰·도구 호출 수와 실패율·테스트 시간·총 대기시간·사람 검토/되돌림 횟수를 함께 남겨야 합니다. 한 지표만 남기면 무엇을 잃고 있는지 보이지 않습니다.</aside>
+</section>
+
+<!-- 15 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 4문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">사다리 0~3단계(단일 호출·연결된 흐름·평가자-수정자 루프·자율 에이전트)는 순위가 아니라 <b>실패 증거로 고르는 범위</b>다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">복잡도 ≠ 성능 — 100줄 하네스가 높은 점수를, 벤더 72%대 수치가 곧 <b>내 업무는 아니다</b>.</span></div>
+    <div class="st"><span class="n">3</span><span class="t">운영 비용도 설계의 일부 — <b>체감(METR 19%)과 실제 완료시간</b>을 구분해 측정한다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">사다리는 <b>되돌릴 수 있는 실험</b> — 못 줄이면 제거하고, 측정값을 한 줄로 줄이지 않는다.</span></div>
+  </div>
+  <aside>이 네 문장은 이 소단원의 뼈대이자, 다음 장에서 강의 전체를 한 줄로 꿰는 출발점입니다.</aside>
+</section>
+
+<!-- 16 강의 전체 한 줄로 -->
+<section class="slide" data-part="마무리">
+  <h2>🧵 강의 전체를 <span class="g">한 줄로 꿰기</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>출발</small><b>결과가 갈리는 장면</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:140px;border-color:var(--gr)"><small>나눔</small><b class="g">지시·맥락·도구·루프</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:140px;border-color:var(--gold)"><small>실행 구조</small><b>모델+하네스+루프</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--pp)"><small>경계</small><b class="p">프롬프트=지시·맥락</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gy)"><small>재검증</small><b>실패가 증명할 때만</b></div>
+  </div>
+  <div class="hl">기법의 변천을 <b>만능 문구의 역사</b>가 아니라 <b>바꿀 수 있는 조건의 확장</b>으로 읽는다. 효과 주장은 같은 시험 입력·성공 기준에서 재검증한다.</div>
+  <aside>결과가 갈리는 장면에서 출발해, 같은 모델의 차이를 네 조건으로 나누고, 실행 구조를 살피고, 프롬프트를 지시와 맥락으로 경계 짓고, 도구·권한·관측·승인·중단으로 실행 경계를 확인했습니다. 그 전체가 이 한 줄로 이어집니다.</aside>
+</section>
+
+<!-- 17 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 복잡도 사다리 <b>0~3단계</b>는 각각 무엇인가?</div>
+    <div class="q"><b>Q2.</b> 2단계 루프에서 "더 잘해 봐" 대신 <b>먼저 정해야 할</b> 세 가지는?</div>
+    <div class="q"><b>Q3.</b> mini-SWE-agent 사례가 말하는 <b>복잡도와 성능</b>의 관계는?</div>
+    <div class="q"><b>Q4.</b> codex-1 72.1%, Claude 4 72.5·72.7% 같은 수치를 <b>내 업무에 바로 옮기면 안 되는</b> 이유는?</div>
+    <div class="q"><b>Q5.</b> METR 실험이 준 <b>단서</b>와, 사다리가 "되돌릴 수 있는 실험"이라는 말의 뜻은?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q3과 Q5가 이 소단원의 핵심을 가장 잘 가립니다.</aside>
+</section>
+
+<!-- 18 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> <b>단일 호출</b>(입력 하나→결과 하나) · <b>연결된 흐름</b>(체인·라우팅, 코드가 순서를 정함) · <b>평가자-수정자 루프</b>(검사 뒤 재생성) · <b>자율 에이전트</b>(모델이 순서·다음 단계 선택).</div>
+    <div class="q a"><b>A2.</b> <b>무엇을 검사하는지 · 통과와 중단 · 최대 시도 횟수</b>. 기계적 확인 기준을 먼저 만들고 루프 전후 통과율·비용·지연을 비교한다.</div>
+    <div class="q a"><b>A3.</b> 약 100줄 하네스가 높은 Verified 성능을 낸 사례처럼, <b>복잡도와 성능은 같은 축이 아니다</b>. 중요한 건 도구·명령·검사 결과가 <b>빠짐없이 연결됐는가</b>.</div>
+    <div class="q a"><b>A4.</b> 각각 <b>벤더가 구성한 하네스·평가 조건</b>의 산물이라, 저장소 상태·도구·시간 예산·판정 검사를 함께 읽어야 하기 때문. 자신의 대표 입력·성공 기준으로 재검증해야 한다.</div>
+    <div class="q a"><b>A5.</b> 도구 사용 조건이 평균 <b>19% 더 오래</b> 걸렸다는 단서 → 체감과 실제 완료시간을 구분해 측정. 사다리는 못 줄이면 제거해 내려올 수 있는 <b>되돌릴 수 있는 실험</b>.</div>
+  </div>
+  <aside>A3과 A5를 자기 말로 설명할 수 있으면 이 소단원의 목표는 달성입니다.</aside>
+</section>
+
+<!-- 19 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>실패가 증명할 때만 🧭</h1>
+    <div class="big" style="margin-top:26px">"어떤 문구를 써야 하는가"가 아니라<br><span class="y">"이 실행은 어떤 조건 위에서 돌아가는가,<br>그 조건 가운데 무엇을 바꿀 수 있는가"</span><small>다음 변경은 "더 똑똑한 에이전트"가 아니라, 관찰된 실패에 맞는 조건 하나와 적절한 멈춤 지점을 고르는 일</small></div>
+    <p class="sub" style="margin-top:24px">거대 언어모델과 프롬프트 — 여기까지</p>
+  </div>
+  <aside>네 조건을 읽는 눈, 조건을 하나씩 바꿔 관찰하는 손, 그 결과를 원문으로 남기는 습관 — 이 셋이 갖춰졌다면 이 강의의 목적은 달성됐습니다. 더 읽기: Anthropic "Building effective agents"; METR RCT.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>자기 진화 · 개선 절차의 자동화</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 거대 언어모델과 프롬프트 · ⑧</span>
+    <h1 style="margin:18px 0">자기 진화<br>개선 절차의 자동화</h1>
+    <p class="sub">모델이 현명해지는 게 아니라, 실패를 분류하고 다음 변경을 고르는 일을 맡긴다</p>
+  </div>
+  <aside>제어권의 경계를 검증 가능하게 만들라는 요구가, 매번 사람이 시험하라는 뜻은 아닙니다. 고치는 일의 일부는 시스템이 맡을 수 있습니다. 다만 무엇을 기억할지와 다음 변경을 어떤 근거로 고를지는 사람이 설계해야 합니다. 이 소단원은 그 경계를 다룹니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>PART 1</small><b>실패를 기억하는 에이전트</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>PART 2</small><b class="g">무엇을 바꾸고 남길까</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gold)"><small>PART 3</small><b>도구와 사람의 몫</b></div>
+  </div>
+  <ul class="pts">
+    <li>답을 다듬는 것과 <b>경험을 다음 선택에 쓰는 것</b>은 다르다 — Reflexion vs self-refinement</li>
+    <li>루프가 강해지면 <b>프롬프트·메모리·도구·코드</b>까지 자동으로 바뀐다</li>
+    <li>AlphaEvolve·컴파운드 엔지니어링·<b>회귀 검사</b>로 변경 전후를 비교한다</li>
+    <li>도구(DSPy·GEPA·promptfoo·Inspect AI)가 하는 일과 <b>사람이 정할 일</b>을 가른다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 자기 진화란 <b>끝없는 반복</b>이 아니라, 고정된 기준을 가진 <b>작은 개선 루프</b>를 설계하는 일이다.</div>
+  <aside>세 파트를 지나면, "모델이 스스로 좋아진다"는 인상을 실패 분류·근거 보존·독립 검증이라는 구체적 설계 문제로 바꿔 보게 됩니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">실패를 기억하는 에이전트</h2>
+    <p style="margin-top:11px">답 하나를 여러 번 다듬는 것과 장기 개선은 다르다</p>
+    <span class="who">Reflexion · episodic memory · 반성</span>
+  </div>
+  <aside>자기 진화는 모델이 갑자기 현명해지는 현상이 아니라, 결과를 보고 실패를 분류하고 다음 변경을 고르는 일을 에이전트가 맡게 만드는 연구 흐름입니다. 그 출발점이 "앞선 시도의 결과를 다음 선택에 실제로 쓰는가"입니다.</aside>
+</section>
+
+<!-- 4 다듬기 vs 개선 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔁 다듬었다고 <span class="g">개선</span>이 생긴 건 아니다</h2>
+  <ul class="pts">
+    <li>답 하나를 여러 번 다듬어도, 그건 <b>지금 답안</b>이 나아진 것일 뿐이다</li>
+    <li>개선 = <b>앞선 시도에서 본 결과가 다음 선택에 실제로 쓰일 때</b> 생긴다</li>
+  </ul>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--gy)"><small>시도 1</small><b>결과 관찰</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gold)"><small>보존</small><b class="g">반성문을 남긴다</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>시도 2</small><b>메모를 읽고 시작</b></div>
+  </div>
+  <div class="hl">핵심은 "여러 번 했다"가 아니라, <b>다음 시도가 이전 경험을 근거로 삼았는가</b>이다.</div>
+  <aside>같은 실행을 반복하는 것과, 이전 실행의 관찰을 보존해 다음 실행이 그것을 근거로 삼는 것은 다릅니다. 뒤엣것만이 장기 개선입니다.</aside>
+</section>
+
+<!-- 5 Reflexion -->
+<section class="slide" data-part="PART 1">
+  <h2>🧠 Reflexion — <span class="g">말로 된 반성</span>을 기억에 넣는다</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">과업 시험에서 틀리면, 받은 <b>점수·자유 형식 피드백</b>을 확보한다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">그것을 <b class="g">말로 된 반성문</b>으로 바꿔 episodic memory buffer(이전 시도를 저장하는 기억 공간)에 넣는다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">다음 trial(시도)은 그 메모를 <b>읽고 시작</b>한다 — 학생의 오답 노트처럼</span></div>
+  </div>
+  <div class="hl"><b>모델 가중치가 바뀌는 게 아니다.</b> 다음 시도에 참고할 <b>텍스트 메모리</b>가 바뀐다.</div>
+  <p style="margin-top:12px"><span class="r">주의</span> — 유용한 규칙이 담기면 도움이 되지만, 실패를 잘못 해석한 메모가 저장되면 같은 오해가 시도마다 쌓일 수 있다. "메모리를 넣는 기능"과 "성공률을 실제로 높이는 개선 절차"는 같은 말이 아니다.</p>
+  <aside>Reflexion은 널리 인용되는 arXiv 프리프린트로, 특정 평가 조건에서 제안된 설계입니다. 반성 구조가 일반적 성능을 보증하지는 않습니다. 기능이 있다는 것과 그 기능이 성공률을 높인다는 것을 분리해서 읽어야 합니다.</aside>
+</section>
+
+<!-- 6 Reflexion vs self-refinement -->
+<section class="slide" data-part="PART 1">
+  <h2>⚖️ Reflexion <span class="g">vs</span> self-refinement</h2>
+  <table class="t">
+    <tr><th>구분</th><th>바꾸는 대상</th><th>다루는 시간 범위</th></tr>
+    <tr><td>self-refinement</td><td>지금 쓰는 <b>답안</b>을 고침 (초안 → 비평·검증 → 수정)</td><td>보통 <b>한 과업 안에서</b></td></tr>
+    <tr><td>Reflexion</td><td><b>다음 trial의 선택</b>에 넣을 반성을 남김</td><td><b>시도와 시도 사이</b>에 경험 보존</td></tr>
+  </table>
+  <div class="hl">둘은 <b>바뀌는 대상</b>과 <b>다루는 시간 범위</b>가 다르다. 성공·실패 시도의 반성을 남겨 다음 trial에 쓰는 것이 Reflexion이다.</div>
+  <aside>self-refinement는 한 과업 안에서 지금 답안을 고치는 일이고, Reflexion은 시도들 사이에 경험을 보존해 다음 시도의 선택에 반영하는 일입니다. 이 구분을 흐리면 "많이 고쳤다"를 "장기 개선"으로 착각하게 됩니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">무엇을 바꾸고 무엇을 남길까</h2>
+    <p style="margin-top:11px">루프가 강해지면 프롬프트만 바뀌지 않는다</p>
+    <span class="who">프롬프트 · 메모리 · 도구 · 코드</span>
+  </div>
+  <aside>개선 루프가 강해지면 프롬프트만 바뀌는 게 아니라 메모리·도구·코드까지 자동으로 바뀔 수 있습니다. 이 파트는 네 대상을 나눠 보고, 변경마다 되돌릴 방법과 검증 기준을 왜 따로 두어야 하는지를 봅니다.</aside>
+</section>
+
+<!-- 8 네 변경 대상 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧩 자동으로 바뀔 수 있는 <span class="g">네 대상</span></h2>
+  <table class="t">
+    <tr><th>대상</th><th>무엇이 바뀌나</th></tr>
+    <tr><td>프롬프트</td><td>다음 후보를 더 잘 만들도록 <b>지시</b>를 고침</td></tr>
+    <tr><td>메모리</td><td>무엇을 보존·요약·삭제할지 <b>규칙</b>을 갱신</td></tr>
+    <tr><td>도구</td><td>성능·비용·실패 기록을 보고 <b>선택·호출 경로</b>를 바꿈</td></tr>
+    <tr><td>코드</td><td>테스트·벤치마크를 <b>통과한 후보</b>를 남기는 방식으로</td></tr>
+  </table>
+  <div class="hl">개선의 대상이 프롬프트를 넘어서면, "무엇을 바꿨나"를 대상별로 <b>이름 붙여 추적</b>해야 한다.</div>
+  <aside>네 대상은 각각 다른 위험을 가집니다. 한 덩어리로 "시스템이 좋아졌다"로 뭉치면, 정작 어디가 위험해졌는지를 놓치게 됩니다.</aside>
+</section>
+
+<!-- 9 한 덩어리로 보면 위험 -->
+<section class="slide" data-part="PART 2">
+  <h2>⚠️ 한 덩어리로 보면 <span class="r">위험 위치</span>를 놓친다</h2>
+  <div class="steps">
+    <div class="st"><span class="n">메</span><span class="t"><b>메모리 변경</b> → 다음 응답이 참고하는 <b>맥락</b>이 바뀐다</span></div>
+    <div class="st"><span class="n">도</span><span class="t"><b>도구 변경</b> → <b>비용·권한 경계</b>가 바뀌고, 신뢰 못 할 출력 경로도 바뀐다</span></div>
+    <div class="st"><span class="n">코</span><span class="t"><b>코드 변경</b> → 이후 <b>모든 실행 경로</b>가 바뀐다</span></div>
+  </div>
+  <div class="hl">그래서 변경 대상마다 <b>되돌릴 방법 · 허용 영향 범위 · 별도 검증 기준</b>을 미리 준비해야 한다.</div>
+  <aside>변경의 파급 범위가 대상마다 다르기 때문에, 롤백 방법과 허용 범위, 그리고 그 변경만을 겨눈 검증 기준을 각각 두어야 합니다. 하나의 통과/실패로 전체를 판정하면 위험이 어디서 커졌는지 알 수 없습니다.</aside>
+</section>
+
+<!-- 10 AlphaEvolve -->
+<section class="slide" data-part="PART 2">
+  <h2>🧬 AlphaEvolve — <span class="g">검증기가 판정할 수 있다는 사실</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:160px;border-color:var(--bl)"><small>생성</small><b>검증 가능한<br>코드 후보</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:160px;border-color:var(--gold)"><small>자동 평가</small><b>통과 여부 판정</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:160px;border-color:var(--gr)"><small>선택</small><b class="g">다음 세대를 고름</b></div>
+  </div>
+  <p style="margin-top:12px">Google DeepMind의 내부 배포 사례. 회사 공식 발표이므로 <b>수치는 주장으로</b>, <b>설계 구조는 사례로</b> 읽는다.</p>
+  <div class="hl">핵심은 "코드가 저절로 바뀐다"가 아니라 <b>검증기가 후보의 통과 여부를 판정할 수 있다는 사실</b>이다.</div>
+  <p style="margin-top:12px"><span class="r">함정</span> — 평가기가 실제 요구를 충분히 못 담으면, 시스템은 <b>점수만 높이고 중요한 조건을 잃을</b> 수 있다.</p>
+  <aside>AlphaEvolve가 흥미로운 이유는 자동화 자체가 아니라, 후보를 판정할 검증기가 존재한다는 점입니다. 검증기가 요구를 제대로 담지 못하면 최적화는 척도만 올리고 진짜 목표를 잃습니다.</aside>
+</section>
+
+<!-- 11 컴파운드 엔지니어링 -->
+<section class="slide" data-part="PART 2">
+  <h2>♻️ 컴파운드 엔지니어링 — <span class="g">다시 쓸 수 있게 남기기</span></h2>
+  <ul class="pts">
+    <li>프롬프트·코드·평가·도구를 바꾸며 얻은 <b>자산을 다시 쓸 수 있게 남기자</b>는 것 (복리의 은유)</li>
+    <li>한 번의 성공보다 중요한 건 <b>다음 실행이 쓸 수 있게</b> 남기는 일</li>
+    <li>보존할 것: <b>실패 사례 · 평가 결과 · 후보 선택/폐기 근거</b></li>
+  </ul>
+  <div class="hl">'컴파운드'는 모델이 스스로 진화한다는 이름이 아니라, <b>같은 과제·같은 성공 기준으로 변경 전후를 비교하는 운영 설계</b>다.</div>
+  <p style="margin-top:12px">어떤 입력에서 무엇이 실패했는지 · 어떤 지표로 비교했는지 · 비용·지연·안전 중 무엇을 우선했는지 기록한다. <b>이 기록이 없으면 다음 실행은 이전 실험을 다시 추측</b>해야 한다.</p>
+  <aside>컴파운드 엔지니어링은 관용 표현이지 공식 분류가 아닙니다. 요점은 복리처럼 자산이 쌓이려면, 각 실험의 실패·지표·선택 근거를 다음 실행이 읽을 수 있는 형태로 남겨야 한다는 것입니다.</aside>
+</section>
+
+<!-- 12 회귀 검사 -->
+<section class="slide" data-part="PART 2">
+  <h2>🛡️ 회귀 검사 — <span class="g">고쳐둔 실패가 되살아나지 않게</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">새 실패 사례를 <b>기존 평가에 더한다</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t">이전에 통과한 동작도 <b>함께 재검사</b>한다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">새 변경이 과거의 성공을 깨뜨리는 <b class="r">회귀</b>(고쳐둔 실패의 재발)를 발견한다</span></div>
+  </div>
+  <div class="hl">보존 = 대화 기록을 무조건 쌓기가 아니라, <b>다음 선택에 필요한 실패·근거를 판별 가능한 평가·버전·재실행 절차로</b> 남기기.</div>
+  <aside>회귀 검사가 없으면 앞에서 고친 실패가 새 변경에 밀려 다시 나타나도 알 수 없습니다. 보존의 목적은 아카이빙이 아니라, 다음 선택이 근거로 삼을 수 있는 재실행 가능한 평가를 갖추는 것입니다.</aside>
+</section>
+
+<!-- 13 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">도구가 해 주는 일과 사람이 정할 일</h2>
+    <p style="margin-top:11px">자동화가 커져도 판단은 사라지지 않는다</p>
+    <span class="who">DSPy · GEPA · promptfoo · Inspect AI</span>
+  </div>
+  <aside>최적화·회귀 방지·독립 평가를 돕는 도구들이 있습니다. 그러나 무엇을 성공으로 측정할지, 어디까지 변경을 허용할지, 언제 사람 승인을 받을지는 여전히 사람의 몫입니다. 이 파트에서 그 경계를 봅니다.</aside>
+</section>
+
+<!-- 14 도구 비교 표 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧰 네 도구 — <span class="g">서로를 대신하지 않는다</span></h2>
+  <table class="t">
+    <tr><th>도구</th><th>성격</th></tr>
+    <tr><td>DSPy</td><td>구조화 입출력·모듈로 LM 프로그램을 구성한 뒤, 예시·metric 기준으로 <b>프롬프트 포함 구성을 최적화</b>. optimizer = 후보를 고르고 다듬는 절차</td></tr>
+    <tr><td>GEPA</td><td>자연어 반성·진화적 탐색으로 LM 프로그램 개선 (<b>ICLR 2026 Oral</b> 채택). rollout = 후보 행동을 끝까지 실행해 얻는 표본</td></tr>
+    <tr><td>promptfoo</td><td>변경 전후 결과를 나란히 비교(프롬프트·에이전트·RAG). <b>CI에 연결해 회귀 검사</b></td></tr>
+    <tr><td>Inspect AI</td><td>에이전트 포함 평가를 구성·실행하는 프레임워크. 시스템의 자기 주장과 <b>별도로 평가 절차</b> 마련</td></tr>
+  </table>
+  <div class="hl">DSPy·GEPA는 <b>최적화</b>, promptfoo는 <b>회귀 방지 검사</b>, Inspect AI는 <b>독립 평가</b> — 역할이 다르다.</div>
+  <aside>네 도구를 한 범주로 뭉치면 안 됩니다. 최적화 도구와 회귀 검사 도구와 독립 평가 프레임워크는 서로 다른 문제를 풉니다. 또한 이 도구들을 쓴다고 모든 현업 품질이 오른다고 보편화해서도 안 됩니다.</aside>
+</section>
+
+<!-- 15 GEPA 수치 -->
+<section class="slide" data-part="PART 3">
+  <h2>📊 GEPA가 보고한 <span class="g">수치</span> — 조건과 함께 읽기</h2>
+  <div class="big">여섯 과제에서 <span class="y">GRPO 대비 평균 6%↑</span><br>최대 <span class="y">35배 적은 rollout</span><small>ICLR 2026 Oral 채택 · rollout = 후보 행동을 끝까지 실행해 얻는 표본</small></div>
+  <div class="hl">이 결과는 <b>저자의 과제·모델·metric·예산</b>에서 나온 것이다. 내 상황에 그대로 옮겨 성능을 단정할 수 없다.</div>
+  <p style="margin-top:12px">DSPy·GEPA를 쓰면 <b>모든 현업 품질이 오른다</b>고 보편화하지 말 것. 최적화 도구는 만능이 아니라, 정해진 평가 기준 위에서만 의미를 가진다.</p>
+  <aside>수치는 정확히 옮기되, 그 수치가 나온 조건을 함께 읽어야 합니다. 여섯 과제·특정 모델·특정 metric·특정 예산에서의 결과이므로, 다른 환경에서의 이득은 별도로 검증해야 합니다.</aside>
+</section>
+
+<!-- 16 사람이 정할 일 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧭 자동화가 커져도 <span class="g">사람이 정할 일</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">측</span><span class="t">무엇을 <b>성공으로 측정</b>할지 = 사람</span></div>
+    <div class="st"><span class="n">범</span><span class="t">어떤 <b>프롬프트·메모리·도구·코드 변경</b>까지 허용할지 = 사람</span></div>
+    <div class="st"><span class="n">승</span><span class="t">외부 권한 확대·사용자 영향 변경이면 <b>언제 사람 승인</b>을 받을지 = 사람</span></div>
+  </div>
+  <div class="hl">평가 세트 없으면 optimizer는 무엇을 최적화했는지 모른다 · 오프라인 비교 없으면 운영 변화가 원인인지 모른다 · CI 없으면 막은 실패가 돌아온다 · 사람 검토 없으면 점수에 안 잡힌 피해·권한 문제를 놓친다.</div>
+  <aside>후보 생성·샌드박스 실행·점수화는 자동화할 수 있지만, 독립 검증이 없으면 오류도 함께 쌓이고 허용 범위가 없으면 위험도 커집니다. 점수가 믿을 만한지 판단과, 배포해도 되는지 판단은 별개입니다.</aside>
+</section>
+
+<!-- 17 먼저 필요한 역량 -->
+<section class="slide" data-part="PART 3">
+  <h2>🎯 먼저 필요한 역량은 <span class="g">무한 반복이 아니다</span></h2>
+  <div class="big">필요한 것은 끝없이 반복하는 시스템이 아니라<br><span class="y">작은 개선 루프</span>를 설계하는 일<small>고정된 평가 기준 · 독립 검증 · 분명한 중단·승인 조건</small></div>
+  <div class="hl">그 작은 루프를 바탕으로, <b>이 에이전트를 얼마나 복잡하게 만들지 계속 판단</b>한다.</div>
+  <aside>자기 진화를 화려한 무한 루프로 상상하기 쉽지만, 실제로 먼저 갖춰야 할 것은 기준·검증·중단·승인이 분명한 작은 루프입니다. 복잡도는 그 위에서 필요할 때 늘리는 판단의 대상입니다. 다음 소단원의 '에이전트 설계 패턴과 복잡도'로 이어집니다.</aside>
+</section>
+
+<!-- 18 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 4문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">자기 진화 = 실패를 분류하고 다음 변경을 고르는 일을 에이전트가 맡는 것 — <b>모델이 현명해지는 게 아니다.</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>Reflexion</b>은 시도 사이에 반성을 남기고, <b>self-refinement</b>는 한 과업 안 답안을 고친다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t">프롬프트·메모리·도구·코드는 위험이 다르다 → 대상마다 <b>롤백·범위·검증</b>과 회귀 검사를 둔다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">도구는 최적화·검사·평가를 돕지만, <b>측정·허용 범위·승인</b>은 사람이 정한다.</span></div>
+  </div>
+  <aside>4번이 이 소단원의 태도입니다. 자동화가 늘어도 무엇을 성공으로 볼지, 어디까지 허용할지, 언제 사람이 승인할지는 사람이 정합니다. 그래서 먼저 필요한 것은 작은 개선 루프입니다.</aside>
+</section>
+
+<!-- 19 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> Reflexion에서 실제로 <b>바뀌는 것</b>은 무엇인가? (모델 가중치인가?)</div>
+    <div class="q"><b>Q2.</b> Reflexion과 self-refinement는 <b>무엇</b>과 <b>무엇</b>이 다른가?</div>
+    <div class="q"><b>Q3.</b> 개선 루프가 자동으로 바꿀 수 있는 <b>네 대상</b>과, 대상마다 준비할 세 가지는?</div>
+    <div class="q"><b>Q4.</b> AlphaEvolve의 핵심이 "코드가 저절로 바뀐다"가 <b>아니라면</b> 무엇인가?</div>
+    <div class="q"><b>Q5.</b> GEPA가 보고한 수치와, 그 수치를 읽을 때의 <b>조건</b>은?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q3과 Q5가 오늘의 핵심을 가장 잘 가립니다.</aside>
+</section>
+
+<!-- 20 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 모델 가중치가 아니라, 다음 시도가 참고할 <b>텍스트 메모리(episodic memory buffer)</b>가 바뀐다.</div>
+    <div class="q a"><b>A2.</b> <b>바뀌는 대상</b>(다음 trial의 선택 vs 지금 답안)과 <b>다루는 시간 범위</b>(시도 사이 vs 한 과업 안)가 다르다.</div>
+    <div class="q a"><b>A3.</b> <b>프롬프트·메모리·도구·코드</b>. 대상마다 <b>되돌릴 방법·허용 영향 범위·별도 검증 기준</b>을 둔다.</div>
+    <div class="q a"><b>A4.</b> <b>검증기가 후보의 통과 여부를 판정할 수 있다는 사실.</b> 평가기가 요구를 못 담으면 점수만 오르고 조건을 잃는다.</div>
+    <div class="q a"><b>A5.</b> 여섯 과제에서 <b>GRPO 대비 평균 6%↑, 최대 35배 적은 rollout</b>(ICLR 2026 Oral). 단 <b>저자의 과제·모델·metric·예산</b>에서 나온 결과.</div>
+  </div>
+  <aside>A3과 A4를 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다. 더 읽기: Reflexion(arXiv), AlphaEvolve(Google DeepMind), GEPA(ICLR 2026), DSPy·promptfoo·Inspect AI 문서.</aside>
+</section>
+
+<!-- 21 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>작은 루프부터 🧭</h1>
+    <div class="big" style="margin-top:26px">자기 진화는 무한 반복이 아니라<br><span class="y">기준·검증·중단·승인</span>을 가진 작은 개선 루프<br><br>무엇을 남기고 무엇을 바꿀지는 <span class="y">사람이 설계한다</span></div>
+    <p class="sub" style="margin-top:24px">자기 진화 — 여기까지 · 다음: 에이전트 설계 패턴과 복잡도</p>
+  </div>
+  <aside>고정된 평가 기준과 독립 검증, 분명한 중단·승인 조건을 가진 작은 루프가 먼저입니다. 그 위에서 에이전트를 얼마나 복잡하게 만들지 판단하는 문제 — 다음 소단원의 '에이전트 설계 패턴과 복잡도'로 이어집니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

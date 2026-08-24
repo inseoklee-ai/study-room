@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>프롬프트 엔지니어링이란? · 결과는 어디서 갈리는가</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 거대 언어모델과 프롬프트 · ①</span>
+    <h1 style="margin:18px 0">프롬프트<br>엔지니어링이란?</h1>
+    <p class="sub">"무슨 문구를 썼나"가 아니라 — 결과는 어디서 갈리는가</p>
+  </div>
+  <aside>프롬프트 엔지니어링은 마법 문구를 찾는 기술로 오해되기 쉽습니다. 이 소단원은 화제가 된 이야기를 사실과 해석으로 나누고, 같은 모델의 결과가 갈리는 지점을 실증으로 확인한 뒤, 그 차이를 설명하는 '네 조건'을 세웁니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>PART 1</small><b>사실과 해석 나누기</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>PART 2</small><b class="g">결과는 어디서 갈리나</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>PART 3</small><b>네 조건</b></div>
+  </div>
+  <ul class="pts">
+    <li>먼저 화제가 된 <b>세 이야기</b>를 사실과 해석으로 나눈다</li>
+    <li>같은 모델·같은 과제인데 결과가 갈린 <b>SWE-bench 실증</b>을 본다</li>
+    <li>그 차이를 <b>지시·맥락·도구·루프</b> 네 조건으로 설명한다</li>
+    <li><b>프롬프트 = 지시와 맥락</b> — 프롬프트가 다루는 영역을 경계 짓는다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 결과가 갈리면 <b>능력이 아니라 조건</b>을 비교합니다.</div>
+  <aside>세 파트를 지나면, 프롬프트 엔지니어링을 '요령'이 아니라 '실행 조건을 설계하고 비교하는 일'로 다시 보게 됩니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">화제부터 사실과 해석으로</h2>
+    <p style="margin-top:11px">유명한 사례가 실제로 보여 주는 것은 무엇인가</p>
+    <span class="who">Air Canada · 고액 연봉 · "PE는 죽었다"</span>
+  </div>
+  <aside>좋은 답을 얻었다는 말에는 여러 일이 섞여 있습니다. 요청이 분명했거나, 모델이 근거 문서를 읽었거나, 도구가 제공됐거나, 사람이 검토했거나. 사례를 볼 때는 "무슨 문구를 썼나"보다 누가 무엇을 만들었고 모델이 무엇을 근거로 답했으며 누가 책임졌는지를 물어야 합니다.</aside>
+</section>
+
+<!-- 4 무엇을 물을 것인가 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔎 "무슨 문구"보다 <span class="g">세 가지</span>를 묻는다</h2>
+  <ul class="pts">
+    <li>좋은 답에는 여러 일이 섞인다 — 분명한 요청 · 읽은 근거 · 제공된 도구 · 사람의 검토</li>
+    <li>실패도 문장이 나빠서가 아니라 <b>근거가 없거나 검사가 없는 구조</b>에서 온다</li>
+  </ul>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>누가</small><b>무엇을 만들었나</b></div>
+    <span class="ar">·</span>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>모델이</small><b>무엇을 근거로 답했나</b></div>
+    <span class="ar">·</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gold)"><small>누가</small><b>어떤 기준으로 책임졌나</b></div>
+  </div>
+  <div class="hl">프롬프트는 모델이 읽는 <b>지시와 맥락</b>이다. 좋은 지시도 <b>근거 없는 사실을 참으로 만들 수는 없다.</b></div>
+  <aside>이 세 질문으로 보면, 프롬프트 엔지니어링은 단독의 비법이 아니라 지시·맥락·도구·검사가 맞물린 설계의 한 부분임이 드러납니다.</aside>
+</section>
+
+<!-- 5 세 사례 표 -->
+<section class="slide" data-part="PART 1">
+  <h2>📰 화제가 된 <span class="g">세 이야기</span>, 사실은?</h2>
+  <table class="t">
+    <tr><th>화제(해석)</th><th>확인된 사실</th><th>진짜 쟁점</th></tr>
+    <tr><td>Air Canada — "AI가 항공권을 협상"</td><td>챗봇이 사별 운임을 정책과 다르게 안내 → 2024.2 민사심판소가 항공사 책임 인정(C$812.02)</td><td>프롬프트 성공담이 아니라 <b>출력 신뢰성·정책 근거·배포 주체의 책임</b></td></tr>
+    <tr><td>"프롬프트 엔지니어가 연 $335,000"</td><td>Bloomberg가 보도한 <b>상한 보수 채용 사례</b>(2023.3)</td><td>표준·평균·직무 범위를 증명하지 않음</td></tr>
+    <tr><td>"프롬프트 엔지니어링은 죽었다"</td><td>구호일 뿐 — 최초 주장·추세·비교 조건이 불명</td><td>도발적 문장은 토론의 출발점이지 결론이 아님</td></tr>
+  </table>
+  <div class="hl">세 사례 모두 <b>한 문장의 마법</b>이 아니라, 근거·검증·책임이라는 <b>구조</b>의 문제를 가리킨다.</div>
+  <aside>Air Canada 사건은 원심 이후 항소에서 일부가 취소된 절차상 단서도 함께 읽어야 합니다. 핵심은 "웹 정보가 정적 페이지든 챗봇이든 책임은 같다"였습니다. 화려한 이야기와 별개로, 결과가 어디서 갈리는지 데이터로 확인합니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">결과는 어디서 갈리는가</h2>
+    <p style="margin-top:11px">같은 모델·같은 과제인데 해결률이 달랐다</p>
+    <span class="who">SWE-bench Verified · 하네스</span>
+  </div>
+  <aside>Anthropic이 Claude 3.7 Sonnet을 실제 저장소 버그 수정 과제 모음(SWE-bench Verified)에 적용한 결과를 봅니다. 같은 모델인데 실행 구조에 따라 해결률이 갈립니다.</aside>
+</section>
+
+<!-- 7 63.7 vs 70.3 -->
+<section class="slide" data-part="PART 2">
+  <h2>📊 같은 모델, <span class="g">6.6%p</span> 차이</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:190px;border-color:var(--gy)"><small>최소 구성</small><b>한 세션에서 명령 고르고<br>파일 수정 → <span style="color:var(--soft)">63.7%</span></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:230px;border-color:var(--gr)"><small>하네스 구성</small><b>병렬 시도 + 회귀 필터 +<br>후보 선정 → <span class="g">70.3%</span></b></div>
+  </div>
+  <div class="big">같은 모델 · 같은 489개 과제인데<br><span class="y">해결 판정 비율이 6.6%p 달랐다</span><small>SWE-bench Verified = OpenAI가 사람 검토로 검증한 500개 중, 기준 패치가 통과 안 된 11개를 뺀 489개</small></div>
+  <div class="hl"><b>하네스</b> = 모델을 둘러싼 도구·검사·권한·실행 절차의 장치. "같은 모델"이라며 차이를 순수 능력 차로 단정하면 <b>이 장치를 지워버린다.</b></div>
+  <aside>일반 SWE-bench 점수와 Verified 점수를 같은 척도로 섞어 읽으면 안 됩니다. 6.6%p는 상대 비율로 부풀리지 말고 "같은 489개에서 해결로 판정된 비율이 그만큼 달랐다"로 읽습니다.</aside>
+</section>
+
+<!-- 8 하네스 3부품 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧩 하네스가 한 일 — <span class="g">세 부품</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b class="g">병렬 시도</b> — 한 실행의 패치를 기다리지 않고, 서로 다른 시도가 각자 해결안(여러 <b>패치 후보</b>)을 만든다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b class="g">회귀 테스트 필터</b> — 이미 작동하던 동작을 깨는 후보를 <b>먼저 제거</b>한다 (고친 척해도 실제 해결로 볼 수 없으므로)</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b class="g">후보 선정</b> — 남은 대안을 점수 모델이 순위 매겨 <b>제출할 것을 고른다</b></span></div>
+  </div>
+  <div class="hl">이 수치는 각 부품에 성능을 배정하는 근거가 아니라, <b>관측·검사·선정의 실행 조건을 함께 설계하고 별도로 시험</b>해야 한다는 근거다.</div>
+  <aside>두 구성의 차이는 "더 좋은 답을 한 번 요구"한 게 아니라 병렬 시도가 후보를 만들고, 회귀 필터가 나쁜 후보를 버리고, 후보 선정이 무엇을 낼지 정한 것입니다. 공개된 집계치만으로는 어느 과제가 새로 풀렸는지 알 수 없습니다.</aside>
+</section>
+
+<!-- 9 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">결과 차이를 비교하는 네 조건</h2>
+    <p style="margin-top:11px">사람이 설계하고 바꿀 수 있는 모델 밖의 영역</p>
+    <span class="who">지시 · 맥락 · 도구 · 루프</span>
+  </div>
+  <aside>결과가 갈릴 때 "모델이 약하다"로 결론내기 전에, 사람이 바꿀 수 있는 네 영역을 나눠 봅니다. 이 네 조건이 이 강의 전체를 관통하는 뼈대입니다.</aside>
+</section>
+
+<!-- 10 네 조건 표 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧭 네 조건 — <span class="g">비교할 질문과 다음 선택</span></h2>
+  <table class="t">
+    <tr><th>조건</th><th>비교할 질문</th><th>실패 뒤의 다음 선택</th></tr>
+    <tr><td>지시</td><td>과업·형식·제약을 어떻게 요청했나</td><td>요청이나 출력 계약을 고친다</td></tr>
+    <tr><td>맥락</td><td>어떤 문서·파일·이력을 읽게 했나</td><td>필요한 사실을 넣거나 불필요한 것을 뺀다</td></tr>
+    <tr><td>도구</td><td>어떤 기능·권한을 어디까지 줬나</td><td>도구·입력 범위·승인을 조정한다</td></tr>
+    <tr><td>루프</td><td>응답 뒤 무엇을 검사하고 언제 재시도하나</td><td>검증·중단·재시도 절차를 고친다</td></tr>
+  </table>
+  <div class="hl"><b>프롬프트 = 지시 + 맥락</b>(모델이 읽는 내용). 모든 실패를 프롬프트 탓으로 돌리면 <b>도구 없는 문제·검사 없는 문제를 가린다.</b></div>
+  <aside>지시=무엇을 어떻게 할지, 맥락=무엇을 읽을지, 도구=무엇을 할 수 있는지, 루프=언제 검사·반복할지. 프롬프트는 이 중 앞의 두 개를 다룹니다.</aside>
+</section>
+
+<!-- 11 네 조건 예시 -->
+<section class="slide" data-part="PART 3">
+  <h2>🛠️ 네 조건, 실패를 이렇게 고친다</h2>
+  <div class="steps">
+    <div class="st"><span class="n">지</span><span class="t"><b>지시</b> — "친절하게 답하라"는 안전 조건을 못 정함 → "주문 번호 없으면 배송일 단정 말고 번호를 한 가지 질문하라"</span></div>
+    <div class="st"><span class="n">맥</span><span class="t"><b>맥락</b> — 환불 예외 조항을 모델이 못 읽었다면 일반 규칙만 답한 건 지시 불이행이 아님 → 조항을 출처로 넣고 다시 실행</span></div>
+    <div class="st"><span class="n">도</span><span class="t"><b>도구</b> — 로그 조회 권한이 없으면 추측 수정안 → 읽기 전용 로그 검색 허용 후 근거가 실제 오류 메시지로 바뀌는지 확인</span></div>
+    <div class="st"><span class="n">루</span><span class="t"><b>루프</b> — 변경 뒤 테스트를 안 하면 "수정했다"는 완료 증거가 아님 → 테스트 실행·실패 재투입·횟수와 중단 조건 설정</span></div>
+  </div>
+  <aside>같은 과업과 성공 기준에서 한 조건만 바꿔 관찰하면, 다음 변경을 추측이 아니라 비교로 고를 수 있습니다.</aside>
+</section>
+
+<!-- 12 원칙 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧪 원칙 — <span class="g">능력이 아니라 조건을 비교한다</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>① 입력 고정</small><b>같은 문의·코드 상태<br>·문서 버전</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gold)"><small>② 성공 기준 고정</small><b>형식? 테스트 통과?<br>출처 유무?</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>③ 한 항목만 변경</small><b>지시·맥락·도구·루프<br>중 하나</b></div>
+  </div>
+  <div class="hl">⚠️ 오염된 비교 — A안엔 최신 문서+검색 도구, B안엔 오래된 문서만 넣고 차이를 "문장 하나의 효과"라 부르면, <b>세 조건이 한꺼번에 바뀐 것</b>이다.</div>
+  <aside>고정 없이는 비교가 인상 비평이 됩니다. 관찰에는 최종 답만이 아니라 읽은 근거·호출한 도구·검사 결과·중단 이유도 포함해야, 다음 변경에서 무엇을 유지하고 무엇을 다시 시험할지 설명할 수 있습니다.</aside>
+</section>
+
+<!-- 13 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 4문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">화제 사례는 <b>문구의 마법</b>이 아니라 근거·검증·책임이라는 <b>구조</b>의 문제였다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">같은 모델·같은 과제도 <b>하네스</b>에 따라 결과가 갈린다(SWE-bench 63.7% → 70.3%).</span></div>
+    <div class="st"><span class="n">3</span><span class="t">결과 차이는 <b>지시·맥락·도구·루프</b> 네 조건으로 나눠 본다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>프롬프트 = 지시 + 맥락</b> — 결과가 갈리면 능력이 아니라 <b>조건</b>을 비교한다.</span></div>
+  </div>
+  <aside>특히 4번이 이 강의 전체의 태도입니다. 낮은 결과를 즉시 모델 한계로 결론내지 말고, 무엇을 읽었고 무엇을 할 수 있었고 어떤 검사 뒤 멈췄는지를 먼저 확인합니다.</aside>
+</section>
+
+<!-- 14 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> Air Canada 사례가 실제로 보여 준 <b>진짜 쟁점</b>은 무엇인가?</div>
+    <div class="q"><b>Q2.</b> 같은 모델·같은 과제에서 63.7%와 70.3%를 가른 <b>세 부품</b>은?</div>
+    <div class="q"><b>Q3.</b> 결과 차이를 비교하는 <b>네 조건</b>은 각각 무엇인가?</div>
+    <div class="q"><b>Q4.</b> 프롬프트는 네 조건 중 <b>어디</b>에 해당하는가?</div>
+    <div class="q"><b>Q5.</b> 두 실행을 "제대로" 비교하려면 무엇을 <b>고정</b>하고 무엇을 <b>바꿔야</b> 하나?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q4와 Q5가 오늘의 핵심을 가장 잘 가립니다.</aside>
+</section>
+
+<!-- 15 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 좋은 프롬프트의 성공담이 아니라 <b>모델 출력의 신뢰성·정책 근거 확인·배포 주체의 책임</b>에 관한 사례.</div>
+    <div class="q a"><b>A2.</b> <b>병렬 시도</b>(여러 후보 생성) · <b>회귀 테스트 필터</b>(나쁜 후보 제거) · <b>후보 선정</b>(제출할 것 선택).</div>
+    <div class="q a"><b>A3.</b> <b>지시</b>(무엇을 어떻게) · <b>맥락</b>(무엇을 읽을지) · <b>도구</b>(무엇을 할 수 있는지) · <b>루프</b>(언제 검사·반복).</div>
+    <div class="q a"><b>A4.</b> <b>지시와 맥락</b> — 모델이 읽는 내용의 설계. 도구·루프는 실행 조건으로 프롬프트와 구분된다.</div>
+    <div class="q a"><b>A5.</b> <b>고정</b>: 같은 입력·같은 성공 기준. <b>변경</b>: 지시·맥락·도구·루프 중 한 항목만.</div>
+  </div>
+  <aside>A4와 A5를 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다.</aside>
+</section>
+
+<!-- 16 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>능력이 아니라 조건 🧭</h1>
+    <div class="big" style="margin-top:26px">같은 모델인데 결과가 갈린다면<br><span class="y">지시·맥락·도구·루프</span>를 하나씩 비교하라<br><br>그 기록을 만들고 판단하는 주체가 <span class="y">에이전트</span></div>
+    <p class="sub" style="margin-top:24px">프롬프트 엔지니어링이란? — 여기까지 · 다음: 에이전트의 구조</p>
+  </div>
+  <aside>같은 모델의 차이는 조건에서 옵니다. 그 조건을 만들고 관측하고 다음 행동을 고르는 실행 구조 — 에이전트 — 를 다음 소단원에서 봅니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

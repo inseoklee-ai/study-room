@@ -162,6 +162,18 @@
    - 9-⑥. 내 업무의 적용 지점 도출 · 9-⑦. 핵심 정리
    - ℹ️ 내용이 하나의 프로젝트 흐름이라 소단원 7개를 한 덱(31슬라이드)으로 묶었습니다.
 
+### 4. 프롬프트 엔지니어링
+1. **거대 언어모델과 프롬프트** ✅ 완결 (9/9)
+   - ✅ ①. 프롬프트 엔지니어링이란? (화제 사실·해석 구분·SWE-bench·네 조건) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/prompt-engineering-intro/) · 📊 [PPT](prompt-engineering-intro/prompt-engineering-intro.pptx)
+   - ✅ ②. 에이전트의 구조 (정의 다섯 관점·어원 세 전통·모델+하네스+루프) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/agent-structure/) · 📊 [PPT](agent-structure/agent-structure.pptx)
+   - ✅ ③. 모델이 실제로 읽는 입력 (messages·기능과 출처·프롬프트 인젝션) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/model-inputs/) · 📊 [PPT](model-inputs/model-inputs.pptx)
+   - ✅ ④. 지시의 우선권과 맥락을 채우는 세 방식 (우선권·컨텍스트 엔지니어링·RAG·JIT) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/instruction-hierarchy/) · 📊 [PPT](instruction-hierarchy/instruction-hierarchy.pptx)
+   - ✅ ⑤. 프롬프트 실행 실습 (Claude Agent SDK·LangChain·Ollama) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/prompt-lab/) · 📊 [PPT](prompt-lab/prompt-lab.pptx)
+   - ✅ ⑥. 프롬프트 엔지니어링의 변천 (인컨텍스트 러닝·CoT·ReAct·추론 모델) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/pe-history/) · 📊 [PPT](pe-history/pe-history.pptx)
+   - ✅ ⑦. 기법의 효과는 다시 검증한다 (증거 세 등급·컨텍스트 엔지니어링·agentic) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/technique-revalidation/) · 📊 [PPT](technique-revalidation/technique-revalidation.pptx)
+   - ✅ ⑧. 자기 진화 — 개선 절차의 자동화 (Reflexion·AlphaEvolve·DSPy·GEPA) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/self-evolution/) · 📊 [PPT](self-evolution/self-evolution.pptx)
+   - ✅ ⑨. 에이전트 설계 패턴과 복잡도 (복잡도 사다리·복잡도≠성능·강의 종합) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/agent-patterns/) · 📊 [PPT](agent-patterns/agent-patterns.pptx)
+
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
 > ⚠️ **웹 슬라이드는 반드시 라이브 사이트에서 열어야 합니다.** GitHub 저장소 화면(github.com)에서 위 링크를 누르면 슬라이드가 아니라 소스 폴더로 갑니다. 아래 라이브 주소로 접속하세요:
@@ -229,6 +241,15 @@
 > - 대2-중②1-③④ https://inseoklee-ai.github.io/study-room/choose-framework/
 > - 대2-중②1-⑤⑥ https://inseoklee-ai.github.io/study-room/mock-and-api/
 > - 대2-중②1-⑦ https://inseoklee-ai.github.io/study-room/shopping-mall-prd/
+> - 대4-① https://inseoklee-ai.github.io/study-room/prompt-engineering-intro/
+> - 대4-② https://inseoklee-ai.github.io/study-room/agent-structure/
+> - 대4-③ https://inseoklee-ai.github.io/study-room/model-inputs/
+> - 대4-④ https://inseoklee-ai.github.io/study-room/instruction-hierarchy/
+> - 대4-⑤ https://inseoklee-ai.github.io/study-room/prompt-lab/
+> - 대4-⑥ https://inseoklee-ai.github.io/study-room/pe-history/
+> - 대4-⑦ https://inseoklee-ai.github.io/study-room/technique-revalidation/
+> - 대4-⑧ https://inseoklee-ai.github.io/study-room/self-evolution/
+> - 대4-⑨ https://inseoklee-ai.github.io/study-room/agent-patterns/
 >
 > 📊 **PPT**: 각 강의 폴더의 `<폴더명>.pptx` (예: `vlm/vlm.pptx`). GitHub 저장소나 라이브 사이트에서 내려받아 PowerPoint로 열 수 있습니다.
 >

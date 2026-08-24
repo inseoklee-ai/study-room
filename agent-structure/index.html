@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>에이전트의 구조 · 관측을 받아 행동을 고르는 설계 단위</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 거대 언어모델과 프롬프트 · ②</span>
+    <h1 style="margin:18px 0">에이전트의 구조</h1>
+    <p class="sub">관측을 받아 행동을 고르고 — 결과를 다시 넣는 설계 단위</p>
+  </div>
+  <aside>에이전트는 흔히 "똑똑한 모델의 별명"으로 오해됩니다. 하지만 같은 모델이라도 입력·도구·관측·승인 규칙에 따라 전혀 다른 실행이 됩니다. 이 소단원은 에이전트를 관측을 받아 제한된 행동을 고르고 그 결과를 다음 판단에 다시 넣는 설계 단위로 읽는 법을 세웁니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>PART 1</small><b>정의의 다섯 관점</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>PART 2</small><b class="g">낱말의 세 전통</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>PART 3</small><b>모델+하네스+루프</b></div>
+  </div>
+  <ul class="pts">
+    <li>'에이전트'는 한 문장으로 고정된 용어가 아니다 — <b>다섯 관점</b>을 겹쳐 본다</li>
+    <li>낱말의 뿌리는 <b>강화학습 · 고전 AI · 90년대 소프트웨어</b> 세 전통</li>
+    <li>자율성은 있다/없다가 아니라 <b>통제권 스펙트럼</b>으로 본다</li>
+    <li>결과가 갈리면 <b>모델 + 하네스 + 루프</b>로 분해하고, 네 영역을 추적한다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 이름 하나가 <b>성능·책임·권한</b>을 보증하지 않는다. 구조를 봐야 한다.</div>
+  <aside>세 파트를 지나면 "이건 에이전트인가?"라는 이름 논쟁 대신 무엇을 관측하고 누가 다음을 정하며 어디서 통제를 회수하는지를 물을 수 있게 됩니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">정의가 달라지는 다섯 관점</h2>
+    <p style="margin-top:11px">이름만으로 자율성 정도나 내부 구조를 결론낼 수 없다</p>
+    <span class="who">Anthropic · OpenAI · Weng · ReAct · 학술</span>
+  </div>
+  <aside>'에이전트'는 저자마다 다른 것을 강조합니다. 어느 정의도 이름의 필요충분조건을 정하지 않습니다. 다섯 관점을 나란히 놓으면 무엇이 공통이고 무엇이 강조점인지가 보입니다.</aside>
+</section>
+
+<!-- 4 다섯 관점 표 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔎 같은 낱말, <span class="g">다섯 강조점</span></h2>
+  <table class="t">
+    <tr><th>관점</th><th>핵심 강조</th><th>판별 질문</th></tr>
+    <tr><td>Anthropic</td><td>workflow는 코드가 경로를 조율, agent는 모델이 과정·도구를 동적 지휘</td><td><b>다음을 누가 정했는가</b></td></tr>
+    <tr><td>OpenAI 가이드</td><td>과업을 독립 완수, 모델이 실행을 관리하고 도구를 동적 사용</td><td>목표를 받아 끝까지 관리하는 <b>책임</b></td></tr>
+    <tr><td>Lilian Weng</td><td>LLM을 두뇌로, <b>계획·기억·도구</b>를 결합하는 설계 문제</td><td>세 요소가 다 있어야만 에이전트는 아님</td></tr>
+    <tr><td>ReAct</td><td>추론↔행동 교대 — 행동이 환경을 바꾸고 반환값이 다음 선택에</td><td>길게 생각이 아니라 <b>행동-관측 순환</b></td></tr>
+    <tr><td>학술 문헌</td><td>Wang 등: profile·memory·planning·action 분류 / AgentBench: 상호작용 능력 평가</td><td>구성요소 분류지 존재론적 정의 아님</td></tr>
+  </table>
+  <div class="hl">OpenAI 가이드는 <b>원문 재대조 전이라 엄밀한 인용이 아니라 관점</b>으로 읽는다. 어느 것도 이름의 <b>필요충분조건</b>을 정하지 않는다.</div>
+  <aside>Anthropic은 제어권, OpenAI는 책임, Weng은 구성요소, ReAct는 순환, 학술은 분류·평가에 방점을 둡니다. 서로 배타적이지 않고 겹쳐 읽어야 전체가 잡힙니다.</aside>
+</section>
+
+<!-- 5 공통분모 정의 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧭 과도하게 좁히지 않은 <span class="g">공통분모</span></h2>
+  <div class="big">에이전트 = 목표와 환경의 관측을 바탕으로<br>모델이 <span class="y">다음 행동·도구 사용을 고르고</span><br>실행 결과를 다시 관측해 <span class="y">다음 선택을 갱신</span>하며 과업을 진행하는 시스템<small>첫 문장 = 고정 경로와의 차이 · 둘째 문장 = 단발성 답변과의 차이</small></div>
+  <ul class="pts" style="margin-top:16px">
+    <li>모델의 <b>"완료 선언"은 관측이 아니다</b> — 테스트 결과·원문·권한 있는 시스템의 반환값이 다음 선택을 바꿀 때 루프가 닫힌다</li>
+    <li>계획·기억·persona는 필수 목록이 아니라 <b>지속성·성능·통제 요구에 따라 더하는 선택</b></li>
+    <li>여러 번 호출한다고 <b>자동으로 에이전트가 되는 것도 아니다</b></li>
+  </ul>
+  <aside>이 정의의 힘은 무엇을 배제하느냐에 있습니다. 고정 경로도, 한 번 답하고 끝나는 호출도, 단순 반복 호출도 아닙니다. 환경의 ground truth가 다음 선택을 바꾸는 순환이 핵심입니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">agent라는 낱말은 어디서 왔나</h2>
+    <p style="margin-top:11px">같은 단어가 세 전통에서 서로 다른 것을 가리킨다</p>
+    <span class="who">강화학습 · 고전 AI · 90년대 소프트웨어</span>
+  </div>
+  <aside>오늘의 LLM 에이전트를 정확히 읽으려면 낱말의 세 뿌리를 구분해야 합니다. 세 전통은 행동·관측이라는 언어를 공유하지만, 학습 방식과 강조점이 전혀 다릅니다.</aside>
+</section>
+
+<!-- 7 세 전통 -->
+<section class="slide" data-part="PART 2">
+  <h2>🌳 낱말의 <span class="g">세 전통</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">RL</span><span class="t"><b class="g">강화학습</b> — 환경에서 관측을 받고 행동을 내며 <b>보상으로 정책을 학습</b>하는 주체. MDP(마르코프 결정 과정, 1957 정식화)=상태·행동·보상·전환확률+마르코프 성질. Sutton·Barto(1998)가 교재화. 핵심: <b>보상으로 정책을 어떻게 갱신하는가</b></span></div>
+    <div class="st"><span class="n">고전</span><span class="t"><b class="g">고전 AI(Russell·Norvig)</b> — 지각을 받아 행동을 선택하는 시스템, 합리성=성능 척도에서 기대 성능을 높이는 선택. <b>모든 agent가 실행 중 학습하는 건 아님</b></span></div>
+    <div class="st"><span class="n">SW</span><span class="t"><b class="g">90년대 소프트웨어·multi-agent</b> — 자율 반응·목표 지향·다른 agent와 상호작용. 위임·상태 유지·역할 협업. 오늘 제품 설명의 "장기 과업·역할 분담·사람 대신 접근"은 이 <b>시스템 은유</b>에 가깝다</span></div>
+  </div>
+  <aside>RL의 agent는 보상으로 학습하는 의사결정 주체, 고전 AI의 agent는 지각-행동 시스템, 90년대 소프트웨어의 agent는 위임받아 협업하는 자율 프로그램입니다. 오늘 우리가 쓰는 "에이전트"는 주로 셋째 은유에 가깝습니다.</aside>
+</section>
+
+<!-- 8 LLM agent로의 이동 + 네 질문 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔁 LLM 에이전트로의 <span class="g">이동</span></h2>
+  <ul class="pts">
+    <li>ReAct 등은 RL·로봇공학의 <b>행동·관측 언어를 공유</b>한다</li>
+    <li>그러나 보통의 배포 LLM 에이전트는 <b>실행 중 보상으로 파라미터·정책을 갱신하지 않는다</b></li>
+    <li>고정된 모델이 추론 시점에 지시·맥락을 읽고 <b>도구 결과로 다음 행동을 고르는 제어</b></li>
+  </ul>
+  <div class="hl">⚠️ <b>행동-관측 루프가 있다고 곧 강화학습은 아니다.</b> 관측 구조는 남지만 학습 방식은 다르다.</div>
+  <p style="margin-top:14px"><b>"agent"를 만났을 때 확인할 네 질문:</b></p>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>①</small><b>보상으로 정책을<br>갱신하는가</b></div>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>②</small><b>무엇을 관측·행동<br>으로 내보내나</b></div>
+    <div class="cell" style="min-width:150px;border-color:var(--gold)"><small>③</small><b>다음 경로를<br>누가 정하나</b></div>
+    <div class="cell" style="min-width:150px;border-color:var(--pp)"><small>④</small><b>위임된 권한은<br>어디까지인가</b></div>
+  </div>
+  <aside>네 질문으로 같은 "agent"라도 학습 시스템 / 실행 구조 / 위임된 소프트웨어로 갈립니다. ③은 자율성, ④는 책임과 안전으로 이어집니다. 이름 하나가 성능·책임·권한을 보증하지 않습니다.</aside>
+</section>
+
+<!-- 9 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">자율성 · 관측 · 분석 모형</h2>
+    <p style="margin-top:11px">어느 결정의 통제권을 넘겼고, 어디서 회수하는가</p>
+    <span class="who">스펙트럼 · 루프 닫기 · 모델+하네스+루프</span>
+  </div>
+  <aside>자율성을 있다/없다로 나누면 중요한 차이가 사라집니다. 더 정확한 질문은 "어느 결정의 통제권을 모델에게 넘겼는가, 그리고 어디서 다시 회수하는가"입니다.</aside>
+</section>
+
+<!-- 10 자율성 스펙트럼 -->
+<section class="slide" data-part="PART 3">
+  <h2>🎚️ 결정의 통제권 <span class="g">스펙트럼</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>고정 경로(workflow)</b> — 순서·재시도·종료 조건을 <b>프로그램이 정함</b>. 비용·실패 지점 예측은 쉽지만 <b>정해진 분기 밖으로 못 나감</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>모델이 고르되 승인 경계</b> — 읽을 파일·검색어·방법은 모델이 선택. 단 <b>외부 발신·결제·운영 데이터 변경은 사람이 승인</b>(명령·대상·예상 변경·되돌림 가능 여부까지 표시)</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>열린 위임</b> — 목표+예산·시간·권한 한도만 주고 순서·도구·반복을 폭넓게 위임. 단 무제한 아님 — <b>비용 상한·허용 도구·작업공간 격리·중단 조건</b>을 코드가 계속 강제</span></div>
+  </div>
+  <div class="hl">자율성 단계는 <b>제품 이름이나 호출 횟수</b>가 아니라, <b>다음 행동과 영향 있는 실행을 누가 결정하는가</b>로 판별한다.</div>
+  <aside>세 단계는 연속적입니다. 핵심은 "완전 자율"이 아니라, 어느 결정을 넘겼고 영향이 큰 실행에서 어떻게 통제를 회수하는가입니다. 2단계의 승인 화면 설계가 실무에서 특히 중요합니다.</aside>
+</section>
+
+<!-- 11 관측으로 루프를 닫는다 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔒 관측으로 <span class="g">루프를 닫는다</span></h2>
+  <ul class="pts">
+    <li>모델의 <b>"수정했습니다"는 주장일 뿐</b> 완료 증거가 아니다</li>
+    <li>코딩=<b>테스트·빌드·린트 결과</b> / 조사=<b>인용한 원문</b> / 업무=<b>권한 있는 시스템의 반환값</b></li>
+    <li>이 값을 다음 입력으로 넣어야, 모델이 자기 서술이 아니라 <b>환경 상태를 보고 계획을 고친다</b></li>
+  </ul>
+  <div class="big">ReAct의 핵심도 <span class="y">긴 문장이 아니라</span><br>행동 뒤 <span class="y">새로 들어오는 관측</span><small>환경의 ground truth가 다음 선택을 바꿀 때 비로소 루프가 닫힌다</small></div>
+  <aside>루프를 닫는다는 것은 모델의 자기 보고 대신 환경이 돌려주는 검증 가능한 값을 다음 판단 재료로 쓴다는 뜻입니다. 이것이 단발성 응답과 에이전트를 가르는 실질적 경계입니다.</aside>
+</section>
+
+<!-- 12 모델+하네스+루프 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧩 분석 모형 — <span class="g">모델 + 하네스 + 루프</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:180px;border-color:var(--bl)"><small>모델</small><b>다음 행동 후보<br>생성 · 판단</b></div>
+    <span class="ar">+</span>
+    <div class="cell" style="min-width:180px;border-color:var(--gold)"><small>하네스</small><b>입력 구성 · 도구 연결<br>권한과 형식 강제</b></div>
+    <span class="ar">+</span>
+    <div class="cell" style="min-width:180px;border-color:var(--gr)"><small>루프</small><b>행동 · 관측 · 검사<br>재시도의 순서와 종료</b></div>
+  </div>
+  <div class="hl">결과가 기대와 다를 때 <b>"모델이 약하다"로 결론내기 전에</b>, 세 층 중 어디서 무엇이 달랐는지 먼저 분해한다.</div>
+  <p style="margin-top:14px"><i>RL의 agent-environment 그림에서 관측·피드백 구조는 남지만, 보통의 LLM 에이전트는 실행 중 보상으로 정책을 학습하지 않는다 — 이미 학습된 모델이 추론 시점에 도구 호출을 선택하고, 하네스가 권한·승인·종료를 제한한다.</i></p>
+  <aside>같은 모델이라도 하네스와 루프가 다르면 전혀 다른 실행이 됩니다. 이 세 층 분해가 원인을 모델 탓으로만 돌리지 않고 수정 지점을 찾게 해 줍니다.</aside>
+</section>
+
+<!-- 13 네 설계 영역 표 -->
+<section class="slide" data-part="PART 3">
+  <h2>🛠️ 하네스가 설계하는 <span class="g">네 영역</span></h2>
+  <table class="t">
+    <tr><th>설계 영역</th><th>설계하는 것</th></tr>
+    <tr><td>지시</td><td>목표 · 역할 · 출력 형식 · 금지 사항 · 성공 기준</td></tr>
+    <tr><td>맥락</td><td>모델이 읽는 문서 · 데이터 · 대화 이력 · 현재 상태</td></tr>
+    <tr><td>도구</td><td>검색 · 파일 · 코드 · 외부 시스템의 기능 · 권한 · 반환 형식</td></tr>
+    <tr><td>루프</td><td>행동 순서 · 관측 수집 · 검증 · 재시도 · 중단 · 승인 조건</td></tr>
+  </table>
+  <div class="hl">칸은 <b>독립 부품 목록이 아니다</b> — 도구 설명은 맥락으로, 테스트 결과는 도구 반환값이자 다음 루프의 맥락. 목적은 원인을 한 칸에 가두는 게 아니라 <b>수정 지점을 빠짐없이 추적</b>하는 것.</div>
+  <aside>네 영역은 서로 스며듭니다. 그래서 실패를 한 칸에 딱 배정하려 하기보다, 네 칸을 체크리스트 삼아 어디를 바꿀지 빠짐없이 훑는 데 씁니다.</aside>
+</section>
+
+<!-- 14 멀티턴 예 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧵 멀티턴 예 — <span class="g">관측이 판단을 바꾼다</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">사용자: <b>"배포 뒤 로그인이 안 된다"</b> → 모델: "발생 시각·HTTP 상태 확인"</span></div>
+    <div class="st"><span class="n">2</span><span class="t">로그 도구가 <b>401 · 토큰 만료 · 배포 버전</b>을 반환 (자기 서술이 아닌 <b>환경의 값</b>)</span></div>
+    <div class="st"><span class="n">3</span><span class="t">둘째 턴 "배포 직후부터" → 모델은 <b>첫 요청 + 도구 요청·결과 + 새 정보</b>를 함께 받아 판단</span></div>
+  </div>
+  <div class="hl">⚠️ 이때 첫 결과를 버리면 <b>근거가 사라지고</b>, 폐기된 설정까지 무차별로 넣으면 <b>근거가 오염된다.</b></div>
+  <aside>이 예는 루프가 닫히는 순간을 보여 줍니다. 모델의 추측이 아니라 로그 도구가 돌려준 401·토큰 만료라는 관측이 다음 판단을 바꿉니다. 다음 소단원의 주제 — 무엇을 남기고 무엇을 넣을 것인가 — 로 자연스럽게 이어집니다.</aside>
+</section>
+
+<!-- 15 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 4문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">에이전트는 <b>관측을 받아 다음 행동을 고르고 결과를 다시 넣는</b> 설계 단위 — 이름·호출 횟수로 정해지지 않는다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">낱말은 <b>강화학습·고전 AI·90년대 소프트웨어</b> 세 전통에서 왔고, 루프가 있다고 곧 강화학습은 아니다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t">자율성은 있다/없다가 아니라 <b>통제권 스펙트럼</b> — 어디서 넘기고 어디서 회수하는가.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">결과가 갈리면 <b>모델+하네스+루프</b>로 분해하고 <b>지시·맥락·도구·루프</b> 네 영역을 추적한다.</span></div>
+  </div>
+  <div class="hl">📚 더 읽기 — Sutton·Barto; Russell·Norvig; Anthropic "Building effective agents"; OpenAI "A practical guide to building agents"; Lilian Weng "LLM Powered Autonomous Agents"; Wang 외 서베이; Yao 외 "ReAct".</div>
+  <aside>4번이 이 소단원의 실무 태도입니다. 낮은 결과를 즉시 모델 한계로 결론내지 말고, 세 층과 네 영역에서 무엇이 달랐는지 먼저 분해하세요.</aside>
+</section>
+
+<!-- 16 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 다섯 관점의 <b>공통분모</b>로 본 에이전트의 정의는?</div>
+    <div class="q"><b>Q2.</b> 모델의 <b>"완료 선언"</b>이 관측이 아니라면, 무엇이 루프를 닫는가?</div>
+    <div class="q"><b>Q3.</b> 낱말의 <b>세 전통</b>은 각각 무엇을 강조하나?</div>
+    <div class="q"><b>Q4.</b> 자율성 <b>통제권 스펙트럼</b> 세 단계는?</div>
+    <div class="q"><b>Q5.</b> 결과가 기대와 다를 때 분해하는 <b>세 층</b>과 추적하는 <b>네 영역</b>은?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q2와 Q5가 오늘의 핵심을 가장 잘 가립니다.</aside>
+</section>
+
+<!-- 17 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 목표와 환경의 관측을 바탕으로 <b>모델이 다음 행동·도구 사용을 고르고, 실행 결과를 다시 관측해 다음 선택을 갱신</b>하며 과업을 진행하는 시스템.</div>
+    <div class="q a"><b>A2.</b> 테스트 결과·인용 원문·권한 있는 시스템의 반환값 같은 <b>환경의 ground truth</b>가 다음 선택을 바꿀 때 루프가 닫힌다.</div>
+    <div class="q a"><b>A3.</b> <b>강화학습</b>(보상으로 정책 갱신) · <b>고전 AI</b>(지각-행동 선택, 합리성) · <b>90년대 소프트웨어</b>(위임·상태·역할 협업의 시스템 은유).</div>
+    <div class="q a"><b>A4.</b> <b>고정 경로</b>(코드가 정함) · <b>모델이 고르되 승인 경계</b>(영향 큰 실행은 사람 승인) · <b>열린 위임</b>(한도 내 폭넓게, 코드가 계속 강제).</div>
+    <div class="q a"><b>A5.</b> 세 층 = <b>모델·하네스·루프</b>. 네 영역 = <b>지시·맥락·도구·루프</b>(칸은 독립 부품이 아니라 수정 지점 추적용).</div>
+  </div>
+  <aside>A2와 A5를 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다. 특히 A2는 에이전트와 단발성 응답을 가르는 경계입니다.</aside>
+</section>
+
+<!-- 18 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>이름이 아니라 구조 🧭</h1>
+    <div class="big" style="margin-top:26px">에이전트는 관측을 받아 <span class="y">행동을 고르고</span><br>그 결과를 <span class="y">다시 넣는</span> 설계 단위<br><br>이름 하나가 성능·책임·권한을 보증하지 않는다</div>
+    <p class="sub" style="margin-top:24px">에이전트의 구조 — 여기까지 · 다음: 모델이 실제로 읽는 입력</p>
+  </div>
+  <aside>에이전트가 관측을 받아 행동을 고른다면, 그 판단의 재료는 무엇일까요? 모델은 화면의 한 문장이 아니라 하네스가 여러 출처에서 조립한 입력을 읽습니다 — 다음 소단원의 주제입니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
