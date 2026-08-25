@@ -14,7 +14,10 @@ const LESSONS = process.argv.slice(2).length
      "decision-doc","two-requests","ocr-pipeline","detect-segment","vlm","ai-tool-choice","ocr-lab",
      "yolo-lab","docimg-wrapup","model-origin","image-path","pixels-sentences",
      "prompt-engineering-intro","agent-structure","model-inputs","instruction-hierarchy","prompt-lab",
-     "pe-history","technique-revalidation","self-evolution","agent-patterns"];
+     "pe-history","technique-revalidation","self-evolution","agent-patterns",
+     "instruction-anatomy","eleven-methods","why-instructions-work","source-and-precedence",
+     "techniques-as-hypotheses","three-instructions-lab","output-contract","eval-metrics",
+     "instruction-failures","minimal-change-workbook","instruction-principles"];
 
 // ---- palette (deck light theme) ----
 const INK="2A2723", SOFT="6B6357", GR="3F6B5F", GR2="2C4D44", GOLD="C8A15A",

@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>지시 3안 · 재고 실행하고 비교하기</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 지시 설계 · ⑥</span>
+    <h1 style="margin:18px 0">지시 3안</h1>
+    <p class="sub">재고 실행하고 비교하기 — 채점 기준을 결과보다 먼저</p>
+  </div>
+  <aside>이 실습은 같은 고객 문의를 세 지시(A·B·C)로 실행해 비교합니다. 핵심은 순서입니다. 결과를 보기 전에 무엇을 성공으로 셀지 기준표를 먼저 만들고, 세 실행 경로에 지시를 있는 그대로 전달해 원문을 기준표로 대조합니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--gold)"><small>PART 1</small><b>채점 기준을 먼저</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>PART 2</small><b class="g">지시 세 안 A·B·C</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>PART 3</small><b>세 경로로 실행·기록</b></div>
+  </div>
+  <ul class="pts">
+    <li>실행 <b>전에</b> 이진 채점 기준표를 세운다 — 결과가 자를 정하지 못하게</li>
+    <li>같은 입력에 <b>다른 계약 세 장</b>(최소·보강·형식)을 놓는다</li>
+    <li><b>Claude SDK · Gemini · Ollama</b> 세 경로에 같은 지시를 전달한다</li>
+    <li>원문을 <b>기준표로 대조</b>하고, 무엇이 달랐는지 한 문장으로 남긴다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 자를 먼저 만들어야 <b>결과가 아니라 부품</b>을 비교할 수 있다.</div>
+  <aside>이 실습은 앞 소단원들의 태도를 손으로 실행합니다. 지시라는 한 부품만 바꿔 세 안을 실행하되, 성공 기준·입력·모델·생성 설정은 고정합니다. 그래야 차이를 능력이 아니라 조건으로 설명할 수 있습니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">결과보다 먼저 놓는 자</h2>
+    <p style="margin-top:11px">무엇을 성공으로 셀지부터 기준표로</p>
+    <span class="who">이진 판정 · 통과/실패</span>
+  </div>
+  <aside>과업은 주문 정보가 없는 고객의 배송일 질문에 보낼 답변 초안을 쓰는 것입니다. 모델이 실제 주문 시스템을 못 읽는다는 조건도 함께 고정합니다. 실행하기 전에 채점 기준부터 정합니다.</aside>
+</section>
+
+<!-- 4 왜 먼저인가 -->
+<section class="slide" data-part="PART 1">
+  <h2>🪤 결과를 본 뒤 기준을 만들면?</h2>
+  <ul class="pts">
+    <li>마음에 드는 결과의 <b>표현</b>을 성공 조건으로 삼게 된다</li>
+    <li>그 자는 차이를 재는 도구가 아니라 <b>이미 나온 답을 정당화하는 설명</b>이 된다</li>
+  </ul>
+  <div class="chain">
+    <div class="cell" style="min-width:170px;border-color:var(--red)"><small>결과 → 기준 (함정)</small><b class="r">답을 보고<br>자를 맞춘다</b></div>
+    <span class="ar">vs</span>
+    <div class="cell" style="min-width:170px;border-color:var(--gr)"><small>기준 → 결과 (실습)</small><b class="g">자를 먼저 세우고<br>답을 잰다</b></div>
+  </div>
+  <div class="hl"><b>실행 전에</b> 성공을 정의해야, 세 안의 결과를 같은 잣대로 통과/실패 판정할 수 있다.</div>
+  <aside>이것이 실습의 뼈대입니다. 좋아 보이는 결과가 나오면 사람은 자기도 모르게 그 결과가 잘한 점을 성공 기준으로 삼습니다. 그러면 비교가 아니라 사후 정당화가 됩니다.</aside>
+</section>
+
+<!-- 5 채점 기준 표 -->
+<section class="slide" data-part="PART 1">
+  <h2>📋 실행 전 <span class="g">채점 기준</span> — 이진 정의</h2>
+  <table class="t">
+    <tr><th>실행 전 채점 기준</th><th>통과의 이진 정의</th><th>확인 위치</th></tr>
+    <tr><td>근거 없는 날짜 금지</td><td>입력에 없는 배송일·주문 상태·운송장 번호를 <b>확정적으로 안 씀</b></td><td>답변 문장</td></tr>
+    <tr><td>부족한 정보 처리</td><td>배송일 확정 불가를 밝히고 <b>확인 정보 한 가지 요청</b></td><td>답변 문장</td></tr>
+    <tr><td>고객용 문체</td><td>비난·전문 용어 나열 없이 <b>정중한 한국어</b></td><td>전체 응답</td></tr>
+    <tr><td>형식 준수</td><td>C안은 <b>reply</b>,<b>question</b> 두 키 JSON 객체만, 두 값 비지 않음</td><td>파싱 결과</td></tr>
+  </table>
+  <div class="hl">마지막 행은 <b>형식을 약속한 C안에서만</b> 적용한다. 문체 우열까지 한 점수에 섞지 않는다.</div>
+  <aside>이진 판정을 쓰는 이유는 업무상 반드시 지킬 약속부터 살피기 위해서입니다. 답변이 자연스러워도 없는 배송일을 단정하면 안전 실패, 사실을 조심했어도 약속한 JSON을 깨면 형식 실패로 봅니다.</aside>
+</section>
+
+<!-- 6 모호함을 먼저 드러낸다 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔬 판정 규칙의 <span class="g">모호함도 실행 전에</span></h2>
+  <ul class="pts">
+    <li>'정중함'처럼 <b>해석이 남는 항목</b>은 그대로 두면 사람마다 다르게 판정한다</li>
+    <li>→ <b>문장 끝 존대 · 고객 비난 없음</b>을 확인 규칙으로 미리 적어 둔다</li>
+  </ul>
+  <div class="steps">
+    <div class="st"><span class="n">애매</span><span class="t">"정중한가?" — 판정자의 인상에 맡기면 안전 실패를 놓친다</span></div>
+    <div class="st"><span class="n">규칙</span><span class="t"><b>문장 끝 존대 O · 고객 비난 X</b> — 원문에서 눈으로 확인 가능한 규칙으로 환원</span></div>
+  </div>
+  <div class="hl">해석이 남는 기준을 <b>실행 전에 규칙으로 못 박아야</b>, 원문을 볼 때 판정이 흔들리지 않는다.</div>
+  <aside>기준을 이진으로 정의한다고 모호함이 사라지는 것은 아닙니다. '정중함' 같은 항목은 확인 가능한 규칙으로 미리 바꿔 두어야, 세 안을 볼 때 같은 잣대가 유지됩니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">같은 문의에 다른 계약 세 장</h2>
+    <p style="margin-top:11px">입력 고정 — 배송일은 언제인가요?</p>
+    <span class="who">A 최소 · B 보강 · C 형식</span>
+  </div>
+  <aside>같은 사용자 입력 "배송일은 언제인가요?"를 고정하고, 시스템 지시만 세 가지로 바꿉니다. A는 요청의 최소 기준선, B는 예상 위험만 보강, C는 B에 출력 모양을 더한 과잉안입니다.</aside>
+</section>
+
+<!-- 8 세 계약 개요 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧾 지시 <span class="g">세 안</span> — 무엇을 더했나</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--gy)"><small>A 최소안</small><b>요청의 가장 작은<br>기준선</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>B 부품 보강안</small><b class="g">A에서 예상한<br>위험만 보강</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gold)"><small>C 과잉안(형식)</small><b>B의 목표·제약 유지<br>+ 출력 모양</b></div>
+  </div>
+  <div class="hl"><b>과잉 = 정보량이 아니다.</b> 이 과업에 비해 <b>형식 계약을 지나치게 세밀히 추가</b>했는지를 관찰한다.</div>
+  <aside>세 안은 지시라는 한 부품을 단계적으로 늘린 것입니다. 입력·모델·생성 설정은 세 안 모두 같게 두어야, 결과 차이를 지시의 차이로 귀속할 수 있습니다.</aside>
+</section>
+
+<!-- 9 A안 -->
+<section class="slide" data-part="PART 2">
+  <h2>Ⓐ 최소안 — <span class="g">기준선</span></h2>
+  <pre>[A] 고객 문의에 답변 초안을 작성하라.</pre>
+  <div class="hl">역할·근거 범위·모를 때 행동·산출 형식이 <b>대부분 비었다</b> → 친절한 답이 나와도 지시가 보장한 게 아니라 <b>학습된 성향</b>일 수 있다.</div>
+  <aside>A안이 좋은 답을 내더라도, 그것을 지시의 성과로 볼 수는 없습니다. 지시가 아무것도 요구하지 않았으므로, 결과가 좋다면 모델의 기본 성향이 우연히 맞은 것일 수 있습니다.</aside>
+</section>
+
+<!-- 10 B안 -->
+<section class="slide" data-part="PART 2">
+  <h2>Ⓑ 부품 보강안 — <span class="g">위험만 보강</span></h2>
+  <pre>[B] 고객 문의에 정중한 한국어 답변 초안을 작성하라.
+입력에 없는 배송일, 주문 상태, 운송장 번호는
+추정하거나 단정하지 말라.
+정보가 부족하면 확인에 필요한 정보 한 가지를 요청하라.</pre>
+  <div class="steps">
+    <div class="st"><span class="n">역할</span><span class="t"><b>고객용 문체</b> — 정중한 한국어 답변</span></div>
+    <div class="st"><span class="n">제약</span><span class="t"><b>입력 밖 사실 금지</b> — 배송일·상태·운송장 추정 금지</span></div>
+    <div class="st"><span class="n">예외</span><span class="t"><b>정보 부족 시 질문</b> — 확인 정보 한 가지 요청</span></div>
+  </div>
+  <aside>B안은 A안에서 비어 있던 부품 중 이 과업에서 위험한 것만 채웠습니다. 역할·제약·예외 처리 세 가지를 명시했고, 이 셋 중 무엇이 결과 차이를 만드는지가 관찰 대상입니다.</aside>
+</section>
+
+<!-- 11 C안 -->
+<section class="slide" data-part="PART 2">
+  <h2>Ⓒ 과잉안 — <span class="g">형식 보강</span></h2>
+  <pre>[C] B안의 지시를 따른다. 아래 JSON 객체만 출력하라.
+{"reply":"고객에게 보낼 답변","question":"추가로 확인할 정보 한 가지"}
+두 값은 한국어 문자열이며 비워 둘 수 없다.</pre>
+  <div class="hl">형식을 추가하나 <b>JSON이 곧 사실성 보장은 아니다.</b> 자연어를 프로그램용 객체로 바꾸는 <b>비용</b>이 생길 수 있어, 형식이 실제 소비자에게 필요한지 별도 판단한다.</div>
+  <aside>C안은 형식이라는 계약을 더한 것이지 답을 더 사실적으로 만드는 것이 아닙니다. 유효한 JSON이면서도 reply에 잘못된 배송일을 넣으면 형식 통과·안전 실패가 됩니다. 형식과 사실성은 별개 기준입니다.</aside>
+</section>
+
+<!-- 12 반복 실행 원칙 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔁 한 번씩만 실행해 <span class="g">일반화하지 않는다</span></h2>
+  <ul class="pts">
+    <li>같은 모델·입력으로 <b>최소 3회</b> 실행해 변동을 보관한다</li>
+    <li>기록에 <b>모델명·시각·시스템 지시·사용자 입력·원문 응답</b>을 함께 남긴다</li>
+    <li>무작위성 설정에선 한 번의 답이 아니라 <b>반복 결과의 범위</b>를 본다</li>
+  </ul>
+  <div class="hl">한 번의 좋은 답은 지시의 증거가 아니다. <b>변동을 함께 기록</b>해야 차이가 부품 때문인지 우연인지 구분된다.</div>
+  <aside>단발 실행은 우연을 실력으로 착각하게 만듭니다. 같은 조건으로 여러 번 실행해 원문을 모두 보관하면, 세 안의 차이가 안정적인지 아니면 실행마다 흔들리는지 볼 수 있습니다.</aside>
+</section>
+
+<!-- 13 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">세 실행 경로를 있는 그대로</h2>
+    <p style="margin-top:11px">인터페이스는 지시를 전달하는 그릇</p>
+    <span class="who">Claude SDK · Gemini · Ollama</span>
+  </div>
+  <aside>같은 지시라도 라이브러리마다 전달 그릇이 다릅니다. Claude Agent SDK는 system_prompt와 비동기 생성기, Gemini는 메시지 객체 목록, Ollama는 role 딕셔너리 목록입니다. 자료형을 잘못 맞추면 비교에 라이브러리 오류가 섞입니다.</aside>
+</section>
+
+<!-- 14 Claude SDK -->
+<section class="slide" data-part="PART 3">
+  <h2>🅰 <span class="g">Claude Agent SDK</span> — 비동기 생성기</h2>
+  <pre>options = ClaudeAgentOptions(
+    system_prompt=system_prompt, max_turns=1, tools=[])
+record = [f"variant:{variant}",
+          f"system_prompt:{system_prompt}",
+          f"user:{QUESTION}"]
+async for event in query(
+        prompt=user_messages(QUESTION), options=options):
+    record.append(f"{type(event).__name__} | {event!r}")</pre>
+  <div class="hl"><b>max_turns=1</b> · <b>tools=[]</b>로 추가 턴·도구를 제외하고, <b>지시+사용자 입력의 응답만</b> 관찰한다.</div>
+  <aside>구독 로그인으로 인증하고, system_prompt와 query()로 한 턴을 실행합니다. 범용 messages 배열 API가 아니며, 한도는 로그인 계정 상태에 의존합니다. 지시를 system_prompt 위치에 전달하는 것이 핵심입니다.</aside>
+</section>
+
+<!-- 15 Gemini + Ollama -->
+<section class="slide" data-part="PART 3">
+  <h2>🅱🅲 <span class="g">Gemini</span> · <span class="g">Ollama</span></h2>
+  <div class="grid2">
+    <div class="box">
+      <h3>LangChain + Gemini</h3>
+      <pre>model = ChatGoogleGenerativeAI(
+    model="gemini-3.7-flash")
+model.invoke([
+    SystemMessage(instruction),
+    HumanMessage(QUESTION)])</pre>
+      <p><b>메시지 객체</b> 전달. API 키가 있어도 공급자 혼잡(<b>503</b>)은 지시와 무관한 실패 → 성공/오류 구별 기록.</p>
+    </div>
+    <div class="box">
+      <h3>Ollama (로컬)</h3>
+      <pre>chat(model="qwen3.5:2b", messages=[
+  {"role":"system",
+   "content":instruction},
+  {"role":"user",
+   "content":QUESTION}])</pre>
+      <p><b>role 딕셔너리</b>, 인증 없이 로컬 반복. 작은 모델의 한국어 품질·지시 이행도는 <b>결과로 재야</b> 한다.</p>
+    </div>
+  </div>
+  <aside>A·B·C를 세 경로 모두 동일한 메시지 위치로 전달하고, 모델·입력·생성 설정을 고정합니다. 실패하면 오류 전문도 결과 파일로 남깁니다. 파일명 규칙 경로-안-반복번호.txt로 반복과 경로 차이를 원문에서 분리 확인합니다.</aside>
+</section>
+
+<!-- 16 세 경로 비교 표 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧭 세 경로 비교 — <span class="g">되는 것 / 주의</span></h2>
+  <table class="t">
+    <tr><th>경로</th><th>되는 것</th><th>주의</th></tr>
+    <tr><td>Claude Agent SDK</td><td>구독 로그인 인증, <b>system_prompt</b>+<b>query()</b>로 한 턴 실행</td><td>범용 messages 배열 API 아님, 한도는 로그인 계정 상태에 의존</td></tr>
+    <tr><td>LangChain+Gemini</td><td>API 키, <b>SystemMessage·HumanMessage·AIMessage</b>를 <b>invoke()</b></td><td>공급자 고유 설정이 추상화에 가려짐, <b>503은 지시 실패 아님</b></td></tr>
+    <tr><td>Ollama</td><td>인증 없이 role 딕셔너리, 로컬 반복</td><td>로컬이 품질 보장 아님, 이행 품질도 관찰 대상</td></tr>
+  </table>
+  <div class="hl">같은 <b>system</b> 이름을 봤다고 <b>입력 자료형까지 바꿔 쓰면</b> 비교에 라이브러리 오류가 섞인다.</div>
+  <aside>세 경로는 지시를 담는 그릇이 다를 뿐 같은 지시를 전달하는 것이 목적입니다. 각 경로의 '주의'는 지시 실패로 오독하기 쉬운 지점들입니다. 특히 503 같은 공급자 오류를 지시 품질과 혼동하면 안 됩니다.</aside>
+</section>
+
+<!-- 17 판정 기록 양식 -->
+<section class="slide" data-part="PART 3">
+  <h2>📝 판정 기록 양식 — <span class="g">원문 읽은 뒤</span></h2>
+  <table class="t">
+    <tr><th>안</th><th>날짜 금지</th><th>정보 처리</th><th>문체</th><th>형식</th><th>차이 만든 부품</th></tr>
+    <tr><td>A 최소안</td><td>통과/실패</td><td>통과/실패</td><td>통과/실패</td><td>해당 없음</td><td>관찰 후 기록</td></tr>
+    <tr><td>B 보강안</td><td>통과/실패</td><td>통과/실패</td><td>통과/실패</td><td>해당 없음</td><td>역할·제약·예외 중 하나</td></tr>
+    <tr><td>C 형식안</td><td>통과/실패</td><td>통과/실패</td><td>통과/실패</td><td>통과/실패</td><td>형식 또는 새 충돌</td></tr>
+  </table>
+  <div class="hl">자리표시자는 <b>실행 전 계약</b>, 실제 통과/실패는 <b>원문을 읽은 뒤</b> 채운다. 한 결과의 좋은 인상으로 모든 기준을 통과시키지 않는다.</div>
+  <aside>예를 들어 C안이 코드 펜스를 붙여 JSON을 냈다면 "객체만 출력" 형식 행은 실패입니다. C안이 유효 JSON이면서 reply에 잘못된 배송일을 넣으면 형식 통과·안전 실패입니다. 각 셀을 독립적으로 판정합니다.</aside>
+</section>
+
+<!-- 18 한 문장 결론 -->
+<section class="slide" data-part="PART 3">
+  <h2>🖊️ 'B가 더 좋다'에서 <span class="g">멈추지 않는다</span></h2>
+  <ul class="pts">
+    <li>기록을 마치면 <b>무엇이 달랐는지 한 문장</b>으로 남긴다</li>
+    <li>그 문장에 <b>지시 부품 · 관측값 · 고정 조건</b>을 함께 담는다</li>
+  </ul>
+  <div class="box"><p style="margin:0"><i>예)</i> "B안은 정보 부족 시 <b>질문 예외</b>를 추가했으며, 세 실행 중 확인 정보 요청이 <b>A안보다 많았다</b>."</p></div>
+  <div class="hl">차이가 <b>없다면</b> 그 역시 중요한 관측이다 — 부품이 이미 학습된 성향과 겹쳤거나, 시험 입력이 효과를 못 드러낸 것.</div>
+  <aside>비교의 결론은 순위가 아니라 인과의 설명입니다. 실패한 안은 최소 변경 후 같은 조건으로 다시 잽니다. 차이가 없다는 관측도 버리지 말고, 왜 없었는지를 기록해 두어야 다음 시험을 설계할 수 있습니다.</aside>
+</section>
+
+<!-- 19 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 채점 기준을 <b>결과보다 먼저</b> 세워야 하는 이유는?</div>
+    <div class="q"><b>Q2.</b> 답변이 자연스러운데 없는 배송일을 단정했다 — <b>어느 판정</b>인가?</div>
+    <div class="q"><b>Q3.</b> A·B·C 세 안은 각각 무엇을 <b>더한</b> 것인가?</div>
+    <div class="q"><b>Q4.</b> Gemini 실행에서 나온 <b>503</b>은 지시의 실패로 세야 하나?</div>
+    <div class="q"><b>Q5.</b> C안이 코드 펜스를 붙여 JSON을 냈다면 <b>형식 행</b>은?</div>
+  </div>
+  <aside>Q2와 Q5가 이진 판정의 핵심을 가립니다. 인상이 좋다고 안전·형식 기준을 함께 통과시키지 않는 태도를 확인하세요.</aside>
+</section>
+
+<!-- 20 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 결과를 먼저 보면 <b>마음에 든 결과의 표현</b>을 성공 조건으로 삼아, 자가 차이를 재는 도구가 아니라 <b>이미 나온 답을 정당화하는 설명</b>이 되기 때문.</div>
+    <div class="q a"><b>A2.</b> <b>안전 실패</b> — 문체가 자연스러워도 근거 없는 날짜를 확정하면 통과가 아니다.</div>
+    <div class="q a"><b>A3.</b> A=<b>최소 기준선</b>, B=A의 <b>예상 위험 보강</b>(역할·제약·예외), C=B에 <b>출력 형식</b>을 더한 과잉안.</div>
+    <div class="q a"><b>A4.</b> <b>아니다.</b> 503은 공급자 혼잡으로 지시와 무관한 실패 — 성공/오류를 구별해 기록한다.</div>
+    <div class="q a"><b>A5.</b> <b>실패.</b> "JSON 객체만 출력" 계약을 코드 펜스가 깼다(형식 통과·안전 판정은 별개).</div>
+  </div>
+  <aside>A1과 A4를 자기 말로 설명할 수 있으면 오늘의 목표는 달성입니다. 자를 먼저 세우는 이유와, 지시 실패가 아닌 오류를 구별하는 태도가 이 실습의 핵심입니다.</aside>
+</section>
+
+<!-- 21 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>먼저 자, 그다음 답 📏</h1>
+    <div class="big" style="margin-top:26px">세 안의 결과를 <span class="y">같은 기준표</span>에 기록하면<br>어느 부품이 차이를 만들었는지 보인다<br><br>실패한 안은 <span class="y">최소 변경 후 같은 조건</span>으로 다시 잰다</div>
+    <p class="sub" style="margin-top:24px">지시 3안 — 여기까지 · 다음: 답의 모양을 약속한다</p>
+  </div>
+  <aside>실행 전 자를 세우고, 지시 한 부품만 바꾸고, 세 경로에 같은 지시를 전달하고, 원문을 기준표로 대조했습니다. 다음 소단원에서는 답의 모양 자체를 약속하는 출력 형식 설계로 넘어갑니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

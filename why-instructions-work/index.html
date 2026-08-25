@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>왜 지시가 통하는가 · 학습의 계보</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 지시 설계 · ③</span>
+    <h1 style="margin:18px 0">왜 지시가 통하는가</h1>
+    <p class="sub">학습의 계보 — 지시 따르기는 형성된 행동이다</p>
+  </div>
+  <aside>프롬프트에 따라 답이 달라진 사실은 분명하지만, 그 차이가 어디서 오는지는 아직 설명이 아닙니다. 이 소단원은 지시 따르기가 모델에 처음부터 있던 기능이 아니라 데이터와 피드백으로 형성된 행동임을 학습의 계보로 추적합니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>PART 1</small><b>형성된 행동</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>PART 2</small><b class="g">학습의 계보</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--pp)"><small>PART 3</small><b class="p">형식·긴장</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>PART 4</small><b>설계 판단</b></div>
+  </div>
+  <ul class="pts">
+    <li>지시 따르기는 <b>처음부터 있던 기능이 아니라</b> 학습된 행동이다</li>
+    <li><b>base LM → SFT → 선호 학습 → 대화 템플릿</b>의 계보를 따라간다</li>
+    <li><b>few-shot·인컨텍스트 러닝·chat template</b> — 형식도 학습된 인터페이스</li>
+    <li><b>The Bitter Lesson</b>이 남기는 긴장과 설계자에게 남는 세 판단</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 학습된 성질 위에서 작동한다면, <b>지시를 조립하는 방법도 배울 수 있다.</b></div>
+  <aside>계보를 알면 "지시를 안 따른다"를 고집이 아니라 어떤 행동이 학습되었는가의 문제로 읽게 됩니다. 이것이 오늘의 관점 전환입니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">지시를 이해한다는 말의 범위</h2>
+    <p style="margin-top:11px">모델이 지시를 "따른다"는 것은 무엇인가</p>
+    <span class="who">형성된 행동 · 능력 ≠ 의도 준수</span>
+  </div>
+  <aside>모델이 지시를 따른다고 할 때, 사람처럼 명령형을 논리적으로 해독한다고 단정하면 안 됩니다. 같은 문장이라도 모델 세대와 대화 형식에 따라 결과가 다른 이유가 여기서 출발합니다.</aside>
+</section>
+
+<!-- 4 형성된 행동 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧬 지시 따르기는 <span class="g">형성된 행동</span></h2>
+  <ul class="pts">
+    <li>같은 문장이라도 <b>모델 세대·대화 형식</b>에 따라 결과가 다르다</li>
+    <li>지시 따르기는 모델에 <b>처음부터 있는 기능이 아니라</b> 데이터와 피드백으로 형성된 행동이다</li>
+  </ul>
+  <div class="box" style="margin-top:14px">
+    <h3><span class="b">base LM</span> — 사전학습된 모델</h3>
+    <p>대규모 텍스트에서 <b>다음 단어 예측</b>으로 학습. 문장을 잇는 능력은 있어도 의도·안전한 거절·형식을 자동으로 우선하지 않는다.</p>
+  </div>
+  <div class="hl">"지시를 안 따른다"를 고집이 아니라 <b>어떤 행동이 학습되었는가</b>의 문제로 읽는다.</div>
+  <aside>base LM은 언어를 잇는 능력을 가졌을 뿐입니다. 의도를 우선하는 성질은 이후 단계에서 형성됩니다. 그래서 실패를 성격이 아니라 학습 이력의 문제로 봅니다.</aside>
+</section>
+
+<!-- 5 능력 vs 의도 준수 -->
+<section class="slide" data-part="PART 1">
+  <h2>⚖️ 능력 <span class="r">≠</span> 의도 준수</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3><span class="b">넓은 과업 수행 능력</span></h3>
+      <p>다양한 문제를 풀어내는 힘. 커졌다는 관찰은 사실이다.</p>
+    </div>
+    <div class="box">
+      <h3><span class="g">의도 준수</span></h3>
+      <p>이번 요청의 <b>경계·형식·금지</b>를 안정적으로 따르는 성질. 능력과 구별된다.</p>
+    </div>
+  </div>
+  <p style="margin-top:12px">GPT-4 기술 보고서는 능력이 커졌다는 관찰을 "사용자 의도를 자동으로 따른다"는 보장으로 바꾸지 않는다.</p>
+  <div class="hl">두 오해를 <b>동시에 멈춰 세운다</b> — "더 큰 모델이니 지시는 짧아도 된다"와 "지시를 길게 쓰면 능력 부족도 해결된다".</div>
+  <aside>새 모델을 도입할 때는 능력 시연과 의도 준수 평가를 분리해 적고, 우리 업무의 경계 입력에서 직접 재야 합니다. 크기만으로 지시 준수 품질을 예측하지 않습니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">학습의 계보</h2>
+    <p style="margin-top:11px">지시-응답 관계와 선호는 어떻게 배우는가</p>
+    <span class="who">SFT · instruction tuning · 선호 학습</span>
+  </div>
+  <aside>이제 계보의 각 단계를 따라갑니다. 사전학습에서 시작해 지시-응답 관계를 배우는 단계, 선호를 반영하는 여러 길, 그리고 대화 템플릿까지 이어집니다.</aside>
+</section>
+
+<!-- 7 계보 흐름 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔗 지시가 형성되는 <span class="g">네 단계</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:140px;border-color:var(--gy)"><small>①</small><b>base LM<br><small>다음 토큰 예측</small></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>②</small><b>SFT · 지시 미세조정<br><small>지시-응답 관계</small></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>③</small><b class="g">선호 학습<br><small>RLHF·DPO·GRPO</small></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:140px;border-color:var(--gold)"><small>④</small><b>대화 템플릿<br><small>역할·순서</small></b></div>
+  </div>
+  <div class="steps" style="margin-top:8px">
+    <div class="st"><span class="n">S</span><span class="t"><b class="b">SFT(지도 미세조정)</b> — 사람이 쓴 <b>지시-응답 쌍</b>으로 조정. 질문 뒤에 어떤 답이 이어져야 하는지 직접 배운다</span></div>
+    <div class="st"><span class="n">I</span><span class="t"><b class="b">instruction tuning(지시 미세조정)</b> — 자연어 지시로 표현한 여러 과업 묶음으로 학습. 한 문장 명령이 아니라 <b>다양한 과업에서 지시-산출물 관계를 반복해서 본 이력</b></span></div>
+  </div>
+  <aside>SFT는 "이 지시엔 이런 답"이라는 시연을 직접 배웁니다. instruction tuning은 그것을 여러 과업으로 넓혀, 지시-산출물 관계 자체를 반복 학습하는 것입니다.</aside>
+</section>
+
+<!-- 8 InstructGPT -->
+<section class="slide" data-part="PART 2">
+  <h2>📊 InstructGPT — <span class="g">시연과 판단을 나눈다</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>1단계</small><b>SFT<br><small>시연</small></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:160px;border-color:var(--gr)"><small>2단계</small><b>보상 모델 학습<br><small>후보 순위 자료</small></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>3단계</small><b>PPO 강화학습</b></div>
+  </div>
+  <div class="big">평가 분포에서<br><span class="y">1.3B InstructGPT가 175B GPT-3보다 선호</span><small>단, 모든 과업·모델에서의 우월성이 아니다 — 모델 크기만으로 지시 준수 품질을 예측하지 말 것</small></div>
+  <div class="hl">'이 지시엔 이런 답'(<b>시연</b>)과 '여러 답 중 이런 답을 선호'(<b>판단</b>)를 구별한다.</div>
+  <aside>1.3B가 175B보다 선호됐다는 결과는 강렬하지만, 특정 평가 분포에서의 선호일 뿐입니다. 모든 과업과 모델에 걸친 우월성으로 확대 해석하면 안 됩니다.</aside>
+</section>
+
+<!-- 9 FLAN -->
+<section class="slide" data-part="PART 2">
+  <h2>📈 FLAN — <span class="g">지시로 배운 일반화</span></h2>
+  <ul class="pts">
+    <li><b>60개 넘는 NLP 과업</b>을 자연어 지시 템플릿으로 학습</li>
+    <li>평가 <b>25개 중 20개</b>에서 zero-shot GPT-3보다 높음</li>
+    <li>여러 지시-응답 관계를 배운 모델이 <b>안 본 과업에도 어느 정도 일반화</b></li>
+  </ul>
+  <div class="big" style="margin-top:12px"><span class="y">25개 중 20개</span> 과업에서 zero-shot GPT-3 상회<small>단, 학습 분포 밖 낯선 규칙·희귀 언어·모순 조건까지 보장하진 않는다</small></div>
+  <div class="hl">새 지시가 실패하면 문장만이 아니라 <b>그 모델이 본 과업 분포와의 거리</b>를 의심한다.</div>
+  <aside>FLAN은 지시 미세조정이 일반화를 낳는다는 증거입니다. 그러나 일반화는 학습 분포 근처까지입니다. 낯선 규칙이나 희귀 언어에서 실패하면, 프롬프트 문장보다 분포 거리를 먼저 봐야 합니다.</aside>
+</section>
+
+<!-- 10 선호 학습 세 길 -->
+<section class="slide" data-part="PART 2">
+  <h2>🛤️ 선호를 반영하는 <span class="g">여러 길</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">R</span><span class="t"><b class="g">RLHF</b> — 사람 피드백 선호를 쓰는 강화학습(보상 모델+PPO). 유용하지만 <b>보상 모델·강화학습 운영의 복잡성·안정성</b> 문제. 친절한 답을 보장하는 마법이 아니라 특정 데이터·기준 아래 선택된 학습 경로</span></div>
+    <div class="st"><span class="n">D</span><span class="t"><b class="g">DPO</b> — 선호 쌍으로 별도 보상 모델·강화학습 없이 <b>직접 정책 최적화</b>. DPO의 존재는 모든 후속 모델이 같은 절차를 쓴다는 뜻이 아니라 <b>선호 반영 구현이 하나가 아니라는 뜻</b></span></div>
+    <div class="st"><span class="n">G</span><span class="t"><b class="g">GRPO</b> — 한 문제에서 여러 답을 뽑아 <b>그룹 내 상대적 보상</b>으로 학습하는 PPO 변형(DeepSeekMath·DeepSeek-R1). RLHF의 동의어 아님 — 어떤 보상·검증을 넣었는지가 행동을 좌우</span></div>
+  </div>
+  <div class="hl"><b>선호 학습</b> = 후보 응답 중 무엇을 더 낫다고 볼지의 신호로 행동을 조정하는 계열.</div>
+  <aside>제품 답변이 공손하고 형식을 지켜도 특정 방법 하나의 효과로 단정할 수 없습니다. GRPO의 그룹 상대 보상이 반드시 사람 선호인 것도 아니어서, "추론을 더 요구하면 언제나 낫다"식 해석을 피해야 합니다.</aside>
+</section>
+
+<!-- 11 계보 압축 표 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧭 계보를 <span class="g">설계 판단으로 압축</span></h2>
+  <table class="t">
+    <tr><th>계보 단계</th><th>학습 신호</th><th>바뀌는 행동</th><th>오해하면 안 될 것</th></tr>
+    <tr><td>사전학습</td><td>다음 토큰 예측(대규모 텍스트)</td><td>언어 규칙·넓은 지식 패턴 이어쓰기</td><td>업무 절차·안전 경계가 자동 보장 안 됨</td></tr>
+    <tr><td>SFT</td><td>사람이 만든 지시-모범 응답</td><td>요청 형식·과업 수행 기본 습관</td><td>예시에 없던 경계 입력까지 정확해진 증거 아님</td></tr>
+    <tr><td>선호 학습</td><td>두 응답 중 나은 쪽 비교</td><td>말투·거절·유용성 경향 조정</td><td>모델 선호가 제품 정책·법적 판단 대신 못함</td></tr>
+    <tr><td>대화 템플릿</td><td>역할 토큰·메시지 순서</td><td>system·developer·user 구획 읽는 방식</td><td>같은 문장을 다른 위치에 넣어도 항상 같은 효과는 아님</td></tr>
+  </table>
+  <div class="hl">모델 스냅샷·템플릿을 바꾸면 성공 문의만 재실행하는 걸로는 부족 — <b>같은 판정표로 전후 비교</b>한다.</div>
+  <aside>고객지원 모델을 새 스냅샷으로 바꾸거나 템플릿을 교체하면, 주문번호 없는 배송일 질문, 문서에 지시처럼 보이는 문장이 섞인 문의, JSON이 비어야 하는 문의를 같은 판정표로 전후 비교해야 합니다. 이전 통과가 새 조합의 통과를 보증하지 않습니다.</aside>
+</section>
+
+<!-- 12 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">형식과 긴장</h2>
+    <p style="margin-top:11px">대화 형식도 학습된 인터페이스다</p>
+    <span class="who">few-shot · 인컨텍스트 러닝 · chat template</span>
+  </div>
+  <aside>지시 따르기가 학습된 행동이라면, 그 지시를 담는 대화 형식 역시 학습된 인터페이스입니다. 이 파트에서 형식의 작동과 The Bitter Lesson이 남기는 긴장을 봅니다.</aside>
+</section>
+
+<!-- 13 형식은 학습된 인터페이스 -->
+<section class="slide" data-part="PART 3">
+  <h2>💬 대화 형식도 <span class="g">학습된 인터페이스</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">F</span><span class="t"><b class="b">few-shot</b> — 입력에 입출력 예시 몇 개로 <b>과업 경계·형식</b>을 보인다</span></div>
+    <div class="st"><span class="n">I</span><span class="t"><b class="b">인컨텍스트 러닝</b> — 가중치를 이 호출 중 업데이트하지 않은 채 예시·문맥으로 응답 패턴을 맞추는 능력. 예시는 <b>학습된 능력을 호출하는 조건</b>이지, 데이터 부족·모순 과업을 해결하는 증거가 아니다</span></div>
+    <div class="st"><span class="n">C</span><span class="t"><b class="b">chat template</b> — system·user·assistant 역할을 특수 토큰·순서로 직렬화하는 대화 형식(모델마다 역할명·제어 토큰이 다를 수 있음)</span></div>
+  </div>
+  <div class="hl">같은 자연어라도 <b>올바른 템플릿 안의 user 지시</b>인지 <b>평문에 섞인 문자열</b>인지에 따라 다르게 작동 — 지시 따르기가 학습된 형식임을 보여 주는 실무 증거.</div>
+  <aside>few-shot과 인컨텍스트 러닝은 별개의 학습이 아니라, 예시로 이미 학습된 능력을 불러내는 방식입니다. chat template은 같은 문장이 위치에 따라 다르게 작동함을 보여, 형식이 학습되었다는 사실을 실무에서 확인시킵니다.</aside>
+</section>
+
+<!-- 14 The Bitter Lesson -->
+<section class="slide" data-part="PART 3">
+  <h2>🪨 The Bitter Lesson과 <span class="g">설계자의 긴장</span></h2>
+  <p>Sutton(2019): 체스·바둑·음성·비전 역사에서 사람이 손으로 설계한 지식보다 <b>계산 규모를 활용한 탐색·학습이 장기적으로 이겼다</b>는 역사적 주장(실험 결과 아님).</p>
+  <div class="grid2" style="margin-top:6px">
+    <div class="box">
+      <h3><span class="r">학습에 맡길 수 있는 것</span></h3>
+      <p>규모가 커질수록 사람의 조정 <b>일부는 모델 안으로</b> 들어갈 수 있다.</p>
+    </div>
+    <div class="box">
+      <h3><span class="g">밖에 남는 것</span></h3>
+      <p>고객의 실제 정책·이번 문서 원문·확인 기준 같은 <b>과업 고유 맥락과 검증.</b></p>
+    </div>
+  </div>
+  <div class="hl">지시 설계는 인간 규칙을 다시 심는 일일까, 이번 과업의 <b>목표·자료 경계를 전달</b>하는 일일까 — 어디까지 학습에 맡길지는 <b>계속 측정할 설계 선택</b>이다.</div>
+  <aside>The Bitter Lesson은 손으로 심은 지식이 규모에 밀렸다는 역사적 관찰입니다. 그렇다고 모든 조정이 사라지는 것은 아닙니다. 이번 고객의 정책과 문서 원문, 확인 기준은 여전히 밖에서 계약으로 적어야 하는 영역입니다.</aside>
+</section>
+
+<!-- 15 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part">
+    <div class="pno">4</div>
+    <h2 style="margin:0">설계자에게 남는 세 판단</h2>
+    <p style="margin-top:11px">계보를 알고 나면 무엇을 하는가</p>
+    <span class="who">이식성 · 오진단 방지 · 독립 검증</span>
+  </div>
+  <aside>계보를 이해했으면 실무의 판단으로 옮깁니다. 지시의 이식성, 실패 원인의 환원 금지, 안전과 권한의 독립 검증 — 세 가지입니다.</aside>
+</section>
+
+<!-- 16 세 판단 -->
+<section class="slide" data-part="PART 4">
+  <h2>🧱 설계자에게 남는 <span class="g">세 판단</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>지시는 모델 독립적 마법 문장이 아니다</b> — 모델·스냅샷·언어·대화 형식을 바꾸면 대표 평가셋에서 다시 측정. 성공 사례 한 개는 이식성의 증거가 아니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>실패 원인을 지시문 한 줄로 환원하지 말 것</b> — 형식을 놓쳤다면 과업 모호성·chat template·디코딩 설정·SFT 데이터 분포가 함께 후보. 변경/고정 조건을 기록해 오진단 방지</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>안전·권한은 지시 준수 학습에만 맡길 수 없다</b> — 거절을 잘해 보여도 도구 호출 권한·주문 변경·개인정보 접근은 애플리케이션이 독립 검사</span></div>
+  </div>
+  <div class="hl">지시는 <b>기대 행동을 조정하는 층</b>, 검증·권한 부여는 <b>기대가 빗나가도 남아야 하는 층</b>이다.</div>
+  <aside>세 판단은 각각 이식성, 오진단 방지, 방어의 이중화를 겨눕니다. 특히 3번은 지시와 검증을 서로 다른 층으로 분리하라는 태도로, 이 강의 전체를 관통합니다.</aside>
+</section>
+
+<!-- 17 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 4문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">지시 따르기는 처음부터 있던 기능이 아니라 <b>데이터와 피드백으로 형성된 행동</b>이다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">계보는 <b>base LM → SFT → 선호 학습(RLHF·DPO·GRPO) → 대화 템플릿</b>으로 이어진다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>InstructGPT</b>(1.3B가 175B보다 선호)·<b>FLAN</b>(25개 중 20개)은 지시 학습의 힘과 <b>한계</b>를 함께 보인다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">학습된 성질 위에서 작동한다면, <b>지시를 조립하는 방법도 배울 수 있다.</b></span></div>
+  </div>
+  <div class="hl">더 읽기 — InstructGPT · FLAN(Wei 외) · Language Models are Few-Shot Learners · DPO · DeepSeekMath·DeepSeek-R1(GRPO) · Hugging Face Chat templates · Sutton, The Bitter Lesson.</div>
+  <aside>4번이 이 소단원의 결론입니다. 지시가 학습된 행동이라는 사실은 무력함이 아니라 조립 가능성의 근거입니다. 수치는 반드시 원 출처의 평가 분포 안에서만 읽으세요.</aside>
+</section>
+
+<!-- 18 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> "능력이 커졌다"는 관찰과 "의도 준수"를 왜 구별해야 하나?</div>
+    <div class="q"><b>Q2.</b> 지시가 형성되는 계보의 <b>네 단계</b>는 무엇인가?</div>
+    <div class="q"><b>Q3.</b> InstructGPT에서 <b>1.3B가 175B보다 선호</b>됐다는 결과를 어떻게 읽어야 하나?</div>
+    <div class="q"><b>Q4.</b> 같은 자연어 문장이 <b>chat template</b>의 위치에 따라 다르게 작동하는 이유는?</div>
+    <div class="q"><b>Q5.</b> 안전·권한을 지시 준수 학습에만 맡기면 안 되는 이유는?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q3과 Q5가 오늘의 핵심 태도를 가장 잘 가립니다.</aside>
+</section>
+
+<!-- 19 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 넓은 과업 수행 능력과, 이번 요청의 <b>경계·형식·금지</b>를 안정적으로 따르는 성질은 별개다. 능력 증가가 의도 자동 준수를 보장하지 않는다.</div>
+    <div class="q a"><b>A2.</b> <b>base LM</b>(다음 토큰 예측) → <b>SFT·지시 미세조정</b> → <b>선호 학습</b>(RLHF·DPO·GRPO) → <b>대화 템플릿</b>.</div>
+    <div class="q a"><b>A3.</b> 특정 <b>평가 분포에서의 선호</b>일 뿐 모든 과업·모델의 우월성이 아니다. 모델 크기만으로 지시 준수 품질을 예측하지 않는다.</div>
+    <div class="q a"><b>A4.</b> 올바른 템플릿 안의 <b>user 지시</b>인지, <b>평문에 섞인 문자열</b>인지에 따라 작동이 갈린다 — 지시 따르기가 학습된 형식이기 때문.</div>
+    <div class="q a"><b>A5.</b> 거절을 잘해 보여도 <b>도구 권한·주문 변경·개인정보 접근</b>은 애플리케이션이 독립 검사해야 한다. 검증·권한은 기대가 빗나가도 남아야 하는 층.</div>
+  </div>
+  <aside>A3과 A5를 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다. 수치는 언제나 원 출처의 평가 조건과 함께 인용하세요.</aside>
+</section>
+
+<!-- 20 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>배울 수 있는 성질 🧬</h1>
+    <div class="big" style="margin-top:26px">지시 따르기가 <span class="y">형성된 행동</span>이라면<br>지시를 <span class="y">조립하는 방법</span>도 배울 수 있다<br><br>그 조립의 다음 물음 — <span class="y">무엇을 근거로, 누구의 말을 먼저</span></div>
+    <p class="sub" style="margin-top:24px">왜 지시가 통하는가 — 여기까지 · 다음: 출처와 우선권</p>
+  </div>
+  <aside>지시는 학습된 성질 위에서 작동합니다. 그 성질을 알고 나면 다음 질문은 자연스럽습니다 — 모델은 무엇을 근거로 답하고, 여러 지시가 충돌할 때 누구의 말을 먼저 따르는가. 다음 소단원 '출처와 우선권'에서 이어집니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

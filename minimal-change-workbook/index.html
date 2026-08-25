@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>실패별 최소 변경 워크북 · 한 번에 한 조건만</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 지시 설계 · ⑩</span>
+    <h1 style="margin:18px 0">실패별<br>최소 변경 워크북</h1>
+    <p class="sub">한 번에 한 조건만 — 대조를 지키는 재실행</p>
+  </div>
+  <aside>기록표에서 실패 표시가 난 행을 어떻게 고칠지 다룹니다. 실패에 이름을 붙이고, 증상에서 유형으로 가는 순서를 정하고, 한 번에 한 조건만 바꿔 재실행한 뒤 기존 기준으로 다시 판정합니다. 전부 한꺼번에 고치면 왜 배울 것이 안 남는지도 봅니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>PART 1</small><b>실패에 이름</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--pp)"><small>PART 2</small><b class="p">판별 절차</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>PART 3</small><b class="g">한 조건만</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gold)"><small>PART 4</small><b>대조 붕괴</b></div>
+  </div>
+  <ul class="pts">
+    <li>실패를 <b>다섯 유형</b>으로 나눠 수정할 부품을 고른다</li>
+    <li>증상에서 유형으로 가는 <b>판별 절차</b>로 질문의 순서를 정한다</li>
+    <li><b>한 번에 한 조건만</b> 바꿔 재실행하고 변경 로그에 남긴다</li>
+    <li>전부 고치기가 <b>대조를 없애는</b> 까닭을 확인한다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 이름은 비난 꼬리표가 아니라 <b>다음 변경의 가설을 좁히는 분류 도구</b>다.</div>
+  <aside>워크북은 실패를 한 자리로 옮겨 이름 붙이고, 딱 한 조건만 바꿔 재실행하고, 그 기록을 다음 지시 설계의 재료로 쌓는 흐름입니다. 오늘은 이 흐름 전체를 한 바퀴 돕니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">실패를 이름 붙여 한 자리로</h2>
+    <p style="margin-top:11px">'답이 별로'는 실패의 이름이 아니다</p>
+    <span class="who">모호함 · 과잉 · 누락 · 충돌 · 형식 드리프트</span>
+  </div>
+  <aside>기록표에서 실패한 행을 고칠 때 먼저 결과의 어느 문장 혹은 빈칸이 어느 기준을 어겼는지 적습니다. '답이 별로입니다'라는 말로는 수정할 부품을 고를 수 없습니다. 그래서 실패를 다섯 유형으로 분류합니다.</aside>
+</section>
+
+<!-- 4 다섯 유형 -->
+<section class="slide" data-part="PART 1">
+  <h2>🏷️ 실패의 <span class="g">다섯 유형</span></h2>
+  <table class="t">
+    <tr><th>유형</th><th>정의</th></tr>
+    <tr><td>모호함</td><td>같은 요청을 여러 방식으로 해석할 여지가 남음</td></tr>
+    <tr><td>과잉</td><td>조건이 너무 많거나 적용 범위를 흐려 길이·우선순위가 무너짐</td></tr>
+    <tr><td>누락</td><td>필수 항목·예외·빈값 행동이 빔</td></tr>
+    <tr><td>충돌</td><td>두 조건 또는 지시와 자료가 동시에 지켜질 수 없음</td></tr>
+    <tr><td>형식 드리프트</td><td>약속한 키·순서·언어·길이·객체 모양에서 벗어남</td></tr>
+  </table>
+  <div class="hl">이름은 <b>비난 꼬리표가 아니라</b> 다음 변경의 가설을 좁히는 분류 도구다.</div>
+  <aside>예를 들어 C안이 JSON 앞뒤에 설명을 붙이면 형식 드리프트, question이 비면 누락입니다. 같은 증상도 원문에 맞춰 어느 유형인지 판별해야 합니다.</aside>
+</section>
+
+<!-- 5 증상 -> 유형 -> 가설 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔎 증상에서 <span class="g">최소 변경 가설</span>로</h2>
+  <table class="t">
+    <tr><th>관측한 증상</th><th>먼저 판별할 유형</th><th>최소 변경 가설</th></tr>
+    <tr><td>배송일을 단정·일반 수치를 개인 주문처럼 제시</td><td>누락/모호함</td><td>입력 밖 사실을 확정 말고, 모르면 확인 정보 요청을 한 문장으로</td></tr>
+    <tr><td>확인 정보가 주문번호·운송장·상품명으로 길게 흩어짐</td><td>모호함/과잉</td><td>반드시 물을 정보 한 가지 지정 또는 후보 짧게 제한</td></tr>
+    <tr><td>JSON 밖에 인사말·코드 펜스가 붙음</td><td>형식 드리프트</td><td>JSON 객체만 출력·다른 문자 금지 문장 보강</td></tr>
+    <tr><td>친절성·기술 문서 톤 동시 요구로 답이 과도하게 딱딱</td><td>충돌/과잉</td><td>실제 수신자를 하나로 정하고 다른 역할 조건 제거</td></tr>
+  </table>
+  <aside>B안이 확인 정보를 안 물으면, 예외 처리가 누락인지 아니면 '정보 한 가지'가 무엇인지 모호한지 원문에 맞춰 판별합니다. 유형은 하나의 가설을 고르게 해 주는 도구입니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">증상에서 유형으로 가는 절차</h2>
+    <p style="margin-top:11px">기준을 어긴 문장·빈 필드를 표시한 뒤 순서대로 묻는다</p>
+    <span class="who">다섯 질문 · 질문의 순서</span>
+  </div>
+  <aside>실패 행을 펼쳐 결과 원문에서 기준을 어긴 문장이나 빈 필드를 표시합니다. 그런 다음 정해진 순서대로 다섯 질문을 던져 유형을 정합니다.</aside>
+</section>
+
+<!-- 7 판별 5단계 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧭 판별 절차 — <span class="g">다섯 질문</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">여러 해석이 가능한 표현이 남았나 → <b>모호함</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t">반드시 있어야 할 사실·질문·필드·예외가 빠졌나 → <b>누락</b> <small>(두 조건이 함께면 증상에 가장 가까운 한 유형을 잠정 선택, 나머지는 비고에)</small></span></div>
+    <div class="st"><span class="n">3</span><span class="t">두 조건을 동시에 지키면 어긋나나 → <b>충돌</b></span></div>
+    <div class="st"><span class="n">4</span><span class="t">조건이 너무 많아 우선순위·적용 범위를 못 가리나 → <b>과잉</b></span></div>
+    <div class="st"><span class="n">5</span><span class="t">출력이 약속한 키·순서·언어·길이·객체 모양을 벗어났나 → <b>형식 드리프트</b></span></div>
+  </div>
+  <aside>예: 주문번호 없는데 날짜를 단정한 답은, 먼저 근거 밖 사실 처리가 비었는지 묻고, JSON 밖 인사말은 내용의 친절성과 분리해 형식 드리프트로 봅니다.</aside>
+</section>
+
+<!-- 8 판별 목적 -->
+<section class="slide" data-part="PART 2">
+  <h2>🎯 목적은 <span class="g">딱지 붙이기가 아니다</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="r">아닌 것</h3><p>한 답에 결함 딱지 하나 붙이기가 목적이 아니다.</p></div>
+    <div class="box"><h3 class="g">인 것</h3><p>수정 가능한 문장을 고르기 위해 <b>질문의 순서를 정하는 것</b>.</p></div>
+  </div>
+  <div class="hl">같은 <b>question 빈칸</b>도 — 필수 필드가 빠졌으면 <b>누락</b>, 질문할 정보(주문번호? 운송장?)를 안 정했으면 <b>모호함</b>.</div>
+  <aside>같은 증상이라도 원인이 다르면 고칠 문장이 달라집니다. 그래서 유형은 결론이 아니라 다음에 어느 문장을 만질지 좁히는 질문의 순서입니다.</aside>
+</section>
+
+<!-- 9 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">한 조건만 바꾸는 재실행</h2>
+    <p style="margin-top:11px">대조 실험의 가장 작은 형태</p>
+    <span class="who">고정 → 한 문장 변경 → 재판정</span>
+  </div>
+  <aside>수정은 한 번에 한 조건만 합니다. 모델명·파라미터·사용자 입력·채점 기준·실행 경로·나머지 지시 문장을 고정하고, 한 문장 혹은 한 필드만 바꿉니다. 이것이 대조 실험의 가장 작은 형태입니다.</aside>
+</section>
+
+<!-- 10 한 조건만 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔬 <span class="g">한 번에 한 조건만</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:180px;border-color:var(--gy)"><small>고정</small><b>모델·파라미터·입력·<br>기준·실행 경로·나머지 문장</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:170px;border-color:var(--gr)"><small>변경</small><b>한 문장/한 필드만</b></div>
+  </div>
+  <div class="hl">B안에서 근거 없는 날짜가 문제면 <b>'입력에 없는 배송일을 추정·단정 말라'만</b> 추가한 B′안 — 동시에 JSON·역할·예시·길이 제한을 <b>더하지 않는다</b>.</div>
+  <p>여러 조건을 함께 만지면 어느 변경이 효과를 냈는지 연결할 수 없다.</p>
+  <aside>B′안은 문제로 지목한 조건 하나만 다릅니다. JSON 전용, 역할 지정, 예시 추가, 길이 제한 같은 다른 변경을 같이 얹으면 이미 한 조건 실험이 아니게 됩니다.</aside>
+</section>
+
+<!-- 11 재실행과 재판정 -->
+<section class="slide" data-part="PART 3">
+  <h2>♻️ 같은 입력으로 <span class="g">다시 판정</span></h2>
+  <ul class="pts">
+    <li>같은 입력으로 재실행하고 <b>기존 이진 기준을 다시 판정</b> — 새 기준을 만들어 B′안에 유리하게 하면 전후 비교가 불가능</li>
+    <li>실패가 사라졌는지뿐 아니라 <b>이전에 통과하던 문체·정보 요청이 안 무너졌는지</b>도 확인</li>
+    <li>무작위성 설정이면 <b>여러 회 실행</b>해 통과/실패 횟수를 기록</li>
+    <li>오류 응답은 품질 점수에 안 섞고 <b>실행 실패로 분리</b></li>
+  </ul>
+  <div class="hl">'더 명확하게 수정'이 아니라 <b>실제로 넣거나 뺀 문장</b>을 적고, 예상과 달라도 그대로 보존한다.</div>
+  <aside>답이 길어졌다면 길이만 줄인 결과로 처리하지 말고, 어떤 조건이 길이 증가를 만들었는지를 다음 가설로 삼습니다. 원문 파일과 로그가 연결되면 다른 사람이 재실행해 판정을 확인할 수 있습니다.</aside>
+</section>
+
+<!-- 12 변경 로그 표 -->
+<section class="slide" data-part="PART 3">
+  <h2>📋 변경 로그 — <span class="g">한 줄에 한 변경</span></h2>
+  <table class="t">
+    <tr><th>변경 번호</th><th>고정한 조건</th><th>딱 한 변경</th><th>이진 판정 변화</th></tr>
+    <tr><td>01</td><td>B안·같은 입력·모델·기준</td><td>날짜 추정 금지 문장 추가</td><td>안전: 실패→통과/변화 없음</td></tr>
+    <tr><td>02</td><td>01의 통과 조건 전부</td><td><code>question</code> 비우지 않기 추가</td><td>형식: 실패→통과/변화 없음</td></tr>
+  </table>
+  <div class="hl">각 변경은 <b>앞 단계에서 통과한 조건 전부를 고정</b>한 위에 하나만 더한다 — 그래야 이번 변화의 원인이 이번 한 문장으로 좁혀진다.</div>
+  <aside>02가 고정한 것은 원래 입력만이 아니라 01에서 통과 판정을 만든 조건 전부입니다. 이렇게 누적 고정을 해야 각 행의 판정 변화를 그 행의 한 변경에 연결할 수 있습니다.</aside>
+</section>
+
+<!-- 13 워크북 다섯 칸 -->
+<section class="slide" data-part="PART 3">
+  <h2>🗂️ 워크북 <span class="g">다섯 칸</span> 양식</h2>
+  <table class="t">
+    <tr><th>변경 전 지시</th><th>변경한 조건</th><th>기대</th><th>결과</th><th>판정</th></tr>
+    <tr><td><code>배송일을 안내합니다.</code></td><td><code>입력에 없는 배송일은 단정 말고 주문번호만 질문합니다.</code></td><td>근거 없는 날짜가 사라짐</td><td>날짜 없이 주문번호를 물음</td><td>안전: 실패→통과</td></tr>
+  </table>
+  <ul class="pts">
+    <li><b>변경 전 지시</b> — 실제 실행한 문장만 · <b>변경한 조건</b> — 넣거나 뺀 한 문장/필드만</li>
+    <li><b>기대</b> — 관측 가능한 증상 · <b>결과</b> — 재실행 원문에서 확인한 사실</li>
+    <li><b>판정</b> — 기존 기준의 실패/통과/변화 없음</li>
+  </ul>
+  <aside>다섯 칸은 각각 한 줄씩 채웁니다. '더 명확하게' 같은 요약이 아니라 실제로 실행한 문장, 실제로 바꾼 한 조건, 원문에서 확인한 사실을 적어야 다른 사람이 재현할 수 있습니다.</aside>
+</section>
+
+<!-- 14 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part">
+    <div class="pno">4</div>
+    <h2 style="margin:0">전부 고치기가 대조를 없앤다</h2>
+    <p style="margin-top:11px">좋아져도, 나빠져도 원인을 못 찾는다</p>
+    <span class="who">대조 붕괴</span>
+  </div>
+  <aside>실패한 답을 보면 역할·제약·예시·스키마·모델까지 한꺼번에 바꾸고 싶어집니다. 그러나 전부 고치면 좋아져도 어느 변경이 효과를 냈는지 모르고, 나빠져도 어느 조건이 충돌했는지 못 찾습니다.</aside>
+</section>
+
+<!-- 15 대조 붕괴 -->
+<section class="slide" data-part="PART 4">
+  <h2>💥 <span class="r">대조 붕괴</span>란</h2>
+  <div class="big">비교 양쪽이 너무 달라져<br><span class="y">차이를 한 원인에 연결할 다리</span>가 사라지는 것</div>
+  <div class="hl">예: B안이 날짜를 지어내고 <code>question</code>을 비우며 인사말까지 붙임 → 근거 범위·빈 필드 금지·JSON 전용을 <b>한 번에</b> 넣어 다 통과해도, 날짜 단정이 <b>어느 문장 때문에</b> 사라졌는지 모른다.</div>
+  <p>다음 입력에서 날짜 단정만 되돌아오면 세 조건을 다시 함께 만져야 한다 — <b>고쳐진 결과는 남아도 재사용할 설계 지식은 안 남는다.</b></p>
+  <aside>question이 채워진 게 빈 필드 금지 때문인지 예시 때문인지도 알 수 없습니다. 결과는 좋아졌지만 왜 좋아졌는지 모르므로, 같은 유형의 다음 실패에서 다시 처음부터 헤매게 됩니다.</aside>
+</section>
+
+<!-- 16 예외와 재료 -->
+<section class="slide" data-part="PART 4">
+  <h2>🧰 예외, 그리고 <span class="g">로그가 남기는 것</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">묶</span><span class="t"><b>긴급 복구</b>에선 여러 수정을 함께 배포해도 된다. 단 기록엔 <b>묶음 변경</b>이라 표시하고 효과 원인을 단정하지 않으며, 안정화 뒤 하나씩 되돌리거나 추가해 어느 약속이 필요한지 확인</span></div>
+    <div class="st"><span class="n">보</span><span class="t"><b>단일 변경</b>은 느린 형식주의가 아니라 다음 오류 때 되짚을 수 있는 <b>실무적 보험</b></span></div>
+    <div class="st"><span class="n">재</span><span class="t"><b>변경 로그가 쌓이면</b> 다음 지시 설계의 재료 — 같은 유형의 새 실패에 과거 행을 찾아 <b>이미 효과 없던 가설을 피한다</b></span></div>
+  </div>
+  <div class="hl">성공한 수정만 남기지 말고 <b>변화 없음·새 실패도 보존</b>해, 다음 계약이 추측이 아닌 <b>관측</b>에서 시작하게.</div>
+  <aside>여러 입력에서 반복 통과한 최소 변경은 역할·근거·제약·형식 중 어느 부품을 먼저 점검할지 알려 줍니다. 그래서 실패와 변화 없음의 기록도 성공만큼 값진 자산입니다.</aside>
+</section>
+
+<!-- 17 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 실패의 <b>다섯 유형</b>은 각각 무엇인가?</div>
+    <div class="q"><b>Q2.</b> 판별 절차에서 가장 <b>먼저</b> 던지는 질문과 그 유형은?</div>
+    <div class="q"><b>Q3.</b> 재실행할 때 무엇을 <b>고정</b>하고 무엇을 <b>바꾸는가</b>?</div>
+    <div class="q"><b>Q4.</b> 재실행 뒤 <b>판정 기준</b>은 어떻게 다뤄야 하나?</div>
+    <div class="q"><b>Q5.</b> <b>대조 붕괴</b>란 무엇이며 왜 문제인가?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q3와 Q5가 오늘의 핵심을 가장 잘 가립니다.</aside>
+</section>
+
+<!-- 18 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> <b>모호함</b>(여러 해석 여지) · <b>과잉</b>(조건 과다로 길이·우선순위 붕괴) · <b>누락</b>(필수 항목·예외·빈값 행동 빔) · <b>충돌</b>(두 조건 동시 준수 불가) · <b>형식 드리프트</b>(키·순서·언어·길이·모양 이탈).</div>
+    <div class="q a"><b>A2.</b> "여러 해석이 가능한 표현이 남았나" → <b>모호함</b>부터 묻는다.</div>
+    <div class="q a"><b>A3.</b> <b>고정</b>: 모델·파라미터·입력·채점 기준·실행 경로·나머지 문장. <b>변경</b>: 한 문장/한 필드만.</div>
+    <div class="q a"><b>A4.</b> <b>기존 이진 기준을 그대로 다시 판정</b> — 새 기준을 만들면 전후 비교가 불가능. 무작위성이면 여러 회 실행해 횟수를 기록.</div>
+    <div class="q a"><b>A5.</b> 비교 양쪽이 너무 달라져 <b>차이를 한 원인에 연결할 다리가 사라지는 것</b>. 좋아져도 원인을, 나빠져도 충돌을 못 찾아 <b>설계 지식이 안 남는다</b>.</div>
+  </div>
+  <aside>A3과 A4를 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다. 이 두 가지가 대조를 지키는 재실행의 뼈대입니다.</aside>
+</section>
+
+<!-- 19 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>한 번에 한 조건만 🔬</h1>
+    <div class="big" style="margin-top:26px">실패에 이름을 붙이고<br><span class="y">한 조건만</span> 바꿔 재실행하라<br><br>변화 없음·새 실패까지 남기면<br>다음 계약은 <span class="y">관측</span>에서 시작한다</div>
+    <p class="sub" style="margin-top:24px">실패별 최소 변경 워크북 — 여기까지 · 다음: 지시 설계의 원칙과 마무리</p>
+  </div>
+  <aside>한 조건의 효과를 재는 습관이 생겼습니다. 다음 소단원에서는 이 습관을 지시 설계 전반의 원칙으로 정리하고 마무리합니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

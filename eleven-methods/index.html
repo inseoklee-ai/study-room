@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>기초 프롬프트 실험 · 같은 질문, 열한 가지 방법</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 지시 설계 · ②</span>
+    <h1 style="margin:18px 0">기초 프롬프트 실험</h1>
+    <p class="sub">같은 질문, 열한 가지 방법 — 눈으로 비교하기</p>
+  </div>
+  <aside>이 소단원은 프롬프트가 답을 바꾼다는 말을 설명이 아니라 실측으로 확인합니다. 로컬 모델 qwen3.5:2b에 같은 질문을 여러 방식으로 보내 답의 모양·내용·비용 차이를 직접 관찰하고, 그 차이를 디코딩 노브의 원리로 설명합니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>PART 1</small><b>실험을 설계한다</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>PART 2</small><b class="g">결과를 실측한다</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>PART 3</small><b>노브로 설명한다</b></div>
+  </div>
+  <ul class="pts">
+    <li>같은 모델·같은 질문을 <b>여러 프롬프트</b>로 보내는 호출 루프를 짠다</li>
+    <li>계산·형식·길이·함정을 <b>문자 수와 파싱</b>으로 실측한다</li>
+    <li>함정 질문 하나에 <b>열한 가지 방법</b>을 적용해 판정 표를 만든다</li>
+    <li>결과 차이를 <b>logit·softmax·temperature</b>의 원리로 설명한다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — <b>지시를 따랐는가</b>와 <b>내용이 사실인가</b>를 하나로 합쳐 판단하지 않는다.</div>
+  <aside>세 파트를 지나면, 기법의 이름이 결과를 보증하지 않으며 정답·형식·비용을 같은 표에 남겨야 무엇이 바뀌었는지 구분할 수 있음을 알게 됩니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">실험을 설계한다</h2>
+    <p style="margin-top:11px">같은 질문을 눈으로 비교할 수 있게 호출을 짠다</p>
+    <span class="who">qwen3.5:2b · Ollama · Claude SDK</span>
+  </div>
+  <aside>프롬프트는 입력 문장이고, 모델은 그 문장의 역할·형식·길이·금지 조건을 함께 해석합니다. 그래서 주제가 같아도 응답은 같지 않습니다. 이 파트에서는 그 차이를 관측 가능하게 만드는 실험 구조를 세웁니다.</aside>
+</section>
+
+<!-- 4 실험 설계 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔬 무엇을, 어떻게 <span class="g">관측하나</span></h2>
+  <ul class="pts">
+    <li>같은 모델·같은 질문이라도 프롬프트가 다르면 <b>답의 모양·내용이 크게 달라진다</b></li>
+    <li>두 관점 — <b>Claude SDK</b>(<b>query()</b>로 호출 구성) · <b>Ollama/LangChain</b>(로컬 서버·메시지 추상화)</li>
+    <li>이 교안이 실제 실행·기록한 경로 = <b>로컬 Ollama</b></li>
+    <li>가능한 일·불가능한 일을 함께 남기는 이유 — 결과는 모델만의 성질이 아니라 <b>호출 도구의 성질도 포함</b>하니까</li>
+  </ul>
+  <div class="hl"><b>판단 분리</b> — "지시를 따랐는가"와 "말한 내용이 사실인가"를 하나로 합쳐 판단하지 않는다.</div>
+  <aside>실험 결과가 순수한 모델 능력의 지표가 아니라는 점이 핵심입니다. 같은 모델이라도 어떤 하네스로 부르느냐에 따라 조절 가능한 변수가 달라지므로, 실측치는 늘 도구 조건과 함께 읽어야 합니다.</aside>
+</section>
+
+<!-- 5 짧은 호출 루프 -->
+<section class="slide" data-part="PART 1">
+  <h2>💻 짧은 호출 루프 <span class="g">(축약본)</span></h2>
+  <pre>PROMPTS = {
+  "basic":    "다음을 계산하세요: 25 × 14 - 87 ÷ 3",
+  "role_cot": "당신은 꼼꼼한 수학 교사입니다 …\n다음을 계산하세요: 25 × 14 - 87 ÷ 3",
+  "few_shot": "예: 18 × 5 - 12 ÷ 3은 90 - 4 = 86입니다 …",
+}
+for name, prompt in PROMPTS.items():
+    payload = {"model": "qwen3.5:2b",
+               "messages": [{"role": "user", "content": prompt}],
+               "stream": False, "think": False}  # think:false 없으면 추론이 content를 비움
+    # POST http://localhost:11434/api/chat → message.content 저장</pre>
+  <div class="hl">한 질문을 <b>여러 프롬프트로</b> 돌려 결과 텍스트를 파일로 남긴다. 비교의 출발점은 <b>재현 가능한 호출</b>.</div>
+  <aside>같은 질문을 basic, role_cot, few_shot 세 프롬프트로 보내고 각 응답을 파일로 저장합니다. 읽기 전 파일명·프롬프트·모델·설정을 나란히 적어 두어야, 나중에 어떤 조건에서 나온 답인지 되짚을 수 있습니다.</aside>
+</section>
+
+<!-- 6 thinking / think:false -->
+<section class="slide" data-part="PART 1">
+  <h2>🧠 thinking 모델과 <span class="g">think:false</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>thinking 모델</b> = 최종 답 전에 내부 추론을 생성한다. 기본 호출에선 추론 토큰이 컨텍스트를 다 써 <b><b>content</b>가 비는</b> 현상이 난다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b><b>think:false</b></b>로 이를 억제 — 이건 정확도 장치가 아니라 <b>비교할 최종 텍스트를 확보하는 호출 조건</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t">설정을 바꾸면 <b>파일명·조건 열에 반드시 남긴다</b>. 길거나 그럴듯해도 통과 근거로 쓰지 않는다</span></div>
+  </div>
+  <div class="hl"><b>temperature</b> = 다음 토큰의 무작위성. 낮을수록 같은 선택 가능성↑ — 그러나 낮은 값은 <b>외부 사실을 검증하지 않는다.</b></div>
+  <aside>think:false는 성능을 올리는 옵션이 아니라 비교 대상이 되는 최종 텍스트를 확보하기 위한 조건일 뿐입니다. 계산은 계산값을, JSON은 파싱과 항목을, 길이는 문자 수를, 금지어는 실제 포함 여부를 각각 확인해야 합니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">결과를 실측한다</h2>
+    <p style="margin-top:11px">계산·형식·길이·함정을 문자 수와 파싱으로 잰다</p>
+    <span class="who">297/952/153자 · "물류강" · 96자 · temp 0/1.5</span>
+  </div>
+  <aside>이제 인상 비평 대신 실측치를 봅니다. 모든 수치는 qwen3.5:2b에 실제로 보낸 결과이며, 형식 통과와 사실 정확이 서로 다른 것임을 데이터로 확인합니다.</aside>
+</section>
+
+<!-- 8 계산 실측 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧮 같은 계산, <span class="g">설명량은 3배 차</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--gy)"><small>기본</small><b>정답 321<br><span class="g">297자</span></b></div>
+    <span class="ar">·</span>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>역할+검산</small><b>정답 321<br><span class="g">952자</span></b></div>
+    <span class="ar">·</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gold)"><small>예시(few-shot)</small><b>정답 321<br><span class="g">153자</span></b></div>
+  </div>
+  <div class="big">세 프롬프트 모두 <span class="y">정답 321</span><br>그러나 설명량은 <span class="y">297 · 952 · 153자</span><small>같은 계산인데 프롬프트가 답의 "모양"을 바꾼다 — 정답 여부는 계산값 321로만 판정</small></div>
+  <div class="hl">프롬프트는 <b>무엇을 말할지뿐 아니라</b> 어떤 모양·설명량을 원할지도 함께 정한다.</div>
+  <aside>세 답 모두 계산값 321로 정답이지만, 역할+검산 프롬프트는 952자로 가장 길고 few-shot은 153자로 가장 짧습니다. 정답이라는 사실과 비용(길이)은 별개의 열로 기록해야 합니다.</aside>
+</section>
+
+<!-- 9 형식 실측 -->
+<section class="slide" data-part="PART 2">
+  <h2>📐 형식 준수 <span class="r">≠ 사실 정확</span></h2>
+  <table class="t">
+    <tr><th>관찰 대상</th><th>조건</th><th>실측 결과</th></tr>
+    <tr><td>형식</td><td>3대 강, 기본</td><td>661자 산문 — 형식 제한 없음</td></tr>
+    <tr><td>형식</td><td>JSON 배열만</td><td>63자, 파싱 성공, 틀린 <b class="r">"물류강"</b> 포함</td></tr>
+    <tr><td>형식</td><td>한 문장</td><td>82자, <b class="r">환각 포함</b> — 짧은 형식도 검증 대신 못 함</td></tr>
+  </table>
+  <pre>observed = '["한강", "낙동강", "물류강"]'
+items = json.loads(observed)   # 파싱 성공
+assert isinstance(items, list) and len(items) == 3   # 형식 통과
+# 그러나 "물류강"이 실제 강인지는 이 코드가 검증하지 않는다</pre>
+  <div class="hl"><b>JSON 파서만</b> 통과시켜선 사실상 옳다고 판정할 수 없다 — "물류강" 같은 매끈한 오류를 놓친다.</div>
+  <aside>JSON "물류강" 사례는 형식과 내용의 분리를 가장 선명하게 보여 줍니다. 파싱 성공은 형식 통과, 계산값 321은 계산 기준 통과, 금지어 미사용은 문자열 기준 통과 — 각 기준은 다른 실패를 잡고, 한 기준의 통과를 전체 품질로 부르면 안 됩니다.</aside>
+</section>
+
+<!-- 10 길이·부정·함정 실측 -->
+<section class="slide" data-part="PART 2">
+  <h2>📏 길이 · 부정 · <span class="g">함정</span> 실측</h2>
+  <table class="t">
+    <tr><th>관찰 대상</th><th>조건</th><th>실측 결과</th><th>확인할 점</th></tr>
+    <tr><td>길이</td><td>양자얽힘 기본 / 30자 이내 / 500자 이상</td><td>1903자 / <b class="r">96자</b> / 995자</td><td>"30자 이내"가 96자로 초과</td></tr>
+    <tr><td>부정</td><td>요약에서 "AI" 금지 3회</td><td>3회 모두 미사용</td><td>이 조건에선 지킴</td></tr>
+    <tr><td>함정</td><td>9.11 vs 9.9, temp 0, 3회</td><td>3회 모두 동일 오답 <b class="r">"9월 11일"</b></td><td>재현 ≠ 정답</td></tr>
+    <tr><td>함정</td><td>같은 질문, temp 1.5, 3회</td><td>1/3회만 정답 9.9</td><td>한 번의 정답은 안정적 탈출 근거 아님</td></tr>
+  </table>
+  <div class="hl">길이가 계약이면 <b>생성 뒤 문자 수를 재고</b> 초과 시 재생성·절단·사람 검토를 호출 바깥에 정한다.</div>
+  <aside>temp 0에서 세 번 문자 단위로 동일한 오답이 나온 것은 재현성일 뿐 정답이 아닙니다. temp 1.5의 1/3 성공은 온도가 문제를 해결한 게 아니라 샘플링 다양성의 부수 효과로 우연히 벗어난 것 — 이를 운영 규칙으로 삼으면 다시 실패합니다.</aside>
+</section>
+
+<!-- 11 관찰 네 가지 -->
+<section class="slide" data-part="PART 2">
+  <h2>🗂️ 관찰에서 남길 <span class="g">네 가지</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>프롬프트가 답을 바꾼다</b> — 무엇을 말할지뿐 아니라 어떤 모양·설명량을 원할지도 입력의 일부</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>형식 준수 ≠ 사실 정확</b> — 63자 JSON이 파싱돼도 "물류강"을 담았다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>temp 0은 재현성만, 정답 아님</b> — 세 번 같은 오답. 안정성이 수학적 해석을 교정하지 않는다</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>온도로 함정 탈출은 우연</b> — 3회 중 1회 성공을 규칙으로 삼으면 다시 실패</span></div>
+  </div>
+  <aside>이 네 가지가 이 소단원의 실측 결론입니다. 각 문장 뒤에는 앞서 본 구체적 수치가 붙어 있으므로, 인용할 때는 근거 수치와 함께 옮기는 습관이 필요합니다.</aside>
+</section>
+
+<!-- 12 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">노브로 설명한다</h2>
+    <p style="margin-top:11px">열한 방법을 한 함정에 걸고, 그 차이를 확률로 푼다</p>
+    <span class="who">logit · softmax · temperature · top_k · top_p</span>
+  </div>
+  <aside>같은 함정 질문 하나(9.11 vs 9.9, 정답 9.9)에 열한 가지 방법을 적용해 판정 표를 만들고, 왜 어떤 노브도 함정을 풀지 못했는지를 디코딩의 확률 분포로 설명합니다.</aside>
+</section>
+
+<!-- 13 열한 방법 판정 표 -->
+<section class="slide" data-part="PART 3">
+  <h2>🎲 열한 방법, <span class="g">한 함정</span> (정답 9.9)</h2>
+  <table class="t">
+    <tr><th>방법</th><th>판정</th><th>비고</th></tr>
+    <tr><td>zero-shot (think:false)</td><td><b class="g">정답</b></td><td>9.9</td></tr>
+    <tr><td>역할 부여(수학 교사)</td><td><b class="g">정답</b></td><td>thinking 8,178자</td></tr>
+    <tr><td>CoT(단계별)</td><td><b class="g">정답</b></td><td>thinking 4,765자</td></tr>
+    <tr><td>few-shot(예시 2개)</td><td><b class="g">정답</b></td><td>thinking 없이</td></tr>
+    <tr><td>Self-Consistency(3풀이 다수결)</td><td><b class="g">정답</b></td><td>응답 1,646자로 가장 김</td></tr>
+    <tr><td>부정 지시("소수점" 금지)</td><td><b class="r">오답</b></td><td>9/11 분수로 재해석</td></tr>
+    <tr><td>JSON 형식 강제</td><td><b class="r">오답</b></td><td>JSON 생성 중 응답 소진</td></tr>
+    <tr><td>temperature 0 / 1.5</td><td><b class="r">오답 / 무효</b></td><td>0은 "9월 11일" 재현, 1.5는 뒤죽박죽</td></tr>
+  </table>
+  <div class="hl"><b>기법의 이름이 결과를 보증하지 않는다.</b> 정답·형식·thinking 비용·응답 소진을 같은 표에 남겨야 무엇이 바뀌었는지 구분된다.</div>
+  <aside>정답끼리도 비용이 다릅니다. zero-shot 215자 대 Self-Consistency 1,646자, 역할 8,178자·CoT 4,765자·few-shot 0자 — 모두 정답이지만 남긴 비용은 제각각입니다. 표의 목적은 순위가 아니라 조건별 차이의 기록입니다.</aside>
+</section>
+
+<!-- 14 핵심 관찰 + SDK 경계 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔍 판정 표가 <span class="g">드러낸 것</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">부</span><span class="t"><b>부정 지시</b>는 답만 못 지킨 게 아니라 <b>해석을 바꿨다</b> — "소수점 쓰지 마라" → 9/11 분수. 금지어는 개념 공간에서 개념을 비활성화하는 부작용이 있어, 금지 문장 하나를 안전장치로 볼 수 없다</span></div>
+    <div class="st"><span class="n">비</span><span class="t"><b>think on/off는 비용 조건</b> — think:false(0자)와 think:true(10,249자) 모두 정답. 후자의 thinking이 약 5배. 이미 풀린 문제에서 thinking은 정확도 없이 비용만↑</span></div>
+    <div class="st"><span class="n">온</span><span class="t"><b>temperature는 추론 오류 교정 노브가 아님</b> — temp 0은 같은 오답 재현, temp 1.5는 일관성을 잃어 무효</span></div>
+  </div>
+  <div class="hl"><b>Claude SDK의 경계</b> — <b>query()</b>는 temperature·top_k를 노출하지 않는다. 노출 안 된 옵션은 기본값으로 채우지 말고 <b>"조절 불가"로 적는다.</b></div>
+  <aside>어떤 하네스를 고르느냐가 조절 가능한 변수를 결정합니다. 비교할 때는 "모델이 다르다"만 적지 말고 모델명·프롬프트·메시지 위치·시스템 지시·temperature·top_k·thinking·반복 횟수·노출 옵션을 함께 기록해야 합니다.</aside>
+</section>
+
+<!-- 15 디코딩 노브: logit → softmax -->
+<section class="slide" data-part="PART 3">
+  <h2>🔢 토큰 선택 <span class="g">두 단계</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:210px;border-color:var(--bl)"><small>① logit</small><b>정렬 안 된 날(raw) 점수<br>"서울" 높고 "바나나" 낮음<br><span style="color:var(--soft)">확률 아님 · 음수 가능 · 합≠1</span></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:210px;border-color:var(--gr)"><small>② softmax</small><b>지수값을 전체 합으로 나눠<br>0~1 정규화, 합=1<br><span class="g">"서울" 0.92 · "평양" 0.04</span></b></div>
+  </div>
+  <div class="big">모델의 답 = 이 분포 위의 <span class="y">표본 추출(sample)</span><small>logit은 각 후보의 날 점수, softmax는 그것을 확률로 바꾼 분포 — 디코딩 노브는 이 분포를 손댄다</small></div>
+  <div class="hl">확률화 이전의 <b>logit 순서</b>가 곧 모델이 무엇을 더 그럴듯하게 보는가이다.</div>
+  <aside>logit은 정규화되지 않은 날 점수라 그 자체로는 확률이 아닙니다. softmax가 각 logit의 지수값을 전체 합으로 나눠 0에서 1 사이 확률로 만들고, 모델의 최종 답은 이 분포에서 하나를 뽑는 표본 추출입니다.</aside>
+</section>
+
+<!-- 16 temperature · top_k · top_p -->
+<section class="slide" data-part="PART 3">
+  <h2>🎛️ 세 노브가 <span class="g">분포를 비트는 법</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">T</span><span class="t"><b>temperature</b> — logit을 temp로 나눈 뒤 확률화. temp&lt;1이면 분포가 <b>뾰족</b>(강한 후보 더 강), temp→0이면 최고 후보가 1로 수렴해 <b>매번 같은 토큰</b>(세 응답 동일의 원인), temp&gt;1이면 약한 후보도 상당한 확률(1.5에서 세 응답 다름)</span></div>
+    <div class="st"><span class="n">K</span><span class="t"><b>top_k</b> — 뽑기 전 후보 수를 자른다. 상위 k개만 남기고 나머지 0, 재정규화. top_k=1이면 최고 후보 하나만 → <b>temp 무관 같은 토큰</b></span></div>
+    <div class="st"><span class="n">P</span><span class="t"><b>top_p</b> — 누적 확률이 p가 될 때까지 상위 후보를 남김. 후보 수 고정 대신 <b>분포 모양에 따라 유동</b></span></div>
+  </div>
+  <div class="hl"><b>한계</b> — 노브가 바꾸는 건 분포의 <b>모양이지 logit 순서가 아니다.</b> "9월 11일"에 높은 logit을 준 모델에게 낮은 온도는 그 오답을 더 충실히 반복할 뿐 — 실험 관찰과 정확히 일치.</div>
+  <aside>이 한계가 PART 2의 함정 결과를 설명합니다. 모델이 오답에 높은 logit을 매겼다면 어떤 샘플링 노브도 순서를 뒤집지 못하므로, 낮은 온도는 오답을 안정적으로 재현하고 높은 온도는 일관성만 잃습니다. 함정 교정은 디코딩이 아니라 지시·맥락 쪽의 일입니다.</aside>
+</section>
+
+<!-- 17 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 4문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>프롬프트가 답의 모양을 바꾼다</b> — 같은 정답 321도 설명량은 297·952·153자로 갈렸다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>형식 준수 ≠ 사실 정확</b> — 파싱된 63자 JSON이 틀린 "물류강"을 담았다. 기준마다 따로 검사한다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>기법 이름이 결과를 보증하지 않는다</b> — 열한 방법 중 부정 지시·JSON 강제는 오답. 정답끼리도 비용이 다르다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>디코딩 노브는 분포 모양만 바꾼다</b> — logit 순서는 못 뒤집어, 낮은 온도는 오답을 충실히 반복한다.</span></div>
+  </div>
+  <div class="hl">📖 더 읽기 — 실측 경로는 로컬 Ollama(qwen3.5:2b), 결과 파일은 <b>basic-prompt-results</b>에 저장.</div>
+  <aside>네 문장 모두 앞서 본 실측 수치에 근거합니다. 특히 4번은 왜 어떤 샘플링 조정으로도 함정을 풀 수 없었는지를 확률의 언어로 요약합니다.</aside>
+</section>
+
+<!-- 18 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 계산 실험에서 세 프롬프트가 <b>모두 맞힌 값</b>과, 그런데도 갈린 것은 각각 무엇인가?</div>
+    <div class="q"><b>Q2.</b> JSON "물류강" 사례가 보여 준 <b>핵심 구분</b>은 무엇인가?</div>
+    <div class="q"><b>Q3.</b> 함정 질문에서 <b>temp 0</b>과 <b>temp 1.5</b>의 결과는 각각 무엇을 뜻하나?</div>
+    <div class="q"><b>Q4.</b> <b>logit</b>과 <b>softmax</b>는 각각 무엇이며, 모델의 답은 어떻게 결정되나?</div>
+    <div class="q"><b>Q5.</b> 디코딩 노브가 <b>바꾸지 못하는</b> 것은 무엇이고, 그것이 함정 결과와 어떻게 이어지나?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q4와 Q5가 오늘의 핵심 원리를 가장 잘 가립니다.</aside>
+</section>
+
+<!-- 19 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 맞힌 값은 <b>계산 정답 321</b>. 갈린 것은 <b>설명량(297자 / 952자 / 153자)</b> — 프롬프트가 답의 모양을 바꾼다.</div>
+    <div class="q a"><b>A2.</b> <b>형식 준수 ≠ 사실 정확</b> — 파싱은 성공(형식 통과)했지만 "물류강"은 틀렸다. 파서만으로는 사실을 판정 못 한다.</div>
+    <div class="q a"><b>A3.</b> temp 0 = 세 번 동일 오답, <b>재현성일 뿐 정답 아님</b>. temp 1.5 = 1/3만 정답, <b>우연한 탈출</b>이지 해결이 아님.</div>
+    <div class="q a"><b>A4.</b> logit = 정규화 안 된 <b>날 점수</b>(확률 아님). softmax = 그것을 <b>합 1의 확률</b>로 정규화. 답은 이 분포의 <b>표본 추출</b>.</div>
+    <div class="q a"><b>A5.</b> 바꾸지 못하는 것은 <b>logit 순서</b>. 오답에 높은 logit을 준 모델에겐 낮은 온도가 오답을 <b>더 충실히 반복</b>할 뿐이다.</div>
+  </div>
+  <aside>A4와 A5를 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다. 노브는 분포의 모양을 다룰 뿐, 무엇이 더 그럴듯한가라는 순서 자체는 지시·맥락으로 바꿔야 합니다.</aside>
+</section>
+
+<!-- 20 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>이름이 아니라 기록 📊</h1>
+    <div class="big" style="margin-top:26px">같은 질문이 갈리면<br><span class="y">정답 · 형식 · 비용</span>을 같은 표에 남겨라<br><br>노브는 분포 모양을 바꿀 뿐, <span class="y">logit 순서</span>는 못 뒤집는다</div>
+    <p class="sub" style="margin-top:24px">기초 프롬프트 실험 — 여기까지 · 다음: 왜 지시가 통하는가 — 학습의 계보</p>
+  </div>
+  <aside>실험으로 프롬프트가 답을 바꾸는 것을 관측했습니다. 다음 소단원에서는 이 관찰을 재는 기준과 함께, 애초에 왜 지시가 통하는지를 학습의 계보에서 살펴봅니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

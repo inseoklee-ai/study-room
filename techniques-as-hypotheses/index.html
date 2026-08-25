@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>기법은 가설이다 · 주문이 아니라 실행 조건의 가설</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 지시 설계 · ⑤</span>
+    <h1 style="margin:18px 0">기법은 가설이다</h1>
+    <p class="sub">주문이 아니라 — 바꿀 수 있는 실행 조건의 가설</p>
+  </div>
+  <aside>프롬프트 기법은 모델을 더 똑똑하게 만드는 주문으로 오해되기 쉽습니다. 이 소단원은 기법을 '같은 과업에서 바꿀 수 있는 실행 조건의 가설'로 다시 놓고, few-shot·역할·CoT를 각각 조건·예상 효과·측정법으로 기록해 검증 가능한 선택으로 만드는 법을 봅니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>PART 1</small><b>기법 = 가설</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>PART 2</small><b class="g">세 기법을 가설로</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>PART 3</small><b>가설 서식으로 기록</b></div>
+  </div>
+  <ul class="pts">
+    <li>기법은 주문이 아니라 <b>바꿀 수 있는 실행 조건의 가설</b>임을 세운다</li>
+    <li><b>few-shot · 역할 · CoT</b>를 각각 조건·예상 효과·측정법으로 다시 본다</li>
+    <li>추론 모델의 <b>thinking budget</b>은 풀이 문구와 별개의 조건임을 나눈다</li>
+    <li>세 기법을 <b>같은 가설 서식 표</b>로 기록해 검증 가능하게 만든다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 가설은 시험해야 하며, 시험에는 <b>답을 재는 자</b>가 먼저 필요하다.</div>
+  <aside>세 파트를 지나면, "이 기법이 좋다"는 말 대신 "이 조건을 이렇게 바꾸면 이 실패가 줄 것으로 예상하고, 이렇게 측정한다"고 말하게 됩니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">기법은 주문이 아니라 가설</h2>
+    <p style="margin-top:11px">"few-shot이 좋다"보다 먼저 무엇을 물어야 하나</p>
+    <span class="who">Mata v. Avianca · 실행 조건 · 비교</span>
+  </div>
+  <aside>기법을 만능 공식처럼 쓰면 실패의 원인과 처방이 어긋납니다. 근거가 부족한데 예시 수만 늘리거나, 형식 오류인데 역할 문장만 바꾸는 식입니다. 먼저 그럴듯함이 왜 확인을 대신하지 못하는지 한 사례로 봅니다.</aside>
+</section>
+
+<!-- 4 Mata v. Avianca -->
+<section class="slide" data-part="PART 1">
+  <h2>⚖️ 그럴듯한 인용은 <span class="g">원문 확인</span>을 대신하지 않는다</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>2023.6.22 미국 뉴욕 남부연방지방법원</b> — <span class="p">Mata v. Avianca</span></span></div>
+    <div class="st"><span class="n">2</span><span class="t">원고 변호사들의 서면에 <b class="r">존재하지 않는 판례 인용</b>이 포함 → <b>5,000달러 제재</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t">변호사들은 ChatGPT로 조사한 뒤 <b>인용 정확성을 확인하지 않았다</b></span></div>
+  </div>
+  <div class="hl"><b>출처 대조 책임은 사용자에게 남는다.</b> "실재하는 판례만 인용하세요"라고 써도 그 문장은 검색·원문 확인을 대신 못한다.</div>
+  <aside>인용이 매끄럽고 사건명·연도·법원이 그럴듯할수록 확인을 건너뛰기 쉽습니다. 이것이 기법을 가설로 다뤄야 하는 이유입니다 — 표면의 그럴듯함이 아니라 검증 결과로 판단해야 합니다.</aside>
+</section>
+
+<!-- 5 기법 = 실행 조건의 가설 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧪 기법 = 바꿀 수 있는 <span class="g">실행 조건의 가설</span></h2>
+  <ul class="pts">
+    <li>기법은 모델을 똑똑하게 만드는 주문이 아니라 <b>같은 과업에서 바꿀 수 있는 실행 조건</b></li>
+    <li>"few-shot이 좋다"보다 먼저 <b>어떤 실패를 줄일지</b>와 <b>무엇을 고정한 채 비교할지</b>를 정한다</li>
+    <li>같은 <b>모델·과업·시험 입력·채점 기준</b>에서 <b>한 조건만</b> 달라야 차이를 그 조건의 후보 효과로 읽는다</li>
+  </ul>
+  <div class="hl">한 번의 인상적인 답은 <b>출발점일 뿐</b>. 대표 실패가 사라졌는지, 새 실패가 생겼는지, <b>토큰 비용·지연</b>이 감당할 만한지도 함께 본다.</div>
+  <aside>실패가 근거 부족인데 예시 수만 늘리거나, 형식 오류인데 역할 문장만 바꾸면 가설과 처방이 어긋납니다. 기법을 만능 공식이 아니라 검증 가능한 선택으로 다루는 것이 핵심입니다.</aside>
+</section>
+
+<!-- 6 비교 원칙 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧭 검증 가능한 선택으로 만드는 <span class="g">세 걸음</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:160px;border-color:var(--gold)"><small>① 먼저</small><b>성공 기준을<br>고정한다</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:160px;border-color:var(--gy)"><small>② 남긴다</small><b>기준선 실행을<br>남긴다</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:160px;border-color:var(--gr)"><small>③ 바꾼다</small><b>최소한의 조건<br>하나만 변경</b></div>
+  </div>
+  <div class="big">성공 기준 고정 → 기준선 실행 남김 → 조건 하나 변경<br><span class="y">기법을 만능 공식이 아니라 검증 가능한 선택으로</span></div>
+  <aside>기준선이 없으면 변경의 효과를 말할 수 없습니다. 두 실행에서 한 조건만 다르게 두어야, 결과 차이를 그 조건의 후보 효과로 읽을 수 있습니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">세 기법을 가설로 다시 본다</h2>
+    <p style="margin-top:11px">각 기법이 어떤 실패를 겨냥한 조건인가</p>
+    <span class="who">few-shot · 역할 · CoT</span>
+  </div>
+  <aside>few-shot·역할·CoT는 모두 학습된 성질을 자극하는 가설입니다. 만능 문구가 아니라, 각각이 겨냥하는 실패와 그 실패가 실제로 줄었는지 재는 방법을 함께 봅니다.</aside>
+</section>
+
+<!-- 8 few-shot -->
+<section class="slide" data-part="PART 2">
+  <h2>🔡 few-shot — <span class="g">경계를 보이는</span> 가설</h2>
+  <ul class="pts">
+    <li><b>few-shot</b> = 입력에 입출력 예시 몇 개. 예시는 <b>정답 형식·레이블 뜻·경계 사례</b>를 동시에 보인다</li>
+    <li>범주 경계를 문장으로 명확히 쓸 수 있으면 우선 <b>zero-shot 기준선</b>을 둔다</li>
+    <li>경계가 미묘하거나 근거 연결을 문장으로 압축하기 어려우면, 실제 입력과 닮은 예시가 계약을 더 직접 드러낸다</li>
+  </ul>
+  <div class="hl"><b>Language Models are Few-Shot Learners</b>(arXiv)는 GPT-3 조건별 결과를 보고했지만, <b>모든 모델·예시·과업에서 반복된다는 보장은 아니다.</b></div>
+  <aside>잘못 고른 예시는 특정 표현을 외우게 하거나 새 입력의 중요한 차이를 가리고, 예시가 길수록 비용·문맥 경쟁이 늘어납니다. 0/1/여러 개 예시를 같은 어려운 입력·기준으로 비교해 레이블 경계 흔들림이 실제로 줄었는지 봅니다.</aside>
+</section>
+
+<!-- 9 역할 -->
+<section class="slide" data-part="PART 2">
+  <h2>🎭 역할 — 관점과 책임을 지정하는 <span class="g">부품</span></h2>
+  <ul class="pts">
+    <li><b>역할 부여</b> = 독자·책임·근거·금지를 구체화할 때의 가설</li>
+    <li>"세무 전문가처럼 답하라"는 <b>호칭만으로 정확도가 오른다</b>고 가정할 수 없다</li>
+    <li>역할이 필요한 이유를 <b>"고객에게 보낼 쉬운 언어로, 확인된 정책만 근거로"</b>처럼 관찰 가능한 계약으로 바꾼다</li>
+    <li>역할 없는 조건과 <b>같은 평가셋</b>에서 비교한다</li>
+  </ul>
+  <div class="hl">역할 = <b>전문성 증명서가 아니라</b> 답의 <b>관점·책임을 지정하는 부품</b>.</div>
+  <aside>역할 문장이 길어진 것 자체는 성공이 아닙니다. 같은 입력에서 역할 있음이 근거 없는 확정이나 고객 비난을 줄였는지, 어느 판정이 달라졌는지가 근거입니다.</aside>
+</section>
+
+<!-- 10 CoT -->
+<section class="slide" data-part="PART 2">
+  <h2>🧮 CoT — <span class="g">답보다 검증</span>을 붙인다</h2>
+  <ul class="pts">
+    <li><b>CoT 요청</b> = 중간 추론을 드러내거나 단계적으로 풀게 하는 조건</li>
+    <li>다단계 계산에서 <b>직접 답 기준선이 실패할 때</b>의 후보</li>
+    <li>단 모든 과업에서 긴 풀이가 정확도를 높이진 않는다 — <b>지연·비용↑</b>, 그럴듯한 단계가 <b>틀린 결론을 정당화</b>할 수도</li>
+  </ul>
+  <div class="hl"><b>Chain-of-Thought Prompting</b>(arXiv): 충분히 큰 모델에서 단계적 예시가 일부 추론 성능을 높였으나 <b>과업·모델 크기·예시 질에 따라 달라진다.</b></div>
+  <aside>외부 계산기·원문 인용·단위 테스트 같은 독립 확인 수단이 있으면 설명 길이보다 그 검증 결과를 우선합니다. 틀린 결론에 그럴듯한 단계가 붙는 비율도 별도로 셉니다.</aside>
+</section>
+
+<!-- 11 추론 모델 thinking budget -->
+<section class="slide" data-part="PART 2">
+  <h2>💭 추론 모델 — <span class="g">생각할 양</span>도 조건이다</h2>
+  <ul class="pts">
+    <li>"차근차근 생각해 주세요" 문구가 모델 내부 <b>thinking budget</b>(답 전에 할당하는 추론 자원)과 같은 뜻이라 가정할 수 없다</li>
+    <li>일부 제품은 <b>effort 같은 별도 설정</b>으로 조절, 어떤 제품은 내부 사고를 노출하지 않거나 문구에 다르게 반응</li>
+    <li>같은 문장이라도 설정이 바뀌면 <b>정확도·지연·비용</b>이 함께 달라진다</li>
+  </ul>
+  <div class="chain">
+    <div class="cell" style="min-width:120px;border-color:var(--gy)"><small>조건 A</small><b>직접 답</b></div>
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>조건 B</small><b>단계적 검증 문구</b></div>
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>조건 C</small><b>낮은 effort</b></div>
+    <div class="cell" style="min-width:120px;border-color:var(--gold)"><small>조건 D</small><b>높은 effort</b></div>
+  </div>
+  <div class="hl"><b>내부적으로 더 오래 추론하는 일</b>과 <b>사용자에게 더 많은 풀이 문장을 요구하는 일</b>은 별개의 설계 선택. CoT 문구와 thinking budget을 한 조건으로 뭉치지 않는다.</div>
+  <aside>높은 budget에서 어려운 계산은 좋아져도 단순 분류 처리량이 나빠질 수 있고, 긴 서술이 늘어도 근거 인용이 정확해진다는 보장은 없습니다. 네 조건을 나눠 정확도·형식 준수·지연·비용을 측정합니다.</aside>
+</section>
+
+<!-- 12 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">가설 서식으로 기록한다</h2>
+    <p style="margin-top:11px">조건 · 예상 효과 · 측정법으로 남긴다</p>
+    <span class="who">기준선 · 변경 · 고정 · 기각 조건</span>
+  </div>
+  <aside>가설은 시험해야 하며, 시험에는 답을 재는 자가 먼저 필요합니다. 각 기법을 조건·예상 효과·측정법으로 적어 두면, 다음 변경을 추측이 아니라 비교로 고를 수 있습니다.</aside>
+</section>
+
+<!-- 13 few-shot 가설 서식 -->
+<section class="slide" data-part="PART 3">
+  <h2>📋 가설 서식 예 — <span class="g">few-shot</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">조</span><span class="t"><b>조건</b> — 범주 경계가 말로만 적어선 흔들리고, 실제 업무 입력과 닮은 예시 제공이 가능하다</span></div>
+    <div class="st"><span class="n">효</span><span class="t"><b>예상 효과</b> — 환불·배송처럼 비슷한 표현이 섞인 문의에서 레이블 선택·근거 문장 모양이 더 안정</span></div>
+    <div class="st"><span class="n">측</span><span class="t"><b>측정법</b> — 예시 없는 기준선 vs 예시 조건에 같은 문의 묶음 실행 → 정확 범주 비율·형식 누락 수·경계 오류 수·입출력 토큰 비용을 나란히</span></div>
+  </div>
+  <div class="hl">⚠️ <b>반대 결과도 포함</b> — 예시가 한 말투/고객 유형에 치우치면 표면 문구에 맞춰 분류하고, 긴 예시는 원문 근거를 문맥 끝으로 밀어낸다.</div>
+  <aside>예시 조건만 더 긴 설명을 받게 하면 비교가 안 됩니다 — 과업·모델·온도·채점 기준을 고정합니다. Anthropic 공식 문서는 보통 3~5개 관련 예시를 권하지만, 그것은 최적값이 아니라 운영상 출발점입니다.</aside>
+</section>
+
+<!-- 14 CoT 가설 서식 -->
+<section class="slide" data-part="PART 3">
+  <h2>📋 가설 서식 예 — <span class="g">CoT</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">조</span><span class="t"><b>조건</b> — 여러 계산·제약·문서 근거를 순서대로 결합하고, 중간 단계를 확인할 수 있다</span></div>
+    <div class="st"><span class="n">효</span><span class="t"><b>예상 효과</b> — 산술 누락·조건 건너뛰기 감소, 사람이 최종 결론을 검토할 단서</span></div>
+    <div class="st"><span class="n">측</span><span class="t"><b>측정법</b> — 직접 답 기준선 vs 단계적 풀이 → 최종 정답률·각 단계 근거 일치·응답 시간·토큰. <b>틀린 결론에 그럴듯한 단계가 붙는 비율</b>도 별도로 센다</span></div>
+  </div>
+  <div class="hl">독립 확인 수단(<b>외부 계산기·원문 인용·단위 테스트</b>)이 있으면 설명 길이보다 <b>그 검증 결과를 우선</b>한다.</div>
+  <aside>긴 추론은 비용·지연을 늘리고, 잘못된 전제가 각 단계로 더 설득력 있어 보일 수 있습니다. 그래서 최종 답에 검증을 붙여, 정답이 실제로 좋아졌는지를 봅니다.</aside>
+</section>
+
+<!-- 15 세 기법 가설 서식 표 -->
+<section class="slide" data-part="PART 3">
+  <h2>🗂️ 세 기법을 <span class="g">같은 가설 서식</span>으로</h2>
+  <table class="t">
+    <tr><th>기법</th><th>기준선</th><th>변경 조건</th><th>성공 지표</th><th>기각 조건</th></tr>
+    <tr><td>few-shot</td><td>예시 없이 분류</td><td>경계 예시 3개</td><td>경계 사례 정확 범주 비율</td><td>정확도 변화 없이 비용만↑</td></tr>
+    <tr><td>역할</td><td>역할 없이 답변</td><td>확인된 사실만 쓰는 지원 담당자</td><td>근거 없는 확정·고객 비난 감소</td><td>판정 개선 없음</td></tr>
+    <tr><td>CoT</td><td>최종 답만 요청</td><td>단계적 풀이·검증 요청</td><td>최종 정답+근거 일치</td><td>그럴듯한 단계만 늘고 정답 개선 없음</td></tr>
+  </table>
+  <div class="hl">고정 조건 — <b>모델·입력·온도·채점표</b>(few-shot), <b>과업·근거·형식·평가셋</b>(역할), <b>문제·도구·정답 채점</b>(CoT). 비용 지표도 함께 기록한다.</div>
+  <aside>역할은 같은 입력에서 이진으로 판정합니다. "배송일은 언제인가요?"에 주문 기록을 안 줬을 때, 역할 없음은 문체·부족 정보 처리만, 역할 있음은 거기에 확인된 사실만 말했는지를 추가 판정 — 어느 행의 통과/실패가 달라졌는지가 근거입니다.</aside>
+</section>
+
+<!-- 16 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 4문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">그럴듯한 인용도 <b>원문 확인을 대신하지 못한다</b>(Mata v. Avianca, 5,000달러 제재) — 출처 대조 책임은 사용자에게.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">기법은 주문이 아니라 <b>같은 과업에서 바꿀 수 있는 실행 조건의 가설</b>이다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>성공 기준 고정 → 기준선 남김 → 조건 하나 변경</b>으로 검증 가능한 선택으로 만든다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">CoT 문구와 <b>thinking budget</b>은 별개 — 내부 추론과 풀이 문장 요구는 다른 설계 선택이다.</span></div>
+  </div>
+  <aside>few-shot·역할·CoT는 모두 학습된 성질을 자극하는 가설입니다. 가설은 시험해야 하며, 시험에는 답을 재는 자가 먼저 필요합니다 — 이것이 이 소단원의 태도입니다.</aside>
+</section>
+
+<!-- 17 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> Mata v. Avianca 사례가 남기는 <b>핵심 교훈</b>은 무엇인가?</div>
+    <div class="q"><b>Q2.</b> 기법을 "가설"로 본다는 것은 무슨 뜻이며, 비교하려면 무엇을 <b>고정</b>하나?</div>
+    <div class="q"><b>Q3.</b> few-shot의 가설 서식에서 <b>조건·예상 효과·측정법</b>은 각각 무엇인가?</div>
+    <div class="q"><b>Q4.</b> 역할 부여를 "관찰 가능한 계약"으로 바꾼다는 것은 무슨 뜻인가?</div>
+    <div class="q"><b>Q5.</b> CoT 문구와 <b>thinking budget</b>을 한 조건으로 뭉치면 안 되는 이유는?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q2와 Q5가 오늘의 핵심을 가장 잘 가립니다.</aside>
+</section>
+
+<!-- 18 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 그럴듯한 인용도 검색·원문 확인을 대신하지 못하며, <b>출처 대조 책임은 사용자에게 남는다</b>. 존재하지 않는 판례 인용으로 5,000달러 제재.</div>
+    <div class="q a"><b>A2.</b> 기법 = 바꿀 수 있는 실행 조건의 가설. <b>모델·과업·시험 입력·채점 기준을 고정</b>하고 한 조건만 바꿔 비교한다.</div>
+    <div class="q a"><b>A3.</b> <b>조건</b>: 경계가 말로 흔들리고 닮은 예시 제공 가능 · <b>예상 효과</b>: 레이블·근거 문장 안정 · <b>측정법</b>: 기준선 vs 예시 조건에 같은 묶음 실행해 정확 범주·형식 누락·경계 오류·토큰 비교.</div>
+    <div class="q a"><b>A4.</b> 호칭 대신 <b>"쉬운 언어로, 확인된 정책만 근거로"</b>처럼 판정 가능한 조건으로 바꿔, 역할 없는 조건과 같은 평가셋에서 비교하는 것.</div>
+    <div class="q a"><b>A5.</b> 같은 문구라도 설정에 따라 정확도·지연·비용이 달라지므로 — <b>내부 추론 자원</b>과 <b>풀이 문장 요구</b>는 별개의 설계 선택이기 때문.</div>
+  </div>
+  <aside>A2와 A5를 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다. 특히 "답을 재는 자를 먼저 만든다"는 태도가 다음 소단원으로 이어집니다.</aside>
+</section>
+
+<!-- 19 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>가설은 시험해야 한다 🧪</h1>
+    <div class="big" style="margin-top:26px">few-shot·역할·CoT는 모두<br><span class="y">학습된 성질을 자극하는 가설</span><br><br>가설은 시험해야 하며, 시험에는<br><span class="y">답을 재는 자</span>가 먼저 필요하다</div>
+    <p class="sub" style="margin-top:24px">기법은 가설이다 — 여기까지 · 다음: 지시 3안 — 재고 실행하고 비교하기</p>
+  </div>
+  <aside>기법을 조건·예상 효과·측정법으로 적어 두면 다음 변경을 비교로 고를 수 있습니다. 다음 소단원에서는 지시 3안을 실제로 실행하고 비교하는 법을 봅니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

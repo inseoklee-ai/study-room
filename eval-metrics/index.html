@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>답을 재는 방법 · 평가지표 사전</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 지시 설계 · ⑧</span>
+    <h1 style="margin:18px 0">답을 재는 방법</h1>
+    <p class="sub">평가지표 사전 — 점수는 질문의 축소판</p>
+  </div>
+  <aside>평가는 마음에 드는 결과를 고르는 일이 아니라, 무엇을 어떤 근거로 통과시킬지 결과가 나오기 전에 정하는 일입니다. 이 소단원은 자주 쓰는 평가지표를 하나씩 사전처럼 정리하고, 각 지표가 무엇을 재고 무엇을 못 재는지, 그리고 과업에서 지표로 가는 순서를 세웁니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>PART 1</small><b>지표라는 자</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>PART 2</small><b class="g">참조로 재기</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--pp)"><small>PART 3</small><b class="p">참조 없이 재기</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gold)"><small>정리</small><b>지표 고르기</b></div>
+  </div>
+  <ul class="pts">
+    <li>지표는 답의 <b>어느 성질</b>을 숫자로 바꿀지 정한 자 — 자 하나로 다 못 잰다</li>
+    <li>참조 답과 겹침으로 재는 <b>이진 판정·F1·BLEU·ROUGE</b></li>
+    <li>참조 없이 재는 <b>perplexity·pass@k·LLM-as-judge</b></li>
+    <li>과업에서 지표로 가는 <b>결정트리</b>와 지표 고르는 질문 3개</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 점수를 고르기 전에 <b>과업의 성공을 문장으로</b> 먼저 쓴다.</div>
+  <aside>지표들을 사전처럼 훑되, 핵심은 각 자가 무엇을 재는가입니다. 사전을 다 보고 나면 마지막에 과업에서 지표로 가는 순서와 보고 원칙으로 묶습니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">지표라는 자</h2>
+    <p style="margin-top:11px">점수는 질문의 축소판이다</p>
+    <span class="who">자 하나가 길이·무게·온도를 다 못 잰다</span>
+  </div>
+  <aside>시험지에는 답보다 먼저 문항·배점·채점 기준이 놓입니다. 평가지표도 답의 어느 성질을 숫자로 바꿀지 정한 자입니다. 자를 고르기 전에 무엇을 재려는지부터 정해야 합니다.</aside>
+</section>
+
+<!-- 4 자 개념 -->
+<section class="slide" data-part="PART 1">
+  <h2>📏 지표 = 답의 성질을 <span class="g">숫자로 바꾸는 자</span></h2>
+  <ul class="pts">
+    <li>자 하나가 길이·무게·온도를 다 못 재듯, 한 점수가 <b>사실성·형식·유용성·안전성</b>을 함께 뜻하지 않는다</li>
+    <li>먼저 과업의 성공을 <b>문장으로</b> 쓰고, 그 문장을 <b>가장 적게 왜곡하는</b> 지표를 고른다</li>
+    <li>시험 입력·실행 조건·판정 규칙을 <b>고정</b>하지 않으면, 숫자 차이는 지시 효과가 아니라 <b>조건 차이</b>일 수 있다</li>
+  </ul>
+  <div class="hl"><b>평가</b> = 마음에 드는 결과를 고르는 일이 아니라, 무엇을 어떤 근거로 통과시킬지 <b>결과 전에 정하는 일.</b></div>
+  <aside>같은 시험 입력·같은 실행 조건·같은 판정 규칙을 고정하지 않으면, A와 B의 점수 차이가 프롬프트 때문인지 조건이 달라서인지 구분할 수 없습니다. 지표를 고르는 일은 곧 무엇을 잃을 위험을 감수할지 고르는 일이기도 합니다.</aside>
+</section>
+
+<!-- 5 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">참조와 겹침으로 재는 지표</h2>
+    <p style="margin-top:11px">기준 답이 있고 표면을 비교할 수 있을 때</p>
+    <span class="who">이진 판정·exact match · F1 · BLEU · ROUGE</span>
+  </div>
+  <aside>기준 답(golden answer)이나 참조 번역·요약이 있을 때 쓰는 지표들입니다. 값싸고 재현 가능하지만, 대부분 표현·표면을 볼 뿐 사실성 자체는 못 잰다는 공통 한계가 있습니다.</aside>
+</section>
+
+<!-- 6 이진 판정 · exact match -->
+<section class="slide" data-part="PART 2">
+  <h2>✔️ 이진 판정 · <span class="g">exact match</span></h2>
+  <ul class="pts">
+    <li><b>이진 판정</b> = 조건 지키면 1, 아니면 0. <b>exact match</b> = 출력이 기준 답과 정확히 같을 때만 통과</li>
+    <li>적합: 선택지 분류·고정 레이블·짧고 유일한 추출 답·정형 JSON·함수 호출</li>
+    <li>예: 허용 답 <span class="g">긍정</span>/<span class="r">부정</span>이면 <b>대체로 긍정</b>은 뜻이 가까워도 계약 밖. JSON은 파싱 후 필드 순서·공백을 정규화해 비교하고 규칙을 문서화</li>
+  </ul>
+  <div class="hl">값싸고 재현 가능하나, <b>표현만 다른 옳은 자유 답을 0점</b>으로 만들고 <b>사실성 자체는 못 잰다.</b></div>
+  <aside>가장 싸고 빠른 자입니다. 결정적으로 채점 가능한 과업이면 여기부터 시작합니다. 단, 같은 뜻을 다르게 쓴 답을 실패로 처리하고, 형식이 맞아도 내용이 참인지는 보증하지 못합니다.</aside>
+</section>
+
+<!-- 7 F1 개념 -->
+<section class="slide" data-part="PART 2">
+  <h2>🎯 F1 — <span class="g">정밀도와 재현율의 조화평균</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:180px;border-color:var(--bl)"><small>정밀도(precision)</small><b>맞다고 넣은 것 중<br>실제 정답 비율</b></div>
+    <span class="ar">·</span>
+    <div class="cell" style="min-width:180px;border-color:var(--gr)"><small>재현율(recall)</small><b>실제 정답 중<br>찾아낸 비율</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>F1</small><b class="g">둘의 조화평균</b></div>
+  </div>
+  <ul class="pts">
+    <li>적합: 개체 추출·키워드·다중 레이블처럼 답이 <b>항목 집합</b>인 과업</li>
+    <li>두 위험(<b>오탐·누락</b>)을 함께 드러내지만, 어느 쪽이 더 위험한지는 <b>숨길 수 있다</b></li>
+  </ul>
+  <div class="hl">밝힐 것 — 양성 레이블·매칭 규칙, <b>micro/macro/weighted</b> 중 어떤 평균인지, 그리고 <b>정밀도·재현율을 나란히.</b></div>
+  <aside>F1은 오탐과 누락을 한 숫자로 묶습니다. 그래서 편리하지만, 누락이 더 위험한 과업인지 오탐이 더 위험한 과업인지는 F1 하나로 알 수 없습니다. 정밀도와 재현율을 함께 적어야 합니다.</aside>
+</section>
+
+<!-- 8 F1 손 계산 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧮 F1 손 계산 — <span class="g">기관명 추출</span></h2>
+  <p>원문에 실제 기관명 12개. 모델이 10개를 냄 → 8개 맞음(TP), 2개 틀림(FP), 빠진 4개(FN).</p>
+  <table class="t">
+    <tr><th>값</th><th>계산</th><th>결과 · 뜻</th></tr>
+    <tr><td>정밀도 P</td><td>8 / 10</td><td><b>0.80</b> — 오탐 위험</td></tr>
+    <tr><td>재현율 R</td><td>8 / 12</td><td><b>≈ 0.67</b> — 누락 위험</td></tr>
+    <tr><td>F1</td><td>2×(0.80×0.67) / (0.80+0.67)</td><td><b class="g">≈ 0.73</b> — 조화평균, 작은 쪽에 민감</td></tr>
+  </table>
+  <div class="hl">산술평균은 한쪽 붕괴를 너무 부드럽게 본다 — <b>P=1.0, R=0.0</b>이면 산술 0.5, <b>조화 0.0.</b></div>
+  <aside>조화평균은 두 값 중 작은 쪽에 민감해, 한쪽이 무너지면 F1도 함께 무너집니다. 암 마커는 재현율을 먼저, 스팸 차단은 정밀도를 먼저 보아야 합니다. F1 하나로 어느 피해가 더 큰지 대신 결정하지 않습니다.</aside>
+</section>
+
+<!-- 9 BLEU -->
+<section class="slide" data-part="PART 2">
+  <h2>🌐 BLEU — <span class="g">n-gram 중첩(정밀도 관점)</span></h2>
+  <ul class="pts">
+    <li>후보와 참조 답의 <b>n-gram 중첩</b>을 주로 정밀도로. n-gram = 연속한 n개 토큰 조각</li>
+    <li>번역처럼 참조가 있고 표면 겹침이 유용할 때 <b>보조 지표</b>. 짧은 답 벌점(brevity penalty) 포함</li>
+  </ul>
+  <div class="box" style="margin-top:6px">
+    <h3>손 계산</h3>
+    <p style="margin-bottom:8px">참조 <b>고양이가 매트 위에 앉았다</b> / 출력 <b>고양이가 매트에 앉았다</b></p>
+    <table class="t">
+      <tr><th>단위</th><th>겹침</th><th>값</th></tr>
+      <tr><td>1-gram</td><td>5 / 5</td><td><b class="g">1.00</b></td></tr>
+      <tr><td>2-gram</td><td>3 / 4</td><td><b class="g">0.75</b></td></tr>
+    </table>
+    <p style="margin:8px 0 0"><b>위</b>가 빠지며 <b>매트-위</b>·<b>위-에</b> 2-gram이 끊긴다.</p>
+  </div>
+  <div class="hl">실제 BLEU는 여러 n-gram 결합 + clipped count. brevity penalty는 감점만 할 뿐 <b>의미를 채점하지 않는다</b> — 부정어 하나가 바뀌어도 조각은 겹칠 수 있다.</div>
+  <aside>clipped count는 참조에 있는 횟수까지만 겹침으로 세는 규칙입니다. 좋은 번역도 어순이 다르거나 동의어를 쓰면 낮은 BLEU를 받고, 반대로 겹친다고 자연스럽거나 사실이라는 보장은 없습니다.</aside>
+</section>
+
+<!-- 10 ROUGE -->
+<section class="slide" data-part="PART 2">
+  <h2>📝 ROUGE — <span class="g">재현율 관점의 요약 지표</span></h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="g">무엇을 재나</h3>
+      <p>참조 요약의 n-gram을 후보가 <b>얼마나 포착</b>했나, 특히 <b>재현율</b> 관점. ROUGE-N(n-gram), 문장열 ROUGE-L.</p>
+    </div>
+    <div class="box">
+      <h3 class="r">한계</h3>
+      <p>길게 쓰면 <b>재현율이 부풀고</b>, 동의어·바꿔쓰기·사실 오류·흐름을 충분히 판단 못 함.</p>
+    </div>
+  </div>
+  <div class="hl">BLEU가 <b>정밀도</b>쪽이면 ROUGE는 <b>재현율</b>쪽 — 둘 다 표면 겹침이라 <b>사람 표본 검토·구체 채점표와 결합</b>한다.</div>
+  <aside>번역은 참조와 얼마나 정확히 겹치나(BLEU), 요약은 참조 내용을 얼마나 담았나(ROUGE)로 짝지어 기억하면 편합니다. 둘 다 단어 겹침이라, 주문번호를 발명했는지 같은 사실성 문제는 잡지 못합니다.</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">참조 없이 재는 지표</h2>
+    <p style="margin-top:11px">확률·실행·사람 판단으로 재기</p>
+    <span class="who">perplexity · pass@k · LLM-as-judge</span>
+  </div>
+  <aside>기준 답을 일일이 준비하기 어려운 경우입니다. 모델 내부 확률(perplexity), 코드 실행 결과(pass@k), 강한 모델의 채점(LLM-as-judge)으로 재되, 각각 무엇을 못 재는지가 특히 중요합니다.</aside>
+</section>
+
+<!-- 12 perplexity -->
+<section class="slide" data-part="PART 3">
+  <h2>📉 perplexity — <span class="g">모델 내부 확률 지표</span></h2>
+  <ul class="pts">
+    <li>실제 다음 토큰에 준 확률의 <b>평균 음의 로그우도를 지수화</b>. 낮을수록 다음 말을 <b>덜 놀라워함</b></li>
+    <li>쓰임: <b>같은 모델·토크나이저·코퍼스</b>에서 언어모델링 적합도·학습 변화 비교</li>
+  </ul>
+  <div class="box" style="margin-top:6px">
+    <h3>직관 — <b>대한민국의 수도는</b> 다음</h3>
+    <p style="margin:0"><b class="g">서울</b>에 0.90을 주면 실제로 서울일 때 덜 놀람(≈1/0.90) · <b class="r">바나나</b>에 0.001을 주면 큰 놀람(≈1000 규모)</p>
+  </div>
+  <div class="hl">⚠️ <b>프롬프트 품질 점수로 쓰면 안 됨</b> — 확신하는 답이 옳은 답은 아니다. 모델은 <b>틀린 배송일도 매우 자신 있게</b> 이어 쓸 수 있다.</div>
+  <aside>실제 PPL은 문장 전체 로그확률의 평균이라 단순 역수와 같지는 않지만 직관은 같습니다. temp 0으로 세 번 돌려도 근거 없는 답이 반복될 수 있듯, 무작위성을 줄인 설정이 오답을 검증·교정해 주지는 않습니다. 프롬프트 비교엔 근거 없는 날짜 금지·확인 질문 여부처럼 과업 성공을 직접 판정하는 기준을 씁니다.</aside>
+</section>
+
+<!-- 13 pass@k -->
+<section class="slide" data-part="PART 3">
+  <h2>🧪 pass@k — <span class="g">실행해 검증하는 코드 지표</span></h2>
+  <ul class="pts">
+    <li>독립적으로 만든 후보 <b>k개 중 적어도 하나</b>가 단위 테스트를 통과할 확률(또는 추정치)</li>
+    <li>적합: 코드·SQL·정형 프로그램처럼 <b>실행해 검증</b> 가능하고, 사용자가 여러 후보를 받을 수 있을 때</li>
+  </ul>
+  <div class="box" style="margin-top:6px">
+    <h3>손 계산</h3>
+    <p style="margin:0">후보 10개, 3개가 모든 테스트 통과 → pass@1 추정 <b class="g">3/10 = 0.3</b>. 통과 = 설명이 그럴듯함이 아니라 <b>실제 실행 결과</b>(컴파일 오류·예외·틀린 반환값은 모두 실패)</p>
+  </div>
+  <div class="hl">후보 <b>다양성이 성능의 일부</b> — temp 낮으면 비슷한 코드 반복, 높으면 다양하나 오류도↑. 테스트가 누락한 경계에선 통과 코드도 실패할 수 있어 <b>완전한 보증으로 읽지 않는다.</b></div>
+  <aside>k는 사용자가 몇 후보까지 받아 실행하는가입니다. 10개 중 3개가 통과라면 세 후보 묶음에 통과 코드가 들 기회가 한 후보보다 크지만, 어떤 셋을 보이는지와 다양성에 따라 달라집니다. 보고엔 온도·샘플링·후보 수·선택 규칙·테스트 커버리지를 함께 남깁니다.</aside>
+</section>
+
+<!-- 14 LLM-as-judge -->
+<section class="slide" data-part="PART 3">
+  <h2>⚖️ LLM-as-judge — <span class="g">강한 모델의 채점</span></h2>
+  <ul class="pts">
+    <li>강한 모델에 상세 <b>rubric</b>(채점 항목·기준)과 기준 답/문맥을 주어 다른 모델의 <b>열린 답</b>을 채점</li>
+    <li>적합: 참조 답이 없고 <b>유용성·문체·추론·사실성</b>처럼 열린 생성 품질을 대량 비교할 때의 <b>1차 신호</b></li>
+    <li>편향: 답 순서·<b>장황한 답 선호</b>·자기 모델 계열 선호가 결과를 바꿀 수 있다</li>
+  </ul>
+  <div class="hl">방어 — 모델·버전·rubric·문맥·기준 답 기록, <b>쌍대 비교 위치 무작위화</b>, 사람 표본 검토와 맞춤. <b>중요 업무의 최종 기준은 사람이 맡는다.</b></div>
+  <aside>심사 모델의 한 점수를 사람 정답처럼 취급해선 안 됩니다. 싼 지표로 비싼 판단을 흉내 내기보다, LLM-as-judge는 대량 1차 선별에 쓰고 남은 불확실성만 사람이 검토하는 편이 낫습니다.</aside>
+</section>
+
+<!-- 15 결정트리 -->
+<section class="slide" data-part="정리">
+  <h2>🌳 과업에서 지표로 — <span class="g">결정트리</span></h2>
+  <table class="t">
+    <tr><th>먼저 묻는 질문</th><th>예라면 1차 지표</th><th>함께 기록할 것</th></tr>
+    <tr><td>고정 레이블/객체 하나?</td><td>이진 판정·exact match</td><td>정규화 규칙·필수 필드·금지 조건</td></tr>
+    <tr><td>여러 항목의 집합?</td><td>F1</td><td>정밀도·재현율·매칭 규칙·평균 방식</td></tr>
+    <tr><td>참조 번역/요약 있음?</td><td>번역 BLEU, 요약 ROUGE</td><td>참조 수·토큰화·사람 표본 검토</td></tr>
+    <tr><td>실행 가능한 코드?</td><td>pass@k + 테스트</td><td>k·샘플링·테스트 커버리지</td></tr>
+    <tr><td>참조 없이 열린 품질?</td><td>rubric 기반 LLM-as-judge</td><td>심사 모델·순서 무작위화·사람 검토</td></tr>
+    <tr><td>같은 모델의 언어모델링 적합도?</td><td>perplexity</td><td>토크나이저·코퍼스·문맥 창</td></tr>
+  </table>
+  <aside>이 표는 기계적 선택표가 아니라 무엇을 잃을 위험을 감수할지 묻는 순서입니다. 주문번호 발명 여부는 단어 겹침으로 못 알고, 같은 뜻의 긴 답 둘을 exact match로 고르면 표현 차이를 실패로 오해합니다.</aside>
+</section>
+
+<!-- 16 지표 고르는 질문 3개 -->
+<section class="slide" data-part="정리">
+  <h2>❓ 지표 고르는 <span class="g">질문 3개</span> <small>(대체로 비용 순서)</small></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b class="g">결정적으로 채점 가능한가?</b> → 테스트·validator·이진 판정부터 (가장 싸고 빠름, 단 사실성까지 보장 안 함)</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b class="g">참조 답과 비교해야 하나?</b> → 유일한 답은 exact match, 항목 집합은 F1, 표면 비교는 BLEU (정답·매칭 규칙 만드는 비용)</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b class="g">사람 판단이 필요한가?</b> → rubric + LLM-as-judge 보조 + 사람 표본 검토 (가장 비쌈)</span></div>
+  </div>
+  <div class="hl">싼 지표로 비싼 판단을 흉내 내기보다, <b>남은 불확실성에만 사람 검토</b>를 붙인다.</div>
+  <aside>비용은 대체로 1에서 3으로 올라갑니다. 형식 준수도 작은 판정으로 나눌 수 있습니다 — 파싱 가능·필수 필드·추가 필드 금지·빈값 처리·근거 원문 포함은 서로 다른 실패이고, 앞의 셋은 validator가 빠르게, 마지막은 입력과 대조해 확인합니다.</aside>
+</section>
+
+<!-- 17 핵심 정리 -->
+<section class="slide" data-part="정리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 4문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">지표는 답의 <b>한 성질</b>을 재는 자다 — 한 점수가 사실성·형식·유용성·안전성을 함께 뜻하지 않는다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">참조 겹침 지표(exact·F1·BLEU·ROUGE)는 <b>표면</b>을 보고, <b>사실성 자체는 못 잰다.</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>perplexity는 확신</b>, <b>pass@k는 실행</b>, <b>LLM-as-judge는 열린 품질</b> — 최종 기준은 사람이 맡는다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">보고엔 평균 하나만 남기지 말고 <b>사례 수·경계 사례·모델과 버전·생성 매개변수·정규화 규칙·분자와 분모</b>를 남긴다.</span></div>
+  </div>
+  <aside>점수 차이가 작거나 사람 검토와 어긋나면 승자를 억지로 선언하지 말고, 어느 사례에서 어떤 약속이 깨졌는지 원문 근거를 남깁니다. 지표를 고른 뒤에도 실패 사례 몇 개를 직접 읽어, 점수는 올랐는데 업무상 나빠진 답이 없는지 확인합니다.</aside>
+</section>
+
+<!-- 18 질문 -->
+<section class="slide" data-part="정리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> exact match가 <b>0점</b>으로 만들어 버리는 옳은 답은 어떤 경우인가?</div>
+    <div class="q"><b>Q2.</b> P=0.80, R=0.67일 때 <b>F1</b>은 얼마이며, 왜 산술평균과 다른가?</div>
+    <div class="q"><b>Q3.</b> BLEU와 ROUGE는 각각 주로 <b>정밀도·재현율</b> 중 어느 관점인가?</div>
+    <div class="q"><b>Q4.</b> perplexity를 <b>프롬프트 품질 점수</b>로 쓰면 안 되는 이유는?</div>
+    <div class="q"><b>Q5.</b> 지표를 고르는 <b>질문 3개</b>는 대체로 어떤 순서로 놓이나?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q2의 손 계산과 Q4의 한계가 오늘의 핵심을 가장 잘 가립니다.</aside>
+</section>
+
+<!-- 19 정답 -->
+<section class="slide" data-part="정리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> <b>표현만 다른 옳은 자유 답</b> — 허용 답이 <b>긍정</b>인데 <b>대체로 긍정</b>처럼 뜻은 가깝지만 계약 밖인 경우.</div>
+    <div class="q a"><b>A2.</b> <b>F1 ≈ 0.73</b> = 2×(0.80×0.67)/(0.80+0.67). 조화평균이라 <b>작은 쪽에 민감</b> — P=1.0·R=0.0이면 산술 0.5, 조화 0.0.</div>
+    <div class="q a"><b>A3.</b> <b>BLEU = 정밀도</b> 관점(번역), <b>ROUGE = 재현율</b> 관점(요약). 둘 다 표면 겹침이라 사실성은 못 잰다.</div>
+    <div class="q a"><b>A4.</b> <b>확신하는 답이 옳은 답은 아니기</b> 때문. 모델은 틀린 배송일도 매우 자신 있게 이어 쓸 수 있다 → 과업 성공을 직접 판정하는 기준을 쓴다.</div>
+    <div class="q a"><b>A5.</b> ① 결정적 채점 가능? → ② 참조 답과 비교? → ③ 사람 판단 필요? — <b>대체로 비용이 오르는 순서.</b></div>
+  </div>
+  <aside>A2를 손으로 다시 계산해 보고, A4를 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다.</aside>
+</section>
+
+<!-- 20 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>재는 자가 생겼다 📏</h1>
+    <div class="big" style="margin-top:26px">형식과 내용의 실패를 <span class="y">작은 판정</span>으로 나눌 자가 생겼다<br><br>이제 지시를 바꾸며 <span class="y">이 자로 재는 실험</span>을 할 수 있다</div>
+    <p class="sub" style="margin-top:24px">답을 재는 방법 — 여기까지 · 다음: 지시 실패 유형학</p>
+  </div>
+  <aside>평가지표는 마음에 드는 답을 고르는 도구가 아니라, 무엇을 어떤 근거로 통과시킬지 결과 전에 정하는 자입니다. 이 자를 손에 쥐었으니, 다음 소단원에서는 지시가 어떤 방식으로 실패하는지 그 유형을 정리합니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

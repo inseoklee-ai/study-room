@@ -173,6 +173,18 @@
    - ✅ ⑦. 기법의 효과는 다시 검증한다 (증거 세 등급·컨텍스트 엔지니어링·agentic) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/technique-revalidation/) · 📊 [PPT](technique-revalidation/technique-revalidation.pptx)
    - ✅ ⑧. 자기 진화 — 개선 절차의 자동화 (Reflexion·AlphaEvolve·DSPy·GEPA) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/self-evolution/) · 📊 [PPT](self-evolution/self-evolution.pptx)
    - ✅ ⑨. 에이전트 설계 패턴과 복잡도 (복잡도 사다리·복잡도≠성능·강의 종합) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/agent-patterns/) · 📊 [PPT](agent-patterns/agent-patterns.pptx)
+2. **지시 설계 — 무엇이라고 시키는가** ✅ 완결 (11/11)
+   - ✅ ①. 지시의 해부학 (역할·과업·형식·제약이라는 계약) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/instruction-anatomy/) · 📊 [PPT](instruction-anatomy/instruction-anatomy.pptx)
+   - ✅ ②. 기초 프롬프트 실험 — 같은 질문, 열한 가지 방법 (디코딩 노브) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/eleven-methods/) · 📊 [PPT](eleven-methods/eleven-methods.pptx)
+   - ✅ ③. 왜 지시가 통하는가 — 학습의 계보 (SFT·RLHF·DPO·GRPO) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/why-instructions-work/) · 📊 [PPT](why-instructions-work/why-instructions-work.pptx)
+   - ✅ ④. 출처와 우선권 (system>developer>user>데이터·프롬프트 인젝션) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/source-and-precedence/) · 📊 [PPT](source-and-precedence/source-and-precedence.pptx)
+   - ✅ ⑤. 기법은 가설이다 (few-shot·역할·CoT를 가설 서식으로) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/techniques-as-hypotheses/) · 📊 [PPT](techniques-as-hypotheses/techniques-as-hypotheses.pptx)
+   - ✅ ⑥. 지시 3안 — 재고 실행하고 비교하기 (채점 기준 먼저·세 실행 경로) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/three-instructions-lab/) · 📊 [PPT](three-instructions-lab/three-instructions-lab.pptx)
+   - ✅ ⑦. 답의 모양을 약속한다 (구조화 출력·스키마·validator) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/output-contract/) · 📊 [PPT](output-contract/output-contract.pptx)
+   - ✅ ⑧. 답을 재는 방법 — 평가지표 사전 (exact match·F1·BLEU·pass@k·LLM-as-judge) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/eval-metrics/) · 📊 [PPT](eval-metrics/eval-metrics.pptx)
+   - ✅ ⑨. 지시 실패 유형학 (모호·과잉·누락·충돌·형식 드리프트) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/instruction-failures/) · 📊 [PPT](instruction-failures/instruction-failures.pptx)
+   - ✅ ⑩. 실패별 최소 변경 워크북 (한 번에 한 조건·대조 붕괴) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/minimal-change-workbook/) · 📊 [PPT](minimal-change-workbook/minimal-change-workbook.pptx)
+   - ✅ ⑪. 지시 설계의 원칙과 마무리 (점검 순서·파라미터도 계약·중단원 종합) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/instruction-principles/) · 📊 [PPT](instruction-principles/instruction-principles.pptx)
 
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
@@ -250,6 +262,17 @@
 > - 대4-⑦ https://inseoklee-ai.github.io/study-room/technique-revalidation/
 > - 대4-⑧ https://inseoklee-ai.github.io/study-room/self-evolution/
 > - 대4-⑨ https://inseoklee-ai.github.io/study-room/agent-patterns/
+> - 대4-2-① https://inseoklee-ai.github.io/study-room/instruction-anatomy/
+> - 대4-2-② https://inseoklee-ai.github.io/study-room/eleven-methods/
+> - 대4-2-③ https://inseoklee-ai.github.io/study-room/why-instructions-work/
+> - 대4-2-④ https://inseoklee-ai.github.io/study-room/source-and-precedence/
+> - 대4-2-⑤ https://inseoklee-ai.github.io/study-room/techniques-as-hypotheses/
+> - 대4-2-⑥ https://inseoklee-ai.github.io/study-room/three-instructions-lab/
+> - 대4-2-⑦ https://inseoklee-ai.github.io/study-room/output-contract/
+> - 대4-2-⑧ https://inseoklee-ai.github.io/study-room/eval-metrics/
+> - 대4-2-⑨ https://inseoklee-ai.github.io/study-room/instruction-failures/
+> - 대4-2-⑩ https://inseoklee-ai.github.io/study-room/minimal-change-workbook/
+> - 대4-2-⑪ https://inseoklee-ai.github.io/study-room/instruction-principles/
 >
 > 📊 **PPT**: 각 강의 폴더의 `<폴더명>.pptx` (예: `vlm/vlm.pptx`). GitHub 저장소나 라이브 사이트에서 내려받아 PowerPoint로 열 수 있습니다.
 >
