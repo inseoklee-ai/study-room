@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>같은 창에서 경쟁하는 다섯 종류 · 하나의 입력 예산</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 컨텍스트 엔지니어링 · ②</span>
+    <h1 style="margin:18px 0">같은 창에서<br>경쟁하는 다섯 종류</h1>
+    <p class="sub">하나의 입력 예산을 나눠 쓴다 — 지시·문서·메모리·도구·이력</p>
+  </div>
+  <aside>맥락이라 하면 대화 이력을 먼저 떠올리지만, 창을 나눠 쓰는 것은 이력만이 아닙니다. 시스템 지시, 도구 정의와 실행 결과, 검색으로 가져온 근거, 답의 출력 스키마까지 매 호출의 창에 함께 들어옵니다. 컨텍스트를 다룬다는 것은 대화창 관리가 아니라 구성요소 전체가 벌이는 자리 다툼을 설계하는 일입니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>PART 1</small><b>한 칸을 나누는 재료</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>PART 2</small><b class="g">같은 역할이 아니다</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gold)"><small>PART 3</small><b>예산표로 결정</b></div>
+  </div>
+  <ul class="pts">
+    <li>매 호출 창에 함께 들어오는 것을 <b>구성요소 카드</b>로 본다</li>
+    <li>하나의 창에서 경쟁하는 <b>다섯 재료</b> — 지시·문서·메모리·도구 목록·대화 이력</li>
+    <li>다섯 재료는 <b>같은 역할을 하지 않는다</b> — 서로를 대신할 수 없다</li>
+    <li><b>예산표</b>로 무엇을 넣고 무엇을 뺄지 투명하게 결정한다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 컨텍스트는 <b>대화창이 아니라 자리 다툼</b>이다.</div>
+  <aside>세 파트를 지나면 컨텍스트를 '대화 이력'과 같은 말로 쓰던 습관에서 벗어나, 하나의 입력 예산을 어느 재료에 얼마나 배정할지 설계하는 관점으로 옮겨 갑니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">한 칸을 나누는 재료들</h2>
+    <p style="margin-top:11px">매 호출의 창에는 대화 이력만 들어오지 않는다</p>
+    <span class="who">구성요소 카드 · 같은 입력 예산</span>
+  </div>
+  <aside>컨텍스트를 '대화 이력'과 같은 말로 쓰면 실제로 무엇이 자리를 차지하는지 놓칩니다. 매 호출 창에는 대화 이력뿐 아니라 시스템 지시, 도구 정의와 실행 결과, 검색 근거, 출력 스키마가 함께 들어옵니다.</aside>
+</section>
+
+<!-- 4 맥락 = 대화 이력이 아니다 -->
+<section class="slide" data-part="PART 1">
+  <h2>🪟 맥락 = 대화 이력? <span class="g">아니다</span></h2>
+  <ul class="pts">
+    <li>맥락이라 하면 <b>대화 이력</b>을 먼저 떠올리지만, 창을 나눠 쓰는 것은 이력만이 아니다</li>
+    <li>매 호출 창엔 <b>시스템 지시 · 도구 정의와 실행 결과 · 검색 근거 · 출력 스키마</b>가 함께 들어온다</li>
+  </ul>
+  <div class="hl">컨텍스트를 다룬다 = <b>대화창 관리가 아니라</b> 구성요소 전체가 벌이는 <b>자리 다툼을 설계하는 일.</b></div>
+  <aside>화면에서는 서로 다른 영역처럼 보이지만, 호출 때는 하나의 입력 예산 안에 모두 놓입니다. 그래서 '무엇을 넣을까'는 언제나 '무엇을 뺄까'와 함께 판단해야 합니다.</aside>
+</section>
+
+<!-- 5 구성요소 카드 -->
+<section class="slide" data-part="PART 1">
+  <h2>🃏 <span class="g">구성요소 카드</span>로 보자</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:110px;border-color:var(--gr)"><small>출처</small><b>어디서 왔나</b></div>
+    <div class="cell" style="min-width:110px;border-color:var(--bl)"><small>역할</small><b>무엇을 하나</b></div>
+    <div class="cell" style="min-width:110px;border-color:var(--gold)"><small>길이</small><b>얼마나 크나</b></div>
+    <div class="cell" style="min-width:110px;border-color:var(--pp)"><small>신뢰</small><b>얼마나 믿나</b></div>
+  </div>
+  <ul class="pts">
+    <li>매 호출 창에 들어오는 각 재료를 <b>카드</b>로 본다 — 카드마다 출처·역할·길이·신뢰 수준이 다르다</li>
+    <li>한 카드를 늘리면 <b>다른 카드가 쓸 공간이 준다</b></li>
+  </ul>
+  <div class="hl">지시·요청·이력·검색·도구·구조화 출력까지 넓게 보는 관점이다. <b>(Philipp Schmid, Context Engineering)</b></div>
+  <aside>구성요소 카드로 보면, 컨텍스트 설계가 단순히 '길이를 줄이는 일'이 아니라 출처·역할·신뢰가 다른 재료들의 비중을 정하는 일임이 드러납니다. Philipp Schmid의 Context Engineering은 지시·요청·이력·검색·도구·구조화 출력까지 넓게 다루는 실무 안내입니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">하나의 창에서 경쟁하는 다섯</h2>
+    <p style="margin-top:11px">같은 막대를 나눠 쓴다 — 늘리면 어딘가 줄어든다</p>
+    <span class="who">지시 · 문서 · 메모리 · 도구 목록 · 대화 이력</span>
+  </div>
+  <aside>다섯 재료는 화면에선 서로 다른 영역처럼 보여도 호출 때는 같은 입력 예산 안에 놓입니다. 다섯이 하나의 막대를 나눠 쓰므로, 어느 하나를 늘릴 땐 출력 영역과 다른 재료의 자리를 함께 확인해야 합니다.</aside>
+</section>
+
+<!-- 7 다섯 재료 -->
+<section class="slide" data-part="PART 2">
+  <h2>🍱 하나의 창에서 경쟁하는 <span class="g">다섯 재료</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b class="g">지시</b> — 모델의 역할·금지 사항</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b class="g">문서</b> — 질문에 답할 근거</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b class="g">메모리</b> — 이전 작업의 요약·결정 기록·사용자 선호</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b class="g">도구 목록</b> — 모델이 쓸 수 있는 도구의 이름·매개변수·설명</span></div>
+    <div class="st"><span class="n">5</span><span class="t"><b class="g">대화 이력</b> — 사용자와 assistant가 주고받은 기록</span></div>
+  </div>
+  <aside>다섯 재료는 뒤 파트에서 다시 역할별로 나눕니다. 지금은 '이 다섯이 같은 창에 함께 들어온다'는 사실 자체가 핵심입니다.</aside>
+</section>
+
+<!-- 8 같은 입력 예산 -->
+<section class="slide" data-part="PART 2">
+  <h2>📏 화면은 나뉘어 보여도 — <span class="g">같은 예산</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>지시</small><b>—</b></div>
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>문서</small><b>—</b></div>
+    <div class="cell" style="min-width:120px;border-color:var(--gold)"><small>메모리</small><b>—</b></div>
+    <div class="cell" style="min-width:120px;border-color:var(--pp)"><small>도구 목록</small><b>—</b></div>
+    <div class="cell" style="min-width:120px;border-color:var(--gy)"><small>대화 이력</small><b>—</b></div>
+  </div>
+  <div class="big">다섯 재료가 <span class="y">하나의 막대</span>를 나눠 쓴다<br>어느 하나를 늘릴 땐<br><span class="y">출력 영역과 다른 재료의 자리</span>를 함께 확인<small>화면에선 서로 다른 영역처럼 보여도 호출 때는 같은 입력 예산 안에 놓인다</small></div>
+  <aside>같은 입력 예산이라는 사실이 이 소단원의 뼈대입니다. 다섯 재료를 각자 독립적으로 최적화하려 하면 서로의 자리를 빼앗는다는 것을 놓치게 됩니다.</aside>
+</section>
+
+<!-- 9 트레이드오프 예시 -->
+<section class="slide" data-part="PART 2">
+  <h2>⚖️ 하나를 늘리면 <span class="r">다른 하나가 준다</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">지</span><span class="t">긴 <b>시스템 지시 + 도구 정의</b>를 넣으면 안전 동작 바탕은 늘지만 <b>정책 문서·대화 이력 자리가 준다</b></span></div>
+    <div class="st"><span class="n">이</span><span class="t"><b>과거 대화를 모두 유지</b>하면 선호·합의 결정은 보존되나 지금 질문에 직접 답하는 <b>조항이 묻힐 수 있다</b></span></div>
+    <div class="st"><span class="n">문</span><span class="t"><b>새 문서를 넓게</b> 넣으면 근거 범위는 커지나 <b>오래된 메모리와 충돌 가능성↑</b></span></div>
+  </div>
+  <div class="hl">어느 하나가 본질적으로 불필요한 게 아니라, <b>현재 과제에 필요한 비중을 정해야</b> 한다.</div>
+  <aside>세 예시 모두 '무엇을 빼야 하는가'라는 단일한 답이 없습니다. 지시도 이력도 문서도 각자 값어치가 있고, 다만 이번 과제에서 어느 것이 얼마만큼 필요한지가 다릅니다.</aside>
+</section>
+
+<!-- 10 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">다섯은 같은 역할을 하지 않는다</h2>
+    <p style="margin-top:11px">서로 대신할 수 없기에, 충돌하면 무엇을 다시 볼지 판단</p>
+    <span class="who">역할 구분 · 대체 불가 · 예산표</span>
+  </div>
+  <aside>다섯 재료가 같은 막대를 나눠 쓴다고 해서 서로 바꿔 넣을 수 있는 건 아닙니다. 각 재료의 역할이 다르기 때문에, 충돌이 생겼을 때 무엇을 다시 확인할지 판단하려면 종류를 구분해야 합니다.</aside>
+</section>
+
+<!-- 11 역할 표 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧭 다섯 재료의 <span class="g">서로 다른 역할</span></h2>
+  <table class="t">
+    <tr><th>재료</th><th>맡는 역할</th></tr>
+    <tr><td>지시</td><td>누구를 위해 어떤 형식으로 무엇을 하지 말지 정하는 <b>규칙</b> — 역할·안전·출력 형식·예외 처리</td></tr>
+    <tr><td>문서</td><td>현재 질문의 <b>사실·규칙</b>을 제공</td></tr>
+    <tr><td>메모리</td><td>이전에 확정한 <b>결정·선호</b>를 짧게</td></tr>
+    <tr><td>도구 목록</td><td>무엇을 <b>조회·실행</b>할 수 있는지</td></tr>
+    <tr><td>대화 이력</td><td><b>질문 경위</b>와 최근 정정</td></tr>
+  </table>
+  <div class="hl">지시는 <b>모든 답의 울타리</b>라 함부로 못 줄이지만, 같은 규칙 반복·무관한 예시는 근거 문서 자리를 줄인다. 지시에 <b>출처·적용 범위</b>를 붙여 정책인지 예시인지 구분.</div>
+  <aside>지시는 역할·안전·출력 형식·예외 처리가 쌓이면 상당한 크기가 됩니다. 그렇다고 통째로 줄일 수는 없으니, 정책과 예시를 표시해 두면 무엇이 반복이고 무엇이 필수인지 가려낼 수 있습니다.</aside>
+</section>
+
+<!-- 12 대체 불가 -->
+<section class="slide" data-part="PART 3">
+  <h2>🚫 서로를 <span class="r">대신할 수 없다</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>메모리가 원문을</b> 대신할 수 없다 — 요약은 결정·선호를 짧게 담을 뿐 근거 문서 자체가 아니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>도구 설명이 실제 결과를</b> 대신할 수 없다 — 무엇을 할 수 있는지와 무엇이 실제 나왔는지는 다르다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>과거 대화가 최신 주문 상태를</b> 대신할 수 없다 — 경위는 지금의 사실이 아니다</span></div>
+  </div>
+  <div class="hl">재료의 <b>종류를 구분</b>해야 충돌할 때 <b>무엇을 다시 확인할지</b> 판단할 수 있다.</div>
+  <aside>대체 불가의 원칙은 실전에서 디버깅의 지침이 됩니다. 답이 틀렸을 때, 메모리가 원문을 대신하려 했는지, 도구 설명을 결과로 오인했는지, 과거 대화를 최신 상태로 착각했는지를 나눠 보면 무엇을 다시 넣어야 할지 보입니다.</aside>
+</section>
+
+<!-- 13 PART 4 겸 예산표 도입 -->
+<section class="slide" data-part="PART 3">
+  <h2>📋 예산표는 <span class="g">줄일 대상을 찾는 도구</span></h2>
+  <table class="t">
+    <tr><th>입력 항목</th><th>실제 토큰 수</th><th>고정/가변</th><th>출처</th><th>제거 시 위험</th><th>확보할 출력량</th></tr>
+    <tr><td>지시</td><td>—</td><td>고정</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr><td>도구 정의</td><td>—</td><td>가변</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr><td>대화 이력</td><td>—</td><td>가변</td><td>—</td><td>—</td><td>—</td></tr>
+  </table>
+  <div class="hl">간단한 예산표 항목: <b>입력 항목 · 실제 토큰 수 · 고정/가변 · 출처 · 제거 시 위험 · 확보할 출력량.</b></div>
+  <aside>예산표는 무엇이 얼마나 자리를 차지하는지 눈에 보이게 만듭니다. 각 행에 출처와 제거 시 위험을 함께 적어야, 자리를 줄일 후보를 감이 아니라 근거로 고를 수 있습니다.</aside>
+</section>
+
+<!-- 14 예산표 적용 예 -->
+<section class="slide" data-part="PART 3">
+  <h2>✂️ 예산표로 <span class="g">자리를 확보한다</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">지</span><span class="t"><b>고정 지시 8k</b>는 매번 유지하되 <b>중복 예시 2k 절감</b> 가능</span></div>
+    <div class="st"><span class="n">도</span><span class="t"><b>도구 정의 12k</b>는 현재 <b>노출 안 하는 도구를 빼</b> 절감</span></div>
+    <div class="st"><span class="n">이</span><span class="t"><b>대화 이력</b>은 <b>최근 원문 + 결정 메모</b>로 분리</span></div>
+  </div>
+  <div class="big">목적 = 무조건 짧게가 아니라<br><span class="y">문서 근거와 설명할 출력의 자리</span>를<br>어디서 확보할지 <span class="y">투명하게 결정</span></div>
+  <aside>절감의 목표는 토큰을 아끼는 게 아니라, 근거 문서와 설명할 출력이 놓일 자리를 만드는 것입니다. 8k, 12k, 2k 같은 수치는 소스의 예시로, 실제 값은 시스템마다 다릅니다.</aside>
+</section>
+
+<!-- 15 무엇을 넣을지 = 무엇을 뺄지 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔁 넣을지는 곧 <span class="g">뺄지의 판단</span></h2>
+  <ul class="pts">
+    <li>오래된 메모리를 <b>남길 이유</b></li>
+    <li>전문을 넣어야 하는 <b>예외</b></li>
+    <li>이번에 <b>안 쓸 도구</b></li>
+    <li>원문으로 되돌아갈 <b>주소</b></li>
+  </ul>
+  <div class="hl">이 넷을 함께 적어야 <b>선택이 검토 가능</b>해진다 — 무엇을 넣을지는 곧 무엇을 뺄지의 판단.</div>
+  <aside>같은 예산을 나눠 쓰는 이상, 무언가를 넣는 결정에는 언제나 무언가를 빼는 결정이 붙습니다. 남길 이유·예외·안 쓸 도구·되돌아갈 주소를 적어 두면, 나중에 왜 그렇게 배치했는지 되짚어 검토할 수 있습니다.</aside>
+</section>
+
+<!-- 16 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 4문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">컨텍스트는 대화창 관리가 아니라 <b>구성요소 전체의 자리 다툼</b>이다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>지시·문서·메모리·도구 목록·대화 이력</b>이 하나의 입력 예산을 나눠 쓴다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t">다섯은 <b>같은 역할을 하지 않고</b> 서로 대신할 수 없다 — 충돌하면 종류를 나눠 다시 본다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>예산표</b>로 무엇을 넣고 뺄지 투명하게 정한다 — 목적은 짧게가 아니라 자리 확보.</span></div>
+  </div>
+  <aside>4번이 이 소단원의 실천 태도입니다. 컨텍스트를 줄이는 것 자체가 목표가 아니라, 근거와 출력이 놓일 자리를 확보하기 위한 수단으로 예산표를 씁니다.</aside>
+</section>
+
+<!-- 17 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> '컨텍스트를 다룬다'는 것은 대화창 관리와 어떻게 <b>다른가</b>?</div>
+    <div class="q"><b>Q2.</b> 하나의 창에서 경쟁하는 <b>다섯 재료</b>는 무엇인가?</div>
+    <div class="q"><b>Q3.</b> 다섯이 화면에선 나뉘어 보여도 호출 때 공유하는 것은 <b>무엇</b>인가?</div>
+    <div class="q"><b>Q4.</b> 메모리·도구 설명·과거 대화가 각각 <b>대신할 수 없는</b> 것은?</div>
+    <div class="q"><b>Q5.</b> 예산표의 <b>목적</b>은 무엇이며, 어떤 항목으로 구성되나?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q4와 Q5가 오늘의 핵심인 '대체 불가'와 '자리 확보'를 가장 잘 가립니다.</aside>
+</section>
+
+<!-- 18 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 대화창 관리가 아니라 <b>구성요소 전체가 벌이는 자리 다툼을 설계하는 일</b> — 시스템 지시·도구·검색 근거·출력 스키마까지 함께 다룬다.</div>
+    <div class="q a"><b>A2.</b> <b>지시</b>(역할·금지) · <b>문서</b>(근거) · <b>메모리</b>(결정·선호) · <b>도구 목록</b>(이름·매개변수·설명) · <b>대화 이력</b>(주고받은 기록).</div>
+    <div class="q a"><b>A3.</b> <b>같은 입력 예산</b> — 하나의 막대를 나눠 쓰므로 하나를 늘리면 출력 영역과 다른 재료의 자리가 준다.</div>
+    <div class="q a"><b>A4.</b> 메모리가 <b>원문</b>을, 도구 설명이 <b>실제 결과</b>를, 과거 대화가 <b>최신 주문 상태</b>를 대신할 수 없다.</div>
+    <div class="q a"><b>A5.</b> 목적은 <b>문서 근거와 출력의 자리를 투명하게 확보</b>하는 것. 항목: 입력 항목·토큰 수·고정/가변·출처·제거 시 위험·확보할 출력량.</div>
+  </div>
+  <aside>A4와 A5를 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다. 특히 예산표는 '짧게 만들기'가 아니라 '자리를 어디서 확보할지 정하기'임을 기억하세요.</aside>
+</section>
+
+<!-- 19 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>자리 다툼을 설계한다 🍱</h1>
+    <div class="big" style="margin-top:26px">같은 창에서 다섯 종류가 경쟁한다<br><span class="y">지시·문서·메모리·도구·이력</span>이<br>하나의 예산을 나눠 쓴다<br><br>이제 남은 물음 — <span class="y">근거를 어디에 놓을까</span></div>
+    <p class="sub" style="margin-top:24px">같은 창에서 경쟁하는 다섯 종류 — 여기까지 · 다음: 길수록 흐려진다</p>
+  </div>
+  <aside>같은 창에서 다섯 종류가 경쟁한다는 사실을 확인했으니, 이제 길이만이 아니라 관련 근거가 어느 위치에 놓일지를 배치해야 합니다. 다음 소단원에서 다룹니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

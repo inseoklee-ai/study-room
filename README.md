@@ -185,6 +185,16 @@
    - ✅ ⑨. 지시 실패 유형학 (모호·과잉·누락·충돌·형식 드리프트) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/instruction-failures/) · 📊 [PPT](instruction-failures/instruction-failures.pptx)
    - ✅ ⑩. 실패별 최소 변경 워크북 (한 번에 한 조건·대조 붕괴) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/minimal-change-workbook/) · 📊 [PPT](minimal-change-workbook/minimal-change-workbook.pptx)
    - ✅ ⑪. 지시 설계의 원칙과 마무리 (점검 순서·파라미터도 계약·중단원 종합) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/instruction-principles/) · 📊 [PPT](instruction-principles/instruction-principles.pptx)
+3. **컨텍스트 엔지니어링 — 무엇을 보게 하는가** ✅ 완결 (9/9)
+   - ✅ ①. 컨텍스트 창의 세 성질 (유한·매 호출 재구성·저장소 아님) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/context-window/) · 📊 [PPT](context-window/context-window.pptx)
+   - ✅ ②. 같은 창에서 경쟁하는 다섯 종류 (지시·문서·메모리·도구·이력) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/five-competitors/) · 📊 [PPT](five-competitors/five-competitors.pptx)
+   - ✅ ③. 길수록 흐려진다 (Lost in the Middle·context rot 네 얼굴) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/context-rot/) · 📊 [PPT](context-rot/context-rot.pptx)
+   - ✅ ④. 맥락 전략의 지도 — 선택과 상태 (전체·RAG·압축·폐기 / 누적·요약) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/context-strategy-map/) · 📊 [PPT](context-strategy-map/context-strategy-map.pptx)
+   - ✅ ⑤. 같은 질문·다른 맥락 (네 조건 통제 실험) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/same-question-different-context/) · 📊 [PPT](same-question-different-context/same-question-different-context.pptx)
+   - ✅ ⑥. 오염과 프롬프트 인젝션 (근거의 네 범주·네 층 방어) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/prompt-injection/) · 📊 [PPT](prompt-injection/prompt-injection.pptx)
+   - ✅ ⑦. 프로젝트 맥락 파일 — CLAUDE.md·AGENTS.md (상시 로드·규칙과 사실 분리) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/project-context-files/) · 📊 [PPT](project-context-files/project-context-files.pptx)
+   - ✅ ⑧. 캐싱과 비용의 경제학 (프리픽스 캐싱·적중률≠품질) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/caching-economics/) · 📊 [PPT](caching-economics/caching-economics.pptx)
+   - ✅ ⑨. 컨텍스트 엔지니어링의 원칙과 마무리 (여섯 판정 사슬·중단원 종합) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/context-principles/) · 📊 [PPT](context-principles/context-principles.pptx)
 
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
@@ -273,6 +283,15 @@
 > - 대4-2-⑨ https://inseoklee-ai.github.io/study-room/instruction-failures/
 > - 대4-2-⑩ https://inseoklee-ai.github.io/study-room/minimal-change-workbook/
 > - 대4-2-⑪ https://inseoklee-ai.github.io/study-room/instruction-principles/
+> - 대4-3-① https://inseoklee-ai.github.io/study-room/context-window/
+> - 대4-3-② https://inseoklee-ai.github.io/study-room/five-competitors/
+> - 대4-3-③ https://inseoklee-ai.github.io/study-room/context-rot/
+> - 대4-3-④ https://inseoklee-ai.github.io/study-room/context-strategy-map/
+> - 대4-3-⑤ https://inseoklee-ai.github.io/study-room/same-question-different-context/
+> - 대4-3-⑥ https://inseoklee-ai.github.io/study-room/prompt-injection/
+> - 대4-3-⑦ https://inseoklee-ai.github.io/study-room/project-context-files/
+> - 대4-3-⑧ https://inseoklee-ai.github.io/study-room/caching-economics/
+> - 대4-3-⑨ https://inseoklee-ai.github.io/study-room/context-principles/
 >
 > 📊 **PPT**: 각 강의 폴더의 `<폴더명>.pptx` (예: `vlm/vlm.pptx`). GitHub 저장소나 라이브 사이트에서 내려받아 PowerPoint로 열 수 있습니다.
 >

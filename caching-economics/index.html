@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>캐싱과 비용의 경제학 · 적중률은 품질 점수가 아니다</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 컨텍스트 엔지니어링 · ⑧</span>
+    <h1 style="margin:18px 0">캐싱과<br>비용의 경제학</h1>
+    <p class="sub">신뢰 판정 뒤에 남는 반복 — 적중률은 품질 점수가 아니다</p>
+  </div>
+  <aside>캐시는 비용과 지연을 줄여 주지만, 그 이유만으로 어떤 맥락이든 앞부분에 고정해선 안 됩니다. 순서는 바뀌지 않습니다 — 먼저 출처·갱신 상태를 확인하고 신뢰 경계·접근 범위를 판정한 뒤에만, 반복되는 맥락을 재사용합니다. 이 소단원은 그 순서를 지키면서 비용을 읽는 법을 다룹니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>PART 1</small><b>캐싱과 단가</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>PART 2</small><b class="g">앞부분과 세 블록</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>PART 3</small><b>적중률 ≠ 품질</b></div>
+  </div>
+  <ul class="pts">
+    <li>캐싱·프리픽스 캐싱의 <b>정의</b>와 cache read·write·일반 입력의 <b>단가 구분</b>을 본다</li>
+    <li>같은 앞부분만 재사용된다는 원리에서 <b>공통·가변·개별 세 블록</b> 배치를 세운다</li>
+    <li>적중률은 <b>비용 지표</b>, 맥락 품질은 <b>판단 지표</b> — 둘은 서로를 증명하지 않는다</li>
+    <li>신뢰 판정은 도장이 아니라 <b>반복 절차</b>, 비교는 <b>작게 시작</b>해 기록으로</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — <b>무엇을 읽힐지</b>와 <b>무엇을 싸게 반복할지</b>는 같은 질문이 아니다.</div>
+  <aside>세 파트를 지나면, 캐시를 '비용 절감 스위치'가 아니라 '신뢰된 맥락만 반복 재사용하도록 배열하는 설계'로 다시 보게 됩니다. 비용 수치는 신뢰 판정을 대체하지 않고 그것과 나란히 검증되는 지표입니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">캐싱이란 무엇이고, 값은 어떻게 매겨지나</h2>
+    <p style="margin-top:11px">"입력이 길다" 한 문장으로는 실제 비용을 설명할 수 없다</p>
+    <span class="who">캐싱 · 프리픽스 캐싱 · cache read/write</span>
+  </div>
+  <aside>먼저 용어를 정확히 놓습니다. 캐싱과 프리픽스 캐싱이 각각 무엇을 재사용하는지, 그리고 캐시 읽기·캐시 쓰기·일반 입력의 단가가 왜 서로 다른지를 구분해야, 비용을 근거로 한 배치 판단을 시작할 수 있습니다.</aside>
+</section>
+
+<!-- 4 정의 -->
+<section class="slide" data-part="PART 1">
+  <h2>💾 캐싱과 <span class="g">프리픽스 캐싱</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>캐싱</h3><p>한 번 처리한 내용을 <b>다시 계산하지 않고</b> 저장한 결과로 재사용하는 기술.</p></div>
+    <div class="box"><h3>프리픽스 캐싱</h3><p>요청의 <b>앞부분(prefix)</b>이 이전 요청과 충분히 같을 때 이미 처리한 입력을 재사용. 긴 시스템 지침·도구 정의·공통 정책 문서를 매번 처음부터 처리하지 않아 <b>입력 지연·비용↓</b>.</p></div>
+  </div>
+  <div class="hl">캐시는 모델이 문맥을 <b>더 잘 이해하게</b> 만드는 기능이 아니다 — 같은 텍스트를 <b>더 싸고 빠르게 다시 읽게</b> 할 뿐이다.</div>
+  <aside>관련성 낮은 문서를 고정했다고 근거 품질이 좋아지지 않고, 질문마다 달라지는 최신 예외를 캐시에서 제외했다고 설계가 실패한 것도 아닙니다. 이 구분이 이 소단원 전체의 출발점입니다.</aside>
+</section>
+
+<!-- 5 단가 구분 -->
+<section class="slide" data-part="PART 1">
+  <h2>💰 단가는 <span class="g">일반 입력과 같지 않다</span></h2>
+  <table class="t">
+    <tr><th>구분</th><th>무엇인가</th><th>단가 감각</th></tr>
+    <tr><td>cache read</td><td>이미 만들어진 캐시를 읽는 비용</td><td>일반 입력 단가의 <b class="g">≈10% 수준</b> — 훨씬 낮음</td></tr>
+    <tr><td>cache write</td><td>캐시를 처음 만드는 비용</td><td>일반 입력보다 <b>약간 비쌀 수 있음</b></td></tr>
+    <tr><td>일반 입력</td><td>캐시 없이 매번 처리하는 토큰</td><td>기준 단가</td></tr>
+  </table>
+  <div class="hl">이 수치는 <b>모델·리전·계약·TTL(캐시 유효 시간)</b>에 따라 달라지는 예시(2026-08 Anthropic 공식 가격 문서 기준). 운영비 계산 전 <b>현재 API 문서 재확인.</b></div>
+  <aside>핵심은 셋을 구분하지 않으면 "입력이 길다" 한 문장으로 실제 비용을 설명할 수 없다는 점입니다. 같은 길이의 입력이라도 cache read로 반복되는지, cache write로 매번 새로 만들어지는지에 따라 실제 지출은 크게 달라집니다.</aside>
+</section>
+
+<!-- 6 손익계산 -->
+<section class="slide" data-part="PART 1">
+  <h2>📈 캐시 친화 배치의 <span class="g">손익계산</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:170px;border-color:var(--gy)"><small>첫 호출</small><b>고정부 <span class="r">cache write</span><br>(비용 발생)</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:190px;border-color:var(--gr)"><small>이어지는 호출</small><b>같은 앞부분 <span class="g">cache read</span><br>낮은 단가 누적</b></div>
+  </div>
+  <ul class="pts">
+    <li>고정부를 <b>앞에 안정적으로</b> 두고 질문별 자료를 뒤에 붙이는 배치는 <b>재사용 횟수가 늘수록</b> 비용 감각을 바꾼다</li>
+    <li>단 <b>한 번만</b> 하는 대화라면 읽을 호출이 안 따라와 <b>write 비용만</b> 남는다</li>
+  </ul>
+  <div class="hl">고정 문서를 길게 둔다는 사실만으로 절감이라 판단 말고, <b>예상 호출 수와 실제 적중률을 함께 계산</b>한다.</div>
+  <aside>같은 앞부분이 반복될 때 첫 write 비용을 이후의 낮은 read 단가가 상쇄하고 누적 절감으로 넘어갑니다. 재사용이 없으면 손익분기를 못 넘습니다. 절감 여부는 배치 그 자체가 아니라 재사용 횟수가 결정합니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">앞부분이 같아야 재사용된다</h2>
+    <p style="margin-top:11px">공통 부분과 새로 검증할 부분을 섞지 않는다</p>
+    <span class="who">프리픽스 · 세 블록 · 배치 vs 캐시</span>
+  </div>
+  <aside>프리픽스는 입력의 처음부터 이어지는 토큰열입니다. 어디서부터 재사용이 끊기는지를 이해하면, 입력을 어떻게 나눠 배치해야 하는지가 따라 나옵니다.</aside>
+</section>
+
+<!-- 8 프리픽스 원리 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧵 프리픽스 — <span class="g">어디서 재사용이 끊기나</span></h2>
+  <ul class="pts">
+    <li>두 요청이 같은 <b>시스템 지침·도구 정의·검증된 정책집</b>으로 시작하고 뒤에 서로 다른 질문을 붙이면, 제공자가 정한 <b>최소 길이·유효 시간</b> 안에서 앞부분 처리를 재사용</li>
+    <li>중간에 <b>날짜·주문번호</b>처럼 달라지는 값을 끼워 넣으면 <b>그 지점 뒤 토큰열은 더 이상 같은 프리픽스가 아니다</b> — 뒤쪽까지 재사용된다고 기대 못 함</li>
+  </ul>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>공통 지침</small><b class="g">같음 → 재사용</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--red)"><small>가변 값 삽입</small><b class="r">여기서 끊김</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gy)"><small>이후 토큰</small><b>재사용 기대 X</b></div>
+  </div>
+  <aside>재사용은 "얼마나 비슷한가"가 아니라 "앞에서부터 어디까지 똑같은가"로 결정됩니다. 가변 값이 앞쪽에 끼면 그 뒤 전체가 새 입력으로 처리되므로, 변하는 것을 뒤로 미루는 배치가 중요해집니다.</aside>
+</section>
+
+<!-- 9 세 블록 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧱 입력을 <span class="g">세 블록</span>으로</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b class="g">공통(고정)</b> — 버전·소유자가 분명하고 갱신 절차가 있는 공통 지침·제한된 도구 정의·검토 마친 정책</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b class="b">가변(근거)</b> — 해당 요청에서만 필요한 검색 발췌·최신 예외처럼 가변적이지만 답의 근거가 되는 자료</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b class="p">개별(요청)</b> — 사용자의 질문·주문 번호처럼 개별 요청</span></div>
+  </div>
+  <div class="hl">모든 제공자의 내부 구현을 보장하는 공식이 아니라, <b>공통 부분과 새로 검증할 부분을 섞지 않기 위한 설계 가설</b>이다.</div>
+  <aside>공통은 앞에 안정적으로 두어 프리픽스로 재사용하고, 가변과 개별은 뒤에 붙여 매 호출 새로 확인합니다. 세 블록의 목적은 캐시 최적화 이전에, 무엇을 이미 검증했고 무엇을 다시 검증해야 하는지를 구조로 분리하는 것입니다.</aside>
+</section>
+
+<!-- 10 고객지원 예시 -->
+<section class="slide" data-part="PART 2">
+  <h2>🎧 고객 지원 — <span class="g">배치와 캐시가 충돌할 때</span></h2>
+  <table class="t">
+    <tr><th>자료</th><th>어느 블록</th><th>이유</th></tr>
+    <tr><td>반품 기본 규칙·답변 형식·도구 사용 제한</td><td><b class="g">공통(고정)</b></td><td>검토·버전 확인 뒤 앞 블록에</td></tr>
+    <tr><td>주문별 배송 기록·오늘 철회된 예외·방금 올린 첨부</td><td><b class="b">가변/개별</b></td><td>매 호출 새로 확인</td></tr>
+  </table>
+  <div class="hl">질문에 필요한 <b>최신 예외</b>를 질문 가까이 두는 편이 근거 활용엔 낫지만, 그 예외가 매번 달라지면 긴 공통 문서와 함께 캐시될 거라 <b>기대 금지</b>.</div>
+  <aside>정책 전문을 캐시할지, 질문별 발췌만 넣을지는 입력비만으로 정하지 않습니다 — 질문 다양성·전역 예외를 놓칠 위험·자료 갱신 빈도·답변이 실제로 인용한 근거를 함께 비교합니다. 절감할 토큰과 새로 확인할 사실을 한 덩어리로 취급하지 않는 것이 핵심입니다. 답이 어느 블록을 근거로 삼았는지도 기록합니다.</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">적중률은 품질 점수가 아니다</h2>
+    <p style="margin-top:11px">신뢰 판정은 도장이 아니라 반복하는 절차다</p>
+    <span class="who">비용 지표 vs 판단 지표 · VIP 반례</span>
+  </div>
+  <aside>여기서부터 비용 지표와 품질 지표를 명확히 갈라 놓습니다. 높은 적중률을 좋은 답의 증거로 오해하면, 오래됐거나 민감한 정보를 고정하는 잘못된 최적화로 이어집니다.</aside>
+</section>
+
+<!-- 12 적중률 vs 품질 -->
+<section class="slide" data-part="PART 3">
+  <h2>📐 두 지표를 <span class="g">가른다</span></h2>
+  <div class="grid2">
+    <div class="box"><h3><span class="b">적중률</span> = 비용 지표</h3><p>같은 앞부분이 <b>얼마나 자주 반복</b>되었는지 보여 준다.</p></div>
+    <div class="box"><h3><span class="g">맥락 품질</span> = 판단 지표</h3><p>그 앞부분이 <b>현재 질문에 관련 있는지·최신인지·출처와 권한이 적절한지</b> 보여 준다.</p></div>
+  </div>
+  <div class="big">높은 적중률과 좋은 답은 함께 나타날 수 있지만<br><span class="y">한쪽이 다른 쪽을 증명하지 않는다</span><small>캐시 친화 배치 = 신뢰된 고정 맥락을 반복 재사용하도록 배열하는 일</small></div>
+  <aside>적중률이 높다는 것은 "같은 것을 자주 재사용했다"일 뿐, 그 재사용된 맥락이 옳고 최신이며 권한에 맞는다는 뜻은 아닙니다. 비용 지표를 품질 지표로 착각하는 순간, 다음 슬라이드의 반례 같은 최적화가 생깁니다.</aside>
+</section>
+
+<!-- 13 VIP 반례 -->
+<section class="slide" data-part="PART 3">
+  <h2>⚠️ 반례 — <span class="r">VIP 목록을 고정하면</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">적중률을 높이려 지난 분기 <b>VIP 고객 목록·담당자 연락처</b>를 공통 프리픽스에 넣어 모든 상담에 상시 로드</span></div>
+    <div class="st"><span class="n">2</span><span class="t">목록은 길고 거의 안 변해 <b class="g">캐시는 잘 맞음</b> — 그러나 퇴사한 담당자 번호·등급 바뀐 고객이 남아 있음</span></div>
+    <div class="st"><span class="n">3</span><span class="t">모델이 현재 주문과 <b>무관한 개인정보</b>를 계속 읽음 → 비용은 줄어도 <b class="r">최신성↓ · 노출 범위↑</b></span></div>
+    <div class="st"><span class="n">4</span><span class="t">더 심하면 오래된 VIP 예외를 근거로 <b>할인·우선 처리</b>를 잘못 안내</span></div>
+  </div>
+  <div class="hl">캐시 적중을 위해 <b>오래됐거나 민감한 정보를 고정</b>하는 최적화는 맥락 품질과 보안을 <b>동시에 해친다.</b></div>
+  <aside>이 반례는 적중률과 품질이 어긋나는 전형입니다. 캐시가 잘 맞을수록 잘못된 정보가 더 자주, 더 넓게 읽힙니다. 재사용 횟수가 많다는 이유로 민감 정보를 더 넓게 노출해서는 안 됩니다.</aside>
+</section>
+
+<!-- 14 신뢰 판정은 절차 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔁 신뢰 판정은 <span class="g">반복하는 절차</span></h2>
+  <ul class="pts">
+    <li>고정 자료에도 <b>버전·출처·갱신 시점·소유자·폐기 조건</b>을 둔다</li>
+    <li>권한이 만료됐거나 출처를 재확인 못 하면 <b>캐시 효율이 좋아도 고정 블록에서 뺀다</b></li>
+    <li>변경 잦은 정보는 <b>캐시 이득과 최신성 손실을 함께 비교</b>한다</li>
+  </ul>
+  <div class="big">신뢰 판정은 캐시 생성 전 한 번 찍고 끝나는 <span class="y">도장이 아니다</span><br>자료가 바뀌거나 유효 시간이 지나면<br><span class="y">다시 수행하는 절차</span></div>
+  <aside>캐싱은 신뢰 판정의 순서를 바꾸지 않습니다. 먼저 판정하고, 판정이 유지되는 동안만 재사용하며, 조건이 바뀌면 판정을 되풀이합니다. 표지에서 말한 순서가 여기서 절차로 구체화됩니다.</aside>
+</section>
+
+<!-- 15 작게 시작 + 기록 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧪 <span class="g">작게 시작</span>해 비용과 신뢰를 함께 검증</h2>
+  <p>공통 정책 블록 하나 + 두세 대표 질문으로 세 조건을 비교한다.</p>
+  <div class="steps">
+    <div class="st"><span class="n">①</span><span class="t">검토된 <b>정책만</b> 고정</span></div>
+    <div class="st"><span class="n">②</span><span class="t">최신 예외를 <b class="r">고정 블록에 섞음</b></span></div>
+    <div class="st"><span class="n">③</span><span class="t">최신 예외를 <b class="g">가변 블록에</b></span></div>
+  </div>
+  <div class="hl">각 조건에서 캐시 사용량뿐 아니라 <b>답이 최신 예외를 인용했는지·필요 없는 고객 정보를 언급했는지·정책 버전이 맞았는지</b> 대조한다.</div>
+  <aside>비용 판단도 대표 과업에서 기록으로 남깁니다 — 입력 토큰·write와 read의 비율·TTL 안 재사용 횟수·응답 지연·근거 정확성·재시도 횟수, 그리고 버전 불일치·부적절한 인용 여부까지. 한 번의 저렴한 호출보다, 같은 조건에서 신뢰된 근거를 반복해 썼는지가 더 중요한 비교 기준입니다. 운영 중에는 고정 블록의 변경을 일반 문서 변경과 다르게 다루고, 보안 사고·권한 변경·오염 의심 시 적중률 손실보다 고정 맥락의 즉시 제거·재검토를 우선합니다.</aside>
+</section>
+
+<!-- 16 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 4문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">캐시는 이해력이 아니라 <b>같은 텍스트를 더 싸고 빠르게 다시 읽는</b> 기능이다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>cache read(≈10%)·cache write·일반 입력</b>을 구분해야 비용을 설명할 수 있고, 절감은 <b>재사용 횟수</b>가 정한다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t">앞부분만 재사용되므로 <b>공통·가변·개별</b> 세 블록으로 나눠 배치한다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>적중률(비용) ≠ 맥락 품질(판단)</b> — 신뢰 판정은 반복 절차이고, 비교는 작게 시작해 기록으로.</span></div>
+  </div>
+  <aside>4번이 이 소단원 전체의 태도입니다. 캐시가 잘 맞는다는 사실을 좋은 답의 증거로 삼지 말고, 무엇을 고정해도 되는지라는 신뢰 판정을 비용 수치와 나란히 검증합니다.</aside>
+</section>
+
+<!-- 17 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> <b>프리픽스 캐싱</b>은 무엇을 재사용하며, 캐시는 모델의 무엇을 <b>바꾸지 못하는가</b>?</div>
+    <div class="q"><b>Q2.</b> <b>cache read·cache write·일반 입력</b>의 단가 감각은 각각 어떠한가?</div>
+    <div class="q"><b>Q3.</b> 입력을 나누는 <b>세 블록</b>은 무엇이며, 왜 나누는가?</div>
+    <div class="q"><b>Q4.</b> <b>적중률</b>과 <b>맥락 품질</b>은 각각 어떤 종류의 지표인가?</div>
+    <div class="q"><b>Q5.</b> VIP 목록 반례에서 캐시 적중을 높이려는 최적화가 무엇을 <b>해쳤는가</b>?</div>
+  </div>
+  <aside>Q4와 Q5가 오늘의 핵심을 가장 잘 가립니다. 답이 바로 떠오르지 않으면 PART 3로 돌아가 확인해 보세요.</aside>
+</section>
+
+<!-- 18 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 요청의 <b>앞부분(prefix)</b>이 이전과 충분히 같을 때 이미 처리한 입력을 재사용. 캐시는 <b>이해력을 높이지 못하고</b>, 같은 텍스트를 더 싸고 빠르게 다시 읽게 할 뿐.</div>
+    <div class="q a"><b>A2.</b> <b>cache read</b> ≈ 일반 입력의 <b>10% 수준</b> · <b>cache write</b> 일반 입력보다 약간 비쌀 수 있음 · <b>일반 입력</b>은 기준 단가(모델·리전·계약·TTL에 따라 달라지는 예시).</div>
+    <div class="q a"><b>A3.</b> <b>공통(검토된 고정 지침·정책)</b> · <b>가변(요청별 근거 자료)</b> · <b>개별(질문·주문번호)</b>. 공통과 새로 검증할 부분을 <b>섞지 않기 위해</b>.</div>
+    <div class="q a"><b>A4.</b> <b>적중률 = 비용 지표</b>(앞부분이 얼마나 반복됐나) · <b>맥락 품질 = 판단 지표</b>(관련·최신·출처·권한). 한쪽이 다른 쪽을 <b>증명하지 않는다</b>.</div>
+    <div class="q a"><b>A5.</b> 비용은 줄었으나 <b>최신성↓·노출 범위↑</b> — 오래됐거나 민감한 정보를 고정해 <b>맥락 품질과 보안을 동시에</b> 해쳤다.</div>
+  </div>
+  <aside>A4와 A5를 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다. 신뢰 판정을 비용 수치와 함께 검증하는 태도가 핵심입니다.</aside>
+</section>
+
+<!-- 19 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>싸게 반복하기 전에, 신뢰부터 💾</h1>
+    <div class="big" style="margin-top:26px">먼저 <span class="y">출처·갱신·권한</span>을 판정하고<br>신뢰된 맥락만 <span class="y">반복 재사용</span>한다<br><br>출처·선택·배치·신뢰·권한·비용의 <span class="y">판정 사슬</span>이 완성된다</div>
+    <p class="sub" style="margin-top:24px">캐싱과 비용의 경제학 — 여기까지 · 다음: 컨텍스트 엔지니어링의 원칙과 마무리</p>
+  </div>
+  <aside>재사용은 편의 기능이지만, 신뢰를 보존하는 조건 아래에서만 비용 절감의 이점을 갖습니다. 출처·선택·배치·신뢰·권한·비용으로 이어진 판정 사슬을 다음 소단원에서 원칙으로 묶고 마무리합니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

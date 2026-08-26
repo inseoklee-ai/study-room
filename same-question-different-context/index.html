@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>같은 질문·다른 맥락 · 네 조건 통제 실험</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 컨텍스트 엔지니어링 · ⑤</span>
+    <h1 style="margin:18px 0">같은 질문·다른 맥락</h1>
+    <p class="sub">네 조건 통제 실험 — 답이 근거에 닿는 방식을 비교</p>
+  </div>
+  <aside>같은 반품 정책, 같은 질문인데 맥락을 어떻게 주느냐에 따라 모델의 답이 달라질 수 있습니다. 이 실습은 맥락 변수 하나만 바꾸고 나머지는 고정한 통제 실험으로, 답의 내용뿐 아니라 답이 근거에 닿는 방식까지 비교합니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>PART 1</small><b>고정과 변경</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>PART 2</small><b class="g">채점</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gold)"><small>PART 3</small><b>코드로 실행</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--pp)"><small>PART 4</small><b class="p">기록</b></div>
+  </div>
+  <ul class="pts">
+    <li>통제 실험으로 <b>고정할 것과 바꿀 것</b>을 나누고 <b>네 조건</b>을 세운다</li>
+    <li>지시 설계에서 만든 <b>이진·형식 기준</b>을 고정 채점표로 가져온다</li>
+    <li>정책과 <b>출처 표식</b>을 준비해 파이썬으로 실행한다</li>
+    <li>원출력과 <b>메타데이터</b>를 남겨 우연히 맞은 답과 근거를 보존한 답을 가린다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 바꾸는 변수는 <b>입력 맥락의 범위와 출처 표식</b>뿐, 나머지는 전부 고정한다.</div>
+  <aside>네 파트를 지나면, 같은 질문에 맥락만 달리 넣었을 때 답이 어떻게·왜 달라지는지를 인상 비평이 아니라 통제된 비교로 설명할 수 있게 됩니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">고정할 것과 바꿀 것을 나눈다</h2>
+    <p style="margin-top:11px">통제 실험 = 알고 싶은 변수 하나만 바꾸고 나머지 고정</p>
+    <span class="who">none · full · selected · selected_cited</span>
+  </div>
+  <aside>통제 실험이란 원인을 알고 싶은 변수 하나만 바꾸고 나머지를 고정하는 것입니다. 여기서 바꾸는 변수는 입력 맥락의 범위와 출처 표식뿐입니다.</aside>
+</section>
+
+<!-- 4 고정/변경 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔒 무엇을 <span class="g">고정</span>하고 무엇을 <span class="r">바꾸나</span></h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="g">고정하는 것</h3>
+      <p>질문 · 모델 · 모델 버전 · 생성 파라미터 · 출력 형식 · 실행 장비 · (가능하면) 실행 시각 기록 방식.</p>
+    </div>
+    <div class="box">
+      <h3 class="r">바꾸는 것</h3>
+      <p>입력 맥락의 <b>범위</b>(얼마나 넣나)와 <b>출처 표식</b>(문서명·버전·절 번호를 붙이나)뿐.</p>
+    </div>
+  </div>
+  <div class="hl"><b>같은 반품 정책</b>인데도 답은 맥락을 어떻게 주느냐에 따라 달라질 수 있다 — 그 차이를 <b>답이 근거에 닿는 방식</b>으로 비교한다.</div>
+  <aside>고정 목록에서 하나라도 함께 바뀌면, 관찰된 차이가 맥락 때문인지 다른 변수 때문인지 구분할 수 없게 됩니다. 그래서 바꾸는 변수를 맥락의 범위와 표식으로만 좁힙니다.</aside>
+</section>
+
+<!-- 5 네 조건 표 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧭 네 조건 — <span class="g">무엇을 분리하나</span></h2>
+  <table class="t">
+    <tr><th>조건</th><th>입력 맥락</th><th>분리하는 변수</th><th>주의</th></tr>
+    <tr><td>none</td><td>정책 없음</td><td>외부 근거 없이 답할 때의 기준선</td><td>정책과 같은 답도 우연한 일치일 수 있음</td></tr>
+    <tr><td>full</td><td>정책 전문</td><td>예외·연결 조항을 함께 볼 때의 변화</td><td>긴 문서의 잡음·배치 효과가 함께 들어감</td></tr>
+    <tr><td>selected</td><td>관련 조각</td><td>선택한 최소 근거 집합의 변화</td><td>빠진 조항 때문에 답이 달라질 수 있음</td></tr>
+    <tr><td>selected_cited</td><td>같은 조각+출처 표식</td><td>출처를 되찾을 수 있게 한 효과</td><td>표식이 사실성·권위를 자동 보장하지 않음</td></tr>
+  </table>
+  <div class="hl"><b>selected_cited</b>는 정보를 더 넣어 정답을 만드는 장치가 아니라, <b>동일 조각을 근거로 되찾고 인용하게 하는 표식의 효과</b>를 본다.</div>
+  <aside>selected와 selected_cited는 문장 내용이 같고 표식만 다릅니다. 두 조건의 답이 다르면 표식이 인용 위치·근거 표현에 관여했을 가능성을 살핍니다. 단 문서 제목·절 번호는 권위의 증명서가 아닙니다.</aside>
+</section>
+
+<!-- 6 고정 질문 + 세 판단 지점 -->
+<section class="slide" data-part="PART 1">
+  <h2>❓ 고정 질문과 <span class="g">세 판단 지점</span></h2>
+  <div class="box">
+    <p style="margin:0"><b>"고객이 상품을 수령한 뒤 12일이 지났고 택을 제거했습니다. 단순 변심으로 반품하려 하며 배송비가 누구에게 있는지 묻습니다. 확인된 정책만 근거로 답하고, 정책이 말하지 않는 사실은 단정하지 마세요."</b></p>
+  </div>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>①</small><b>수령일<small>(12일)</small></b></div>
+    <span class="ar">·</span>
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>②</small><b>택 제거</b></div>
+    <span class="ar">·</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gold)"><small>③</small><b>단순 변심 배송비</b></div>
+  </div>
+  <div class="hl">정책에 착용 여부·택 제거의 의미가 없으면, 모델이 빈자리를 <b>일반 관행으로 채우지 않고 확인 질문·조건부 표현으로 남기는지</b> 본다.</div>
+  <aside>이 세 지점이 판단이 갈리는 곳입니다. 각 조건은 두 번 실행합니다. 같은 파라미터에서도 생성엔 변동이 있으므로, 두 답이 다르면 조건의 효과와 실행 간 변동을 분리할 단서가 생깁니다. 두 번이 통계 검정은 아니지만, 한 번의 인상적 답을 조건의 일반 성질로 선언하는 일을 줄여줍니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">앞서 만든 자를 그대로 쓴다</h2>
+    <p style="margin-top:11px">새 평가 이론을 만들지 않는다 — 이진·형식 기준을 고정 통제로 회수</p>
+    <span class="who">이진 판정 · 형식 준수 · 근거 일치</span>
+  </div>
+  <aside>지시 설계에서 만든 이진·형식 기준을 그대로 고정 통제로 가져옵니다. 이진 판정은 조건을 지키면 1 아니면 0이며, 형식 준수는 내용의 사실성과 별도로 검사합니다. 친절한 말투·긴 설명은 이 기준을 통과시키지 않습니다.</aside>
+</section>
+
+<!-- 8 고정 채점 항목 표 -->
+<section class="slide" data-part="PART 2">
+  <h2>📋 고정 채점 항목 — <span class="g">이진/기록 기준</span></h2>
+  <table class="t">
+    <tr><th>항목</th><th>이진/기록 기준</th><th>확인 방법</th></tr>
+    <tr><td>형식</td><td><b>reply</b>·<b>evidence</b>·<b>question</b> 세 필드, 근거 없을 때 <b>evidence</b>는 <b>null</b></td><td>JSON 파싱·필드 검사</td></tr>
+    <tr><td>정답성</td><td>수령 12일 사실과 정책 기한·배송비 조항에 안 어긋남</td><td>질문과 원문 대조</td></tr>
+    <tr><td>근거 일치</td><td>핵심 판단마다 실제 입력 조항·표식 위치가 대응</td><td>답 문장 옆에 원문 위치</td></tr>
+    <tr><td>무근거 주장</td><td>입력 밖 주문·착용·환불 사실을 단정 안 함</td><td>입력 밖 문장 표시</td></tr>
+    <tr><td>충돌 처리</td><td>예외가 있으면 반영하거나 적용에 필요한 사실을 물음</td><td>기본 규칙·예외 함께 대조</td></tr>
+    <tr><td>기권</td><td>근거 부족 시 <b>null</b>+확인 질문으로 멈춤</td><td>근거 없는 완료형 단정 찾기</td></tr>
+  </table>
+  <aside>답이 요구한 필드를 가졌는지, 근거가 있을 때 어느 조항인지 적었는지, 근거가 없을 때 null과 확인 질문을 남겼는지를 먼저 고정 기준으로 삼습니다.</aside>
+</section>
+
+<!-- 9 정답성 != 근거 일치 -->
+<section class="slide" data-part="PART 2">
+  <h2>⚖️ 정답성과 근거 일치를 <span class="g">합치지 않는다</span></h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="r">우연한 정답</h3>
+      <p><b>none</b>이 "14일 이내 반품 가능"이라 우연히 정책과 같아도, 회사 정책의 <b>출처가 없으므로</b> 근거 일치는 통과가 아니다.</p>
+    </div>
+    <div class="box">
+      <h3 class="b">표식은 맞지만 어긋남</h3>
+      <p><b>selected_cited</b>가 <b>[반품 정책 v2.1 §3]</b>을 정확히 적어도, 그 절이 배송비가 아닌 <b>기한만 말하면</b> 배송비 판단의 근거 일치는 실패.</p>
+    </div>
+  </div>
+  <div class="hl">형식이 맞는 <b>JSON도 내용의 참을 대신하지 않는다.</b> 정답성·근거 일치는 서로 다른 것을 잰다.</div>
+  <aside>정답성은 답이 사실·정책과 어긋나지 않는가를, 근거 일치는 그 판단이 실제 입력 조항에 대응하는가를 잽니다. 둘을 합치면 우연히 맞은 답과 근거를 보존한 답을 구분할 수 없게 됩니다.</aside>
+</section>
+
+<!-- 10 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">정책과 출처 표식을 준비해 실행한다</h2>
+    <p style="margin-top:11px">예시 정책은 실습용 가상 문서</p>
+    <span class="who">langchain-ollama · qwen3.5:2b</span>
+  </div>
+  <aside>예시 정책은 실습용 가상 문서입니다. 전문엔 무관해 보이는 배송 지연 보상 조항도 넣어 관련성·문서량을 함께 관찰합니다. 관련 조각엔 기한·택 제거 뒤 확인·단순 변심 배송비를 함께 포함합니다 — 하나라도 빠지면 다른 근거 집합이 되기 때문입니다.</aside>
+</section>
+
+<!-- 11 정책·출처 표식 코드 -->
+<section class="slide" data-part="PART 3">
+  <h2>📄 정책 전문과 <span class="g">관련 조각·표식</span></h2>
+<pre>POLICY_FULL = """
+[반품 정책 v2.1 §1] 상품은 수령 후 14일 이내에 반품을 신청할 수 있습니다.
+[반품 정책 v2.1 §2] 단순 변심 반품의 왕복 배송비는 고객 부담입니다.
+[반품 정책 v2.1 §3] 택 제거 상품은 착용 여부 확인 뒤 처리합니다.
+[반품 정책 v2.1 §4] 불량·오배송은 회사가 배송비를 부담합니다.
+"""
+POLICY_SELECTED = """
+[반품 정책 v2.1 §1] 상품은 수령 후 14일 이내에 반품을 신청할 수 있습니다.
+[반품 정책 v2.1 §3] 택 제거 상품은 착용 여부 확인 뒤 처리합니다.
+"""
+CONTEXTS = {"none": "", "full": POLICY_FULL, "selected": POLICY_SELECTED,
+    "selected_cited": "[반품 정책 v2.1, §1·§3]\n\n" + POLICY_SELECTED}</pre>
+  <div class="hl"><b>selected</b>와 <b>selected_cited</b>는 문장 내용이 같고 표식만 다르다 — 앞머리에 <b>[반품 정책 v2.1, §1·§3]</b>이 붙었을 뿐.</div>
+  <aside>selected에는 §1·§3만 담고, selected_cited는 같은 두 조각 앞에 출처 표식 한 줄을 더합니다. §2(단순 변심 배송비)를 selected에서 뺐다면 그것이 다른 근거 집합이 된다는 점과 제외 이유를 함께 기록해야 합니다.</aside>
+</section>
+
+<!-- 12 실행 루프 코드 -->
+<section class="slide" data-part="PART 3">
+  <h2>🐍 네 조건 × 두 번 <span class="g">실행 루프</span></h2>
+<pre>MODEL, TEMPERATURE, REPEATS = "qwen3.5:2b", 0, 2
+
+llm = ChatOllama(model=MODEL, temperature=TEMPERATURE,
+                 reasoning=False)   # think:false에 해당
+OUT.mkdir(exist_ok=True)
+for name, ctx in CONTEXTS.items():
+    for rep in range(1, REPEATS + 1):
+        user = (ctx + "\n\n" + QUESTION) if ctx else QUESTION
+        resp = llm.invoke(user)
+        (OUT / f"{name}-run{rep}.txt").write_text(
+            resp.content, encoding="utf-8")</pre>
+  <div class="hl">각 조건을 <b>두 번</b> 실행해 파일로 남긴다 — <b>{조건}-run{반복}.txt</b>. 실행 전 <b>ast.parse</b>로 구문을 먼저 검증해 <b>복사 오류와 API·모델 오류를 구분</b>한다.</div>
+  <aside>실행 전 python -c "import ast, pathlib; ast.parse(...)"로 구문을 먼저 검증하면 복사 과정의 구문 오류와 API·모델 오류를 구분할 수 있습니다. 오류가 나면 줄 번호와 메시지를 기록합니다.</aside>
+</section>
+
+<!-- 13 reasoning=False 단서 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧵 <span class="g">reasoning=False</span> — 추론 토큰 예산의 단서</h2>
+  <ul class="pts">
+    <li>qwen3.5처럼 추론 토큰을 따로 내는 모델은 대체로 <b>추론을 켠 쪽</b>이 어려운 질문에서 더 좋은 답을 낸다</li>
+    <li>단 <b>langchain-ollama</b>에서 추론 끄기는 <b>think</b>가 아니라 <b><b>reasoning=False</b></b></li>
+    <li>반복 실행 관찰에선 추론 토큰이 <b>출력 예산을 소진해 본문이 비는 현상</b>이 실제로 관찰됨</li>
+    <li>→ 관찰 안정성을 위해 추론을 끄고 <b>조건 비교</b>에 맞췄다</li>
+  </ul>
+  <div class="hl">⚠️ 어떤 설정이 나은지는 <b>과업마다 측정할 일</b>이지, 기본값에 대한 믿음으로 정할 일이 아니다.</div>
+  <aside>추론을 끈 것은 이 조건 비교 실습에서 본문이 비는 현상을 피해 관찰을 안정시키기 위한 선택입니다. 다른 과업에서는 추론을 켠 쪽이 나을 수 있으므로, 기본값을 신뢰하지 말고 측정해야 합니다.</aside>
+</section>
+
+<!-- 14 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part">
+    <div class="pno">4</div>
+    <h2 style="margin:0">원출력과 메타데이터를 함께 남긴다</h2>
+    <p style="margin-top:11px">재현성 = 같은 답의 보장이 아니라, 추적할 수 있게 남기는 실천</p>
+    <span class="who">모델·버전·날짜·파라미터·로그</span>
+  </div>
+  <aside>재현성은 다른 사람이 같은 답을 반드시 얻는다는 약속이 아니라, 무엇을 실행했고 무엇이 달랐는지 추적할 수 있게 남기는 실천입니다. 모델명만 적으면 같은 이름 아래 배포 버전·서버 구현·날짜·파라미터가 달라졌는지 모릅니다.</aside>
+</section>
+
+<!-- 15 기록표 열 -->
+<section class="slide" data-part="PART 4">
+  <h2>🗂️ 기록표에 <span class="g">함께 남길 열</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>실행 식별</b> — 조건 · 반복 · 모델·버전 · 날짜 · 파라미터 · 원출력 로그 파일명</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>비용·응답성</b> — 토큰(입력·출력) · 입력 토큰 · 지연</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b class="r">실패 유형</b> — poisoning · distraction · confusion · clash · 없음</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b class="g">필수 결정 회수율</b> — 세 판단 지점 중 회수 수 / 3</span></div>
+  </div>
+  <div class="hl">정확한 버전 문자열을 모르면 추정 대신 <b>'제공되지 않음'</b>. API가 토큰 수를 안 주면 추정값 대신 <b>제공되지 않음</b>.</div>
+  <aside>각 출력 옆에 모델·버전·날짜·반복 수·파라미터·원출력 로그 파일명을 기록합니다. 로그 파일을 남겨야 집계된 숫자에서 원문으로 되돌아가 사람이 재대조할 수 있습니다.</aside>
+</section>
+
+<!-- 16 토큰·지연 != 품질 -->
+<section class="slide" data-part="PART 4">
+  <h2>📉 토큰·지연은 <span class="r">품질 점수가 아니다</span></h2>
+  <ul class="pts">
+    <li>입력 토큰이 적어 더 빠르고 저렴해도, <b>필요한 예외를 누락했다면</b> 그 절약은 근거를 줄인 결과</li>
+    <li>전문 조건의 지연이 길어도 실제로 더 정확·근거에 맞았는지는 <b>채점표가 따로 말한다</b></li>
+    <li>같은 정답이라도 <b>실패 유형</b>은 다른 처방을 요구 — poisoning=상태 정정, distraction=선택 축소, confusion=근거 경계 분리, clash=우선순위 판정</li>
+  </ul>
+  <div class="hl">압축·선택 뒤에도 수령일·택 제거·배송비라는 필수 결정 요소가 답에 남았는지 <b>필수 결정 회수율</b>로 기록해야, <b>우연히 맞은 답과 근거를 보존한 답</b>을 구분한다.</div>
+  <aside>정답 여부만으로는 운영 판단을 할 수 없습니다. 같은 정답이라도 입력 토큰·지연에 따라 비용·응답성 선택이 달라지고, 네 실패 유형은 각각 다른 처방을 요구하기 때문입니다.</aside>
+</section>
+
+<!-- 17 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 4문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">통제 실험은 <b>맥락의 범위와 출처 표식</b>만 바꾸고 질문·모델·파라미터·형식을 고정한다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">네 조건(<b>none·full·selected·selected_cited</b>)은 각각 다른 변수를 분리하며, 표식은 사실성을 자동 보장하지 않는다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>정답성과 근거 일치는 별개</b> — 형식 맞는 JSON도 내용의 참을 대신하지 않는다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">원출력·메타데이터를 남기고 <b>필수 결정 회수율</b>로 우연한 정답과 근거를 보존한 답을 가른다.</span></div>
+  </div>
+  <aside>토큰·지연은 품질 점수가 아니며, 정답 여부만으로는 운영 판단을 할 수 없습니다. 무엇을 실행했고 무엇이 달랐는지 추적할 수 있게 남기는 것이 이 실습의 태도입니다.</aside>
+</section>
+
+<!-- 18 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 이 통제 실험에서 <b>바꾸는 변수</b>와 <b>고정하는 것</b>은 각각 무엇인가?</div>
+    <div class="q"><b>Q2.</b> <b>selected</b>와 <b>selected_cited</b>의 차이는 무엇이며, 표식은 무엇을 자동 보장하지 <b>않는가?</b></div>
+    <div class="q"><b>Q3.</b> <b>정답성</b>과 <b>근거 일치</b>를 합치지 않는 이유를 한 예로 설명하라.</div>
+    <div class="q"><b>Q4.</b> <b>langchain-ollama</b>에서 추론을 끄는 인자는 무엇이며, 왜 이 실습에서 껐나?</div>
+    <div class="q"><b>Q5.</b> <b>필수 결정 회수율</b>은 무엇을 세며, 왜 정답 여부와 따로 기록하나?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q3와 Q5가 오늘의 핵심을 가장 잘 가립니다.</aside>
+</section>
+
+<!-- 19 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> <b>바꾸는 것</b>: 입력 맥락의 범위와 출처 표식뿐. <b>고정</b>: 질문·모델·모델 버전·생성 파라미터·출력 형식·실행 장비·실행 시각 기록 방식.</div>
+    <div class="q a"><b>A2.</b> 문장 내용은 같고 <b>출처 표식(문서명·버전·절 번호)</b>만 다르다. 표식은 <b>사실성·권위를 자동 보장하지 않는다</b> — 원문이 실제로 그 판단을 뒷받침하는지는 사람이 재대조.</div>
+    <div class="q a"><b>A3.</b> <b>none</b>이 우연히 정책과 같은 답을 내도 출처가 없어 근거 일치는 실패이고, <b>selected_cited</b>가 표식을 정확히 적어도 그 절이 다른 사안이면 근거 일치는 실패다.</div>
+    <div class="q a"><b>A4.</b> <b>think</b>가 아니라 <b><b>reasoning=False</b></b>. 추론 토큰이 출력 예산을 소진해 본문이 비는 현상을 피하고 <b>조건 비교의 관찰을 안정</b>시키려 껐다.</div>
+    <div class="q a"><b>A5.</b> 수령일·택 제거·배송비 <b>세 판단 지점 중 답에 남은 수 / 3</b>. 압축·선택 뒤에도 근거가 보존됐는지 봐야 <b>우연히 맞은 답과 근거를 보존한 답</b>을 구분하기 때문.</div>
+  </div>
+  <aside>A3와 A5를 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다. 더 읽기: 실습 코드는 day29_context_test.py, 로그는 context-lab-logs 디렉터리에 남습니다.</aside>
+</section>
+
+<!-- 20 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>같은 질문, 다른 근거 🧭</h1>
+    <div class="big" style="margin-top:26px">맥락만 바꿔 답이 갈린다면<br><span class="y">답의 내용이 아니라 답이 근거에 닿는 방식</span>을 비교하라<br><br>표식은 편의일 뿐, <span class="y">참을 보장하지 않는다</span></div>
+    <p class="sub" style="margin-top:24px">같은 질문·다른 맥락 — 여기까지 · 다음: 오염과 프롬프트 인젝션</p>
+  </div>
+  <aside>맥락을 신뢰할수록, 그 맥락이 오염되거나 조작됐을 때의 위험도 커집니다. 다음 소단원에서 오염과 프롬프트 인젝션을 봅니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

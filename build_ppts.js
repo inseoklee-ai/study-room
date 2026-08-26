@@ -17,7 +17,9 @@ const LESSONS = process.argv.slice(2).length
      "pe-history","technique-revalidation","self-evolution","agent-patterns",
      "instruction-anatomy","eleven-methods","why-instructions-work","source-and-precedence",
      "techniques-as-hypotheses","three-instructions-lab","output-contract","eval-metrics",
-     "instruction-failures","minimal-change-workbook","instruction-principles"];
+     "instruction-failures","minimal-change-workbook","instruction-principles",
+     "context-window","five-competitors","context-rot","context-strategy-map","same-question-different-context",
+     "prompt-injection","project-context-files","caching-economics","context-principles"];
 
 // ---- palette (deck light theme) ----
 const INK="2A2723", SOFT="6B6357", GR="3F6B5F", GR2="2C4D44", GOLD="C8A15A",
