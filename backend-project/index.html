@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>내 서비스에 백엔드 붙이기 · 과제와 종합 정리</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 백엔드 ⑨</span>
+    <h1 style="margin:18px 0">내 서비스에<br>백엔드 붙이기</h1>
+    <p class="sub">[프로젝트] 과제와 종합 정리 — 백엔드가 실제로 도는 것을 내 손으로</p>
+  </div>
+  <aside>이번 소단원은 새 개념을 배우는 시간이 아니라, 지금까지 배운 것을 내 손으로 도는 서비스로 만드는 프로젝트 시간입니다. 목표는 단 하나 — '백엔드가 실제로 도는 것'을 직접 경험하는 것입니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>과제</small><b>두 갈래 중 하나</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>공통</small><b class="g">보안 체크</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>어디에 둘까</small><b>세 가지 길</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--pp)"><small>마무리</small><b>회고 · 종합 정리</b></div>
+  </div>
+  <ul class="pts">
+    <li>과제는 <b>두 갈래</b> — 튜토리얼로 한 바퀴(A) 또는 내 서비스에 붙여 배포(B)</li>
+    <li>제출 전 반드시 지나야 할 <b>공통 보안 체크</b>를 함께 본다</li>
+    <li>백엔드를 <b>어디에 둘지</b> — 집+터널·무료 클라우드·Supabase 세 가지 길</li>
+    <li>마지막으로 <b>오늘의 회고 · 제출 루브릭 · 핵심 정리</b>로 강의 전체를 닫는다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 배운 것을 <b>도는 것</b>으로 만드는 날. 완성도보다 '내 손으로 한 바퀴'가 목표.</div>
+  <aside>이 여정은 곧 제출까지의 순서이기도 합니다. 갈래를 고르고, 보안을 점검하고, 호스팅을 정하고, 회고로 정리하는 흐름을 따라가면 제출물이 자연스럽게 완성됩니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">과제 — 두 갈래 중 하나로 제출</h2>
+    <p style="margin-top:11px">나에게 맞는 쪽을 고른다. 목표는 같다.</p>
+    <span class="who">A 튜토리얼 · B 내 서비스</span>
+  </div>
+  <aside>두 갈래는 난이도 등급이 아니라 출발점의 차이입니다. 만들 주제가 아직 없으면 A, 지난 시간의 PRD·목업으로 이어갈 주제가 있으면 B를 고릅니다. 어느 쪽이든 '백엔드가 실제로 도는 것'을 경험한다는 목표는 동일합니다.</aside>
+</section>
+
+<!-- 4 두 갈래 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔀 나에게 맞는 <span class="g">한 갈래</span>를 고른다</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="b">갈래 A — 튜토리얼로 한 바퀴</h3>
+      <p>아직 만들 주제가 없다면. 잘 만든 튜토리얼을 따라 <b>데이터가 진짜로 저장되는 작은 앱</b>(방명록·할 일 목록 등)을 만든다.</p>
+    </div>
+    <div class="box">
+      <h3 class="g">갈래 B — 내 서비스에 붙여 배포</h3>
+      <p>만들 주제가 있다면. 지난 PRD·목업을 이어 내 서비스에 <b>백엔드 기능 한 겹</b>을 붙이고 <b>화면까지 배포</b>한다.</p>
+    </div>
+  </div>
+  <div class="hl">공통 목표 — <b>'백엔드가 실제로 도는 것'을 내 손으로 경험.</b> 백엔드가 필요한 기능은 <b>하나면 충분</b>하다.</div>
+  <aside>B의 "기능 하나면 충분"은 예를 들어 글이 저장되어 새로고침해도, 다른 기기에서도 남는 것 정도입니다. 크게 만들 필요가 없습니다. 한 겹이라도 실제로 도는 것이 핵심입니다.</aside>
+</section>
+
+<!-- 5 갈래 A 상세 -->
+<section class="slide" data-part="PART 1">
+  <h2>🅰️ 갈래 A — <span class="b">따라하기 → 내 손으로 바꿔보기</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>추천 출발점</b> — <b class="g">Supabase 공식 퀵스타트</b>. 무료로 DB·로그인·배포까지 한 바퀴를 돈다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>AI와 함께</b> — "이 튜토리얼을 함께 따라가며 각 단계가 무엇을 하는지 설명해줘"라고 하면 훨씬 남는다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>개선 한 가지</b> — 그냥 따라만 말고 기능 하나를 더하거나(항목 삭제·검색) 보안 체크를 직접 적용</span></div>
+  </div>
+  <div class="hl">📤 제출 — <b>작동 링크(또는 시연)</b> + 내가 바꾸거나 개선한 부분 한 줄.</div>
+  <aside>'따라하기 → 내 손으로 바꿔보기'가 진짜 학습입니다. 튜토리얼을 그대로 끝내면 손끝에 남는 게 적지만, 작은 기능 하나라도 스스로 바꿔보면 각 단계가 무엇을 하는지 몸으로 이해하게 됩니다.</aside>
+</section>
+
+<!-- 6 갈래 B 설계 한 장 -->
+<section class="slide" data-part="PART 1">
+  <h2>🅱️ 갈래 B — 먼저 <span class="g">설계 한 장</span>(코드가 아니라 지도)</h2>
+  <table class="t">
+    <tr><th>항목</th><th>내가 채울 것</th></tr>
+    <tr><td>백엔드가 꼭 필요한 기능</td><td>저장 / 로그인 / 검색 중 무엇?</td></tr>
+    <tr><td>화면만으로 되는 기능</td><td>서버 없이 되는 것은? ('먼저 예측' 표를 다시 보며)</td></tr>
+    <tr><td>필요한 창구(엔드포인트)</td><td>예: 목록 주기 / 하나 저장하기 (CRUD 중 무엇?)</td></tr>
+    <tr><td>다뤄야 할 비밀값</td><td>API 키·비밀번호 등 환경변수로 뺄 것</td></tr>
+    <tr><td>호스팅</td><td>뒤에 나올 '세 가지 길' 중 무엇?</td></tr>
+  </table>
+  <div class="hl">📤 제출 — 작동 링크(또는 3분 시연) '새로고침해도 데이터가 남는' 장면 + <b>설계 한 장</b> + 고른 호스팅과 그 이유 한 줄.</div>
+  <aside>설계 한 장은 코드가 아니라 지도입니다. 무엇을 서버에 맡기고 무엇을 화면만으로 처리할지, 어떤 창구가 필요하고 어떤 비밀값을 빼야 할지를 먼저 그려두면, 만드는 도중 길을 잃지 않습니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">공통 — 제출 전 보안 체크</h2>
+    <p style="margin-top:11px">A든 B든, 내기 전에 반드시 지나는 관문</p>
+    <span class="who">환경변수 · 백엔드 검증 · RLS · 인가 · 요금 한도</span>
+  </div>
+  <aside>보안 체크는 두 갈래 공통입니다. 루브릭의 첫 학습목표가 '보안을 스스로 점검할 수 있다'인 만큼, 이 다섯 항목은 제출 전 반드시 스스로 확인해야 합니다.</aside>
+</section>
+
+<!-- 8 보안 체크리스트 -->
+<section class="slide" data-part="PART 2">
+  <h2>✅ 제출 전 <span class="g">보안 체크 다섯</span></h2>
+  <div class="qa">
+    <div class="q"><b>1.</b> 비밀값(키·비밀번호)을 코드에 직접 안 적고 <b>환경변수</b>로 뺐는가?</div>
+    <div class="q"><b>2.</b> 가격·수량·권한 같은 <b>검증을 백엔드에서</b> 하는가? (프론트만 믿지 않기)</div>
+    <div class="q"><b>3.</b> (Supabase면) <b>RLS를 켜고</b> 정책을 넣었는가?</div>
+    <div class="q"><b>4.</b> 로그인이 필요한 데이터에 <b>권한 확인(인가)</b>이 들어가는가?</div>
+    <div class="q"><b>5.</b> 사용하는 무료 티어의 <b>한도와 요금 알림</b>을 아는가?</div>
+  </div>
+  <div class="hl">이 다섯은 <b>AI가 자주 놓치는</b> 지점이다. 만들 때 프롬프트로 요구하고, 낸 결과를 다시 되물어 확인한다.</div>
+  <aside>프론트만 믿지 않기가 특히 중요합니다. 가격이나 수량, 권한 같은 값은 화면에서 얼마든지 조작될 수 있으므로, 최종 판단은 반드시 백엔드에서 다시 검증해야 합니다.</aside>
+</section>
+
+<!-- 9 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">백엔드를 어디에 둘까 — 세 가지 길</h2>
+    <p style="margin-top:11px">상황에 맞게 고른다. 정답은 하나가 아니다.</p>
+    <span class="who">집+터널 · 무료 클라우드 · Supabase</span>
+  </div>
+  <aside>세 가지 길은 각각 '언제 쓰면 좋은지'와 '한계'가 다릅니다. 원리를 만지고 싶은지, 내 로직을 안정적으로 열고 싶은지, 데이터 저장·조회가 대부분인지에 따라 고르면 됩니다.</aside>
+</section>
+
+<!-- 10 세 가지 길 표 -->
+<section class="slide" data-part="PART 3">
+  <h2>🏠☁️🧰 세 가지 길, <span class="g">언제 · 한계</span></h2>
+  <table class="t">
+    <tr><th>길</th><th>무엇</th><th>언제</th><th>한계</th></tr>
+    <tr><td>① 집 컴퓨터 + 터널</td><td>내 노트북에서 서버를 돌리고 <b>Tailscale Funnel</b> 같은 무료 터널로 공개(포트포워딩 없이·CGNAT 통과)</td><td>원리를 직접 만지거나 잠깐 시연·공유</td><td>컴퓨터 꺼지면 멈춤·대역폭/포트 제한 → <b class="r">상시 서비스엔 부적합</b></td></tr>
+    <tr><td>② 무료 클라우드 서버</td><td><b>Render</b>처럼 서버 코드를 올려 24시간 돌리는 무료 티어</td><td>내가 짠 백엔드 로직(엔드포인트·검증)을 안정적으로 열 때</td><td>안 쓰면 잠들고(첫 요청 ~1분), 무료 DB는 기한이 있을 수 있음</td></tr>
+    <tr><td>③ Supabase (BaaS)</td><td>서버 없이 DB·로그인·저장·자동 API를 '빌려' 씀. <b>Postgres 중심</b></td><td>백엔드 대부분이 '저장·조회·로그인'이면 가장 빠름</td><td>내부 함수(Edge Functions)는 <b>Deno+TypeScript로 제한</b>, 장시간 복잡 로직엔 별도 서버</td></tr>
+  </table>
+  <div class="hl">호스팅은 '무엇이 가장 좋은가'가 아니라 <b>내 서비스가 무엇을 필요로 하는가</b>로 고른다.</div>
+  <aside>Supabase는 앱 코드 자체는 여러 언어로 붙일 수 있지만, Supabase 안에서 도는 함수는 Deno와 TypeScript로 제한됩니다. 대부분 기능이 DB에서 파생되는 Postgres 중심 구조라는 점을 기억하면 어떤 일에 맞는지 판단하기 쉽습니다.</aside>
+</section>
+
+<!-- 11 Supabase RLS 주의 -->
+<section class="slide" data-part="PART 3">
+  <h2>⚠️ Supabase 보안은 <span class="r">'자동'이 아니다</span></h2>
+  <ul class="pts">
+    <li>브라우저가 <b>공개 키로 DB에 직접 접근</b>하는 구조 → <b>RLS(행 수준 보안)</b>를 켜고 규칙을 짜야만 안전</li>
+    <li>안 켜면 그 공개 키로 <b class="r">누구나 데이터를 읽고 고치고 지울 수</b> 있다</li>
+    <li>특히 <b>AI 코딩 툴로 만든 테이블은 RLS가 꺼진 채 시작</b>되는 경우가 많다</li>
+  </ul>
+  <div class="chain">
+    <div class="cell" style="min-width:190px;border-color:var(--gr)"><small>공개 키 + RLS 켜짐</small><b class="g">안전</b></div>
+    <span class="ar">↔</span>
+    <div class="cell" style="min-width:190px;border-color:var(--red)"><small>RLS 꺼짐</small><b class="r">열린 DB</b></div>
+  </div>
+  <div class="hl"><b>CVE-2025-48757</b> — 실제로 수백 개 앱이 데이터를 통째로 노출한 사고. AI에게 <b>"RLS 켜고 정책 넣어줘"</b>라고 반드시 요구·확인.</div>
+  <aside>이 슬라이드는 강의 전체에서 가장 실무적인 경고입니다. Supabase가 편리한 만큼, 기본이 안전한 것은 아니라는 점을 반드시 기억해야 합니다. AI가 만든 테이블일수록 RLS 상태를 직접 확인하세요.</aside>
+</section>
+
+<!-- 12 오늘의 회고 -->
+<section class="slide" data-part="PART 3">
+  <h2>💭 오늘의 회고 — <span class="g">스스로 답해보기</span></h2>
+  <div class="qa">
+    <div class="q"><b>회고 1.</b> 내 화면이 '세상과 끊겨 있던' 이유를 <b>손님·주방</b> 비유로 한 문장으로?</div>
+    <div class="q"><b>회고 2.</b> <b>404</b>와 <b>500</b> 중, 내 서비스에서 더 자주 만나고 싶지 <b>않은</b> 것은? 왜?</div>
+    <div class="q"><b>회고 3.</b> '먼저 예측' 표에서 <b>틀리게</b> 예측했던 항목이 있나? 지금은 왜 그런지 설명할 수 있나?</div>
+    <div class="q"><b>회고 4.</b> AI에게 보안을 맡길 때 반드시 <b>되물어야 할 질문</b> 하나는?</div>
+  </div>
+  <aside>회고는 정답을 맞히는 시험이 아니라, 배운 개념이 내 안에서 연결되는지 확인하는 시간입니다. 특히 회고 4는 방금 본 RLS 경고와 곧바로 이어집니다.</aside>
+</section>
+
+<!-- 13 제출 루브릭 -->
+<section class="slide" data-part="마무리">
+  <h2>📋 프로젝트 <span class="g">제출 루브릭</span></h2>
+  <table class="t">
+    <tr><th>학습목표</th><th>평가기준</th></tr>
+    <tr><td>보안을 스스로 점검할 수 있다</td><td>제출물에 보안상의 문제가 없는지 잘 검토되어 있고, 실제로 문제가 없어야 한다</td></tr>
+    <tr><td>실제 동작하는 백엔드 동작을 포함시킬 수 있다</td><td>실제로 동작하는 백엔드 동작이 의도한 것과 일치한다</td></tr>
+    <tr><td>프론트엔드와 백엔드가 적절하게 만들어져 동작한다</td><td>서비스가 직관적이고 의도한 대로 잘 동작한다</td></tr>
+  </table>
+  <div class="hl">📦 제출 — 파일 또는 URL 중 한 방식(ZIP·PDF·이미지, 최대 5MB). <b class="r">제출 후 수정 불가.</b></div>
+  <aside>제출 후 수정이 불가하므로, 내기 전에 보안 체크 다섯 항목을 한 번 더 확인하세요. 링크로 제출한다면 실제로 접속되는지, 새로고침해도 데이터가 남는지도 마지막으로 점검합니다.</aside>
+</section>
+
+<!-- 14 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 핵심 정리 — <span class="g">이 강의가 남긴 다섯</span></h2>
+  <table class="t">
+    <tr><th>오늘 배운 것</th><th>한 문장 정리</th><th>내가 할 수 있는 행동</th></tr>
+    <tr><td>백엔드의 역할</td><td>화면 뒤에서 저장·확인·연결을 맡는 '주방'</td><td>새로고침해도 남아야 할 데이터를 구분</td></tr>
+    <tr><td>네트워크 네 조각</td><td>도메인·DNS·HTTP(S)·포트·호스팅이 주소를 화면으로 잇는다</td><td>안 열릴 때 어디를 볼지 감이 온다</td></tr>
+    <tr><td>요청의 여정·상태 코드</td><td>요청→응답 왕복, 맨 앞 숫자가 신호등(4=내 잘못, 5=서버 잘못)</td><td>에러 번호를 AI에게 그대로 붙여 물어본다</td></tr>
+    <tr><td>AI 코드의 약점</td><td>보안·비밀 관리·권한 확인은 AI가 자주 놓친다</td><td>프롬프트로 요구하고 결과를 되묻는다</td></tr>
+    <tr><td>배포와 비용</td><td>화면·서버·데이터를 나눠 올리고 GitHub로 자동 배포</td><td>환경변수를 넣고 요금 알림을 켜 둔다</td></tr>
+  </table>
+  <aside>이 표는 강의 전체의 한 장 요약입니다. 왼쪽은 개념, 가운데는 한 문장 정의, 오른쪽은 실제로 손을 움직이는 행동입니다. 개념이 행동으로 이어질 때 비로소 배운 것이 됩니다.</aside>
+</section>
+
+<!-- 15 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 과제 <b>두 갈래</b>는 각각 무엇이며, 공통 목표는?</div>
+    <div class="q"><b>Q2.</b> 갈래 B에서 코드보다 먼저 그려야 할 <b>설계 한 장</b>에는 어떤 항목이 들어가나?</div>
+    <div class="q"><b>Q3.</b> 제출 전 <b>보안 체크</b> 중 'RLS'와 '백엔드 검증'은 각각 왜 필요한가?</div>
+    <div class="q"><b>Q4.</b> 백엔드 <b>세 가지 길</b>과 각각이 맞는 상황은?</div>
+    <div class="q"><b>Q5.</b> Supabase에서 "공개 키 + RLS 켜짐"과 "RLS 꺼짐"의 차이는? (CVE-2025-48757)</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q3와 Q5가 이번 프로젝트에서 가장 자주 실수하는 지점을 가립니다.</aside>
+</section>
+
+<!-- 16 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> A: 튜토리얼로 작은 앱을 한 바퀴 / B: 내 서비스에 백엔드 한 겹 붙여 배포. 공통 목표는 <b>'백엔드가 실제로 도는 것'을 내 손으로 경험.</b></div>
+    <div class="q a"><b>A2.</b> 꼭 필요한 기능 · 화면만으로 되는 기능 · 필요한 창구(엔드포인트) · 다룰 비밀값 · 호스팅 <b>다섯 항목.</b></div>
+    <div class="q a"><b>A3.</b> RLS: 공개 키로 DB에 직접 접근하는 구조라 켜야만 데이터가 안전. 백엔드 검증: 가격·수량·권한은 <b>프론트만 믿을 수 없어</b> 서버에서 다시 확인.</div>
+    <div class="q a"><b>A4.</b> ① 집+터널(원리 체험·잠깐 시연) ② 무료 클라우드(내 로직 안정적으로) ③ Supabase(저장·조회·로그인 대부분일 때 가장 빠름).</div>
+    <div class="q a"><b>A5.</b> "공개 키 + RLS 켜짐 = 안전 / RLS 꺼짐 = <b class="r">열린 DB</b>". 꺼져 있으면 누구나 읽고·고치고·지울 수 있다.</div>
+  </div>
+  <aside>A3와 A5를 자기 말로 설명할 수 있으면 이번 프로젝트의 보안 목표는 달성입니다. AI가 만든 테이블일수록 RLS 상태를 직접 확인하는 습관이 남으면 충분합니다.</aside>
+</section>
+
+<!-- 17 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>화면 뒤에서 일어나는 일들 🍳</h1>
+    <div class="big" style="margin-top:26px">이제 내 화면은 '세상과 끊긴' 그림이 아니라<br><span class="y">저장되고 · 확인되고 · 연결되는</span> 서비스<br><br>화면 뒤에서 일어나는 일들 — <span class="y">여기까지</span></div>
+    <p class="sub" style="margin-top:24px">백엔드 소단원 종료 · 배운 것을 내 손으로 도는 것으로</p>
+  </div>
+  <aside>백엔드는 화면 뒤의 주방입니다. 저장하고 확인하고 연결하는 그 일들을, 이제 개념이 아니라 내가 만든 서비스에서 볼 수 있습니다. 여기까지가 이 강의입니다 — 배운 것을 도는 것으로 만든 여러분, 수고하셨습니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

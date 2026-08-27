@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>네트워크 기본기 · 주소가 화면이 되기까지</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 백엔드 ②</span>
+    <h1 style="margin:18px 0">네트워크 기본기</h1>
+    <p class="sub">주소를 넣으면 화면이 뜨기까지 — 인터넷의 뼈대</p>
+  </div>
+  <aside>백엔드를 이해하려면 인터넷이 어떻게 연결되는지 최소한만 알면 됩니다. 네트워크 엔지니어가 될 필요는 없습니다. 이 흐름을 알면 AI가 만든 것을 이해하고, 문제가 생기면 어디를 볼지 알고, AI에게 제대로 요청할 수 있습니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정 — <span class="g">엔터부터 화면까지 네 조각</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>①</small><b>이름을 주소로<br>도메인·DNS</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>②</small><b class="g">그 주소엔 무엇이<br>서버·호스팅</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gold)"><small>③</small><b>어느 문으로<br>포트·방화벽</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--pp)"><small>④</small><b class="p">무슨 말로<br>HTTP·HTTPS</b></div>
+  </div>
+  <ul class="pts">
+    <li><code>mysite.com</code>을 입력하고 엔터를 누른 순간부터 화면이 뜨기까지 딱 <b>네 조각</b></li>
+    <li>여기에 <b>자물쇠의 원리</b>·<b>패킷의 여행</b>·<b>요청 한 번의 여정</b>·<b>상태 코드</b>를 더한다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — <b>주소를 넣으면 화면이 뜨는 그 1초</b> 안에서 무슨 일이 벌어지는지 본다.</div>
+  <aside>네 조각은 순서대로 이어집니다. 이름을 번호로 바꾸고, 그 번호의 컴퓨터에 닿고, 알맞은 문으로 들어가, 공통 언어로 대화합니다. 이 뼈대만 잡으면 나머지는 살을 붙이는 일입니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">이름을 주소로</h2>
+    <p style="margin-top:11px">사람이 외우는 이름을, 컴퓨터가 아는 번호로</p>
+    <span class="who">도메인 · DNS · IP 주소</span>
+  </div>
+  <aside>모든 컴퓨터에는 번호가 있지만 사람은 번호를 외우지 못합니다. 그 사이를 이어 주는 것이 도메인과 DNS입니다. 이 첫 조각이 나머지 세 조각의 출발점입니다.</aside>
+</section>
+
+<!-- 4 IP·도메인·DNS -->
+<section class="slide" data-part="PART 1">
+  <h2>📖 도메인은 이름, <span class="g">DNS는 전화번호부</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>사람이 외우는</small><b>도메인<br>mysite.com</b></div>
+    <span class="ar">→ DNS →</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>컴퓨터가 아는</small><b>IP 주소<br>142.250.72.14</b></div>
+  </div>
+  <ul class="pts">
+    <li>모든 컴퓨터엔 <b>번호(IP 주소)</b>가 있다 — 외우기 불편하고(IPv6는 더 길다) 수시로 바뀌기도</li>
+    <li><b>도메인</b> = 사람이 외우는 <b>가게 이름</b> · <b>DNS</b> = 이름을 번호로 바꿔 주는 <b>전화번호부</b></li>
+    <li><b>도메인은 사는 것</b>(1년 만 원 안팎) — 등록 후 "이 도메인은 저 서버(IP)를 가리켜라"라고 연결</li>
+  </ul>
+  <div class="hl">⚠️ 흔한 함정 — <b>왜 바로 안 바뀌지?</b> DNS는 답을 한동안 기억(캐시)하므로, 가리키는 곳을 바꿔도 즉시 반영 안 됨(전파에 몇 분~몇 시간).</div>
+  <aside>도메인은 등록 기관에서 빌리는 이름입니다. DNS 설정이란 그 이름 옆에 "실제 서버의 번호"를 적어 두는 일입니다. 캐시 때문에 변경이 늦게 보이는 것은 고장이 아니라 정상 동작입니다.</aside>
+</section>
+
+<!-- 5 도메인의 다섯 가지 힘 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧱 도메인은 '별칭' 그 이상 — <span class="g">다섯 가지 힘</span></h2>
+  <p>이름과 실제 서버 사이에 '한 겹'을 두는 <b>추상화</b>. 앞(도메인)은 그대로, 뒤(서버·IP)는 바꿀 수 있다.</p>
+  <table class="t">
+    <tr><th>힘</th><th>무엇을 할 수 있나</th></tr>
+    <tr><td>① 이사 자유</td><td>서버를 옮겨도 주소는 그대로 (DNS 한 줄만 고침)</td></tr>
+    <tr><td>② 여러 서버</td><td>하나의 이름 → 여러 서버 (부하 분산·CDN)</td></tr>
+    <tr><td>③ 구조화</td><td>서브도메인으로 나눔 (<code>api.</code>·<code>blog.</code>·<code>shop.</code>)</td></tr>
+    <tr><td>④ 신뢰의 증표</td><td>이메일 @ 뒤·HTTPS 인증서가 도메인에 발급됨</td></tr>
+    <tr><td>⑤ 보유·이동</td><td>내 이름으로 보유 — 호스팅을 바꿔도 그대로</td></tr>
+  </table>
+  <div class="hl">🔒 오해 — 자물쇠(HTTPS)는 '믿을 만한 회사'라는 증명이 아니라 '이 도메인의 주인과 암호를 걸어 통신 중'이라는 뜻일 뿐. 피싱도 자물쇠를 붙일 수 있다 → <b>도메인 철자 자체</b>를 확인.</div>
+  <aside>도메인이 별칭에 불과하다면 이 다섯 가지 힘이 안 나옵니다. 이름과 실체 사이에 한 겹을 둔 덕분에 뒤를 자유롭게 갈아 끼울 수 있습니다. 자물쇠는 신뢰의 보증이 아니라 암호화의 표시라는 점을 꼭 기억하세요.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">그 주소엔 무엇이</h2>
+    <p style="margin-top:11px">늘 켜진 컴퓨터, 그리고 안과 밖의 경계</p>
+    <span class="who">서버 · 호스팅 · 클라우드 · 내부망/외부망</span>
+  </div>
+  <aside>주소가 가리키는 곳에는 24시간 켜진 컴퓨터가 있어야 합니다. 그리고 그 컴퓨터가 우리 집 안에 있는지 세상에 열려 있는지가 '왜 내 링크가 안 열리지?'를 가릅니다.</aside>
+</section>
+
+<!-- 7 서버와 호스팅 -->
+<section class="slide" data-part="PART 2">
+  <h2>🖥️ 서버 = <span class="g">24시간 켜진 컴퓨터</span></h2>
+  <ul class="pts">
+    <li><b>서버</b> = 내 서비스 파일·데이터를 올려 두고 <b>24시간 켜진 컴퓨터</b></li>
+    <li>"노트북을 닫으니 꺼진" 이유가 여기 — 노트북은 24시간 켜 두는 물건이 아님</li>
+    <li>그래서 <b>호스팅</b>(늘 켜진 컴퓨터를 빌려 씀)을 쓴다</li>
+  </ul>
+  <div class="chain">
+    <div class="cell" style="min-width:200px;border-color:var(--gy)"><small>예전</small><b>회사가 서버를 직접 구입<br>전원·냉방·보안·고장까지</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:220px;border-color:var(--gr)"><small>지금 · 클라우드</small><b class="g">거대 서버 창고에서<br>필요한 만큼만 빌림</b></div>
+  </div>
+  <div class="hl"><b>클라우드</b>(아마존·구글) — 고장·보안·전원은 그쪽이 맡는다. 비전공자가 할 일은 <b>"어디에 올릴지"만 고르는 것</b>.</div>
+  <aside>서버는 특별한 기계가 아니라 그저 늘 켜져 있는 컴퓨터입니다. 클라우드는 그 컴퓨터를 필요한 만큼만 빌려 쓰는 방식이고, 관리의 번거로움을 대신 맡아 줍니다.</aside>
+</section>
+
+<!-- 8 내부망 vs 외부망 -->
+<section class="slide" data-part="PART 2">
+  <h2>🚪 내부망과 외부망 — <span class="g">문지기는 공유기</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">내</span><span class="t"><b>내부망(LAN)</b> — 집·회사 안 공유기로 묶인 '우리끼리' 네트워크. <code>192.168.0.5</code> 같은 <b>집 안 전용 주소(사설 IP)</b></span></div>
+    <div class="st"><span class="n">외</span><span class="t"><b>외부망(WAN=인터넷)</b> — 그 바깥의 전 세계. 밖에서 볼 때 우리 집은 <b>공유기 하나(공인 IP 하나)</b>로만 보임</span></div>
+    <div class="st"><span class="n">문</span><span class="t"><b>문지기 = 공유기(NAT)</b> — 안→바깥은 자유롭지만 <b>바깥→안은 기본적으로 못 들어옴</b>(그래서 평소 안전)</span></div>
+  </div>
+  <div class="hl"><code>localhost:3000</code>이 나한테만 보이고 친구에겐 안 보이는 이유 = '내부망의 내 컴퓨터'에만 있으니까. 서비스를 <b>'세상에 연다'</b> = 내부망의 무언가를 외부망에서 닿게 만드는 일.</div>
+  <aside>맨 처음 만나는 '안 열리는 링크'는 대부분 이 경계 때문입니다. 클라우드 서버에 올리거나 터널로 이어야 바깥에서 닿을 수 있습니다. 안전과 불편이 같은 원리에서 나옵니다.</aside>
+</section>
+
+<!-- 9 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">어느 문으로</h2>
+    <p style="margin-top:11px">한 서버, 여러 일 — 요청을 알맞은 창구로</p>
+    <span class="who">포트 · 방화벽</span>
+  </div>
+  <aside>서버 한 대는 웹·메일·데이터베이스를 동시에 처리합니다. 어떤 요청을 어느 창구로 보낼지 정하는 번호가 포트이고, 그 문을 지키는 경비가 방화벽입니다.</aside>
+</section>
+
+<!-- 10 포트와 방화벽 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔢 포트 = 호실 번호, <span class="g">방화벽 = 경비</span></h2>
+  <ul class="pts">
+    <li>서버 한 대는 여러 일을 동시에 (웹·메일·DB…) — "이 요청은 어느 창구로"를 정하는 게 <b>포트</b></li>
+    <li>IP가 '건물 주소'라면 포트는 <b>'호실 번호'</b>(0~65535번). 웹은 보통 <b>80(HTTP)·443(HTTPS)</b></li>
+    <li><code>localhost:3000</code>의 <b>3000이 포트 번호</b></li>
+    <li><b>방화벽</b> = 그 문을 지키는 경비 (필요 없는 문은 닫아 둠)</li>
+  </ul>
+  <div class="hl">"내 컴퓨터에선 되는데 밖에선 안 열려요"의 흔한 원인 — 열려야 할 <b>문(포트)이 방화벽에 막힘</b>. 배포 플랫폼을 쓰면 대개 알아서 열어 줌.</div>
+  <aside>포트는 같은 주소 안의 여러 창구를 구분하는 번호입니다. 방화벽은 쓰지 않는 창구를 닫아 위험을 줄입니다. 배포 도구는 이 설정을 대신해 주므로 비전공자가 직접 만질 일은 드뭅니다.</aside>
+</section>
+
+<!-- 11 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part">
+    <div class="pno">4</div>
+    <h2 style="margin:0">무슨 말로</h2>
+    <p style="margin-top:11px">브라우저와 서버가 대화하는 공통 언어</p>
+    <span class="who">HTTP · HTTPS · API</span>
+  </div>
+  <aside>주소를 찾고 문으로 들어갔으면 이제 대화할 차례입니다. 그 공통 언어가 HTTP이고, 대화를 암호로 감싼 것이 HTTPS입니다.</aside>
+</section>
+
+<!-- 12 HTTP 요청/응답 -->
+<section class="slide" data-part="PART 4">
+  <h2>💬 HTTP — <span class="g">"이 페이지 줘" → "여기 있어"</span></h2>
+  <pre>[브라우저의 요청]
+GET  /products      ← "products 목록 페이지를 줘(GET)"
+Host: mysite.com
+
+[서버의 응답]
+200 OK              ← "성공! 여기 있어"
+(그리고 화면 내용이나 데이터가 따라옴)</pre>
+  <ul class="pts">
+    <li><b>HTTPS</b> = 이 대화를 <b>암호로 감싼</b> 안전한 버전 — 주소창 <b>자물쇠 아이콘</b></li>
+    <li>HTTP는 <b class="r">엽서</b>처럼 훔쳐볼 수 있지만 HTTPS는 <b class="g">밀봉된 봉투</b> — 로그인·결제엔 필수</li>
+    <li>참고 — 프로그램끼리 정해진 창구로 요청·응답을 주고받는 약속 = <b>API</b>. "AI야, 지도 API 붙여줘"의 그 API</li>
+  </ul>
+  <div class="hl">없으면 "안전하지 않음" 경고가 뜬다. 요즘 배포 플랫폼은 자물쇠(SSL 인증서)를 <b>자동으로 붙여 준다</b>.</div>
+  <aside>HTTP는 사람이 읽을 수 있을 만큼 단순한 텍스트 대화입니다. HTTPS는 그 대화를 봉투에 넣어 밀봉합니다. API는 사람 화면 대신 프로그램끼리 이 대화를 나누는 창구입니다.</aside>
+</section>
+
+<!-- 13 자물쇠의 원리 -->
+<section class="slide" data-part="PART 4">
+  <h2>🔐 자물쇠의 원리 — <span class="g">우편함과 열쇠</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:180px;border-color:var(--bl)"><small>공개키 = 우편함 투입구</small><b>누구나 편지를 넣을 수 있음<br>(공개해도 됨)</b></div>
+    <span class="ar">↔</span>
+    <div class="cell" style="min-width:180px;border-color:var(--gr)"><small>개인키 = 유일한 열쇠</small><b>우편함을 여는<br>서버만의 열쇠</b></div>
+  </div>
+  <ul class="pts">
+    <li>누구나 공개키로 <b>잠글 수는</b> 있지만 <b>열 수 있는 건 개인키를 가진 서버뿐</b> → 중간에서 엿봐도 못 읽음</li>
+    <li>실제론 이 방식이 느려서, 접속 초반에 공개키로 <b>'오늘만 쓸 임시 열쇠(세션 키)'를 안전하게 주고받고</b> 그다음부턴 빠른 방식으로 대화 — 첫 인사 = <b>TLS 핸드셰이크</b></li>
+    <li>진짜 사이트인지는 <b>인증기관(CA)</b>이 서명한 <b>인증서</b>로 보증</li>
+  </ul>
+  <div class="hl">이 복잡한 과정을 <b>배포 플랫폼이 자동으로</b> 처리해 준다.</div>
+  <aside>공개키로 잠그고 개인키로만 여는 비대칭 구조가 핵심입니다. 다만 느리기 때문에 처음에만 이 방식으로 임시 열쇠를 나누고, 이후엔 빠른 대칭 방식으로 대화합니다. 인증서는 그 상대가 진짜인지 보증하는 신분증입니다.</aside>
+</section>
+
+<!-- 14 패킷 -->
+<section class="slide" data-part="PART 4">
+  <h2>📦 패킷 — <span class="g">데이터는 잘게 쪼개져 여행한다</span></h2>
+  <p>데이터는 통째로가 아니라 <b>작은 조각(패킷)으로 쪼개져</b> 각자 여행 후 도착지에서 <b>다시 조립</b>된다.</p>
+  <div class="steps">
+    <div class="st"><span class="n">✉️</span><span class="t"><b>우편 비유</b> — 긴 편지를 인덱스카드 여러 장에 나눠 적고 '보낸이·받는이·몇 번째'를 표시 (패킷도 머리표+내용)</span></div>
+    <div class="st"><span class="n">🍕</span><span class="t"><b>피자 비유</b> — 조각으로 나눠 보내면 한 조각만 없어져도 <b>그 조각만 다시</b> 보내면 됨</span></div>
+    <div class="st"><span class="n">🧭</span><span class="t"><b>내비 비유</b> — 패킷들은 서로 다른 길로 감(한 길이 막히면 우회) → 인터넷 일부가 고장 나도 전체가 안 멈춤</span></div>
+  </div>
+  <div class="hl">이 공통 규칙이 <b>TCP/IP</b>. 덕분에 수십억 대 기기가 같은 회선을 <b>동시에 나눠 쓴다</b>.</div>
+  <aside>큰 데이터를 조각으로 나누면 손실에 강하고 회선을 함께 쓰기 좋습니다. 세 비유는 각각 조각의 표시, 재전송, 우회를 설명합니다. 이 약속이 TCP/IP이고 인터넷 전체가 이 위에서 돌아갑니다.</aside>
+</section>
+
+<!-- 15 요청 한 번의 여정 -->
+<section class="slide" data-part="정리">
+  <h2>🚚 요청 한 번의 여정 — <span class="g">엔터를 치면, 1초 안에</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">브라우저가 <b>DNS</b>에 물음 — "<code>mysite.com</code> IP가 어디죠?" <i>(택배: 배송지 검색)</i></span></div>
+    <div class="st"><span class="n">2</span><span class="t">IP를 받아 <b>서버에 연결</b> (443번 문, HTTPS 자물쇠) <i>(택배: 차량 이동)</i></span></div>
+    <div class="st"><span class="n">3</span><span class="t">"이 페이지 줘"라고 <b>HTTP 요청</b> → 서버가 화면·데이터를 <b>응답</b> <i>(택배: 요청·수령)</i></span></div>
+    <div class="st"><span class="n">4</span><span class="t">브라우저가 그 응답을 <b>화면으로 그림</b> <i>(택배: 포장 풀기)</i></span></div>
+  </div>
+  <div class="hl">목업 데이터는 이 여정 없이 화면에 미리 넣어 둔 것. <b>진짜 서비스는 매번 이 왕복</b>이고, 백엔드는 그 왕복의 <b>반대편 끝에서 대답하는 쪽</b>.</div>
+  <aside>네 조각이 여기서 하나로 이어집니다. 이름을 번호로, 번호의 서버에 연결, 공통 언어로 요청·응답, 마지막으로 화면 렌더링. 이 왕복의 반대편이 다음 소단원의 주제인 백엔드입니다.</aside>
+</section>
+
+<!-- 16 상태 코드 -->
+<section class="slide" data-part="정리">
+  <h2>🚦 HTTP 상태 코드 — <span class="g">인터넷의 신호등</span></h2>
+  <p><b>맨 앞 숫자</b>만 보면 됨 — <b class="g">2xx 성공</b> / <b class="b">3xx 다른 데로</b> / <b class="r">4xx 요청(나)의 잘못</b> / <b class="r">5xx 서버의 잘못</b>.</p>
+  <table class="t">
+    <tr><th>코드</th><th>뜻</th><th>한마디</th></tr>
+    <tr><td>200 OK</td><td>성공</td><td>"다 잘됐어"</td></tr>
+    <tr><td>301/302</td><td>주소 이동</td><td>"그 페이지 저쪽으로 옮겼어"</td></tr>
+    <tr><td>401 Unauthorized</td><td>로그인 필요</td><td>"누구세요?"</td></tr>
+    <tr><td>403 Forbidden</td><td>권한 없음</td><td>"누군지 알지만 넌 안 돼" (VIP 바운서)</td></tr>
+    <tr><td>404 Not Found</td><td>없는 페이지</td><td>"그런 페이지 없어"</td></tr>
+    <tr><td>429 Too Many Requests</td><td>너무 많은 요청</td><td>"천천히 좀"</td></tr>
+    <tr><td>500 Internal Server Error</td><td>서버 오류</td><td>"네 잘못 아냐, 내가 터졌어"</td></tr>
+  </table>
+  <div class="hl">실전 팁 — <b class="r">4xx면 내 요청을 고치고, 5xx면 서버(만든 사람) 문제</b>. AI에게 "500 에러가 나"라며 화면 에러를 그대로 붙이면 원인을 훨씬 잘 찾음.</div>
+  <aside>재미로 418 "I'm a teapot"은 1998년 만우절 농담이고, 451은 소설 제목에서 따온 "법적 이유로 막힌 콘텐츠"입니다. 앞자리 하나만 봐도 방향이 잡힙니다. 4로 시작하면 내 쪽, 5로 시작하면 서버 쪽입니다.</aside>
+</section>
+
+<!-- 17 미니 퀴즈 -->
+<section class="slide" data-part="정리">
+  <h2>🧠 미니 퀴즈 — <span class="g">이 상황엔 몇 번?</span></h2>
+  <div class="qa">
+    <div class="q a"><b>없는 페이지에 들어감</b> → <b class="r">404</b> Not Found</div>
+    <div class="q a"><b>로그인 안 하고 진입</b> → <b class="r">401</b> Unauthorized</div>
+    <div class="q a"><b>로그인했지만 권한 없음</b> → <b class="r">403</b> Forbidden</div>
+    <div class="q a"><b>서버가 터짐</b> → <b class="r">500</b> Internal Server Error</div>
+    <div class="q a"><b>정상</b> → <b class="g">200</b> OK</div>
+  </div>
+  <div class="hl">401과 403의 차이가 핵심 — <b>401은 "누구세요?"</b>(신원 미확인), <b>403은 "넌 안 돼"</b>(신원은 알지만 권한 없음).</div>
+  <aside>401과 403을 헷갈리기 쉽습니다. 401은 아직 누구인지 모르니 로그인하라는 뜻이고, 403은 누구인지 알지만 그 사람에겐 권한이 없다는 뜻입니다. VIP 바운서 비유가 403입니다.</aside>
+</section>
+
+<!-- 18 직접 해보기 -->
+<section class="slide" data-part="정리">
+  <h2>🔍 직접 해보기 — <span class="g">검사 → 네트워크 탭</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">아무 웹사이트에서 <b>우클릭 → '검사(Inspect)'</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>'네트워크(Network)' 탭</b>을 연다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>새로고침</b> → 맨 위 줄 <code>Status</code>에 <b class="g">200</b> 등이 보임</span></div>
+    <div class="st"><span class="n">4</span><span class="t">화면이 안 뜰 땐 여기서 <b class="r">빨간 줄(4xx·5xx)</b>을 찾으면 단서</span></div>
+  </div>
+  <div class="hl">AI에게 도움 청할 때 이 화면을 <b>함께 주면 정확한 답</b>을 받는다. 문제의 위치가 데이터로 보이기 때문.</div>
+  <aside>네트워크 탭은 브라우저가 실제로 주고받은 요청·응답을 그대로 보여 줍니다. 빨간 줄 하나가 문제의 위치를 정확히 가리키므로, 막연히 "안 돼요" 대신 상태 코드를 함께 전달하면 훨씬 빨리 해결됩니다.</aside>
+</section>
+
+<!-- 19 이해도 확인 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> <b>도메인</b>과 <b>DNS</b>는 각각 무엇에 비유되었나?</div>
+    <div class="q"><b>Q2.</b> <code>localhost:3000</code>이 <b>나한테만 보이는</b> 이유는? (내부망/외부망으로 설명)</div>
+    <div class="q"><b>Q3.</b> IP가 '건물 주소'라면 <b>포트</b>는 무엇에 해당하는가?</div>
+    <div class="q"><b>Q4.</b> HTTPS의 자물쇠에서 <b>공개키</b>와 <b>개인키</b>는 각각 어떤 역할인가?</div>
+    <div class="q"><b>Q5.</b> <b>4xx</b> 오류와 <b>5xx</b> 오류는 각각 누구의 잘못인가?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q4의 공개키·개인키와 Q5의 4xx/5xx 구분이 오늘의 핵심을 가장 잘 가립니다.</aside>
+</section>
+
+<!-- 20 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 도메인 = 사람이 외우는 <b>가게 이름</b>, DNS = 이름을 번호(IP)로 바꿔 주는 <b>전화번호부</b>.</div>
+    <div class="q a"><b>A2.</b> 그 서비스가 <b>내부망의 내 컴퓨터</b>에만 있어서. 공유기(NAT)가 바깥→안을 막으므로, 세상에 열려면 외부망에서 닿게 만들어야 함.</div>
+    <div class="q a"><b>A3.</b> <b>호실 번호</b> — 한 서버(건물)의 여러 창구를 구분. 웹은 보통 80·443, <code>localhost:3000</code>의 3000이 포트.</div>
+    <div class="q a"><b>A4.</b> 공개키 = 누구나 넣는 <b>우편함 투입구</b>(잠그기), 개인키 = 서버만 가진 <b>유일한 열쇠</b>(열기).</div>
+    <div class="q a"><b>A5.</b> <b>4xx = 요청(나)의 잘못</b>, <b>5xx = 서버(만든 사람)의 잘못</b>.</div>
+  </div>
+  <aside>A2와 A4를 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다. 특히 A5의 구분은 문제가 생겼을 때 어디부터 봐야 할지 바로 알려 줍니다.</aside>
+</section>
+
+<!-- 21 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>주소가 화면이 되기까지 🌐</h1>
+    <div class="big" style="margin-top:26px">이름을 번호로 · 번호의 서버에 연결 ·<br>알맞은 문으로 · 공통 언어로 대화<br><br><span class="y">그 왕복의 반대편에서 대답하는 쪽</span>이 백엔드</div>
+    <p class="sub" style="margin-top:24px">네트워크 기본기 — 여기까지 · 다음: 백엔드가 실제로 하는 일</p>
+  </div>
+  <aside>네 조각과 요청 한 번의 여정을 잡았습니다. 이제 그 왕복의 반대편 끝, 요청을 받아 데이터를 꺼내고 대답을 만들어 돌려주는 쪽 — 백엔드가 실제로 하는 일을 다음 소단원에서 봅니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

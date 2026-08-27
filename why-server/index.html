@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>화면 뒤에 서버가 필요한 이유 · 백엔드 ①</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 백엔드 ①</span>
+    <h1 style="margin:18px 0">화면 뒤에<br>서버가 필요한 이유</h1>
+    <p class="sub">"링크 보냈는데 안 열려요" — 내 화면이 아직 세상에 없는 이유</p>
+  </div>
+  <aside>어젯밤 근사한 화면을 만들어 친구에게 자랑했는데 "안 열린다"는 답이 옵니다. 아침에 노트북을 다시 켜니 입력한 내용도 사라져 있습니다. 남이 못 열고, 껐다 켜면 사라진다 — 이 두 증상이 오늘의 출발점입니다. 코드는 AI가 쓰지만, 무엇이 필요하고 무엇이 위험한지 판단하는 감각을 세우는 것이 목표입니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>PART 1</small><b>증상과 원인</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>PART 2</small><b class="g">손님과 주방</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>PART 3</small><b>역사와 확장</b></div>
+  </div>
+  <ul class="pts">
+    <li>세 가지 <b>증상</b>이 사실은 <b>하나의 원인</b>을 가리킨다</li>
+    <li>어떤 기능이 서버가 필요한지 <b>먼저 예측</b>해 감각을 잡는다</li>
+    <li><b>클라이언트·서버</b>를 손님과 24시간 주방에 빗대 이해한다</li>
+    <li>인터넷이 <b>어떻게 연결됐는지</b>와 손님이 몰릴 때의 대비를 본다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 산출물은 코드가 아니라 <b>"내 서비스를 세상에 내보내는 데 필요한 것들의 지도."</b></div>
+  <aside>오늘은 주방에서 직접 요리하지 않습니다. 요리(코드)는 AI가 하고, 우리는 주방이 어떻게 돌아가고 무엇을 조심할지를 익힙니다. 그래야 AI에게 제대로 시키고 결과를 판단할 수 있습니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">남이 못 열고, 껐다 켜면 사라진다</h2>
+    <p style="margin-top:11px">세 가지 증상, 그런데 원인은 하나</p>
+    <span class="who">새로고침 · localhost · 전원</span>
+  </div>
+  <aside>화면은 예쁘게 만들었는데 실제로는 두 가지가 안 됩니다. 친구가 링크를 열지 못하고, 노트북을 껐다 켜면 입력이 사라집니다. 겉으로는 서로 다른 문제처럼 보이지만, 파고들면 공통 원인 하나로 모입니다.</aside>
+</section>
+
+<!-- 4 세 증상, 하나의 원인 -->
+<section class="slide" data-part="PART 1">
+  <h2>😱 세 가지 증상, <span class="g">하나의 원인</span></h2>
+  <table class="t">
+    <tr><th>증상</th><th>진짜 원인</th></tr>
+    <tr><td>새로고침하면 입력이 사라진다</td><td>데이터를 <b>저장해 둘 곳</b>이 없다</td></tr>
+    <tr><td>친구에게 주소를 줘도 안 열린다</td><td><b>localhost</b>는 '내 컴퓨터'라는 뜻이다</td></tr>
+    <tr><td>노트북을 닫으면 화면도 꺼진다</td><td>서비스가 <b>내 컴퓨터에서만</b> 돌아간다</td></tr>
+  </table>
+  <div class="hl">공통 원인 하나 — 지금 만든 것은 <b>내 컴퓨터 안에만</b> 있고, 세상과 연결된 <b>'뒤편'이 없다.</b> 그 뒤편을 맡는 것이 <b>백엔드(서버).</b></div>
+  <aside>세 증상은 저장·공유·상시 가동이라는 서로 다른 얼굴을 하고 있지만 모두 "뒤편이 없다"는 한 원인에서 나옵니다. 백엔드는 이 뒤편을 담당하는 부분이라고 먼저 이름만 붙여 둡니다.</aside>
+</section>
+
+<!-- 5 localhost -->
+<section class="slide" data-part="PART 1">
+  <h2>🏠 <span class="g">localhost</span>는 왜 친구에게 안 열릴까</h2>
+  <ul class="pts">
+    <li><b>localhost</b> = "지금 이 컴퓨터"를 가리키는 특별한 주소</li>
+    <li>친구가 자기 컴퓨터에서 <b>localhost:3000</b>을 열면 → <b>'친구 자기 컴퓨터의 3000번'</b>을 찾는다</li>
+    <li>그곳엔 아무것도 없으니 <b class="r">"연결할 수 없음"</b></li>
+  </ul>
+  <div class="big">내 방 주소를 알려줬는데<br><span class="y">친구가 자기 집에서 그 방을 찾는 셈</span><small>같은 글자여도 각자의 컴퓨터를 가리키므로 서로 다른 곳이 된다</small></div>
+  <aside>localhost는 주소처럼 생겼지만 항상 "말하는 그 사람의 컴퓨터"를 가리킵니다. 그래서 나에게는 내 화면이 열리고 친구에게는 친구의 빈 컴퓨터가 열립니다. 세상 어디서나 같은 곳을 가리키는 주소가 있어야 진짜로 공유됩니다.</aside>
+</section>
+
+<!-- 6 먼저 예측 O/X -->
+<section class="slide" data-part="PART 1">
+  <h2>🤔 먼저 예측해보기 — <span class="g">서버가 필요할까?</span></h2>
+  <table class="t">
+    <tr><th>기능</th><th>서버 필요?</th></tr>
+    <tr><td>버튼을 누르면 색이 바뀐다</td><td><span class="r">X</span></td></tr>
+    <tr><td>회원가입하고 로그인한다</td><td><span class="g">O</span></td></tr>
+    <tr><td><b>다른 사람</b>이 쓴 글을 본다</td><td><span class="g">O</span></td></tr>
+    <tr><td>새로고침해도 남아 있는 저장</td><td><span class="g">O</span></td></tr>
+    <tr><td>화면에 애니메이션을 넣는다</td><td><span class="r">X</span></td></tr>
+    <tr><td>입력한 카드 번호로 결제한다</td><td><span class="g">O</span></td></tr>
+  </table>
+  <aside>정답을 맞히는 것보다 왜 그런지를 스스로 설명해 보는 게 중요합니다. 다음 장의 실마리 한 줄이 이 표 전체를 관통합니다.</aside>
+</section>
+
+<!-- 7 판단의 실마리 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧭 판단의 <span class="g">실마리</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="g">서버가 필요</h3><p><b>여러 사람이 나눠 쓰거나</b>, 껐다 켜도 <b>남아야 하거나</b>, <b>비밀이 오가는</b> 것</p></div>
+    <div class="box"><h3 class="r">서버 없이도 OK</h3><p><b>내 화면 안에서 잠깐 보이고 마는 것</b> — 색 바꾸기·애니메이션</p></div>
+  </div>
+  <div class="hl">이 감각이 <b>오늘 내내 기준</b>이다 — 공유·지속·비밀이면 뒤편이 필요하다.</div>
+  <aside>이 한 줄이면 앞의 O/X 표를 외우지 않고도 판단할 수 있습니다. 새 기능을 볼 때마다 "여러 사람? 껐다 켜도? 비밀?" 세 가지를 자문해 보세요.</aside>
+</section>
+
+<!-- 8 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">클라이언트와 서버</h2>
+    <p style="margin-top:11px">손님과 24시간 주방으로 이해하기</p>
+    <span class="who">손님 · 주방 · 홀</span>
+  </div>
+  <aside>추상적인 용어 대신 식당에 빗대 봅니다. 손님과 주방, 홀과 주방이라는 그림 하나면 클라이언트·서버·프론트엔드·백엔드가 한꺼번에 정리됩니다.</aside>
+</section>
+
+<!-- 9 손님과 24시간 주방 -->
+<section class="slide" data-part="PART 2">
+  <h2>🍽️ 손님과 <span class="g">24시간 주방</span></h2>
+  <div class="grid2">
+    <div class="box"><h3 class="b">클라이언트 = 손님</h3><p>내 브라우저·앱. <b>주문하러 온 손님</b>으로, 왔다가 간다. 여러 명일 수도 있다.</p></div>
+    <div class="box"><h3 class="g">서버 = 24시간 주방·창고</h3><p>늘 그 자리에서 <b>주문을 받고(요청)</b> · <b>음식을 내주고(응답)</b> · <b>재료를 보관(저장).</b></p></div>
+  </div>
+  <div class="hl">손님은 왔다 가지만 <b>주방은 늘 켜져 있어야</b> 언제 누가 와도 주문을 받는다.</div>
+  <aside>클라이언트는 요청을 보내는 쪽, 서버는 요청을 받아 응답하고 데이터를 보관하는 쪽입니다. 손님이 잠깐 다녀가도 주방은 24시간 자리를 지키기 때문에 저장과 공유가 가능합니다.</aside>
+</section>
+
+<!-- 10 홀과 주방 -->
+<section class="slide" data-part="PART 2">
+  <h2>🏗️ 프론트엔드는 홀, <span class="g">백엔드는 주방</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">홀</span><span class="t"><b class="b">프론트엔드(화면)</b> — 손님 눈에 보이는 <b>홀</b>: 메뉴판·자리·분위기</span></div>
+    <div class="st"><span class="n">주</span><span class="t"><b class="g">백엔드(서버)</b> — 눈에 안 보이는 <b>주방</b>: 데이터 저장·회원 확인·계산 처리</span></div>
+    <div class="st"><span class="n">AI</span><span class="t">오늘 <b>직접 요리하진 않는다</b> — 요리(코드)는 AI가. 우리는 "주방이 어떻게 돌아가고 무엇을 조심할지"를 안다</span></div>
+  </div>
+  <div class="hl">지금까지 만든 화면은 <b>"홀 인테리어"만</b> 있는 셈 — 예쁘지만 <b>주방이 없으면 진짜 주문은 못 받는다.</b></div>
+  <aside>손님이 100명 몰리면 주방이 바빠지지만, 그건 서버가 커진 뒤 걱정할 일입니다. 지금은 홀과 주방이 나뉘어 있다는 구조부터 잡습니다. 주방을 알아야 AI에게 제대로 시키고 결과를 판단할 수 있습니다.</aside>
+</section>
+
+<!-- 11 핵심 한 문장 -->
+<section class="slide" data-part="PART 2">
+  <h2>💡 오늘의 <span class="g">핵심 한 문장</span></h2>
+  <div class="big">백엔드는 화면 뒤에서 <span class="y">데이터를 저장하고, 사람을 확인하고, 세상과 연결하는</span> 부분이다<small>코드는 AI가 쓰지만, 무엇이 필요하고 무엇이 위험한지 판단하는 것은 여러분의 몫이다</small></div>
+  <div class="hl">오늘의 산출물은 코드가 아니라 <b>"내 서비스를 세상에 내보내는 데 필요한 것들의 지도."</b></div>
+  <aside>저장·확인·연결 — 이 세 가지가 백엔드가 하는 일의 뼈대입니다. 판단의 몫이 사람에게 남는다는 점이 이 강의 전체를 관통하는 태도입니다.</aside>
+</section>
+
+<!-- 12 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">인터넷은 어쩌다 이렇게 연결됐나</h2>
+    <p style="margin-top:11px">역사, 그리고 손님이 몰릴 때의 대비</p>
+    <span class="who">ARPANET · TCP/IP · 웹 · 클라우드</span>
+  </div>
+  <aside>서버를 빌려 몇 분 만에 서비스를 올리는 오늘은 갑자기 온 것이 아닙니다. 멀리 있는 컴퓨터를 잇는 실험에서 시작해 공통 규칙과 웹, 클라우드로 이어진 흐름 위에 우리가 서 있습니다.</aside>
+</section>
+
+<!-- 13 인터넷 역사 -->
+<section class="slide" data-part="PART 3">
+  <h2>🕰️ 인터넷 연결의 <span class="g">네 단계</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>1969 ARPANET</b> — 미국 몇몇 대학 컴퓨터를 처음 서로 연결한 실험. "멀리 있는 컴퓨터끼리 메시지를 주고받자"가 인터넷의 씨앗</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>1970~80s 공통 규칙(TCP/IP)</b> — "데이터를 잘게 나눠(패킷) 주소를 붙여 보내자". 오늘의 <b>IP 주소</b>가 여기서</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>1989~1991 웹의 탄생</b> — CERN의 팀 버너스리가 "문서를 링크로 잇자"는 월드 와이드 웹 제안·공개. <b>HTTP</b>와 URL 등장</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>2000s~ 클라우드</b> — 아마존·구글이 "우리 서버를 빌려 쓰세요" → 비전공자도 몇 분 만에 서비스를 올린다</span></div>
+  </div>
+  <div class="hl">한 줄 — <b>"멀리 있는 컴퓨터를 잇자"(1969) → "공통 규칙을 만들자"(TCP/IP) → "문서를 링크로 잇자"(웹·HTTP) → "서버를 빌려 쓰자"(클라우드).</b></div>
+  <aside>예전엔 회사가 서버를 직접 사서 관리해야 했습니다. 클라우드 덕분에 서버를 빌려 쓰게 되면서 진입 장벽이 크게 낮아졌고, 오늘 우리는 이 마지막 단계 위에 서 있습니다.</aside>
+</section>
+
+<!-- 14 손님이 몰리면 -->
+<section class="slide" data-part="PART 3">
+  <h2>📈 손님이 몰리면 — <span class="g">서버는 어떻게 버티나</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b class="g">주방을 여러 개로(수평 확장)</b> — 똑같은 서버를 여러 대 두고 손님을 나눠 보냄. 이 '안내 직원'이 <b>로드 밸런서</b>("지금은 2번 주방으로")</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b class="g">자주 나가는 메뉴는 미리 준비(캐시·CDN)</b> — 인기 이미지·파일을 손님과 가까운 여러 지점에 미리 복사 → 지구 반대편에서도 빠르게. 이것이 <b>CDN</b></span></div>
+  </div>
+  <div class="hl">비전공자가 지금 직접 다룰 일은 없다(클라우드가 대부분 자동) — <b>"인기를 끌면 왜 서버 비용이 오르는지"의 감각으로</b> 알아 두면 된다.</div>
+  <aside>큰 서비스가 왜 안 느려지는지도 이 개념으로 설명됩니다. 다만 감당 못 할 만큼 몰리면 유명 서비스도 가끔 다운됩니다. 지금은 원리만 감각으로 잡아 두는 것으로 충분합니다.</aside>
+</section>
+
+<!-- 15 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 4문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">"남이 못 열고, 껐다 켜면 사라진다"는 세 증상의 원인은 하나 — <b>세상과 연결된 뒤편(백엔드)이 없다.</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>공유·지속·비밀</b>이 필요하면 서버가 필요하고, 내 화면에서 잠깐 보이고 마는 것은 없어도 된다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>클라이언트=손님, 서버=24시간 주방</b>, 프론트=홀, 백엔드=주방.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">백엔드는 <b>저장·확인·연결</b>. 코드는 AI가 쓰고, <b>필요·위험을 판단하는 것은 내 몫.</b></span></div>
+  </div>
+  <aside>4번이 오늘의 태도입니다. 만드는 손이 아니라 판단하는 눈을 기르는 것이 이 강의의 목표이며, 그 판단의 기준을 오늘 세웠습니다.</aside>
+</section>
+
+<!-- 16 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 세 증상(사라짐·안 열림·꺼짐)이 가리키는 <b>하나의 원인</b>은?</div>
+    <div class="q"><b>Q2.</b> 친구가 <b>localhost:3000</b>을 열었을 때 안 열리는 이유는?</div>
+    <div class="q"><b>Q3.</b> 어떤 기능이 서버가 필요한지 가리는 <b>세 가지 실마리</b>는?</div>
+    <div class="q"><b>Q4.</b> <b>손님·24시간 주방·홀·주방</b>은 각각 무엇에 해당하나?</div>
+    <div class="q"><b>Q5.</b> 손님이 몰릴 때 쓰는 <b>로드 밸런서</b>와 <b>CDN</b>은 각각 무엇을 하나?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q3의 실마리를 자기 말로 설명할 수 있으면 오늘 핵심을 잡은 것입니다.</aside>
+</section>
+
+<!-- 17 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 지금 만든 것이 <b>내 컴퓨터 안에만</b> 있고, 세상과 연결된 <b>뒤편(백엔드/서버)이 없다.</b></div>
+    <div class="q a"><b>A2.</b> localhost는 <b>'말하는 그 컴퓨터'</b>를 뜻해, 친구에겐 <b>친구 자신의 빈 컴퓨터</b>를 가리키기 때문.</div>
+    <div class="q a"><b>A3.</b> <b>여러 사람이 나눠 쓰나 · 껐다 켜도 남아야 하나 · 비밀이 오가나</b> — 하나라도 예면 대개 서버 필요.</div>
+    <div class="q a"><b>A4.</b> 손님=<b>클라이언트</b>, 24시간 주방=<b>서버</b>, 홀=<b>프론트엔드(화면)</b>, 주방=<b>백엔드(서버)</b>.</div>
+    <div class="q a"><b>A5.</b> <b>로드 밸런서</b>=손님을 여러 서버로 나눠 보내는 안내 직원, <b>CDN</b>=인기 파일을 가까운 지점에 미리 복사해 빠르게 전달.</div>
+  </div>
+  <aside>A3과 A4를 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다. 용어보다 그림(손님·주방)으로 기억하는 편이 오래갑니다.</aside>
+</section>
+
+<!-- 18 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>화면 뒤편을 그리다 🍳</h1>
+    <div class="big" style="margin-top:26px">공유·지속·비밀이 필요하면<br><span class="y">화면 뒤에 24시간 주방(서버)</span>이 필요하다<br><br>코드는 AI가, <span class="y">판단은 내가</span></div>
+    <p class="sub" style="margin-top:24px">화면 뒤에 서버가 필요한 이유 — 여기까지 · 다음: 네트워크 기본기 — 주소가 화면이 되기까지</p>
+  </div>
+  <aside>왜 서버가 필요한지, 클라이언트·서버가 무엇인지까지 그렸습니다. 다음 소단원에서는 그 주소가 실제로 어떻게 화면이 되는지, 네트워크의 기본기를 봅니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

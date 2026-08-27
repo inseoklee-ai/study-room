@@ -44,17 +44,16 @@
    - ✅ ①-5. 백엔드 없이 프론트엔드 만들기 (목업 데이터) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/mock-and-api/) · 📊 [PPT](mock-and-api/mock-and-api.pptx)
    - ✅ ①-6. CS 교양 — API가 하는 일 이해하기 (REST·GraphQL) — 🖥️ [①-5 덱에 포함](https://inseoklee-ai.github.io/study-room/mock-and-api/#8)
    - ✅ ①-7. 쇼핑몰을 운영해보고 싶다! (종합·PRD 과제) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/shopping-mall-prd/) · 📊 [PPT](shopping-mall-prd/shopping-mall-prd.pptx)
-2. [프로젝트] 백엔드 — 화면 뒤에서 일어나는 일들
-   - ②-1. 화면 뒤에 서버가 필요한 이유
-   - ②-2. 네트워크 기본기 — 주소가 화면이 되기까지
-   - ②-3. 백엔드가 실제로 하는 일 — 요청을 받아 처리하고 돌려주기
-   - ②-4. 프로토타입과 프로덕트 사이 — AI가 약한 곳
-   - ②-5. 세상에 내보내기 — 배포
-   - ②-6. 공짜로 세상에 올리기 — 무료 서버 고르기
-   - ②-7. 내 컴퓨터를 서버로 — 집에서 돌려보기
-   - ②-8. 바이브 코딩으로 프론트-백엔드 연결하기
-   - ②-9. 내 서비스에 백엔드 한 겹 붙이기와 과제
-   - 📦 프로젝트 제출
+2. **[프로젝트] 백엔드 — 화면 뒤에서 일어나는 일들** ✅ 완결 (9/9)
+   - ✅ ②-1. 화면 뒤에 서버가 필요한 이유 (손님·주방·localhost) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/why-server/) · 📊 [PPT](why-server/why-server.pptx)
+   - ✅ ②-2. 네트워크 기본기 — 주소가 화면이 되기까지 (도메인·DNS·HTTP·상태 코드) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/network-basics/) · 📊 [PPT](network-basics/network-basics.pptx)
+   - ✅ ②-3. 백엔드가 실제로 하는 일 (엔드포인트·API·CRUD·JSON) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/backend-request-response/) · 📊 [PPT](backend-request-response/backend-request-response.pptx)
+   - ✅ ②-4. 프로토타입과 프로덕트 사이 — AI가 약한 곳 (보안·환경변수·인증/인가) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/ai-code-weakness/) · 📊 [PPT](ai-code-weakness/ai-code-weakness.pptx)
+   - ✅ ②-5. 세상에 내보내기 — 배포 (GitHub 자동 배포·CORS·요금) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/deploy/) · 📊 [PPT](deploy/deploy.pptx)
+   - ✅ ②-6. 공짜로 세상에 올리기 — 무료 서버 고르기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/free-hosting/) · 📊 [PPT](free-hosting/free-hosting.pptx)
+   - ✅ ②-7. 내 컴퓨터를 서버로 — 집에서 돌려보기 (NAT·터널) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/home-server/) · 📊 [PPT](home-server/home-server.pptx)
+   - ✅ ②-8. 바이브 코딩으로 프론트-백엔드 연결하기 (계약 불일치·API 명세) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/fullstack-connect/) · 📊 [PPT](fullstack-connect/fullstack-connect.pptx)
+   - ✅ ②-9. 내 서비스에 백엔드 붙이기와 과제 (세 가지 길·RLS·📦 제출 루브릭) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/backend-project/) · 📊 [PPT](backend-project/backend-project.pptx)
 3. 데이터베이스 — 고객의 데이터는 어떻게 관리될까
    - ③-1. 데이터를 저장할 곳이 필요한 이유
    - ③-2. 왜 종류가 많을까 — 데이터베이스의 역사
@@ -273,6 +272,15 @@
 > - 대2-중②1-③④ https://inseoklee-ai.github.io/study-room/choose-framework/
 > - 대2-중②1-⑤⑥ https://inseoklee-ai.github.io/study-room/mock-and-api/
 > - 대2-중②1-⑦ https://inseoklee-ai.github.io/study-room/shopping-mall-prd/
+> - 대2-백엔드-②1 https://inseoklee-ai.github.io/study-room/why-server/
+> - 대2-백엔드-②2 https://inseoklee-ai.github.io/study-room/network-basics/
+> - 대2-백엔드-②3 https://inseoklee-ai.github.io/study-room/backend-request-response/
+> - 대2-백엔드-②4 https://inseoklee-ai.github.io/study-room/ai-code-weakness/
+> - 대2-백엔드-②5 https://inseoklee-ai.github.io/study-room/deploy/
+> - 대2-백엔드-②6 https://inseoklee-ai.github.io/study-room/free-hosting/
+> - 대2-백엔드-②7 https://inseoklee-ai.github.io/study-room/home-server/
+> - 대2-백엔드-②8 https://inseoklee-ai.github.io/study-room/fullstack-connect/
+> - 대2-백엔드-②9 https://inseoklee-ai.github.io/study-room/backend-project/
 > - 대4-① https://inseoklee-ai.github.io/study-room/prompt-engineering-intro/
 > - 대4-② https://inseoklee-ai.github.io/study-room/agent-structure/
 > - 대4-③ https://inseoklee-ai.github.io/study-room/model-inputs/

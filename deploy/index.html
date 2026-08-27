@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>세상에 내보내기 — 배포 · 내 손을 떠나 세상으로</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 백엔드 ⑤</span>
+    <h1 style="margin:18px 0">세상에 내보내기<br>— 배포</h1>
+    <p class="sub">내 손을 떠나 세상으로</p>
+  </div>
+  <aside>지난 시간까지 만든 서비스는 아직 내 컴퓨터 안에만 있습니다. 오늘은 그것을 세상 누구나 주소로 들어올 수 있게 만드는 '배포'를 다룹니다. 비전공자도 클릭 몇 번과 AI의 도움으로 따라올 수 있도록, 개념과 순서, 그리고 초보가 자주 막히는 지점을 하나씩 봅니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>PART 1</small><b>배포란 무엇인가</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>PART 2</small><b class="g">어디에·어떻게 올리나</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>PART 3</small><b>막히는 곳·요금</b></div>
+  </div>
+  <ul class="pts">
+    <li>배포가 무엇이고, 왜 예전보다 <b>쉬워졌는지</b>부터 본다</li>
+    <li>화면·서버·데이터를 <b>셋으로 나눠</b> 올리는 이유를 식당에 빗대 이해한다</li>
+    <li>GitHub에 올리면 <b>자동으로 배포</b>되는 4단계를 따라간다</li>
+    <li>초보가 막히는 <b>세 곳</b>과 <b>요금 폭탄</b>을 피하는 법, AI에게 부탁하는 프롬프트까지</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 배포는 <b>어렵던 전문가의 일</b>에서 <b>클릭 몇 번 + AI</b>의 일로 바뀌었습니다.</div>
+  <aside>세 파트를 지나면, 어젯밤 친구가 못 열던 화면을 세상 누구나 여는 링크로 바꾸는 전 과정을 그릴 수 있게 됩니다. 문법을 몰라도 순서와 함정만 알면 됩니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">배포란 무엇인가</h2>
+    <p style="margin-top:11px">내 컴퓨터 안의 서비스를, 세상 누구나 여는 주소로</p>
+    <span class="who">deploy · 늘 켜진 서버 · 주소</span>
+  </div>
+  <aside>배포의 개념을 한 문장으로 잡고 갑니다. 어려운 말처럼 들리지만, 핵심은 '내 컴퓨터에만 있던 것'을 '늘 켜진 서버'로 옮겨 누구나 들어올 수 있게 하는 것입니다.</aside>
+</section>
+
+<!-- 4 배포 정의 -->
+<section class="slide" data-part="PART 1">
+  <h2>🚀 배포 <span class="g">deploy</span>란?</h2>
+  <div class="big">내 컴퓨터에만 있던 서비스를<br><span class="y">늘 켜진 서버에 올려</span><br>누구나 주소로 들어오게 하는 것</div>
+  <ul class="pts" style="margin-top:16px">
+    <li>처음의 그 장면 — <b>친구가 못 열던 화면</b>을 세상 누구나 열 수 있게 만드는 단계</li>
+    <li>예전엔 <b>며칠씩 걸리던 전문가의 일</b>이었지만</li>
+    <li>지금은 <b>클릭 몇 번 + AI의 도움</b>으로 몇 분이면 된다</li>
+  </ul>
+  <aside>배포의 정의는 딱 이만큼입니다. "늘 켜진 서버"가 중요한 이유는, 내 노트북은 껐다 켜고 이동하지만 서버는 24시간 켜져 있어 언제든 누가 들어와도 응답할 수 있기 때문입니다. 어려워 보이던 일이 지금은 몇 분짜리 일이 되었다는 점을 강조합니다.</aside>
+</section>
+
+<!-- 5 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">어디에·어떻게 올리나</h2>
+    <p style="margin-top:11px">셋으로 나눠 올리고, GitHub로 자동 배포한다</p>
+    <span class="who">화면 · 서버 · 데이터 · GitHub</span>
+  </div>
+  <aside>현대 웹서비스는 한 군데에 다 올리지 않고 보통 세 군데로 나눠 올립니다. 왜 그렇게 하는지, 그리고 GitHub와 연결하면 어떻게 자동으로 배포되는지를 이 파트에서 봅니다.</aside>
+</section>
+
+<!-- 6 셋으로 나눠 올린다 표 -->
+<section class="slide" data-part="PART 2">
+  <h2>🏢 셋으로 <span class="g">나눠 올린다</span> — 식당 비유</h2>
+  <table class="t">
+    <tr><th>무엇을</th><th>어디에(예)</th><th>식당 비유</th><th>왜 여기에?</th></tr>
+    <tr><td><b>화면</b>(프론트)</td><td>Vercel · Netlify</td><td>전 세계 지점의 <b>홀</b></td><td>손님 가까운 곳에서 <b>빠르게</b></td></tr>
+    <tr><td><b>서버</b>(백엔드)</td><td>Render · Railway</td><td>늘 켜진 <b>주방</b></td><td>요청을 <b>계속</b> 처리</td></tr>
+    <tr><td><b>데이터</b>(DB)</td><td>Supabase 등 관리형</td><td>재료 <b>창고</b></td><td><b>안전하게 보관</b>(다음 시간)</td></tr>
+  </table>
+  <div class="hl">🍽️ 홀·주방·창고를 <b>각자 잘하는 곳</b>에 맡기듯, 화면·서버·데이터를 나눠 올린다.</div>
+  <aside>식당을 떠올리면 쉽습니다. 손님을 맞는 홀(화면), 음식을 만드는 주방(서버), 재료를 보관하는 창고(데이터)는 하는 일이 다릅니다. 데이터/DB는 다음 시간에 따로 다룹니다.</aside>
+</section>
+
+<!-- 7 왜 나눠 올리나 -->
+<section class="slide" data-part="PART 2">
+  <h2>🤔 "왜 <span class="g">한 군데</span>에 다 안 올려요?"</h2>
+  <ul class="pts">
+    <li>각자 <b>잘하는 게 다르기</b> 때문 — 나눠 맡기면 각자 <b>최고</b>를 쓸 수 있다</li>
+    <li>무료로 시작한다면 서버는 <b>Render</b>(무료 티어 유지)가 무난</li>
+    <li>Railway는 <b>시작 크레딧을 다 쓰면 유료</b>로 넘어간다</li>
+  </ul>
+  <div class="hl"><b>무료로 시작</b>할 때 — 서버는 무료 티어가 유지되는 <b>Render</b>부터 골라 보자.</div>
+  <aside>세 군데로 나누는 이유는 복잡하게 하려는 게 아니라, 각 영역에 특화된 서비스가 따로 있기 때문입니다. 무료로 실습을 시작할 때는 서버로 Render를 권합니다. Railway는 처음 준 크레딧을 소진하면 요금이 붙는다는 점을 기억하세요.</aside>
+</section>
+
+<!-- 8 GitHub 자동 배포 4단계 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔗 GitHub에 올리면 <span class="g">자동 배포</span> — 4단계</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">내 코드를 <b>GitHub</b>(코드 저장소)에 올린다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">배포 플랫폼(Vercel 등)에서 <b>"이 GitHub 저장소와 연결"</b> 버튼을 누른다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">그때부터 플랫폼이 저장소를 지켜보다, 코드가 <b>바뀔 때마다 자동으로 다시 배포</b></span></div>
+    <div class="st"><span class="n">4</span><span class="t">배포가 끝나면 플랫폼이 <b>주소(도메인)를 하나 만들어</b> 준다 (예 <b>내프로젝트.vercel.app</b>)</span></div>
+  </div>
+  <aside>이 4단계가 배포의 뼈대입니다. 어렵게 들리지만 실제로는 코드를 GitHub에 올리고, 플랫폼에서 연결 버튼을 한 번 누르는 것이 전부입니다. 그 다음부터는 플랫폼이 알아서 지켜보다 자동으로 배포합니다.</aside>
+</section>
+
+<!-- 9 자동 배포 흐름 -->
+<section class="slide" data-part="PART 2">
+  <h2>♻️ "저장 → 올리기 → 자동 배포"가 <span class="g">한 줄</span>로</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>고치고</small><b>저장</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gy)"><small>GitHub에</small><b>올리기</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:140px;border-color:var(--gr)"><small>플랫폼이</small><b class="g">자동 배포</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gold)"><small>어디서든</small><b>내프로젝트.vercel.app</b></div>
+  </div>
+  <div class="big">한 번 연결하면 다음부턴<br><span class="y">고치고 저장만 해도</span> 세상에 반영</div>
+  <div class="hl">✨ 이 순간, <b>어젯밤 안 열리던 그 링크</b>가 어디서든 열린다.</div>
+  <aside>한 번만 연결해 두면 이후로는 코드를 고치고 저장하는 것만으로 세상에 반영됩니다. 첫 시간에 친구가 못 열던 그 화면이, 이제 주소 하나로 어디서든 열린다는 것 — 이 장면이 배포의 보람입니다.</aside>
+</section>
+
+<!-- 10 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">막히는 곳과 요금</h2>
+    <p style="margin-top:11px">초보가 자주 걸리는 세 곳, 그리고 요금 폭탄 피하기</p>
+    <span class="who">환경변수 · CORS · 무료의 함정</span>
+  </div>
+  <aside>배포 자체는 쉬워졌지만, 처음 하는 사람이 거의 똑같은 곳에서 막힙니다. 그 세 곳을 미리 알면 대부분 예방할 수 있습니다. 요금 문제도 겁줄 일이 아니라 알고 시작하면 됩니다.</aside>
+</section>
+
+<!-- 11 막히는 세 곳 -->
+<section class="slide" data-part="PART 3">
+  <h2>🚧 초보가 가장 많이 <span class="g">막히는 세 곳</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">①</span><span class="t"><b class="r">환경변수 빼먹기</b> — 내 컴퓨터의 <b>.env</b>(비밀값)는 GitHub에 일부러 안 올린다 → 배포 플랫폼의 <b>설정 화면에 비밀값을 따로 넣어</b> 줘야. "로컬에선 됐는데 배포하니 안 돼"의 최다 원인</span></div>
+    <div class="st"><span class="n">②</span><span class="t"><b class="r">CORS 막힘</b> — 화면(Vercel)과 서버(Railway)가 <b>서로 다른 주소</b>에 살면, 서버가 "이 화면 요청은 허용"이라고 문을 열어 줘야. 안 그러면 브라우저가 "다른 집 요청은 못 받아"로 막는다</span></div>
+    <div class="st"><span class="n">③</span><span class="t"><b class="r">무료의 함정</b> — 대부분 무료 티어(Vercel 무료 · Railway 시작 크레딧 · Supabase 500MB 무료, 2026 기준·정책은 바뀔 수 있음)가 있지만 <b>트래픽이 늘면 유료로</b></span></div>
+  </div>
+  <div class="hl">💬 AI에게 — "내 프론트 주소에서 오는 요청을 <b>허용(CORS)</b>해줘"</div>
+  <aside>①은 배포 실패의 압도적 1위입니다. 비밀값은 GitHub에 올리지 않으니, 배포 플랫폼 설정에 직접 넣어야 합니다. ②는 화면과 서버가 다른 주소일 때 생기는 흔한 문제로, 서버 쪽에서 우리 화면 주소를 허용해 주면 풀립니다. ③ 무료 티어의 한도와 정책은 바뀔 수 있으니 늘 확인하세요.</aside>
+</section>
+
+<!-- 12 요금 폭탄 피하기 -->
+<section class="slide" data-part="PART 3">
+  <h2>💸 요금 <span class="g">폭탄 피하기</span></h2>
+  <p>특히 <b>키 유출</b>이나 실수로 만든 <b>무한 반복</b> 때문에 요금이 훅 오를 수 있다. 초보가 지킬 세 가지:</p>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>요금 알림을 켜 둔다</b> — "한 달에 X원 넘으면 알려줘"</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>한도를 안다</b> — 월 무료 사용량이 얼마까지인지 파악</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>비밀 키를 지킨다</b> — 유출된 키로 남이 비싼 작업을 돌리면 그 요금은 <b>내 몫</b> (그래서 환경변수가 중요)</span></div>
+  </div>
+  <div class="hl">😌 겁주려는 게 아니라 — <b>알고 시작하면 거의 다 예방</b> 가능하다.</div>
+  <aside>요금 폭탄은 대개 두 가지에서 옵니다. 비밀 키가 새어 남이 내 계정으로 비싼 작업을 돌리거나, 코드 실수로 무한 반복이 돌거나. 알림·한도·키 관리 세 가지만 지키면 대부분 막을 수 있습니다. 비밀 키 관리가 곧 환경변수 이야기와 이어진다는 점이 핵심입니다.</aside>
+</section>
+
+<!-- 13 AI 배포 프롬프트 -->
+<section class="slide" data-part="PART 3">
+  <h2>🤖 AI에게 <span class="g">배포를 부탁하는</span> 프롬프트</h2>
+  <pre>이 프로젝트를 배포하고 싶어. 비용은 최소로 하고 싶어.
+1. 프론트엔드와 백엔드를 각각 어디에 올리면 좋을지 무료 옵션으로 추천해줘.
+2. GitHub에 올리고 자동 배포되게 하는 순서를 하나씩 알려줘.
+3. 비밀 키(환경변수)는 어디에 어떻게 넣어야 하는지 짚어줘.
+4. 배포 후 화면이 서버와 통신이 안 될 때 확인할 것(CORS·환경변수)을 체크리스트로 줘.
+5. 요금이 갑자기 오르지 않게 설정할 것이 있으면 알려줘.</pre>
+  <div class="hl">문법을 몰라도 <b>조건 + 순서 + 함정 체크</b>를 요구하면, AI가 처음부터 끝까지 <b>안내자</b> 역할을 한다.</div>
+  <aside>이 프롬프트 한 벌에 오늘 배운 모든 함정이 들어 있습니다. 무료 옵션, 자동 배포 순서, 환경변수, CORS, 요금 관리까지. 비전공자일수록 "이렇게 해줘"가 아니라 "조건과 순서와 확인할 것을 달라"고 요구하는 것이 안전합니다.</aside>
+</section>
+
+<!-- 14 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 4문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>배포</b> = 내 컴퓨터의 서비스를 늘 켜진 서버에 올려 <b>누구나 주소로</b> 들어오게 하는 것.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">현대 웹서비스는 <b>화면·서버·데이터</b>를 셋으로 나눠 올린다 (홀·주방·창고).</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>GitHub 연결</b> 한 번이면, 고치고 저장만 해도 <b>자동으로 다시 배포</b>된다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">초보가 막히는 곳은 <b>환경변수·CORS·무료의 함정</b> — 알림·한도·키로 <b>요금 폭탄</b>도 예방한다.</span></div>
+  </div>
+  <aside>네 문장이 오늘의 전부입니다. 특히 1번(배포의 정의)과 4번(막히는 세 곳)을 자기 말로 설명할 수 있으면, 처음 배포에서 겪는 대부분의 어려움을 미리 피할 수 있습니다.</aside>
+</section>
+
+<!-- 15 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 한 문장으로, <b>배포(deploy)</b>란 무엇인가?</div>
+    <div class="q"><b>Q2.</b> 화면·서버·데이터를 <b>식당</b>에 빗대면 각각 무엇인가?</div>
+    <div class="q"><b>Q3.</b> GitHub와 배포 플랫폼을 연결하면, 코드가 바뀔 때 무슨 일이 <b>자동</b>으로 일어나나?</div>
+    <div class="q"><b>Q4.</b> "로컬에선 됐는데 배포하니 안 돼"의 <b>최다 원인</b>은 무엇이며 어떻게 고치나?</div>
+    <div class="q"><b>Q5.</b> 요금 폭탄을 피하기 위해 초보가 지킬 <b>세 가지</b>는?</div>
+  </div>
+  <aside>답이 바로 안 떠오르면 앞 장으로 돌아가 확인해 보세요. Q4(환경변수)와 Q5(요금)가 실제 배포에서 가장 자주 부딪히는 지점입니다.</aside>
+</section>
+
+<!-- 16 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 내 컴퓨터에만 있던 서비스를 <b>늘 켜진 서버에 올려</b>, 누구나 주소로 들어올 수 있게 하는 것.</div>
+    <div class="q a"><b>A2.</b> 화면=<b>홀</b>(손님 가까이 빠르게) · 서버=<b>주방</b>(요청을 계속 처리) · 데이터=<b>창고</b>(안전하게 보관).</div>
+    <div class="q a"><b>A3.</b> 플랫폼이 저장소를 지켜보다 코드가 <b>바뀔 때마다 자동으로 다시 배포</b>하고, <b>주소(도메인)</b>를 만들어 준다.</div>
+    <div class="q a"><b>A4.</b> <b>환경변수(비밀값) 빼먹기</b> — .env는 GitHub에 안 올리므로, 배포 플랫폼 <b>설정 화면에 비밀값을 따로 넣어</b> 준다.</div>
+    <div class="q a"><b>A5.</b> ① <b>요금 알림</b>을 켜 둔다 · ② <b>한도(무료 사용량)</b>를 안다 · ③ <b>비밀 키</b>를 지킨다.</div>
+  </div>
+  <aside>A4와 A5를 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다. 특히 비밀 키 관리가 환경변수와 요금 안전을 동시에 지켜 준다는 연결을 기억하세요.</aside>
+</section>
+
+<!-- 17 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>내 손을 떠나 세상으로 🚀</h1>
+    <div class="big" style="margin-top:26px">클릭 몇 번 + AI의 도움으로<br><span class="y">어젯밤 안 열리던 링크</span>가<br>어디서든 열린다</div>
+    <p class="sub" style="margin-top:24px">세상에 내보내기 — 여기까지 · 다음: 공짜로 세상에 올리기 — 무료 서버 고르기</p>
+  </div>
+  <aside>배포는 더 이상 전문가만의 일이 아닙니다. 개념과 순서, 막히는 세 곳만 알면 누구나 몇 분 안에 세상에 서비스를 올릴 수 있습니다. 다음 시간에는 무료로 시작할 수 있는 서버를 어떻게 고르는지 봅니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

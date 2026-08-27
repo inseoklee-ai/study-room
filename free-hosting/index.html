@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>공짜로 세상에 올리기 · 무료 서버 고르기</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 백엔드 ⑥</span>
+    <h1 style="margin:18px 0">공짜로<br>세상에 올리기</h1>
+    <p class="sub">무료 서버 고르기 — 공짜의 세계는 계속 줄어드는 중</p>
+  </div>
+  <aside>배포를 배웠으니 자연스러운 질문이 이어집니다 — 돈 안 들이고 올릴 수 있나요? 됩니다. 요즘은 비전공자가 만든 웹앱을 무료로 인터넷에 띄울 곳이 여럿입니다. 다만 그 무료의 세계는 해마다 조금씩 줄어들고 있어서, 무엇이 남아 있고 어떤 함정이 있는지 함께 정리합니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--red)"><small>PART 1</small><b class="r">줄어드는 공짜</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>PART 2</small><b class="g">쓸 만한 곳 비교</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>PART 3</small><b class="b">이럴 땐 이걸로</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>PART 4</small><b>세 가지 함정</b></div>
+  </div>
+  <ul class="pts">
+    <li>한때 성지였던 <b>무료 서버들이 왜 사라졌는지</b>부터 본다</li>
+    <li>2026년 지금 <b>쓸 만한 무료 호스팅</b>을 한 표로 비교한다</li>
+    <li>내가 만든 것에 맞춰 <b>어디로 시작할지</b> 고른다</li>
+    <li>시작 전에 알아 둘 <b>세 가지 함정</b>으로 마무리한다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 무료는 <b>배우고 시연하기엔 충분</b>하다. 대신 그 한계를 알고 골라야 한다.</div>
+  <aside>오늘의 목표는 특정 서비스를 외우는 것이 아니라, 무료 호스팅의 지형과 그 제약을 이해하고 스스로 판단하는 눈을 갖는 것입니다. 정책은 계속 바뀌므로, 판단 기준이 서비스 이름보다 오래갑니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">공짜의 세계는 줄어드는 중</h2>
+    <p style="margin-top:11px">어제의 무료가 오늘은 없다 — 왜?</p>
+    <span class="who">Heroku · Railway · Fly.io · Glitch</span>
+  </div>
+  <aside>무료 호스팅을 다룰 때 가장 먼저 알아야 할 사실은, 이 세계가 고정돼 있지 않고 계속 축소되고 있다는 점입니다. 몇 해 사이 초보들이 기대던 서비스들이 잇달아 무료를 접었습니다.</aside>
+</section>
+
+<!-- 4 사라진 무료들 -->
+<section class="slide" data-part="PART 1">
+  <h2>🕰️ 하나씩 사라진 <span class="r">무료 서버들</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b class="r">Heroku</b> — 한때 초보들의 성지였던 무료 서버가 <b>2022년 11월</b> 완전히 사라짐</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>Railway</b>(<b>2023</b>) · <b>Fly.io</b>(<b>2024</b>) — 상시 무료를 없앰</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>Glitch</b> — <b>2025년 7월</b> 앱 호스팅 종료</span></div>
+  </div>
+  <div class="hl">이 이름들을 외울 필요는 없다. <b>무료는 언제든 접힐 수 있다</b>는 흐름 자체가 요점이다.</div>
+  <aside>여기 적힌 연도는 각 서비스가 무료 제공을 접은 시점입니다. 지금 이 강의를 듣는 시점에는 또 다른 곳이 명단에 추가돼 있을 수 있습니다. 그래서 특정 서비스에 의존하기보다 흐름을 읽는 것이 안전합니다.</aside>
+</section>
+
+<!-- 5 왜 줄어드나 -->
+<section class="slide" data-part="PART 1">
+  <h2>🤔 왜 <span class="r">공짜를 거둬들일까</span></h2>
+  <ul class="pts">
+    <li>무료 계정을 <b>암호화폐 채굴</b> 같은 곳에 악용하는 사람이 늘어남</li>
+    <li>비용 부담이 커지자 회사들이 <b>공짜를 거둬들이기</b> 시작</li>
+  </ul>
+  <div class="big">"지금 무료인 것도<br><span class="y">언젠가 바뀔 수 있다"</span>는 전제로 고른다<small>가입 직전에 공식 요금 페이지를 한 번 확인하는 습관이 안전</small></div>
+  <div class="hl"><b>습관 하나</b> — 가입 버튼을 누르기 직전, 그 서비스의 <b>공식 요금 페이지</b>를 한 번 확인한다.</div>
+  <aside>무료가 사라지는 배경에는 악용 문제가 있습니다. 소수의 남용이 다수의 무료를 거둬들이게 만든 셈입니다. 그래서 지금 무료라는 정보도 유통기한이 있다고 보고, 가입 직전 공식 요금 페이지를 확인하는 습관을 들이는 것이 안전합니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">지금 쓸 만한 무료 호스팅</h2>
+    <p style="margin-top:11px">2026 기준 · 정책은 바뀔 수 있음</p>
+    <span class="who">정적 사이트 · 백엔드 · VM</span>
+  </div>
+  <aside>이제 실제로 남아 있는 선택지를 봅니다. 표를 읽기 전에, 무엇을 올리려는지에 따라 갈 곳이 달라진다는 점을 먼저 짚어 둡니다.</aside>
+</section>
+
+<!-- 7 용어 -->
+<section class="slide" data-part="PART 2">
+  <h2>📖 먼저 <span class="g">두 단어</span>만 정리</h2>
+  <div class="grid2">
+    <div class="box"><h3 class="g">정적 사이트</h3><p>화면만 있는 것 — <b>포트폴리오·소개 페이지</b> 같은 것</p></div>
+    <div class="box"><h3 class="b">백엔드</h3><p>뒤에서 <b>데이터를 처리하는 부분</b> — 로그인·저장 같은 일</p></div>
+  </div>
+  <div class="hl">내가 만든 게 <b>화면만</b>이면 정적, <b>데이터를 다루면</b> 백엔드가 필요하다.</div>
+  <aside>이 두 단어가 표를 읽는 열쇠입니다. 화면만 있는 것은 가장 단순하고 무료로 올리기 쉽고, 데이터를 처리하는 백엔드가 붙으면 선택지도 제약도 달라집니다.</aside>
+</section>
+
+<!-- 8 비교 표 -->
+<section class="slide" data-part="PART 2">
+  <h2>📊 무료 호스팅 <span class="g">한눈에 비교</span></h2>
+  <table class="t">
+    <tr><th>서비스</th><th>뭘 올리기 좋나</th><th>무료로 주는 것·주의점</th><th>카드</th></tr>
+    <tr><td>Cloudflare Pages</td><td>정적·프론트</td><td><b>대역폭 무제한</b> — 트래픽 걱정 가장 적음</td><td>불필요</td></tr>
+    <tr><td>GitHub Pages</td><td>정적 전용</td><td>가장 단순, 코드 저장하던 곳에 그대로 게시</td><td>불필요</td></tr>
+    <tr><td>Vercel (Hobby)</td><td>프론트·Next.js</td><td>손이 가장 덜 감, 단 <b>개인·비상업용만</b></td><td>불필요</td></tr>
+    <tr><td>Netlify</td><td>정적·프론트</td><td>Vercel 대안, <b>상업적 이용 허용</b></td><td>불필요</td></tr>
+    <tr><td>Render</td><td>백엔드 API</td><td><b>15분 안 쓰면 잠듦</b>(다시 깨는 데 ~1분)</td><td>불필요</td></tr>
+    <tr><td>Supabase</td><td>백엔드+DB</td><td>DB·로그인 한 번에, <b>7일 미사용 시 일시정지</b></td><td>불필요</td></tr>
+    <tr><td>Oracle Always Free</td><td>진짜 리눅스 서버(VM)</td><td>상시 무료 VM, 단 <b>카드 필요·설정 어려움</b></td><td>필요</td></tr>
+  </table>
+  <div class="hl">한도·정책은 각 서비스 <b>공식 요금 페이지</b>에서 최신으로 확인한다.</div>
+  <aside>Supabase는 7일 미사용 시 일시정지되며 데이터는 보존되지만 아주 오래 방치하면 삭제될 수 있습니다. 표의 수치와 조건은 2026년 기준이며 정책은 바뀔 수 있으니, 실제 가입 전에는 공식 페이지에서 다시 확인하세요.</aside>
+</section>
+
+<!-- 9 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">이럴 땐 이걸로 시작</h2>
+    <p style="margin-top:11px">내가 만든 것에 맞춰 고르기</p>
+    <span class="who">포트폴리오 · 프론트 · 백엔드 · 진짜 서버</span>
+  </div>
+  <aside>표를 봐도 막막할 수 있어서, 만든 것의 성격별로 첫 목적지를 정리합니다. 처음에는 이 추천대로 시작하고, 필요가 커지면 그때 옮기면 됩니다.</aside>
+</section>
+
+<!-- 10 이럴 땐 이걸로 -->
+<section class="slide" data-part="PART 3">
+  <h2>🎯 상황별 <span class="g">첫 목적지</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">화</span><span class="t"><b>포트폴리오·소개 페이지(화면만)</b> → <b class="g">Cloudflare Pages</b> 또는 <b class="g">GitHub Pages</b></span></div>
+    <div class="st"><span class="n">프</span><span class="t"><b>프레임워크 프론트(Next.js 등)</b> → <b class="g">Vercel</b> (수익 서비스면 나중에 유료로)</span></div>
+    <div class="st"><span class="n">DB</span><span class="t"><b>로그인·저장이 필요한 백엔드+DB</b> → <b class="g">Supabase</b>가 무난한 1순위 (API 서버가 따로 필요하면 <b>Render</b>를 곁들이기)</span></div>
+    <div class="st"><span class="n">서</span><span class="t"><b>진짜 서버를 만져 보며 공부</b> → <b class="g">Oracle Always Free</b> (설정 난이도 있음)</span></div>
+  </div>
+  <aside>Supabase를 백엔드 1순위로 추천하는 이유는 DB와 로그인을 한 번에 해결해 주기 때문입니다. 별도의 API 서버 로직이 필요해지면 Render를 함께 쓰는 조합이 흔합니다.</aside>
+</section>
+
+<!-- 11 AI에게 물어봐 -->
+<section class="slide" data-part="PART 3">
+  <h2>🤖 고르는 것도 <span class="g">AI에게 물어보면 된다</span></h2>
+  <div class="box">
+    <p style="margin:0">"내가 만든 건 이런 서비스인데, <b>무료로 올리기 좋은 곳과 그 제약을 표로</b> 정리해 줘"</p>
+  </div>
+  <div class="hl">AI가 후보를 뽑아 주면, 여러분은 그 답을 <b>판단</b>하면 된다.</div>
+  <aside>선택지가 많고 정책이 자주 바뀌는 영역이라, 스스로 전부 조사하기보다 AI에게 후보와 제약을 정리하게 하는 것이 효율적입니다. 다만 최종 판단, 특히 제약이 내 상황에 맞는지는 사람의 몫입니다.</aside>
+</section>
+
+<!-- 12 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part">
+    <div class="pno">4</div>
+    <h2 style="margin:0">시작 전에 알아 둘 세 함정</h2>
+    <p style="margin-top:11px">무료 티어를 쓰기 전 반드시 확인</p>
+    <span class="who">잠듦 · 기한/일시정지 · 요금 폭탄</span>
+  </div>
+  <aside>무료 티어에는 유료와 다른 특유의 제약이 있습니다. 미리 알면 당황하지 않고, 데이터를 잃거나 예상치 못한 요금을 맞는 일도 피할 수 있습니다.</aside>
+</section>
+
+<!-- 13 세 함정 -->
+<section class="slide" data-part="PART 4">
+  <h2>⚠️ 무료 티어의 <span class="r">세 가지 함정</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b class="r">잠듦(spin-down)</b> — 한동안 아무도 안 오면 잠듦. 오랜만의 첫 방문자는 화면 뜨는 데 1분쯤(<b>고장 아님</b>). Render 무료가 대표적</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b class="r">기한·일시정지</b> — 무료 DB가 일정 기간 뒤 사라지거나(Render 무료 Postgres는 <b>30일 후 만료</b>), 안 쓰면 잠시 멈춤(Supabase <b>7일</b>). <b>중요한 데이터는 백업</b>을 꼭 따로</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b class="r">요금 폭탄 방지</b> — 카드가 걸린 서비스(클라우드 VM 등)는 <b>예산 알림·상한</b>을 걸어 둘 것</span></div>
+  </div>
+  <aside>세 함정 중 초보가 가장 많이 놀라는 것이 잠듦입니다. 오랜만에 접속하면 느려서 고장인 줄 알기 쉽지만, 잠든 서버가 깨어나는 정상 동작입니다. 카드를 등록하는 서비스에서는 예산 상한을 반드시 걸어 요금 사고를 막으세요.</aside>
+</section>
+
+<!-- 14 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 4문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">무료의 세계는 <b>계속 줄어드는 중</b> — 가입 직전 공식 요금 페이지를 확인한다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">화면만이면 <b>Cloudflare Pages·GitHub Pages</b>, 데이터가 붙으면 <b>Supabase</b>부터.</span></div>
+    <div class="st"><span class="n">3</span><span class="t">고르는 것도 <b>AI에게 표로</b> 뽑게 하고, 판단은 내가 한다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">세 함정 — <b>잠듦·기한/일시정지·요금 폭탄</b>을 미리 알고 시작한다.</span></div>
+  </div>
+  <div class="hl">정리 — 무료는 <b>"배우고 시연하기"엔 충분</b>. 많은 사람에게 24시간 안정적으로 제공하는 단계가 오면 그때 유료를 검토한다.</div>
+  <aside>무료 티어의 목적을 분명히 하면 실망할 일이 없습니다. 학습과 시연에는 충분하고, 실제 서비스 규모가 되면 유료 전환을 검토하는 것이 자연스러운 순서입니다.</aside>
+</section>
+
+<!-- 15 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 초보들의 성지였던 무료 서버가 <b>완전히 사라진 시점</b>과 이름은?</div>
+    <div class="q"><b>Q2.</b> 회사들이 <b>무료를 거둬들이게 된 이유</b>는 무엇인가?</div>
+    <div class="q"><b>Q3.</b> <b>화면만 있는 페이지</b>를 올리기 좋은 무료 서비스 두 곳은?</div>
+    <div class="q"><b>Q4.</b> <b>로그인·저장이 필요한 백엔드+DB</b>의 무난한 1순위는?</div>
+    <div class="q"><b>Q5.</b> 무료 티어의 <b>세 가지 함정</b>은 각각 무엇인가?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q5는 실제로 무료 서버를 쓸 때 가장 자주 부딪히는 부분입니다.</aside>
+</section>
+
+<!-- 16 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> <b>Heroku</b> — <b>2022년 11월</b> 무료 제공이 완전히 종료됐다.</div>
+    <div class="q a"><b>A2.</b> 무료 계정을 <b>암호화폐 채굴</b> 같은 곳에 악용하는 사람이 늘어, 비용 부담이 커진 회사들이 공짜를 거둬들였다.</div>
+    <div class="q a"><b>A3.</b> <b>Cloudflare Pages</b>(대역폭 무제한) · <b>GitHub Pages</b>(가장 단순).</div>
+    <div class="q a"><b>A4.</b> <b>Supabase</b> — DB·로그인을 한 번에 해결. API 서버가 따로 필요하면 Render를 곁들인다.</div>
+    <div class="q a"><b>A5.</b> <b>잠듦</b>(안 쓰면 잠듦) · <b>기한·일시정지</b>(무료 DB 만료/멈춤, 백업 필수) · <b>요금 폭탄</b>(카드 걸린 서비스는 예산 상한).</div>
+  </div>
+  <aside>다섯 문항을 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다. 특히 함정 세 가지는 실전에서 데이터와 비용을 지키는 안전장치입니다.</aside>
+</section>
+
+<!-- 17 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>공짜로도 충분하다 🚀</h1>
+    <div class="big" style="margin-top:26px">무료는 <span class="y">배우고 시연하기</span>엔 충분하다<br>한계를 알고 고르면 된다<br><br>정책이 바뀌어도 남는 건 <span class="y">판단하는 눈</span></div>
+    <p class="sub" style="margin-top:24px">공짜로 세상에 올리기 — 여기까지 · 다음: 내 컴퓨터를 서버로 — 집에서 돌려보기</p>
+  </div>
+  <aside>무료 호스팅의 지형과 함정을 알았으니, 다음에는 남의 서버가 아니라 내 컴퓨터를 직접 서버로 만들어 집에서 돌려보는 방법을 다룹니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
