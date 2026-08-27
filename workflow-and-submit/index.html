@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>내 워크플로 강화하기와 과제 · 프로젝트 제출 (에이전트 도구 ⑦)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 에이전트 도구 ⑦ + 과제</span>
+    <h1 style="margin:18px 0">내 워크플로<br>강화하기와 과제</h1>
+    <p class="sub">범용 AI를 '내 전용 조수'로 — 그리고 스킬 하나를 GitHub에</p>
+  </div>
+  <aside>강의를 닫는 소단원입니다. 배운 것을 세 줄로 정리하고, 과제(내가 실제로 쓸 스킬 하나를 GitHub에 올리기)와 제출 루브릭까지 갑니다.</aside>
+</section>
+
+<!-- 2 내일 아침 -->
+<section class="slide" data-part="표지">
+  <h2>내일 아침의 <span class="g">장면</span>으로 다시 보기</h2>
+  <p>내일 팀원이 <b>"어제 만든 예약 화면에서 오늘 예약만 보여 줘"</b>라고 합니다. 이때 범용 채팅창에 화면 구조·DB 이름·확인 순서를 <b class="r">매번 길게 설명하면</b>, 일은 되더라도 <b>같은 설명을 계속 반복</b>하게 됩니다.</p>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>하네스</b>를 하나 고르고 (내 조건에 맞게)</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>MCP나 앱의 CLI</b>로 내 데이터·도구에 잇고 (규칙 파일로 사용법을 알려 주고)</span></div>
+    <div class="st"><span class="n">3</span><span class="t">자주 하는 일을 <b>스킬</b>로 외워 두면 —</span></div>
+  </div>
+  <div class="big" style="margin-top:12px">범용 AI가 <span class="y">내 서비스를 아는 전용 조수</span>로 바뀝니다</div>
+  <aside>오늘 배운 것은 그 반복을 줄이는 방법입니다. 세 단계가 각각 소단원 ④·②⑥·③에 대응합니다.</aside>
+</section>
+
+<!-- 3 책임 -->
+<section class="slide" data-part="표지">
+  <h2>단, <span class="r">검토 책임까지 넘기는 건 아닙니다</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>✅ 넘기는 것</h3><p>실행 권한 · 반복 작업 · 정리와 요약</p></div>
+    <div class="box"><h3>❌ 넘길 수 없는 것</h3><p><b class="r">결과에 대한 검토와 판단</b></p></div>
+  </div>
+  <div class="hl">🧭 처음에는 <b>읽기 전용 연결과 작은 작업부터</b> 시작하고, <b>실행 결과를 내가 확인하는 습관</b>을 남겨 둡시다</div>
+  <ul class="pts">
+    <li>소단원 ④의 <b>'승인 93%'</b>, 소단원 ①의 <b>'작은 단위·명확한 권한·중간 확인'</b>이 모두 이 한 줄로 모입니다</li>
+  </ul>
+  <aside>강의 전체를 관통하는 태도입니다. 조수에게 권한을 준다고 책임까지 넘어가지 않습니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">과제 — 내가 실제로 쓸 스킬 하나, GitHub에</h2>
+  <p style="margin-top:11px">제출은 저장소 링크 하나</p><span class="who">⑦ 과제</span></div>
+  <aside>오늘 배운 개념이 내 것이 되려면 직접 하나 만들어 봐야 합니다.</aside>
+</section>
+
+<!-- 5 후보 고르기 -->
+<section class="slide" data-part="PART 1">
+  <h2>1. 스킬 후보 고르기 — <span class="g">"또 이걸 설명하고 있네"</span></h2>
+  <p><b>"AI한테 또 이걸 설명하고 있네" 싶은 순간</b>이 후보입니다.</p>
+  <ul class="pts">
+    <li>코드를 고칠 때마다 <b>우리 팀 린트·컨벤션</b>을 다시 알려 주는 일</li>
+    <li>작업을 끝내고 항상 돌리는 정리 — <b>커밋 메시지·변경 요약</b></li>
+    <li><b>회의록·안내문</b>을 우리 팀 양식으로 바꾸는 일</li>
+  </ul>
+  <div class="hl">🎯 스킬의 본질 — <b>'매번 반복하던 일'에서 나와야</b> 합니다. 멋있어 보이는 걸 새로 상상해 만들면 쓰지 않게 됩니다</div>
+  <aside>여기서 후보를 못 고르는 학습자에게는 "지난 2주간 AI에게 같은 말을 두 번 이상 한 게 뭐였나"를 물어 보세요.</aside>
+</section>
+
+<!-- 6 저장소 -->
+<section class="slide" data-part="PART 1">
+  <h2>2. 저장소를 만들고 <span class="b">스킬 쓰기</span></h2>
+  <p>새 GitHub 저장소를 하나 만듭니다(예: <code>my-skills</code>). 그 안에 스킬 폴더와 <code>SKILL.md</code>를 만듭니다. Claude Code 기준 경로는 <code>.claude/skills/&lt;스킬이름&gt;/SKILL.md</code>이고, 다른 도구는 각 도구의 스킬 위치에 둡니다.</p>
+  <pre>---
+name: commit-summary
+description: 오늘 작업을 우리 팀 커밋 메시지 양식으로 요약할 때 사용
+---
+
+# 커밋 메시지 요약
+
+1. `git diff`로 바뀐 부분을 확인한다.
+2. 바뀐 것을 주제별로 묶어 한 줄씩 요약한다.
+3. 양식은 `[범위] 한 일 (#이슈)` 로 맞춘다.</pre>
+  <ul class="pts">
+    <li>파일은 <b>프론트매터(<code>name</code>·<code>description</code>)</b>와 <b>본문</b>으로 씁니다</li>
+  </ul>
+  <aside>소단원 ③의 SKILL.md 형식과 같습니다. 본문은 신입에게 설명하듯 단계로 쓰면 됩니다.</aside>
+</section>
+
+<!-- 7 README -->
+<section class="slide" data-part="PART 1">
+  <h2>3. README로 <span class="p">'왜'</span> 쓰기 · 4. 올리고 링크 제출</h2>
+  <div class="steps">
+    <div class="st"><span class="n">3</span><span class="t">저장소 최상단 <code>README.md</code>에 <b>왜 이 스킬을 만들었는지</b>를 한 장으로. <b>"무슨 불편이 있었고, 스킬이 어떻게 없앴는지"</b>가 한눈에 들어와야 한다</span></div>
+    <div class="st"><span class="n">4</span><span class="t">push하고 <b>저장소 링크를 제출</b>한다</span></div>
+  </div>
+  <div class="hl">🎁 보너스 — 친구에게 링크를 주고 <b>"이 스킬 써 봐"</b> 했을 때, <b>따로 설명하지 않아도 돌아가면 성공</b>입니다</div>
+  <ul class="pts">
+    <li>이게 소단원 ⑤의 <b>플러그인·팀 공유</b>가 값진 이유와 같은 원리입니다 — 내 머릿속에만 있던 세팅을 남이 쓸 수 있게 만드는 것</li>
+  </ul>
+  <aside>README의 '왜'가 평가에서 가장 갈리는 부분입니다. 기능 설명만 있는 README는 남이 쓰지 않습니다.</aside>
+</section>
+
+<!-- 8 제출 전 체크 -->
+<section class="slide" data-part="PART 1">
+  <h2>제출 전 <span class="g">체크</span></h2>
+  <div class="qa">
+    <div class="q"><b>☐</b> 스킬이 <b>'매번 반복하던 일'</b>에서 나왔는가? (스킬의 본질)</div>
+    <div class="q"><b>☐</b> <code>description</code>만 봐도 <b>언제 쓰는지</b> 아는가?</div>
+    <div class="q"><b>☐</b> README에 <b>'왜'</b>가 불편에서 해결로 적혀 있는가?</div>
+    <div class="q"><b>☐</b> <b>다른 대화에서 한마디로 발동</b>시켜 보았는가?</div>
+  </div>
+  <div class="hl">💡 두 번째 항목이 실제로 가장 중요합니다 — AI가 <b><code>description</code> 한 줄로 이 스킬을 꺼낼지 판단</b>하니까요</div>
+  <aside>네 항목 모두 소단원 ③에서 배운 원리(점진 공개·재프롬프트 문제)와 직접 연결됩니다.</aside>
+</section>
+
+<!-- 9 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">📦 프로젝트 제출</h2>
+  <p style="margin-top:11px">루브릭과 제출 방식</p><span class="who">📦 제출</span></div>
+  <aside>평가 기준을 미리 보여 주고 과제를 하게 하면 결과가 훨씬 좋아집니다.</aside>
+</section>
+
+<!-- 10 루브릭 -->
+<section class="slide" data-part="PART 2">
+  <h2>제출 <span class="g">루브릭</span></h2>
+  <table class="t">
+    <tr><th>학습목표</th><th>평가기준</th></tr>
+    <tr><td>스스로 작업을 효율화 할 수 있습니다</td><td><b>충분히 유의미한 내용</b>에 대해서 skill 이 만들어졌는가?</td></tr>
+    <tr><td>실제 사용할 기능을 직접 설계합니다</td><td>만들어진 skill 이 <b>재사용 될만한 요소</b>인가?</td></tr>
+    <tr><td>에이전트 skill 에 대해서 이해합니다</td><td>만들어진 skill 이 <b>실제로 동작하는가?</b></td></tr>
+  </table>
+  <div class="hl">🎯 세 기준이 곧 <b>유의미함 · 재사용성 · 실제 동작</b>입니다 — 앞의 '제출 전 체크' 네 항목이 그대로 대응합니다</div>
+  <aside>세 번째(실제 동작)를 확인하려면 반드시 다른 대화에서 한 번 발동시켜 봐야 합니다.</aside>
+</section>
+
+<!-- 11 제출 방식 -->
+<section class="slide" data-part="PART 2">
+  <h2>제출 방식 — <span class="r">한 가지만</span>, 수정 불가</h2>
+  <div class="grid2">
+    <div class="box"><h3>📁 파일 업로드</h3><p><b>ZIP · PDF · 이미지</b>만 첨부 가능 (최대 <b>5MB</b>)</p></div>
+    <div class="box"><h3>🔗 URL 업로드</h3><p>저장소 링크 하나 — <b class="g">이 과제는 이쪽이 자연스럽습니다</b></p></div>
+  </div>
+  <div class="steps">
+    <div class="st"><span class="n">!</span><span class="t"><b>파일 또는 URL 중 한 가지 방식으로만</b> 업로드 가능</span></div>
+    <div class="st"><span class="n">!</span><span class="t"><b class="r">제출 후 수정은 불가</b> — 링크가 열리는지, 저장소가 public인지 미리 확인</span></div>
+  </div>
+  <aside>제출 후 수정 불가이므로, 링크를 다른 브라우저(로그아웃 상태)에서 한 번 열어 보게 하세요. private 저장소를 제출하는 실수가 가장 흔합니다.</aside>
+</section>
+
+<!-- 12 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">회고와 핵심 정리</h2>
+  <p style="margin-top:11px">세 질문 · 여섯 줄</p><span class="who">⑦ 마무리</span></div>
+  <aside>자기 노트에 짧게 남기게 하세요.</aside>
+</section>
+
+<!-- 13 회고 -->
+<section class="slide" data-part="PART 3">
+  <h2>오늘의 <span class="g">회고</span> 세 질문</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">MCP를 <b>'USB-C'</b>에 빗댄다면, 내 서비스에서 <b>가장 먼저 꽂고 싶은 것</b>은?</span></div>
+    <div class="st"><span class="n">2</span><span class="t">내가 <b>매번 반복해서 설명하던 일</b>(= 스킬 후보)은 무엇인가?</span></div>
+    <div class="st"><span class="n">3</span><span class="t">새 AI 도구가 쏟아질 때, <b>나를 덜 휩쓸리게 해 줄 기준 하나</b>는?</span></div>
+  </div>
+  <div class="hl">✍️ 세 질문 모두 <b>'외웠는가'가 아니라 '내 상황으로 옮길 수 있는가'</b>를 묻습니다</div>
+  <aside>3번의 좋은 답은 "에이전트 = 모델 + 하네스로 분류해 보기" 또는 "내 조건(터미널/편집기·비용·확장·맡길까 지켜볼까)으로 고르기"입니다.</aside>
+</section>
+
+<!-- 14 핵심 정리 -->
+<section class="slide" data-part="PART 3">
+  <h2>핵심 정리 — <span class="g">여섯 줄</span></h2>
+  <table class="t">
+    <tr><th>오늘 배운 것</th><th>한 문장 정리</th><th>내가 할 수 있는 행동</th></tr>
+    <tr><td><b>에이전트의 구조</b></td><td>에이전트 = 모델(지능) + 하네스(껍데기)입니다</td><td>도구를 볼 때 <b>'하네스'를 봅니다</b></td></tr>
+    <tr><td><b>MCP</b></td><td>AI를 내 데이터·도구에 꽂는 'USB-C' 표준입니다</td><td>연결하고 싶은 데이터를 하나 고릅니다</td></tr>
+    <tr><td><b>스킬</b></td><td>반복 작업을 외워 두는 재사용 설명서입니다</td><td>매번 반복하던 지시를 <b>스킬 후보로 적습니다</b></td></tr>
+    <tr><td><b>규칙 파일</b></td><td>프로젝트 상시 안내문(AGENTS.md·CLAUDE.md)입니다</td><td>반복 설명을 파일에 한 번 적어 둡니다</td></tr>
+    <tr><td><b>CLI로 잇기</b></td><td>앱 명령을 규칙 파일로 알려 두면 AI가 직접 실행합니다</td><td>자주 쓰는 조회를 <b>명령 하나로</b> 만듭니다</td></tr>
+    <tr><td><b>도구 선택</b></td><td>종류는 많고 빠르게 바뀌니 '내 조건'으로 고릅니다</td><td>개념을 잡고, <b>유행에 덜 휩쓸립니다</b></td></tr>
+  </table>
+  <aside>세 번째 열이 중요합니다. '안다'가 아니라 '한다'로 끝나야 강의가 남습니다.</aside>
+</section>
+
+<!-- 15 출처 1 -->
+<section class="slide" data-part="PART 3">
+  <h2>출처 · 더 찾아보기 ①</h2>
+  <ul class="pts">
+    <li><b>MCP 공식 문서</b> — modelcontextprotocol.io/docs/getting-started/intro</li>
+    <li><b>MCP 쉬운 설명</b> — IBM, "What is Model Context Protocol (MCP)?" · ibm.com/think/topics/model-context-protocol</li>
+    <li><b>에이전트 스킬</b> — Claude Platform Docs, "Agent Skills" · platform.claude.com/docs/en/agents-and-tools/agent-skills/overview</li>
+    <li><b>스킬 예시 저장소</b> — <code>anthropics/skills</code></li>
+    <li><b>Claude Code 플러그인</b> — code.claude.com/docs/en/plugins</li>
+    <li><b>AutoGPT 초기 급성장(2023년 봄)</b> — <code>Significant-Gravitas/AutoGPT</code></li>
+    <li><b>하네스 비교 2026</b> — Faros AI, "Best AI Coding Agents for 2026" · DEV, "Every AI Coding CLI in 2026"</li>
+    <li><b>Devin Desktop(구 Windsurf)</b> — docs.windsurf.com/windsurf · <b>Roo Code 확장 종료(2026-05-15)</b> — docs.roocode.com</li>
+    <li><b>Gemini CLI → Antigravity CLI 전환(2026-06)</b> — Google Developers Blog · <b>Antigravity</b> — antigravity.google</li>
+  </ul>
+  <aside>도구 관련 링크는 확인 시점이 중요합니다. 선택 직전에 공식 공지를 다시 보세요.</aside>
+</section>
+
+<!-- 16 출처 2 -->
+<section class="slide" data-part="PART 3">
+  <h2>출처 · 더 찾아보기 ②</h2>
+  <ul class="pts">
+    <li><b>명세 주도 개발</b> — <code>github/spec-kit</code> · <code>Fission-AI/openspec</code> · Kiro(AWS) kiro.dev/docs/specs</li>
+    <li><b>에이전트 오케스트레이션</b> — <code>Yeachan-Heo/oh-my-claudecode</code> · <code>code-yeongyu/oh-my-openagent</code>(omo)</li>
+    <li><b>MCP 토큰 부담과 코드 실행</b> — Anthropic, "Code execution with MCP"</li>
+    <li><b>MCP 도구 검색(툴 서치)</b> — Anthropic, "Advanced tool use"; Claude Code MCP 문서</li>
+    <li><b>컴파운드 엔지니어링</b> — Every, every.to/guides/compound-engineering</li>
+    <li><b>Hermes Agent</b> — <code>NousResearch/hermes-agent</code></li>
+    <li><b>Ralph 루프</b> — Geoffrey Huntley, ghuntley.com/ralph · <b>루프 엔지니어링</b> — Pragmatic Engineer</li>
+    <li><b>열린/닫힌 모델</b> — OpenRouter, "The open weight models that matter" · <b>모델 지표·요금</b> — Artificial Analysis</li>
+    <li><b>오픈소스 에이전트</b> — goose(리눅스재단 AAIF) · Earendil Pi · OpenClaw</li>
+  </ul>
+  <aside>이 목록은 강의 뒤에 스스로 파고들 사람을 위한 것입니다. 전부 볼 필요는 없습니다.</aside>
+</section>
+
+<!-- 17 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 마지막 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 범용 AI를 '내 전용 조수'로 바꾸는 세 단계는?</div>
+    <div class="q a"><b>A1.</b> ① <b>하네스</b>를 내 조건에 맞게 고르고 ② <b>MCP나 앱의 CLI</b>로 내 데이터에 잇고(규칙 파일로 사용법을 알려 주고) ③ 자주 하는 일을 <b>스킬</b>로 외워 둔다.</div>
+    <div class="q"><b>Q2.</b> 좋은 스킬 후보를 찾는 신호는?</div>
+    <div class="q a"><b>A2.</b> <b>"AI한테 또 이걸 설명하고 있네" 싶은 순간.</b> 새로 상상해 만든 스킬은 쓰지 않게 된다.</div>
+    <div class="q"><b>Q3.</b> 제출에서 가장 흔한 실수는?</div>
+    <div class="q a"><b>A3.</b> 저장소가 <b>private</b>이라 링크가 안 열리는 것. 제출 후 수정이 불가하므로 로그아웃 상태에서 미리 열어 본다.</div>
+  </div>
+  <aside>Q3은 매 기수 반복되는 실수라 반드시 짚어 주세요.</aside>
+</section>
+
+<!-- 18 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>모델 · 하네스 · 내 조건 🛠️</h1>
+    <div class="big" style="margin-top:26px">MCP로 잇고, 규칙으로 알려 주고, 스킬로 외워 두면<br><span class="y">범용 AI가 내 서비스 전용 조수가 됩니다</span><br><small>도구는 계속 바뀌지만, 이 개념은 남습니다</small></div>
+    <p class="sub" style="margin-top:24px">AI 에이전트 도구 — 강의 완결 (7/7 + 제출)</p>
+  </div>
+  <aside>대단원 2 중단원② 강 4 완결입니다. 다음 강 5는 '메인 퀘스트 — 나만의 프로덕트 만들기'로, 지금까지의 조각(프론트·백엔드·DB·에이전트 도구)을 모아 내 서비스를 짓습니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

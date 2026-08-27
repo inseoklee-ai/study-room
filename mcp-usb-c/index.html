@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP · AI를 내 데이터에 꽂는 USB-C (에이전트 도구 ②)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 에이전트 도구 ②</span>
+    <h1 style="margin:18px 0">MCP — AI를<br>내 데이터에 꽂는 USB-C</h1>
+    <p class="sub">연결 하나를 다시 만들지 않기 위한 업계 공용 약속</p>
+  </div>
+  <aside>하네스를 강하게 만드는 첫 번째 방법입니다. 아무리 똑똑한 AI도 기본적으로는 자기가 학습한 것만 압니다 — 내 데이터베이스, 내 파일, 우리 회사 문서는 모릅니다.</aside>
+</section>
+
+<!-- 2 문제 -->
+<section class="slide" data-part="표지">
+  <h2>문제 — AI는 <span class="r">'내 것'</span>을 모릅니다</h2>
+  <p>내 데이터베이스, 내 파일, 내 캘린더, 우리 회사 문서를 모릅니다. 그때그때 복사해서 붙여넣을 수도 있지만, 연결할 도구가 많아지면 —</p>
+  <div class="big">AI 3개 × 도구 5개 = <span class="y">연결 15개</span><br><small>이걸 일일이 만들어야 하는 지옥 — 이른바 M×N 문제</small></div>
+  <ul class="pts">
+    <li>도구가 하나 늘 때마다 <b>AI 개수만큼</b> 연동을 새로 만들어야 합니다</li>
+    <li>AI를 하나 갈아타면 <b>도구 개수만큼</b> 다시 만들어야 합니다</li>
+  </ul>
+  <aside>M×N 문제를 숫자로 보여 주면 표준의 필요성이 바로 이해됩니다. 뒤에서 M+N으로 줄어드는 계산이 다시 나옵니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">MCP = "AI를 위한 USB-C 포트"</h2>
+  <p style="margin-top:11px">Model Context Protocol</p><span class="who">② MCP</span></div>
+  <aside>Anthropic이 2024년 말에 공개했고, 지금은 업계 표준이 되었습니다.</aside>
+</section>
+
+<!-- 4 USB-C -->
+<section class="slide" data-part="PART 1">
+  <h2>한 번 만들면 <span class="g">아무 AI에나 꽂힙니다</span></h2>
+  <p>USB-C를 떠올려 보세요. 예전엔 기기마다 충전기가 달랐지만, USB-C 하나로 통일되니 <b>아무 기기나 아무 충전기에 꽂힙니다.</b></p>
+  <div class="hl">🔌 <b>MCP는 'AI를 위한 USB-C'</b>입니다 — 도구를 한 번 MCP 규격으로 만들어 두면, MCP를 지원하는 <b>아무 AI에나 꽂힙니다</b></div>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">AI가 <b>내 데이터베이스를 직접 조회</b>해서 답하기</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>Figma 디자인</b>을 읽어서 그대로 화면 만들기</span></div>
+    <div class="st"><span class="n">3</span><span class="t">내 <b>캘린더·Notion·Slack</b>에 접근해 개인 비서처럼 굴기</span></div>
+  </div>
+  <aside>출처: modelcontextprotocol.io, "What is MCP"; IBM, "What is Model Context Protocol?". MCP는 Model Context Protocol의 약자입니다.</aside>
+</section>
+
+<!-- 5 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">역사 — MCP는 어쩌다 '표준'이 됐나</h2>
+  <p style="margin-top:11px">경쟁사들이 같은 규격에 손을 얹었다</p><span class="who">② MCP</span></div>
+  <aside>이 대목이 MCP를 배울 값어치를 만듭니다.</aside>
+</section>
+
+<!-- 6 연표 -->
+<section class="slide" data-part="PART 2">
+  <h2>경쟁하는 회사들이 <span class="p">같은 규격</span>을 떠받쳤습니다</h2>
+  <div class="steps">
+    <div class="st"><span class="n">24.11</span><span class="t"><b>Anthropic이 MCP 공개</b> — 'M×N 통합 지옥'을 풀 공용 규격이 필요했다</span></div>
+    <div class="st"><span class="n">25.03</span><span class="t"><b>OpenAI 채택</b></span></div>
+    <div class="st"><span class="n">25.04</span><span class="t"><b>구글 채택</b></span></div>
+    <div class="st"><span class="n">25말</span><span class="t">여러 회사가 함께 관리하는 <b>중립 재단</b>(리눅스 재단 산하 <b>Agentic AI Foundation</b>)으로 이관</span></div>
+  </div>
+  <div class="hl">🤝 그래서 MCP는 특정 회사 기능이 아니라 <b>업계 공용 약속</b>입니다 — 한 번 익히면 <b>도구가 바뀌어도 계속 쓸 수 있습니다</b></div>
+  <aside>출처: Anthropic, "Model Context Protocol", 2024; TechCrunch, 2025. 경쟁사가 같은 규격을 함께 떠받치는 건 기술 역사에서 흔치 않은 일입니다.</aside>
+</section>
+
+<!-- 7 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">MCP로 실제로 뭘 할까</h2>
+  <p style="margin-top:11px">사례 모음과 실전 목록</p><span class="who">② MCP</span></div>
+  <aside>추상적으로 느껴지지 않게, 사람들이 실제로 연결해 쓰는 예를 봅니다.</aside>
+</section>
+
+<!-- 8 사례 -->
+<section class="slide" data-part="PART 3">
+  <h2>사람들이 <span class="g">이렇게</span> 씁니다</h2>
+  <ul class="pts">
+    <li><b>디자인 → 코드</b> — Figma를 연결하면 AI가 디자인을 <b>읽어서 그대로 화면</b>을 만든다</li>
+    <li><b>내 문서와 대화</b> — Notion을 연결해 "이번 주 할 일 정리해 줘", "이 문서 요약해 줘"를 채팅 안에서</li>
+    <li><b>웹을 데이터로</b> — 웹사이트를 훑어 <b>상품·가격·이미지</b>를 정리해 오기(스크래핑)를 자연어로</li>
+    <li><b>글을 소리로</b> — 긴 글을 음성으로 바꾸기</li>
+    <li><b>일정 자동화</b> — "다음 주 화요일 회의 잡아 줘" → 캘린더에 초대장</li>
+    <li><b>사내 업무</b> — 회사 DB·내부 문서·ERP에 붙여 IT 지원·채용·계약 업무를 돕기</li>
+  </ul>
+  <div class="hl">💡 흥미로운 현실 — 공개적으로 널리 쓰이는 MCP 서버는 아직 손에 꼽지만, <b>회사 내부용 MCP</b>(사내 DB·문서 연결)가 <b>가장 값지다</b>는 평가입니다</div>
+  <aside>출처: Merge, "MCP integration examples"; Pragmatic Engineer, "Building MCP servers". Anthropic이 Google Drive·Slack·GitHub·Postgres 같은 기성 MCP 서버를 공개해 뒀고, Cursor·Zed·Replit 등도 MCP를 받아들였습니다. 남에게 공개하지 않아도 내 데이터에 AI를 붙이는 것만으로 큰 힘이 됩니다.</aside>
+</section>
+
+<!-- 9 실전 목록 -->
+<section class="slide" data-part="PART 3">
+  <h2>실전 — <span class="b">많이 붙이는 것들</span></h2>
+  <table class="t">
+    <tr><th>MCP 서버</th><th>한 줄 용도</th><th>이런 사람에게</th></tr>
+    <tr><td><b>파일시스템</b></td><td>내 폴더의 파일을 읽고 쓰기</td><td>문서·자료 정리하는 누구나</td></tr>
+    <tr><td><b>GitHub</b></td><td>저장소 이슈·코드 읽고 커밋·검색</td><td>프로젝트를 GitHub에 올리는 사람</td></tr>
+    <tr><td><b>브라우저 자동화</b><br><small>Playwright</small></td><td>AI가 실제 웹브라우저를 열어 클릭·입력·캡처</td><td>반복 웹작업·테스트</td></tr>
+    <tr><td><b>Slack</b></td><td>채널 내역 검색·메시지 보내기</td><td>팀 소통 자동화</td></tr>
+    <tr><td><b>Notion</b></td><td>노션 페이지·DB 읽고 쓰기</td><td>노션으로 지식 관리하는 사람</td></tr>
+    <tr><td><b>데이터베이스</b></td><td>DB에 자연어로 물어 조회(<b>읽기 전용 권장</b>)</td><td>앞서 배운 내 서비스 DB와 연결</td></tr>
+    <tr><td><b>구글 드라이브·캘린더</b></td><td>문서 검색·일정 확인/생성</td><td>문서·일정 자동화</td></tr>
+  </table>
+  <div class="hl">⚠️ 딱 하나 조심 — 공개된 MCP 서버는 <b class="r">수천 개 이상으로 급증</b>했고 그중엔 검증 안 된 것도 많습니다. <b>회사가 직접 낸 공식 서버 위주로</b> 시작하세요</div>
+  <aside>MCP 서버는 이제 '앱스토어'처럼 공식 레지스트리(https://registry.modelcontextprotocol.io)에서 찾습니다. 모르는 서버를 함부로 붙이지 마세요 — AI에게 내 데이터·계정 접근 권한을 주는 일입니다.</aside>
+</section>
+
+<!-- 10 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">개념 정리 — MCP가 건네는 세 가지</h2>
+  <p style="margin-top:11px">도구 · 자원 · 프롬프트</p><span class="who">② MCP</span></div>
+  <aside>이름만 알아 두면 됩니다.</aside>
+</section>
+
+<!-- 11 세 가지 -->
+<section class="slide" data-part="PART 4">
+  <h2>도구 · 자원 · 프롬프트</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>도구(Tools)</b> — AI가 <b class="r">실행</b>하는 기능 (예: 검색하기, DB 조회하기)</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>자원(Resources)</b> — AI가 <b>읽어 들이는</b> 데이터 (예: 파일, 문서, 기록)</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>프롬프트(Prompts)</b> — 미리 만들어 둔 <b>요청 템플릿</b></span></div>
+  </div>
+  <p>이게 왜 좋을까요? ① 연결을 매번 새로 안 만들어도 되고, ② AI가 <b>실제 최신 데이터</b>를 보니 <b class="g">엉뚱한 답(환각)이 줄고</b>, ③ 학습 시점 이후의 최신 정보도 쓸 수 있습니다.</p>
+  <div class="hl">🎯 결국 이렇게 다가옵니다 — <b>"AI야, 우리 서비스 DB 보고 답해 줘"</b>가 가능해지는 것. 문법을 몰라도 이미 만들어진 연결을 <b>켜기만</b> 하면 됩니다</div>
+  <aside>출처: modelcontextprotocol.io; Descope, "What Is MCP". 세 가지 중 '도구'만 실제 행동을 합니다 — 다음 슬라이드의 권한 이야기로 이어집니다.</aside>
+</section>
+
+<!-- 12 구조 -->
+<section class="slide" data-part="PART 4">
+  <h2>구조와 셈 — <span class="g">M×N에서 M+N으로</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px"><small>host</small><b>AI를 담은 앱<br><small>(코딩 도구 등)</small></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>client</small><b class="b">연결 관리</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:170px;border-color:var(--gr)"><small>server</small><b class="g">Notion·파일·DB<br><small>tools/resources/prompts</small></b></div>
+  </div>
+  <table class="t">
+    <tr><th></th><th>표준이 없으면</th><th>공통 규약을 따르면</th></tr>
+    <tr><td>구현 수</td><td>앱 M개 × 서비스 N개 = <b class="r">M×N개</b></td><td>앱은 client 한 번, 서비스는 server 한 번 → 대략 <b class="g">M+N개</b></td></tr>
+  </table>
+  <ul class="pts">
+    <li>한 서버가 무엇을 허용하는지는 <b>서버가 명시</b>하고, host는 그 목록을 AI에게 보여 줍니다</li>
+    <li>USB-C 비유가 여기서 나옵니다 — 단, <b class="r">플러그 모양이 같다고 모든 기기가 같은 권한을 갖는 건 아닙니다.</b> MCP도 <b>연결 규칙이지 자동 안전 보장은 아닙니다</b></li>
+  </ul>
+  <aside>M+N 계산을 칠판에 써 보면 설득력이 큽니다. AI 앱 5개, 서비스 10개면 50개 → 15개입니다.</aside>
+</section>
+
+<!-- 13 권한 -->
+<section class="slide" data-part="PART 4">
+  <h2>특히 <span class="r">tool은 실제 행동</span>을 할 수 있습니다</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">처음에는 <b class="g">"읽기" 도구부터</b> 연결한다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>쓰기·삭제·배포</b>처럼 되돌리기 어려운 권한은 <b>승인 과정</b>을 둔다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">AI가 최신 데이터를 읽는다고 <b class="r">해석까지 자동으로 맞는 것은 아니므로</b>, 중요한 결과는 <b>원본과 함께 확인</b>한다</span></div>
+  </div>
+  <div class="hl">🧭 앞 강의의 DB 실습에서 배운 것과 같습니다 — <b>읽기 전용부터, 되돌릴 수 없는 것엔 승인</b></div>
+  <aside>데이터베이스 MCP를 '읽기 전용 권장'이라 적은 이유가 이것입니다. 권한 이야기는 소단원 ④에서 하네스 안전으로 다시 확장됩니다.</aside>
+</section>
+
+<!-- 14 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> MCP가 푸는 문제(M×N)는 무엇인가?</div>
+    <div class="q a"><b>A1.</b> AI 앱 M개와 서비스 N개가 각각 전용 연동을 만들면 <b>M×N개</b>가 필요하다. 공통 규약을 따르면 대략 <b>M+N개</b>로 줄어든다.</div>
+    <div class="q"><b>Q2.</b> MCP 서버가 건네는 세 가지는?</div>
+    <div class="q a"><b>A2.</b> <b>도구(Tools) · 자원(Resources) · 프롬프트(Prompts).</b> 이 중 실제 행동을 하는 건 도구다.</div>
+    <div class="q"><b>Q3.</b> MCP가 '업계 공용 약속'이라고 말할 수 있는 근거는?</div>
+    <div class="q a"><b>A3.</b> Anthropic이 2024-11 공개 → <b>OpenAI(2025-03)·구글(2025-04) 채택</b> → 2025년 말 <b>리눅스 재단 산하 중립 재단(AAIF)</b>으로 이관.</div>
+    <div class="q"><b>Q4.</b> "USB-C 비유"의 한계는?</div>
+    <div class="q a"><b>A4.</b> 플러그 모양이 같다고 모든 기기가 같은 권한을 갖는 건 아니다. <b>MCP는 연결 규칙이지 자동 안전 보장이 아니다</b> — 읽기부터, 위험한 권한엔 승인.</div>
+  </div>
+  <aside>Q4를 빠뜨리면 학습자가 "MCP만 붙이면 안전하다"고 오해합니다.</aside>
+</section>
+
+<!-- 15 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>규격 · 연결 · 권한 🔌</h1>
+    <div class="big" style="margin-top:26px">한 번 만든 연결을 다시 만들지 않는 것<br><span class="y">그리고 읽기부터 시작하는 것</span></div>
+    <p class="sub" style="margin-top:24px">에이전트 도구 ② — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ③은 하네스를 강하게 만드는 두 번째·세 번째 방법 — 반복 작업을 외워 두는 스킬과, 프로젝트 상시 안내문인 규칙 파일입니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

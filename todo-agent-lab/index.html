@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>실습 · Todo 앱을 AI가 아는 앱으로 (에이전트 도구 ⑥)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 에이전트 도구 ⑥ · 실습</span>
+    <h1 style="margin:18px 0">어제 만든 Todo 앱을<br>'AI가 아는' 앱으로</h1>
+    <p class="sub">CLI + 규칙 파일 + 스킬 — 범용 AI를 내 앱 전용 조수로</p>
+  </div>
+  <aside>지난 강의에서 우리는 에이전트에게 시켜 Todo 앱을 만들었습니다. 오늘 배운 것은 읽고 끝내면 남지 않으니, 그 Todo 앱을 재료로 범용 AI를 '내 앱을 아는 전용 조수'로 바꾸는 걸 직접 해 봅니다.</aside>
+</section>
+
+<!-- 2 하는 것 -->
+<section class="slide" data-part="표지">
+  <h2>이 실습에서 하는 것 — <span class="g">네 가지</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">앱에 <b>CLI</b>(<code>todo list</code>·<code>summary</code> 같은 명령)를 갖추고, <b><code>AGENTS.md</code></b>(규칙 파일)에 사용법을 적는다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">AI에게 그 <b>CLI를 실제로 돌리게</b> 해 내 할 일 데이터를 읽는다 (이때 <b>권한 승인</b>을 관찰하고, 위험 작업 전 <b>커밋</b>으로 되돌릴 지점을 만든다)</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b><code>SKILL.md</code></b>를 하나 만들어, 매번 반복하던 정리 작업을 <b>한 번 적어 재사용</b>한다</span></div>
+    <div class="st"><span class="n">4</span><span class="t">(덤) 같은 걸 <b>MCP로 붙이면</b> 어떻게 다른지 짧게 체험한다</span></div>
+  </div>
+  <div class="hl">🧰 준비물 — 지난 시간에 <b>로컬에 만든</b> Todo 앱 폴더(데이터가 <code>todo.db</code> 같은 내 컴퓨터 파일에 저장되는 형태) + 에이전트형 도구(Claude Code·Cursor 등) 하나</div>
+  <aside>방향은 소단원 ⑤에서 본 흐름 그대로입니다 — 무거운 MCP부터 세우기보다, 앱에 CLI를 갖추고 그 사용법을 규칙 파일에 적어 두면 AI가 그 명령을 직접 돌려 내 데이터를 읽습니다. 클라우드 DB로 만들었다면 이 실습은 로컬 파일 기준으로 읽어 주세요.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">1단계 — 앱에 '명령줄 사용법(CLI)'을 붙이기</h2>
+  <p style="margin-top:11px">얇은 진입점 하나만</p><span class="who">⑥ 실습</span></div>
+  <aside>지난 시간에 만든 Todo 앱은 아마 화면(웹)으로 쓰는 형태일 겁니다.</aside>
+</section>
+
+<!-- 4 왜 CLI -->
+<section class="slide" data-part="PART 1">
+  <h2>AI가 다루기 편한 창구는 <span class="g">명령줄</span>입니다</h2>
+  <div class="grid2">
+    <div class="box"><h3>🖱️ 화면(웹)</h3><p>사람이 <b>클릭하라고</b> 있는 것 — AI가 붙잡기 <b class="r">번거롭다</b></p></div>
+    <div class="box"><h3>⌨️ 명령줄(CLI)</h3><p>"명령어를 쳐서 <b>결과를 글로 받는</b>" 방식 — AI가 <b class="g">그대로 실행하고 읽기 좋다</b></p></div>
+  </div>
+  <ul class="pts">
+    <li>앱을 <b>새로 만들 필요는 없습니다</b> — 할 일을 추가·조회·완료하는 <b>로직은 이미 앱 안에</b> 있으니, 터미널에서 부를 수 있는 <b>작은 입구(진입점) 하나만</b> 더 얹으면 됩니다</li>
+    <li>데이터도 앱이 쓰던 그 파일(<code>todo.db</code>)을 그대로 씁니다 — 새 데이터를 만드는 게 아니라 <b>같은 데이터를 여는 문을 하나 더 다는</b> 셈</li>
+  </ul>
+  <div class="hl">📌 CLI 한 줄 정의 — 프로그램에 "무엇을 할지"를 화면 클릭 대신 <b>명령어 + 값</b>으로 전달하는 방식. <code>node todo.js add "우유 사기"</code>에서 <code>add</code>가 명령, <code>"우유 사기"</code>가 넘겨주는 값</div>
+  <aside>여기서 학습자가 "내 앱을 다시 만드는 게 아니다"를 이해해야 부담 없이 시작합니다.</aside>
+</section>
+
+<!-- 5 부탁 문장 -->
+<section class="slide" data-part="PART 1">
+  <h2>AI에게 이렇게 <span class="b">부탁합니다</span></h2>
+  <pre>"우리 Todo 앱의 기존 로직을 재사용해서 터미널에서 쓸 todo 명령을 만들어 줘.
+ add(추가)·list(목록)·done(완료)·summary(오늘 완료 요약) 네 개면 돼.
+ 데이터는 지금 쓰는 todo.db를 그대로 쓰고,
+ 앱 코드를 갈아엎지 말고 얇은 진입점만 더해 줘."</pre>
+  <p>그러면 이렇게 동작합니다.</p>
+  <pre>$ node todo.js list
+[x] 1. 발표 자료 초안 작성하기
+[ ] 4. 헬스장 PT 예약 변경 문의하기</pre>
+  <ul class="pts">
+    <li>앱이 파이썬이면 <code>python todo.py list</code>처럼, <b>쓰는 언어에 맞는 진입점</b>이 생깁니다 — 형태만 다를 뿐 원리는 같습니다</li>
+    <li>⚠️ <code>summary</code>가 '오늘 완료'를 세려면 <b>완료한 시각이 데이터에 있어야</b> 합니다. 없으면 AI에게 <b>"완료 시각도 기록하게 해 줘"</b>를 함께 부탁하세요</li>
+  </ul>
+  <aside>이하 편의상 todo …로 줄여 씁니다. AI가 실제로 만든 파일명은 cli.js처럼 다를 수 있으니, 나온 이름으로 바꿔 쓰면 됩니다.</aside>
+</section>
+
+<!-- 6 규칙 파일 -->
+<section class="slide" data-part="PART 1">
+  <h2>사용법을 <span class="g">규칙 파일</span>에 5~10줄로</h2>
+  <pre># Todo 앱
+
+## 개요
+할 일을 추가·완료·조회하는 1인용 앱.
+
+## 명령
+- 목록: node todo.js list
+- 추가: node todo.js add "&lt;내용&gt;"
+- 완료: node todo.js done &lt;번호&gt;
+- 오늘 완료 요약: node todo.js summary
+
+## 규칙
+- 데이터는 todo.db에 저장한다. UI 문구는 존댓말로.
+
+## 하지 말 것
+- todo.db(실데이터)를 직접 지우거나 덮어쓰지 말 것.</pre>
+  <div class="hl">⚠️ 파일 이름은 <b>도구를 탑니다</b> — <b>Cursor</b> 등은 <code>AGENTS.md</code>를 그대로 읽고, <b>Claude Code는 <code>CLAUDE.md</code>만</b> 자동으로 읽습니다(<code>CLAUDE.md</code> 첫 줄에 <code>@AGENTS.md</code>를 적어 불러와도 됩니다)</div>
+  <aside>앱 폴더 맨 위(루트)에 둡니다. 소단원 ③에서 배운 네 항목(개요·명령·규칙·하지 말 것)이 그대로 들어갑니다.</aside>
+</section>
+
+<!-- 7 확인 -->
+<section class="slide" data-part="PART 1">
+  <h2>1단계 통과 기준 — <span class="g">새 대화에서 물어보기</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px"><small>1</small><b>새 대화를 연다</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:180px;border-color:var(--bl)"><small>2</small><b class="b">"이 프로젝트<br>어떻게 실행해?"</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:180px;border-color:var(--gr)"><small>3</small><b class="g">방금 적은 명령을<br>먼저 읽고 답하면 성공</b></div>
+  </div>
+  <ul class="pts">
+    <li>대화를 리셋해도 이 파일은 자동으로 읽히니 <b>같은 설명을 두 번 안 해도 됩니다</b></li>
+    <li>소단원 ④에서 본 <b>"규칙 파일에 적은 건 리셋해도 유지된다"</b>가 여기서 확인됩니다</li>
+  </ul>
+  <aside>새 대화를 여는 게 중요합니다. 같은 대화에서 물으면 방금 얘기한 내용을 기억하는 것과 구분이 안 됩니다.</aside>
+</section>
+
+<!-- 8 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">2단계 — AI에게 그 CLI를 실제로 돌리게 하기</h2>
+  <p style="margin-top:11px">그리고 권한을 관찰하기</p><span class="who">⑥ 실습</span></div>
+  <aside>이제 진짜 재미있는 부분입니다.</aside>
+</section>
+
+<!-- 9 실행 -->
+<section class="slide" data-part="PART 2">
+  <h2>"오늘 할 일 목록 좀 <span class="g">보여 줘</span>"</h2>
+  <p>규칙 파일을 읽은 AI는 스스로 <code>node todo.js list</code>를 <b>실행</b>해서 그 출력을 가져옵니다. <b class="g">복사·붙여넣기 없이</b>, AI가 내 앱을 직접 돌려 데이터를 읽는 거죠.</p>
+  <div class="hl">🎯 핵심은 <b>소스 코드가 아니라 '실제 할 일 데이터'</b>를 보는 것입니다</div>
+  <ul class="pts">
+    <li>소단원 ①의 루프가 여기서 눈에 보입니다 — <b>계획(어떤 명령?) → 실행 → 관찰(출력) → 답</b></li>
+  </ul>
+  <aside>학습자가 "AI가 내 컴퓨터에서 내 앱을 돌렸다"는 감각을 처음 갖는 순간입니다.</aside>
+</section>
+
+<!-- 10 권한 -->
+<section class="slide" data-part="PART 2">
+  <h2>여기서 <span class="r">권한을 관찰</span>하세요</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">명령을 실행하기 직전, 도구가 <b>"이 명령을 실행해도 될까요?"</b>를 묻는다 — <code>list</code>·<code>summary</code>처럼 <b>읽기만 하는 건 승인</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t">한 번은 <b class="r">일부러</b> 위험한 걸 시켜 본다 — <i>"todo.db 파일을 지워 줘."</i> 승인창이 뜨면 <b class="r">거부</b>하고, 규칙 파일의 '하지 말 것'과 연결해 <b>'내가 문지기'</b>라는 감을 익힌다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">뭔가 시키기 전에 <b><code>git commit</code></b>으로 되돌릴 지점을 먼저 만든다 — 잘못돼도 그 지점으로 되돌아갈 수 있다</span></div>
+  </div>
+  <div class="hl">💡 왜 CLI로 할까요? 소단원 ⑤의 '요즘 흐름' 그대로 — AI는 <code>node</code>·<code>git</code> 같은 명령을 <b>이미 알고 있어서</b>, 무거운 연결을 새로 세우지 않고 <b>있는 명령을 그냥 부르는</b> 게 가볍고 빠릅니다</div>
+  <aside>소단원 ④의 '승인 93%' 이야기가 여기서 실습이 됩니다. 거부해 보는 경험이 이 실습의 숨은 목표입니다.</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">3단계 — 반복 작업을 스킬로 외워 두기</h2>
+  <p style="margin-top:11px">Claude Code 기준</p><span class="who">⑥ 실습</span></div>
+  <aside>Cursor 등 다른 도구는 스킬 위치가 다르니 개념만 봐도 됩니다.</aside>
+</section>
+
+<!-- 12 스킬 -->
+<section class="slide" data-part="PART 3">
+  <h2>매번 똑같이 시키는 일을 <span class="g">한 번 적어</span></h2>
+  <p>"오늘 완료한 것만 뽑아 커밋 메시지 형식으로 정리해 줘" 같은 일이죠. 앱 폴더의 <code>.claude/skills/todo-summary/SKILL.md</code>에 이렇게 적습니다.</p>
+  <pre>---
+name: todo-summary
+description: 오늘 완료한 할 일을 커밋 메시지 형식으로 요약할 때 사용
+---
+
+# 오늘 완료 요약
+
+`node todo.js summary`를 실행하고, 그 출력을 그대로 보여준다.</pre>
+  <div class="hl">🎯 핵심 — 스킬이 <b>직접 데이터를 뒤지는 게 아니라, 앞서 만든 CLI를 대신 불러 준다</b>는 것</div>
+  <aside>Claude Code는 이 경로의 스킬을 자동으로 찾습니다. 스킬 폴더를 처음 만들었다면 도구를 한 번 재시작해야 인식됩니다.</aside>
+</section>
+
+<!-- 13 점진 공개 -->
+<section class="slide" data-part="PART 3">
+  <h2>그리고 <span class="p">다른 대화에서</span> 한마디</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:180px"><small>내가</small><b>"요약 스킬 써서<br>오늘 한 일 정리해 줘"</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--pp)"><small>AI가</small><b class="p">스킬을 꺼낸다</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>실행</small><b class="g">todo summary<br>→ 결과 정리</b></div>
+  </div>
+  <ul class="pts">
+    <li>소단원 ③에서 배운 <b>점진 공개</b>가 실제로 동작하는 순간입니다 — 평소엔 <code>description</code> 한 줄만 알고 있다가, 지금 일이 맞을 때 본문을 펼칩니다</li>
+  </ul>
+  <div class="hl">🧱 층이 쌓인 걸 보세요 — <b>규칙 파일(사용법) → CLI(실행) → 스킬(반복 자동화)</b></div>
+  <aside>이 세 층이 오늘 강의의 MCP·스킬·규칙 중 두 개를 실제로 구현한 것입니다.</aside>
+</section>
+
+<!-- 14 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">덤 — 같은 걸 MCP로 붙이면?</h2>
+  <p style="margin-top:11px">시간 남으면</p><span class="who">⑥ 실습</span></div>
+  <aside>비교해 보면 소단원 ⑤의 판단이 몸으로 이해됩니다.</aside>
+</section>
+
+<!-- 15 MCP -->
+<section class="slide" data-part="PART 4">
+  <h2>파일시스템 MCP를 <span class="b">등록해 보기</span></h2>
+  <pre>{
+  "mcpServers": {
+    "todo-files": {
+      "command": "npx",
+      "args": ["-y","@modelcontextprotocol/server-filesystem","/내-Todo앱-경로"]
+    }
+  }
+}</pre>
+  <ul class="pts">
+    <li>붙여 두면 <b>"우리 앱 소스에서 할 일을 어떻게 저장하는지 설명해 줘"</b> 같은 걸 시켜 볼 수 있습니다</li>
+    <li>다만 차이가 느껴질 거예요 — 이 서버는 <b>파일(소스)을 읽는 데는 좋지만</b>, 데이터가 담긴 <code>todo.db</code>는 <b class="r">이진 파일이라 내용까지 세어 주진 못합니다</b></li>
+    <li>방금 CLI로 한 <b>"오늘 완료 몇 건"</b> 같은 건 결국 앱의 명령(<code>todo summary</code>)을 돌려야 나옵니다</li>
+  </ul>
+  <div class="hl">🧭 그래서 오늘 배운 판단이 그대로 쓰입니다 — <b>혼자 작은 앱이면 CLI + 스킬이 가볍고, 여럿이 쓰고 권한·기록을 챙겨야 하면 MCP.</b> 도구가 아니라 <b>상황이 고릅니다</b></div>
+  <aside>실패처럼 보이는 이 체험이 실은 가장 값진 학습입니다 — 도구마다 잘하는 일이 다르다는 것.</aside>
+</section>
+
+<!-- 16 정리 -->
+<section class="slide" data-part="확인">
+  <h2>정리 — 오늘의 <span class="g">결과물</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">☐</span><span class="t">앱에 <b>CLI</b>(<code>list</code>·<code>summary</code> 등) + <b>규칙 파일</b>(<code>AGENTS.md</code>, Claude Code면 <code>CLAUDE.md</code>)에 사용법</span></div>
+    <div class="st"><span class="n">☐</span><span class="t">AI가 그 CLI를 <b>직접 실행</b>해 내 할 일 데이터를 읽음 (권한 승인창을 한 번은 <b class="r">거부</b>, 위험 작업 전 <code>git commit</code>)</span></div>
+    <div class="st"><span class="n">☐</span><span class="t"><b><code>SKILL.md</code> 1개</b>(Claude Code 기준) — 다른 대화에서 한마디로 발동, 스킬이 CLI를 대신 호출</span></div>
+    <div class="st"><span class="n">☐</span><span class="t">(덤) 같은 걸 <b>MCP로도</b> 붙여 보고 CLI와 비교</span></div>
+  </div>
+  <div class="hl">❓ 마지막 확인 — 범용 AI가 <b>내 Todo 앱을 아는 조수</b>로 바뀐 지점은 어디였나요? (규칙 파일? CLI 실행? 스킬?) <b>그 감각이 오늘의 핵심입니다</b></div>
+  <aside>정답은 사람마다 다릅니다. 대개 "AI가 스스로 todo list를 실행했을 때"라고 답합니다 — 그 순간이 '말하는 AI'와 '움직이는 AI'의 경계입니다.</aside>
+</section>
+
+<!-- 17 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>CLI · 규칙 · 스킬 🧪</h1>
+    <div class="big" style="margin-top:26px">무거운 연결부터 세우지 않아도<br><span class="y">명령 하나와 파일 두 개면 전용 조수가 됩니다</span></div>
+    <p class="sub" style="margin-top:24px">에이전트 도구 ⑥ 실습 — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑦에서 워크플로 강화 정리와 과제(내가 실제로 쓸 스킬 하나를 GitHub에 올리기)로 강의를 닫습니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

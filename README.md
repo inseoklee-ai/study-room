@@ -63,15 +63,15 @@
    - ✅ ③-6. 무료로 쓸 수 있는 DB 고르기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/free-db-choice/) · 📊 [PPT](free-db-choice/free-db-choice.pptx)
    - ✅ ③-7. 실습 — 에이전트로 '내 Todo 앱'을 내 컴퓨터에 만들기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/todo-db-lab/) · 📊 [PPT](todo-db-lab/todo-db-lab.pptx)
    - ✅ ③-8. 마무리 — 회고와 핵심 정리 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/db-wrapup/) · 📊 [PPT](db-wrapup/db-wrapup.pptx)
-4. [프로젝트] AI 에이전트 도구 — 내 AI를 더 강하게
-   - ④-1. 어시스턴트에서 에이전트로 — 도구의 정체
-   - ④-2. MCP — AI를 내 데이터에 꽂는 USB-C
-   - ④-3. 스킬 — 반복 작업을 AI에게 외워 두기
-   - ④-4. 하네스 종류 — 어떤 AI 코딩 도구를 고를까
-   - ④-5. 스킬 너머 — 확장과 요즘 흐름
-   - ④-6. 실습 — 어제 만든 Todo 앱을 'AI가 아는' 앱으로
-   - ④-7. 내 워크플로 강화하기와 과제
-   - 📦 프로젝트 제출
+4. **[프로젝트] AI 에이전트 도구 — 내 AI를 더 강하게** ✅ 완결 (7/7)
+   - ✅ ④-1. 어시스턴트에서 에이전트로 — 도구의 정체 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/agent-and-harness/) · 📊 [PPT](agent-and-harness/agent-and-harness.pptx)
+   - ✅ ④-2. MCP — AI를 내 데이터에 꽂는 USB-C — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/mcp-usb-c/) · 📊 [PPT](mcp-usb-c/mcp-usb-c.pptx)
+   - ✅ ④-3. 스킬 — 반복 작업을 AI에게 외워 두기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/skills-and-rules/) · 📊 [PPT](skills-and-rules/skills-and-rules.pptx)
+   - ✅ ④-4. 하네스 종류 — 어떤 AI 코딩 도구를 고를까 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/harness-choice/) · 📊 [PPT](harness-choice/harness-choice.pptx)
+   - ✅ ④-5. 스킬 너머 — 확장과 요즘 흐름 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/beyond-skills/) · 📊 [PPT](beyond-skills/beyond-skills.pptx)
+   - ✅ ④-6. 실습 — 어제 만든 Todo 앱을 'AI가 아는' 앱으로 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/todo-agent-lab/) · 📊 [PPT](todo-agent-lab/todo-agent-lab.pptx)
+   - ✅ ④-7. 내 워크플로 강화하기와 과제 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/workflow-and-submit/) · 📊 [PPT](workflow-and-submit/workflow-and-submit.pptx)
+   - ✅ 📦 프로젝트 제출 (루브릭) — 🖥️ [④-7 덱에 포함](https://inseoklee-ai.github.io/study-room/workflow-and-submit/#9)
 5. 메인 퀘스트 — 나만의 프로덕트 만들기
    - ⑤-1. 메인퀘스트 착수 — 배운 조각을 모아 내 서비스로
    - ⑤-2. 범위부터 좁힌다 — MVP와 안 만들 것 목록
@@ -289,6 +289,13 @@
 > - 대2-DB-③6 https://inseoklee-ai.github.io/study-room/free-db-choice/
 > - 대2-DB-③7 https://inseoklee-ai.github.io/study-room/todo-db-lab/
 > - 대2-DB-③8 https://inseoklee-ai.github.io/study-room/db-wrapup/
+> - 대2-에이전트-④1 https://inseoklee-ai.github.io/study-room/agent-and-harness/
+> - 대2-에이전트-④2 https://inseoklee-ai.github.io/study-room/mcp-usb-c/
+> - 대2-에이전트-④3 https://inseoklee-ai.github.io/study-room/skills-and-rules/
+> - 대2-에이전트-④4 https://inseoklee-ai.github.io/study-room/harness-choice/
+> - 대2-에이전트-④5 https://inseoklee-ai.github.io/study-room/beyond-skills/
+> - 대2-에이전트-④6 https://inseoklee-ai.github.io/study-room/todo-agent-lab/
+> - 대2-에이전트-④7 https://inseoklee-ai.github.io/study-room/workflow-and-submit/
 > - 대4-① https://inseoklee-ai.github.io/study-room/prompt-engineering-intro/
 > - 대4-② https://inseoklee-ai.github.io/study-room/agent-structure/
 > - 대4-③ https://inseoklee-ai.github.io/study-room/model-inputs/
