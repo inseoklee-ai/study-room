@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>도메인 전문가만 가진 세 가지 비대칭 우위 (코딩 0줄로 여는 첫날 ②)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 1 · 아이펠 적용하기 · 코딩 0줄로 여는 첫날 ②</span>
+    <h1 style="margin:18px 0">도메인 전문가만 가진<br>세 가지 비대칭 우위</h1>
+    <p class="sub">위로가 아니라 구조로 봅니다</p>
+  </div>
+  <aside>"도메인 전문성이 자산이다"는 말은 자칫 위로처럼 들립니다. 그래서 위로가 아니라 구조로 봅니다.</aside>
+</section>
+
+<!-- 2 비대칭 -->
+<section class="slide" data-part="표지">
+  <h2>공통점은 <span class="p">비대칭(asymmetry)</span>입니다</h2>
+  <p><b>비대칭</b>이란 한쪽이 가지면 <b>다른 쪽이 돈이나 시간으로 따라잡기 어려운 격차</b>를 말합니다. 코딩 실력은 학원 몇 달이면 따라붙을 수 있지만, 아래 셋은 그렇지 않습니다.</p>
+  <table class="t">
+    <tr><th>무기</th><th>일반 개발자의 출발점</th><th>도메인 전문가의 출발점</th></tr>
+    <tr><td><b>1. 진짜 문제를 알아본다</b></td><td>"어떤 AI 기능이 멋질까?"</td><td><b class="g">"내 분야에서 가장 아픈 문제가 뭐였지?"</b></td></tr>
+    <tr><td><b>2. 결과의 옳고 그름을 판단한다</b></td><td>그럴듯하면 통과</td><td><b class="g">그럴듯해도 어디가 틀렸는지 보인다</b></td></tr>
+    <tr><td><b>3. 사용자의 신뢰를 얻는다</b></td><td>"개발자가 만든 도구"</td><td><b class="g">"같은 분야 사람이 만든 도구"</b></td></tr>
+  </table>
+  <aside>이 표가 소단원 전체의 뼈대입니다. 셋을 하나씩 펼칩니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">첫 번째 무기 — 진짜 문제를 알아본다</h2>
+  <p style="margin-top:11px">멋진 아이디어 ≠ 진짜 아픈 문제</p><span class="who">② 세 가지 비대칭 우위</span></div>
+  <aside>새 기술이 나오면 가장 먼저 쏟아지는 것은 "이걸로 뭘 만들면 멋질까" 하는 아이디어입니다.</aside>
+</section>
+
+<!-- 4 진짜 문제 -->
+<section class="slide" data-part="PART 1">
+  <h2>데모의 박수와 <span class="g">현장의 매일</span>은 다릅니다</h2>
+  <div class="grid2">
+    <div class="box"><h3>💡 멋진 아이디어</h3><p>데모에서 <b>박수</b>를 받는다</p></div>
+    <div class="box"><h3>🔧 진짜 문제를 푼 도구</h3><p>현장에서 <b class="g">매일 쓰인다</b></p></div>
+  </div>
+  <ul class="pts">
+    <li>자기 분야에서 <b>매일 30분씩 잡아먹는데 아무도 손대지 않는 잡무</b>, <b>신입이 꼭 한 번씩 사고를 내는 지점</b>, <b>베테랑만 아는 '이건 이렇게 하면 안 된다'는 감각</b></li>
+    <li>이런 것은 <b>그 분야 안에 오래 있어야 보입니다.</b> 외부 개발자는 이 목록을 <b class="r">처음부터 만들 수 없습니다</b> — 그들에게는 '무엇이 아픈지'를 알려줄 사람이 따로 필요합니다</li>
+    <li><b class="g">여러분은 그 목록을 이미 머릿속에 들고 있습니다</b></li>
+  </ul>
+  <aside>"둘은 자주 다른 물건입니다"가 핵심 문장입니다. 다음 슬라이드에서 같은 기능으로 대비해 보여 줍니다.</aside>
+</section>
+
+<!-- 5 회의록 대비 -->
+<section class="slide" data-part="PART 1">
+  <h2>같은 "회의록 요약"인데 <span class="b">출발점이 다릅니다</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>일반 개발자</h3><p>"회의 녹음을 텍스트로 바꾸고 핵심을 요약하면 멋지겠다."<br>→ <b>일반적인 요약기</b>를 만든다</p></div>
+    <div class="box"><h3>그 분야 전문가</h3><p>"우리 회의에서 진짜 중요한 건 요약이 아니라 <b class="g">누가 무엇을 언제까지 하기로 했는가</b>다. 요약은 그걸 자주 흘린다."<br>→ <b class="g">결정·담당·기한만 뽑는 도구</b>를 만든다</p></div>
+  </div>
+  <div class="hl">🎯 두 번째가 현장에서 살아남습니다 — 차이를 만든 것은 <b>코딩 실력이 아니라 무엇이 진짜 문제인지 아는 눈</b></div>
+  <aside>🤔 자문: 지난 한 달 동안 자기 업무에서 "이건 사람이 할 일이 아닌데" 싶었던 작업이 하나라도 있었나요? 그게 첫 번째 무기의 재료입니다 — 소단원 ⑤ 워크북에서 다시 씁니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">두 번째 무기가 왜 가장 강한가 — 판단</h2>
+  <p style="margin-top:11px">넉 달 내내 가장 자주 쓰게 될 무기</p><span class="who">② 세 가지 비대칭 우위</span></div>
+  <aside>세 무기 중 가장 자주 쓰게 될 무기라서 미리 한번 휘둘러 봅니다.</aside>
+</section>
+
+<!-- 7 환각 -->
+<section class="slide" data-part="PART 2">
+  <h2>그럴듯함과 <span class="r">정확함</span>은 다릅니다</h2>
+  <p>생성형 AI의 답변은 대체로 <b>그럴듯하게</b> 나옵니다. 문법은 매끄럽고 어조에는 자신감이 넘칩니다. 문제는 <b class="r">그럴듯함과 정확함이 다르다</b>는 데 있습니다.</p>
+  <div class="hl">🌀 AI가 사실이 아닌 내용을 사실처럼 지어내는 현상을 <b>환각(Hallucination)</b>이라고 부릅니다 — 이 환각을 잡아내려면 <b class="g">그 분야를 아는 눈</b>이 필요합니다</div>
+  <ul class="pts">
+    <li>AI를 쓰는 사람은 많지만, <b>AI의 답을 의심하며 쓰는 사람은 의외로 적습니다</b></li>
+  </ul>
+  <aside>소단원 ⑤ 실습의 목적이 바로 이 '채점하는 법'입니다. 여기서 미리 한 문제 풀어 봅니다.</aside>
+</section>
+
+<!-- 8 판단해보세요 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔍 판단해보세요 — <span class="b">환불 정책 안내문</span></h2>
+  <p>한 신입이 AI에게 "고객 환불 정책 안내문을 써줘"라고 요청해 받은 답입니다.</p>
+  <pre>"고객님께서는 구매일로부터 30일 이내 언제든 전액 환불이 가능하며,
+ 별도의 사유 없이 즉시 처리됩니다. 추가 문의는 고객센터로 연락 주세요."</pre>
+  <div class="hl">❓ 문장은 매끄럽습니다. 그런데 실제 그 업무를 안다면 <b class="r">그대로 내보내면 안 되는 이유</b>가 한 가지 이상 보일 것입니다. 무엇일까요? <b>먼저 적어 보세요</b></div>
+  <aside>여기서 멈추고 학습자가 직접 답을 적게 하세요. 다음 슬라이드가 모범 사고입니다.</aside>
+</section>
+
+<!-- 9 검토 포인트 -->
+<section class="slide" data-part="PART 2">
+  <h2>💡 검토 포인트 — <span class="r">지뢰 세 개</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>회사 실제 정책과 다를 수 있음</b> — "30일", "전액", "사유 없이"는 <b class="r">AI가 일반적인 값으로 채운 추측</b>입니다. 실제 규정이 <b>7일</b>이거나, <b>개봉 시 환불 불가</b>일 수 있습니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>예외가 통째로 빠짐</b> — <b>단순 변심 vs 제품 하자</b>, <b>디지털 상품 vs 실물 상품</b> — 도메인 전문가라면 곧바로 떠오르는 분기가 하나도 없습니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>법적 표현의 무게</b> — <b>"즉시 처리됩니다"</b> 같은 단정은 분쟁이 생겼을 때 <b class="r">회사를 묶습니다</b></span></div>
+  </div>
+  <div class="big" style="margin-top:12px">개발자는 이 답이 매끄러워서 <span class="y">통과시킵니다</span><br>도메인 전문가는 같은 답에서 <span class="y">지뢰를 봅니다</span><br><small>이 차이가 비대칭 우위입니다</small></div>
+  <aside>이 슬라이드가 소단원 전체에서 가장 설득력 있는 대목입니다. 학습자가 자기 분야의 비슷한 예를 떠올리게 하세요.</aside>
+</section>
+
+<!-- 10 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">세 번째 무기 — 신뢰</h2>
+  <p style="margin-top:11px">같은 언어를 쓰는 사람에게 간다</p><span class="who">② 세 가지 비대칭 우위</span></div>
+  <aside>AI 도구의 가장 큰 적은 성능이 아니라 불신입니다.</aside>
+</section>
+
+<!-- 11 신뢰 -->
+<section class="slide" data-part="PART 3">
+  <h2>현장은 <span class="g">후자</span>를 더 믿습니다</h2>
+  <p>같은 기능을 가진 도구가 두 개 있다고 합시다. 하나는 <b>외부 개발팀</b>이 만들었고, 하나는 <b>그 분야에서 10년 일한 사람</b>이 만들었습니다.</p>
+  <ul class="pts">
+    <li>후자는 <b>용어를 정확히 쓰고, 예외 상황을 알고, "이건 이래서 위험하다"는 단서를 달아줍니다</b></li>
+    <li>아무리 정확해도 현장 사람이 <b class="r">"이게 우리 사정을 모르고 만든 것 같다"</b>고 느끼면 쓰지 않습니다</li>
+    <li>반대로 같은 분야 사람이 <b>"나도 이게 필요했다"</b>며 만든 도구는 <b class="g">약간 거칠어도 일단 써봅니다</b> — 그 한 번의 사용 기회가 모든 차이를 만듭니다</li>
+  </ul>
+  <div class="hl">🤝 <b>신뢰는 기능 명세서에 적히지 않습니다.</b> 그 분야의 언어와 맥락을 공유하는 데서 나옵니다 — 이것 역시 <b>코딩으로 살 수 없는 자산</b></div>
+  <aside>이 무기는 소단원 ③ 지도의 '프로덕션' 굽이에서 실제로 작동합니다.</aside>
+</section>
+
+<!-- 12 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">"내 자리가 사라질 것 같다"에 대하여</h2>
+  <p style="margin-top:11px">솔직하게 짚습니다</p><span class="who">② 세 가지 비대칭 우위</span></div>
+  <aside>덮지 않고 정직하게 다루는 파트입니다.</aside>
+</section>
+
+<!-- 13 줄어드는 일 -->
+<section class="slide" data-part="PART 4">
+  <h2>AI가 대체하는 일은 <span class="r">분명히 있습니다</span></h2>
+  <p>단순 반복 작업, 정형화된 문서 작성, 규칙이 명확한 분류 — 이런 일은 줄어듭니다. <b>이걸 "괜찮아질 거예요"라고 덮지 않겠습니다.</b></p>
+  <table class="t">
+    <tr><th>줄어드는 일 (AI가 가져감)</th><th>남는 일 (사람이 결정)</th></tr>
+    <tr><td>초안 작성, 정형 문서 채우기</td><td>그 초안이 <b class="g">맞는지 판단하기</b></td></tr>
+    <tr><td>규칙이 명확한 분류·정리</td><td><b class="g">어떤 규칙을 적용할지, 예외를 어떻게 둘지</b></td></tr>
+    <tr><td>자료 검색·1차 요약</td><td><b class="g">무엇이 중요한 자료인지 고르기</b></td></tr>
+  </table>
+  <div class="hl">🎯 변하는 것은 <b>"무엇을 직접 손으로 하느냐"</b>이고, 변하지 않는 것은 <b>"무엇이 옳은지 결정하는 사람이 누구냐"</b>입니다</div>
+  <ul class="pts">
+    <li>오른쪽 열은 전부 <b>도메인 지식이 있어야 할 수 있는 일</b> — AI가 왼쪽을 가져갈수록 <b class="g">오른쪽의 가치는 오히려 올라갑니다</b></li>
+  </ul>
+  <aside>손이 빨라진 만큼, '무엇이 옳은지 아는 사람'의 시간이 더 귀해집니다. 🤔 방금 본 판단 사례를 자기 분야로 옮긴다면, AI가 "그럴듯하지만 틀린 답"을 낼 만한 지점이 어디일까요?</aside>
+</section>
+
+<!-- 14 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> '비대칭 우위'란 무슨 뜻인가?</div>
+    <div class="q a"><b>A1.</b> 한쪽이 가지면 <b>다른 쪽이 돈이나 시간으로 따라잡기 어려운 격차.</b> 코딩은 몇 달이면 따라붙지만 세 무기는 그렇지 않다.</div>
+    <div class="q"><b>Q2.</b> 환불 안내문 사례에서 개발자와 도메인 전문가의 차이는?</div>
+    <div class="q a"><b>A2.</b> 개발자는 <b>매끄러워서 통과</b>시키고, 도메인 전문가는 같은 답에서 <b>지뢰</b>(추측된 수치·빠진 예외·법적 단정)를 본다.</div>
+    <div class="q"><b>Q3.</b> AI 도구의 가장 큰 적은?</div>
+    <div class="q a"><b>A3.</b> 성능이 아니라 <b>불신.</b> "우리 사정을 모르고 만든 것 같다"고 느끼면 쓰지 않는다.</div>
+    <div class="q"><b>Q4.</b> AI가 초안을 가져갈수록 가치가 올라가는 일은?</div>
+    <div class="q a"><b>A4.</b> <b>그 초안이 맞는지 판단하기 · 어떤 규칙과 예외를 적용할지 정하기 · 무엇이 중요한 자료인지 고르기.</b></div>
+  </div>
+  <aside>Q4가 다음 소단원(지도)에서 "무게중심이 옮겨간다"는 설명과 이어집니다.</aside>
+</section>
+
+<!-- 15 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>문제 · 판단 · 신뢰 🛡️</h1>
+    <div class="big" style="margin-top:26px">코딩으로 살 수 없는 세 가지<br><span class="y">그중 판단은 넉 달 내내 가장 많이 쓰게 됩니다</span></div>
+    <p class="sub" style="margin-top:24px">코딩 0줄로 여는 첫날 ② — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ③에서 넉 달의 지도를 펼치고, 지금 내가 어디에 서 있는지 확인합니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

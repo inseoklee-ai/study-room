@@ -12,7 +12,13 @@
 1. 아이펠 적응하기 (아이펠 온보딩)
 2. 아이펠이란?
 3. 퀘스트란?
-4. 코딩 0줄로 여는 첫날
+4. **코딩 0줄로 여는 첫날** ✅ 완결 (6/6)
+   - ✅ ④-1. 늦게 시작한 게 정말 약점일까 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/late-start-reframe/) · 📊 [PPT](late-start-reframe/late-start-reframe.pptx)
+   - ✅ ④-2. 도메인 전문가만 가진 세 가지 비대칭 우위 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/three-asymmetries/) · 📊 [PPT](three-asymmetries/three-asymmetries.pptx)
+   - ✅ ④-3. 넉 달의 지도 — 지금 내 위치 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/four-month-map/) · 📊 [PPT](four-month-map/four-month-map.pptx)
+   - ✅ ④-4. 어떻게 배우나 — 함께, 매주 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/learning-together/) · 📊 [PPT](learning-together/learning-together.pptx)
+   - ✅ ④-5. ChatGPT에게 내 분야를 들켜보기 (실습) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/first-ai-audit/) · 📊 [PPT](first-ai-audit/first-ai-audit.pptx)
+   - ✅ ④-6. 오늘의 회고와 내일로 가는 다리 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/day1-wrapup/) · 📊 [PPT](day1-wrapup/day1-wrapup.pptx)
 5. **[프로젝트] Computational Thinking — 컴퓨터처럼 사고하는 법** ✅ 완결 (5/5)
    - ✅ ⑤-1. 큰 일을 통째로 던지면 왜 아무것도 안 돌아올까 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/why-decompose/) · 📊 [PPT](why-decompose/why-decompose.pptx)
    - ✅ ⑤-2. 하나의 사고법, 네 개의 손동작 (분해·패턴·추상화·알고리즘) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/four-moves/) · 📊 [PPT](four-moves/four-moves.pptx)
@@ -315,6 +321,12 @@
 > - 대1-CT-⑤3 https://inseoklee-ai.github.io/study-room/domain-already/
 > - 대1-CT-⑤4 https://inseoklee-ai.github.io/study-room/my-problem-workbook/
 > - 대1-CT-⑤5 https://inseoklee-ai.github.io/study-room/ct-submit/
+> - 대1-첫날-④1 https://inseoklee-ai.github.io/study-room/late-start-reframe/
+> - 대1-첫날-④2 https://inseoklee-ai.github.io/study-room/three-asymmetries/
+> - 대1-첫날-④3 https://inseoklee-ai.github.io/study-room/four-month-map/
+> - 대1-첫날-④4 https://inseoklee-ai.github.io/study-room/learning-together/
+> - 대1-첫날-④5 https://inseoklee-ai.github.io/study-room/first-ai-audit/
+> - 대1-첫날-④6 https://inseoklee-ai.github.io/study-room/day1-wrapup/
 > - 대4-① https://inseoklee-ai.github.io/study-room/prompt-engineering-intro/
 > - 대4-② https://inseoklee-ai.github.io/study-room/agent-structure/
 > - 대4-③ https://inseoklee-ai.github.io/study-room/model-inputs/
