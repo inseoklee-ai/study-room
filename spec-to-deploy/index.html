@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>실전 기록 · 스펙부터 배포·관리자까지 (메인 퀘스트 ③)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 메인 퀘스트 ③</span>
+    <h1 style="margin:18px 0">실전 기록 — 에이전트와<br>스펙부터 배포·관리자까지</h1>
+    <p class="sub">세부 손놀림은 다음 소단원에서 — 여기선 '이렇게 흘러가는구나'만</p>
+  </div>
+  <aside>곧 다섯 단계로 직접 한 바퀴 돌릴 텐데, 그 전에 전체가 에이전트와의 대화로 어떻게 굴러가는지 크게 한 번 봅니다. 조교 같은 코딩 에이전트와 대화하며 신청 앱을 정원 규칙부터 배포까지, 원하면 로그인·관리자 기능까지 끌고 간 과정입니다.</aside>
+</section>
+
+<!-- 2 네 걸음 -->
+<section class="slide" data-part="표지">
+  <h2>핵심 흐름은 <span class="g">네 걸음</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px"><small>1</small><b>스펙 먼저</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>2</small><b class="b">Supabase를<br>에이전트에 연결</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--pp)"><small>3</small><b class="p">무료 배포</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>4</small><b class="g">관리자 기능</b></div>
+  </div>
+  <ul class="pts">
+    <li>각 걸음에서 지난 시간에 배운 것 — <b>스펙 주도 · MCP · 트랜잭션 · 행 수준 보안</b>이 실제로 어디에 쓰이는지 짚어 갑니다</li>
+  </ul>
+  <div class="hl">💡 여기서 쓰는 도구(스펙 도구·Supabase·배포처)는 <b>'이렇게도 된다'를 보여 주는 한 가지 길</b>입니다 — 최종 과제에서는 각자 판단해서 고르면 됩니다</div>
+  <aside>도구를 강요하지 않는다는 점을 먼저 말해 주세요. 절차가 배울 것이고 도구는 예시입니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">스펙부터 — 코드보다 문서를 먼저</h2>
+  <p style="margin-top:11px">OpenSpec · opsx 워크플로</p><span class="who">③ 실전 기록</span></div>
+  <aside>지난 시간에 본 스펙 주도 방식입니다.</aside>
+</section>
+
+<!-- 4 왜 스펙 먼저 -->
+<section class="slide" data-part="PART 1">
+  <h2>바로 '만들어 줘'라고 하면 <span class="r">내 규칙이 슬쩍 빠집니다</span></h2>
+  <p>에이전트는 그럴듯한 코드를 쏟아내지만, <b class="r">정원 초과 금지 같은 '내 규칙'</b>이 슬쩍 빠지곤 합니다. 그래서 코드 전에 <b>스펙</b>을 먼저 세웁니다.</p>
+  <div class="grid2">
+    <div class="box"><h3>PRD (소단원 ④에서 씀)</h3><p><b>'무엇을'</b> — 기획서 한 장</p></div>
+    <div class="box"><h3>OpenSpec</h3><p>그 PRD를 도구로 정형화해 <b>제안·설계·명세·작업목록</b>으로 나눠 주는 <b class="b">심화판</b> (필수는 아님)</p></div>
+  </div>
+  <pre>npm install -g @fission-ai/openspec@latest
+openspec init</pre>
+  <aside>Node.js와 npm이 먼저 깔려 있어야 합니다. 없으면 nodejs.org에서 설치하세요. 전역 설치엔 관리자 권한이 필요할 수 있습니다.</aside>
+</section>
+
+<!-- 5 opsx -->
+<section class="slide" data-part="PART 1">
+  <h2>OpenSpec(opsx)이 뭔가요 — <span class="g">change 단위</span>로 다룹니다</h2>
+  <p>코드를 짜기 전에 명세를 먼저 확정하고, 그 명세를 기준으로 구현·검증·기록을 관리하는 도구입니다. 일을 <b>change(변경 제안)</b> 단위로 다뤄, <b>무엇을·왜(proposal) / 어떻게(design·명세) / 할 일(tasks)</b>을 먼저 문서로 만들고 사람이 검토한 뒤 구현합니다.</p>
+  <pre>/opsx:explore   생각·요구 정리
+/opsx:propose   change 문서 일괄 생성
+/opsx:update    (필요하면) 계획 문서 수정
+/opsx:apply     코드 구현
+/opsx:sync      변경분을 메인 명세에 반영
+/opsx:archive   완료·보관</pre>
+  <ul class="pts">
+    <li>장점 — <b>코드부터 짜서 방향이 어긋나는 걸 막고</b>, '왜 이렇게 바꿨는지'가 <b>변경 단위로 남습니다</b></li>
+    <li>⚠️ opsx는 OpenSpec의 <b>실험적(experimental) 워크플로</b>라 명령이 바뀔 수 있습니다</li>
+  </ul>
+  <aside>출처: OpenSpec, https://github.com/Fission-AI/openspec — Claude Code에선 슬래시 명령으로 흐릅니다.</aside>
+</section>
+
+<!-- 6 명령 -->
+<section class="slide" data-part="PART 1">
+  <h2>의도만 주면 — <span class="b">코드가 아니라 문서</span>가 먼저 나옵니다</h2>
+  <pre>"원데이 클래스 신청 기능을 OpenSpec 변경 제안으로 먼저 정리해 줘.
+ 로그인한 사람만 신청, 한 사람은 한 번, 정원은 절대 못 넘김,
+ 내 신청 내역 보기.
+ 그리고 백엔드 스택 후보를 비교해서 왜 그걸 골랐는지
+ 근거도 설계 문서에 남겨 줘."</pre>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>제안서</b> — 무엇을·왜</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>설계 문서</b> — 어떻게 만들지와 <b>스택 선정 근거</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>요구사항 명세</b> — 로그인·정원·중복 규칙을 문장으로</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>작업 목록</b></span></div>
+  </div>
+  <div class="hl">🔎 나중에 코드가 규칙과 어긋나면 <b>이 문서로 되짚을 수 있습니다</b></div>
+  <aside>파일로 남는다는 게 핵심입니다. 대화는 사라지지만 문서는 남습니다.</aside>
+</section>
+
+<!-- 7 스택 근거 -->
+<section class="slide" data-part="PART 1">
+  <h2>백엔드는 <span class="g">AI가 고르고, 근거를 남기게</span></h2>
+  <p>아무거나 기본값으로 고르지 말고, 에이전트가 <b>후보를 견줘 고르고 근거를 남기게</b> 하세요. 실제로 이 앱에서는 <b>'설치가 어느 환경에서나 깨지지 않고, 정원 지키는 한 줄 저장을 읽기 쉽게 쓸 수 있는'</b> 조합을 <b>트레이드오프와 함께</b> 골라 설계 문서에 적었습니다.</p>
+  <div class="big">PRD에는 <span class="y">기술 선택을 넣지 않되</span>(무엇을 만들지는 사람이 정함)<br>스택은 AI가 고르고 <span class="y">그 근거를 설계 문서에</span> 남깁니다</div>
+  <aside>이 구분이 중요합니다 — '무엇을'은 사람, '어떻게'는 AI, 단 근거는 문서로.</aside>
+</section>
+
+<!-- 8 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">Supabase를 에이전트에 직접 연결하기</h2>
+  <p style="margin-top:11px">MCP · DB 함수 · RLS</p><span class="who">③ 실전 기록</span></div>
+  <aside>Supabase는 표(DB)와 회원가입·로그인이 함께 오는 백엔드 서비스입니다.</aside>
+</section>
+
+<!-- 9 MCP 등록 -->
+<section class="slide" data-part="PART 2">
+  <h2>MCP로 붙이면 <span class="b">에이전트가 직접</span> 표를 만듭니다</h2>
+  <pre>claude mcp add --scope project --transport http supabase \
+  "https://mcp.supabase.com/mcp?project_ref=&lt;내 프로젝트 ref&gt;"</pre>
+  <ul class="pts">
+    <li>등록하면 <b>브라우저 로그인으로 한 번 승인</b>하고, 그때부터 에이전트가 <b>표 생성·정책·함수 실행을 대신</b>합니다</li>
+    <li>지난 강의의 <b>MCP</b>가 여기서 실제로 쓰입니다 — "AI에게 새 능력·연결을 준다"</li>
+  </ul>
+  <div class="hl">🎯 여기서 오늘의 핵심 두 가지가 실제로 쓰입니다 — <b>DB 안에서 정원 지키기</b> · <b>남의 데이터는 안 보이게 RLS</b></div>
+  <aside>출처: Supabase MCP, https://supabase.com/docs/guides/getting-started/mcp</aside>
+</section>
+
+<!-- 10 정원 -->
+<section class="slide" data-part="PART 2">
+  <h2>정원 초과 방지는 <span class="r">화면이 아니라 DB 안에서</span></h2>
+  <p>브라우저에서 '남은 자리를 세고 나서 신청을 넣는' 방식은 <b class="r">여러 명이 동시에 누르면 뚫립니다</b>(지난 시간의 그 문제).</p>
+  <div class="chain">
+    <div class="cell" style="min-width:190px;border-color:var(--red)"><small>위험</small><b class="r">화면에서 세고<br>→ 저장</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:230px;border-color:var(--gr)"><small>안전</small><b class="g">'현재 신청 수 &lt; 정원'을 조건으로 한<br>단일 원자적 저장 (DB 함수)</b></div>
+  </div>
+  <ul class="pts">
+    <li>신청은 <b>무조건 그 함수를 거치게</b> 합니다</li>
+    <li>마지막 한 자리에 <b>열 명이 동시에 눌러도 딱 한 명만 성공</b>합니다</li>
+  </ul>
+  <aside>DB 강의의 트랜잭션·ACID가 여기서 실제 코드가 됩니다. "앱 메모리에서 검사하면 lost update"라고 배운 그 지점입니다.</aside>
+</section>
+
+<!-- 11 RLS -->
+<section class="slide" data-part="PART 2">
+  <h2>남의 데이터는 안 보이게 — <span class="g">행 수준 보안(RLS)</span></h2>
+  <pre>"Supabase에 클래스와 신청 표를 만들고, 행 수준 보안을 켜서
+ 각자 본인 신청만 보게 해 줘.
+ 신청은 정원을 절대 못 넘기게 DB 함수로 원자적으로 처리하고,
+ 로그인한 사용자만 부를 수 있게."</pre>
+  <ul class="pts">
+    <li>표에 RLS를 켜고 <b>'본인 신청만 조회' 정책</b>을 걸면, 로그인해도 <b class="g">남의 신청은 못 봅니다</b></li>
+    <li>남은 자리 집계나 신청 처리는 위 함수가 대신하니, <b>화면은 안전한 통로로만 DB에 닿습니다</b></li>
+  </ul>
+  <div class="hl">👀 확인(직접 눈으로) — 마지막 한 자리를 두고 서로 다른 계정으로 동시에 신청해 <b>딱 한 건만 성공</b>하는지, 다른 계정으로 로그인하면 앞 사람 신청이 <b>안 보이는지</b></div>
+  <aside>출처: Row Level Security, https://supabase.com/docs/guides/database/postgres/row-level-security — AI 설명만 믿지 말고 로그로 확인하는 습관이 중요합니다.</aside>
+</section>
+
+<!-- 12 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">무료로 배포하고, 관리자 기능까지</h2>
+  <p style="margin-top:11px">GitHub Pages · 권한은 DB에서</p><span class="who">③ 실전 기록</span></div>
+  <aside>배포는 소단원 ④의 5단계에서 직접 해 봅니다. 여기선 흐름만.</aside>
+</section>
+
+<!-- 13 배포 -->
+<section class="slide" data-part="PART 3">
+  <h2>정적 화면은 <span class="p">GitHub Pages</span>로</h2>
+  <p>우리 화면은 HTML/CSS/JS 한 벌이라 <b>서버 없이 정적 호스팅에 올라갑니다.</b> 저장소에 올리고 Pages를 켜면 몇 분 뒤 <b>누구나 들어오는 주소</b>가 생깁니다.</p>
+  <div class="hl">🔑 배포물에는 <b class="g">공개 키만</b> 담기게 하세요 — 공개 저장소이니 <b class="r">비밀 키가 들어가면 그대로 노출됩니다</b></div>
+  <pre>"이 정적 화면을 GitHub Pages로 배포하는 절차를 알려 줘.
+ 공개 키만 들어가게 하고 비밀 키는 빼 줘."</pre>
+  <aside>이 강의 저장소(study-room)도 GitHub Pages로 배포됩니다 — 학습자가 이미 보고 있는 방식입니다.</aside>
+</section>
+
+<!-- 14 관리자 -->
+<section class="slide" data-part="PART 3">
+  <h2>관리자 페이지 — <span class="r">버튼만 숨기기는 보안이 아닙니다</span></h2>
+  <p>클래스를 추가·수정·삭제하고 신청자 명단을 보는 건 관리자만 해야죠. 이때 <b class="r">'화면에서 버튼만 숨기기'는 보안이 아닙니다</b> — 누구든 요청을 직접 보낼 수 있으니까요.</p>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>관리자 명단을 DB에</b> 둔다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">관리용 함수가 실행될 때마다 <b>스스로 '관리자냐'를 다시 확인</b>하게 만든다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">화면은 관리자에게만 패널을 <b>보여 줄 뿐</b> — <b class="g">진짜 문지기는 DB</b></span></div>
+  </div>
+  <pre>"관리자만 클래스를 추가·수정·삭제하고 신청자 명단을 볼 수 있게 해 줘.
+ 관리자 판별과 권한 검사는 화면이 아니라 DB 쪽에서 하고,
+ 관리자가 아니면 거부해 줘."</pre>
+  <div class="hl">👀 확인 — 관리자가 <b>아닌</b> 계정으로 관리 요청을 보내면 <b>거부되는지</b>, 관리자 계정에서만 추가·삭제와 명단 보기가 되는지</div>
+  <aside>이 네 걸음이 전체 그림입니다 — 로그인해 클래스를 골라 신청하고, 정원이 차면 마감되며, 관리자는 클래스를 관리하는 앱이 실제 주소에서 돌아갑니다.</aside>
+</section>
+
+<!-- 15 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">심화 읽기 — 이 데모를 '진짜 서비스'로 올리려면</h2>
+  <p style="margin-top:11px">당장 다 할 필요는 없습니다</p><span class="who">③ 실전 기록</span></div>
+  <aside>지금 만든 것은 따라 하기 좋은 데모입니다. 실제 사용자를 받는 서비스로 올리려면 아래를 더 갖춰야 합니다 — 체크리스트로 하나씩 채워 가면 됩니다.</aside>
+</section>
+
+<!-- 16 체크리스트 1 -->
+<section class="slide" data-part="PART 4">
+  <h2>프로덕션 체크리스트 — <span class="r">키와 계정</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>비밀 키·토큰 재발급과 서버 전용 보관</b> — 공개 배포물에는 공개 키만. 서비스 롤(secret) 키나 접속 토큰이 한 번이라도 새어 나갔다면 <b class="r">즉시 재발급.</b> 이 키 하나로 접근 제어가 통째로 우회된다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>이메일 확인 켜기 + 커스텀 SMTP</b> — 확인을 끄면 <b class="r">남의 이메일로도 무제한 가입</b>됩니다. 실사용에선 확인을 켜고, 내장 메일 대신 Resend·SendGrid·Amazon SES·Postmark 같은 SMTP를 연결</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>비밀번호 정책과 유출 검사</b> — 최소 길이만으로는 약하다. 길이·복잡도 규칙과 <b>이미 유출된 비밀번호 차단</b>(HaveIBeenPwned 연동)</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>남용 방어</b> — 가입·신청에 <b>사람 확인(CAPTCHA)</b>과 <b>요청 제한(rate limit)</b>을 두어 봇의 대량 가입·요청을 막는다</span></div>
+  </div>
+  <aside>출처: Supabase, "Going into Prod"; "Password security". 1번이 가장 치명적입니다 — 키 하나로 RLS가 무력화됩니다.</aside>
+</section>
+
+<!-- 17 체크리스트 2 -->
+<section class="slide" data-part="PART 4">
+  <h2>프로덕션 체크리스트 — <span class="b">접근 제어와 운영</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">5</span><span class="t"><b>접근 제어 재점검</b> — <b>모든 표에 행 수준 보안</b>을 켜고, 서버 권한으로 도는 함수는 꼭 필요한 역할에만. <b>보안 점검 도구(advisor)</b>를 주기적으로 돌려 빠진 정책을 잡는다</span></div>
+    <div class="st"><span class="n">6</span><span class="t"><b>도메인·주소 설정</b> — 자체 도메인과 HTTPS, 그리고 <b>로그인 뒤 돌아올 주소</b>(Site URL과 허용 목록)를 배포 주소로 정확히 맞춘다</span></div>
+    <div class="st"><span class="n">7</span><span class="t"><b>운영 기본기</b> — <b>백업</b>, 로그·모니터링, 그리고 이메일 같은 개인정보를 어떻게 <b>보관·파기</b>할지 정해 둔다</span></div>
+    <div class="st"><span class="n">8</span><span class="t"><b>무료 티어의 한계</b> — 무료 호스팅·DB는 한동안 쉬면 <b class="r">잠들거나(콜드 스타트)</b> 용량·발송 한도가 있다. 실사용 규모가 되면 유료·전용으로 옮길 준비</span></div>
+  </div>
+  <div class="hl">🧭 당장 다 할 필요는 없습니다 — <b>체크리스트로 하나씩</b> 채워 가면 됩니다</div>
+  <aside>7번의 백업은 DB 강의의 3-2-1 규칙과 이어집니다.</aside>
+</section>
+
+<!-- 18 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 코드보다 스펙을 먼저 쓰는 이유는?</div>
+    <div class="q a"><b>A1.</b> 바로 "만들어 줘"라고 하면 <b>정원 초과 금지 같은 '내 규칙'이 슬쩍 빠진다.</b> 문서로 남기면 코드가 규칙과 어긋날 때 되짚을 수 있다.</div>
+    <div class="q"><b>Q2.</b> 정원 초과 방지를 화면에서 하면 안 되는 이유는?</div>
+    <div class="q a"><b>A2.</b> '세고 나서 저장'은 <b>여러 명이 동시에 누르면 뚫린다.</b> '현재 신청 수 &lt; 정원'을 조건으로 한 <b>단일 원자적 저장(DB 함수)</b>을 거치게 해야 한다.</div>
+    <div class="q"><b>Q3.</b> 관리자 권한을 화면에서 처리하면 안 되는 이유는?</div>
+    <div class="q a"><b>A3.</b> <b>버튼만 숨겨도 누구든 요청을 직접 보낼 수 있다.</b> 관리자 명단을 DB에 두고 함수가 실행될 때마다 스스로 확인 — <b>진짜 문지기는 DB</b>.</div>
+    <div class="q"><b>Q4.</b> 공개 배포물에 절대 들어가면 안 되는 것은?</div>
+    <div class="q a"><b>A4.</b> <b>비밀 키(secret/service_role)</b>. 한 번이라도 새어 나갔다면 즉시 재발급 — 이 키 하나로 접근 제어가 통째로 우회된다.</div>
+  </div>
+  <aside>네 문제 모두 '화면이 아니라 서버·DB에서 강제한다'는 하나의 원칙으로 모입니다.</aside>
+</section>
+
+<!-- 19 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>스펙 · 원자성 · 문지기 📋</h1>
+    <div class="big" style="margin-top:26px">문서를 먼저 쓰고, 규칙은 DB에서 강제하고<br><span class="y">공개되는 것과 숨길 것을 가릅니다</span></div>
+    <p class="sub" style="margin-top:24px">메인 퀘스트 ③ — 여기까지</p>
+  </div>
+  <aside>이제 다음 소단원 ④에서 이 흐름을 다섯 단계로 직접 한 바퀴 돌립니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

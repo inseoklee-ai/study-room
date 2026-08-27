@@ -72,15 +72,15 @@
    - ✅ ④-6. 실습 — 어제 만든 Todo 앱을 'AI가 아는' 앱으로 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/todo-agent-lab/) · 📊 [PPT](todo-agent-lab/todo-agent-lab.pptx)
    - ✅ ④-7. 내 워크플로 강화하기와 과제 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/workflow-and-submit/) · 📊 [PPT](workflow-and-submit/workflow-and-submit.pptx)
    - ✅ 📦 프로젝트 제출 (루브릭) — 🖥️ [④-7 덱에 포함](https://inseoklee-ai.github.io/study-room/workflow-and-submit/#9)
-5. 메인 퀘스트 — 나만의 프로덕트 만들기
-   - ⑤-1. 메인퀘스트 착수 — 배운 조각을 모아 내 서비스로
-   - ⑤-2. 범위부터 좁힌다 — MVP와 안 만들 것 목록
-   - ⑤-3. 실전 기록 — 에이전트와 대화로 스펙부터 배포·관리자까지
-   - ⑤-4. 따라하며 익히기 — 정원 있는 '원데이 클래스 신청'을 5단계로
-   - ⑤-5. 로그인까지 — Supabase로 회원가입·로그인 붙이기
-   - ⑤-6. 내 도메인으로 날개 펴기 — 내가 만들고 싶은 것을 자유롭게
-   - ⑤-7. 막혔을 때 — AI와 만들어 나가는 네 가지 규율
-   - ⑤-8. 오늘의 마무리 — 회고와 정리
+5. **메인 퀘스트 — 나만의 프로덕트 만들기** ✅ 완결 (8/8)
+   - ✅ ⑤-1. 메인퀘스트 착수 — 배운 조각을 모아 내 서비스로 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/mainquest-kickoff/) · 📊 [PPT](mainquest-kickoff/mainquest-kickoff.pptx)
+   - ✅ ⑤-2. 범위부터 좁힌다 — MVP와 안 만들 것 목록 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/scope-and-mvp/) · 📊 [PPT](scope-and-mvp/scope-and-mvp.pptx)
+   - ✅ ⑤-3. 실전 기록 — 에이전트와 대화로 스펙부터 배포·관리자까지 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/spec-to-deploy/) · 📊 [PPT](spec-to-deploy/spec-to-deploy.pptx)
+   - ✅ ⑤-4. 따라하며 익히기 — 정원 있는 '원데이 클래스 신청'을 5단계로 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/five-steps-lab/) · 📊 [PPT](five-steps-lab/five-steps-lab.pptx)
+   - ✅ ⑤-5. 로그인까지 — Supabase로 회원가입·로그인 붙이기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/supabase-auth/) · 📊 [PPT](supabase-auth/supabase-auth.pptx)
+   - ✅ ⑤-6. 내 도메인으로 날개 펴기 — 내가 만들고 싶은 것을 자유롭게 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/my-domain-build/) · 📊 [PPT](my-domain-build/my-domain-build.pptx)
+   - ✅ ⑤-7. 막혔을 때 — AI와 만들어 나가는 네 가지 규율 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/four-disciplines/) · 📊 [PPT](four-disciplines/four-disciplines.pptx)
+   - ✅ ⑤-8. 오늘의 마무리 — 회고와 정리 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/mainquest-wrapup/) · 📊 [PPT](mainquest-wrapup/mainquest-wrapup.pptx)
 
 ### 3. AI의 이해와 사용
 1. **AI는 어떻게 배우나** ✅ 완결 · 7개 소단원을 **3개 덱으로 통합**
@@ -296,6 +296,14 @@
 > - 대2-에이전트-④5 https://inseoklee-ai.github.io/study-room/beyond-skills/
 > - 대2-에이전트-④6 https://inseoklee-ai.github.io/study-room/todo-agent-lab/
 > - 대2-에이전트-④7 https://inseoklee-ai.github.io/study-room/workflow-and-submit/
+> - 대2-메인퀘-⑤1 https://inseoklee-ai.github.io/study-room/mainquest-kickoff/
+> - 대2-메인퀘-⑤2 https://inseoklee-ai.github.io/study-room/scope-and-mvp/
+> - 대2-메인퀘-⑤3 https://inseoklee-ai.github.io/study-room/spec-to-deploy/
+> - 대2-메인퀘-⑤4 https://inseoklee-ai.github.io/study-room/five-steps-lab/
+> - 대2-메인퀘-⑤5 https://inseoklee-ai.github.io/study-room/supabase-auth/
+> - 대2-메인퀘-⑤6 https://inseoklee-ai.github.io/study-room/my-domain-build/
+> - 대2-메인퀘-⑤7 https://inseoklee-ai.github.io/study-room/four-disciplines/
+> - 대2-메인퀘-⑤8 https://inseoklee-ai.github.io/study-room/mainquest-wrapup/
 > - 대4-① https://inseoklee-ai.github.io/study-room/prompt-engineering-intro/
 > - 대4-② https://inseoklee-ai.github.io/study-room/agent-structure/
 > - 대4-③ https://inseoklee-ai.github.io/study-room/model-inputs/
