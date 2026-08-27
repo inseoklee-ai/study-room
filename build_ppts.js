@@ -29,7 +29,8 @@ const LESSONS = process.argv.slice(2).length
      "agent-and-harness","mcp-usb-c","skills-and-rules","harness-choice",
      "beyond-skills","todo-agent-lab","workflow-and-submit",
      "mainquest-kickoff","scope-and-mvp","spec-to-deploy","five-steps-lab",
-     "supabase-auth","my-domain-build","four-disciplines","mainquest-wrapup"];
+     "supabase-auth","my-domain-build","four-disciplines","mainquest-wrapup",
+     "why-decompose","four-moves","domain-already","my-problem-workbook","ct-submit"];
 
 // ---- palette (deck light theme) ----
 const INK="2A2723", SOFT="6B6357", GR="3F6B5F", GR2="2C4D44", GOLD="C8A15A",

@@ -13,7 +13,13 @@
 2. 아이펠이란?
 3. 퀘스트란?
 4. 코딩 0줄로 여는 첫날
-5. [프로젝트] Computational Thinking — 컴퓨터처럼 사고하는 법
+5. **[프로젝트] Computational Thinking — 컴퓨터처럼 사고하는 법** ✅ 완결 (5/5)
+   - ✅ ⑤-1. 큰 일을 통째로 던지면 왜 아무것도 안 돌아올까 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/why-decompose/) · 📊 [PPT](why-decompose/why-decompose.pptx)
+   - ✅ ⑤-2. 하나의 사고법, 네 개의 손동작 (분해·패턴·추상화·알고리즘) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/four-moves/) · 📊 [PPT](four-moves/four-moves.pptx)
+   - ✅ ⑤-3. 의사도 변호사도 이미 매일 하고 있다 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/domain-already/) · 📊 [PPT](domain-already/domain-already.pptx)
+   - ✅ ⑤-4. 내 문제를 네 조각으로, 그리고 AI에게 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/my-problem-workbook/) · 📊 [PPT](my-problem-workbook/my-problem-workbook.pptx)
+   - ✅ ⑤-5. 내일 키보드를 잡습니다 (과제 제출) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/ct-submit/) · 📊 [PPT](ct-submit/ct-submit.pptx)
+   - ✅ 📦 프로젝트 제출 (루브릭) — 🖥️ [⑤-5 덱에 포함](https://inseoklee-ai.github.io/study-room/ct-submit/#7)
 
 ### 2. AIFFEL_LMS
 **중단원 ①**
@@ -304,6 +310,11 @@
 > - 대2-메인퀘-⑤6 https://inseoklee-ai.github.io/study-room/my-domain-build/
 > - 대2-메인퀘-⑤7 https://inseoklee-ai.github.io/study-room/four-disciplines/
 > - 대2-메인퀘-⑤8 https://inseoklee-ai.github.io/study-room/mainquest-wrapup/
+> - 대1-CT-⑤1 https://inseoklee-ai.github.io/study-room/why-decompose/
+> - 대1-CT-⑤2 https://inseoklee-ai.github.io/study-room/four-moves/
+> - 대1-CT-⑤3 https://inseoklee-ai.github.io/study-room/domain-already/
+> - 대1-CT-⑤4 https://inseoklee-ai.github.io/study-room/my-problem-workbook/
+> - 대1-CT-⑤5 https://inseoklee-ai.github.io/study-room/ct-submit/
 > - 대4-① https://inseoklee-ai.github.io/study-room/prompt-engineering-intro/
 > - 대4-② https://inseoklee-ai.github.io/study-room/agent-structure/
 > - 대4-③ https://inseoklee-ai.github.io/study-room/model-inputs/

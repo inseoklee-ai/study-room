@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>내일 키보드를 잡습니다 · 과제 제출과 정리 (Computational Thinking ⑤)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 1 · 아이펠 적용하기 · Computational Thinking ⑤ + 제출</span>
+    <h1 style="margin:18px 0">내일 키보드를<br>잡습니다</h1>
+    <p class="sub">과제 제출 · OT 3일을 한 줄로 · 그리고 핵심 정리</p>
+  </div>
+  <aside>온보딩 모듈의 마지막 소단원입니다. 오늘의 산출물을 과제로 제출하고, 3일 동안 손에 쥔 것을 한 자리에 모읍니다.</aside>
+</section>
+
+<!-- 2 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">과제 제출하기</h2>
+  <p style="margin-top:11px">자기 도메인 업무 분해 예시</p><span class="who">⑤ 제출</span></div>
+  <aside>소단원 ④에서 만든 한 페이지가 그대로 제출물이 됩니다.</aside>
+</section>
+
+<!-- 3 과제 개요 -->
+<section class="slide" data-part="PART 1">
+  <h2>제출물 · 목표 · <span class="g">형식</span></h2>
+  <table class="t">
+    <tr><th>항목</th><th>내용</th></tr>
+    <tr><td><b>제출물</b></td><td>자기 도메인 <b>업무 분해 예시</b></td></tr>
+    <tr><td><b>학습 목표</b></td><td>본인의 <b>도메인 전문성을 AI 서비스 관점에서 정리</b>하고, 과정 전체에서 다룰 <b>개인 문제를 초안으로 정의</b></td></tr>
+    <tr><td><b>제출 형식</b></td><td><b>마크다운 문서</b></td></tr>
+  </table>
+  <pre>[도메인 맥락]
+나는 ____ 도메인 ____ 년 차이고, ____ 작업을 자동화/정리하고 싶습니다.
+
+[네 동작 분석]
+1. 분해: ____      2. 패턴: ____
+3. 추상화: ____    4. 알고리즘: ____
+
+[출력 요구]      ____ 형식으로, 한국어로.
+[검증 기준]      ____ 한 사람이 ____ 라고 평가할 것.</pre>
+  <aside>🔍 한 칸이라도 비어 있다면 그 칸은 "아직 또렷하게 생각하지 못한 부분"입니다. 가장 자주 비는 칸은 [검증 기준] — "누가·어떤 기준으로" 합격을 판단하는지 적어야 AI가 그 기준에 맞춥니다. 검증 기준은 도메인 전문가만 정할 수 있는 칸입니다.</aside>
+</section>
+
+<!-- 4 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">실제 제출 예시</h2>
+  <p style="margin-top:11px">AI Agent 도입 컨설팅 · 블로그 발행 프로세스</p><span class="who">⑤ 제출</span></div>
+  <aside>실제로 제출된 예시입니다. 도메인이 '컨설팅'이라 코딩과 거리가 멀어 보이지만 네 동작이 또렷하게 들어갔습니다.</aside>
+</section>
+
+<!-- 5 예시 1 -->
+<section class="slide" data-part="PART 2">
+  <h2>예시 — <span class="b">도메인 맥락과 네 동작</span></h2>
+  <pre>[도메인 맥락]
+나는 중소기업 대상 AI Agent 도입 컨설팅을 하는 1인/소규모 사업자이고,
+서비스 홍보를 위해 매일 AI 관련 블로그 글 1개를 발행하고 싶습니다.</pre>
+  <div class="steps">
+    <div class="st"><span class="n">분해</span><span class="t">소재수집 → 소재선별 → <b>카테고리분류(트렌드/사례/성과)</b> → 핵심메시지추출 → 초안작성 → CTA삽입 → 검토 → 발행 <b>8단계</b></span></div>
+    <div class="st"><span class="n">패턴</span><span class="t"><b>트렌드형·도입사례형·성과형 3가지 유형</b>별로 반복되는 문장 구조(<b>도입-전개-시사점-CTA</b>) 발견</span></div>
+    <div class="st"><span class="n">추상화</span><span class="t">3가지 유형을 <b>"빈칸만 채우면 되는" 마스터 템플릿 3종</b>으로 일반화. <b class="r">과장 수치·과도한 기술 디테일은 제거</b></span></div>
+    <div class="st"><span class="n">알고리즘</span><span class="t">매일 소재 수집 → <b>유형 배정(요일별 캘린더)</b> → 템플릿에 소재 대입 → 체크리스트 검토 → 발행 → <b>성과 기록(주/월 피드백 루프)</b></span></div>
+  </div>
+  <aside>제출 예시: 이인석 — https://github.com/iamgod2983/hello-aiffel (Computational Thinking-이인석.md). 분해가 8단계까지 내려간 것과, 추상화에서 '무엇을 버릴지'까지 적은 것이 좋은 지점입니다.</aside>
+</section>
+
+<!-- 6 예시 2 -->
+<section class="slide" data-part="PART 2">
+  <h2>예시 — <span class="g">출력 요구와 검증 기준</span></h2>
+  <pre>[출력 요구]
+매일 발행 가능한 블로그 콘텐츠 생성 프로세스 문서로, 한국어로.
+
+[검증 기준]
+실제로 매일 1시간 이내에 초안을 완성할 수 있고,
+중소기업 대표가 읽고 "우리 회사 얘기 같다"고 느낄 것.</pre>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>측정 가능한 기준</b> — "매일 <b>1시간 이내</b>에 초안 완성"</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>누가 판단하는지 명시</b> — "<b>중소기업 대표</b>가 읽고"</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>도메인 전문가만 아는 합격선</b> — "<b class="g">우리 회사 얘기 같다</b>고 느낄 것"</span></div>
+  </div>
+  <div class="hl">💎 이게 좋은 [검증 기준]입니다 — <b>AI가 스스로 정할 수 없는 기준</b>이고, 그래서 <b>사람이 정해 줘야 하는 칸</b></div>
+  <aside>"잘 작동하면 좋겠어"와 비교해 보여 주면 차이가 확연합니다. 시간 기준·판단 주체·정성 기준 세 가지가 다 들어 있습니다.</aside>
+</section>
+
+<!-- 7 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">📦 프로젝트 제출 루브릭</h2>
+  <p style="margin-top:11px">세 가지 평가기준</p><span class="who">📦 제출</span></div>
+  <aside>평가 기준을 미리 보여 주고 과제를 하게 하면 결과가 훨씬 좋아집니다.</aside>
+</section>
+
+<!-- 8 루브릭 -->
+<section class="slide" data-part="PART 3">
+  <h2>루브릭과 <span class="r">제출 방식</span></h2>
+  <table class="t">
+    <tr><th>학습목표</th><th>평가기준</th></tr>
+    <tr><td><b>문제를 분해했는가</b></td><td>도메인 문제를 <b>더 작은 하위 문제로 나누어</b> 제시합니다</td></tr>
+    <tr><td><b>절차로 표현했는가</b></td><td>해결 과정을 <b>순서가 있는 단계</b>로 작성합니다</td></tr>
+    <tr><td><b>패턴·추상화를 적용했는가</b></td><td>반복 구조를 <b>패턴으로 정리</b>하고 <b>핵심만 남기는 추상화</b>를 수행합니다</td></tr>
+  </table>
+  <div class="steps">
+    <div class="st"><span class="n">!</span><span class="t"><b>ZIP · PDF · 이미지</b>만 첨부 가능 (최대 <b>5MB</b>) 또는 <b>URL 업로드</b></span></div>
+    <div class="st"><span class="n">!</span><span class="t"><b>파일 또는 URL 중 한 가지 방식으로만</b> 업로드 가능</span></div>
+    <div class="st"><span class="n">!</span><span class="t"><b class="r">제출 후 수정은 불가</b> — 링크가 열리는지, 저장소가 public인지 미리 확인</span></div>
+  </div>
+  <aside>루브릭 세 항목이 네 동작 중 분해·알고리즘·(패턴+추상화)에 그대로 대응합니다. 네 동작을 채웠다면 자연히 충족됩니다.</aside>
+</section>
+
+<!-- 9 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">OT 모듈 3일을 한 줄로 잇기</h2>
+  <p style="margin-top:11px">출발점 · 루틴 · 사고법</p><span class="who">⑤ 마무리</span></div>
+  <aside>3일 동안 손에 쥔 것을 한 자리에 모읍니다.</aside>
+</section>
+
+<!-- 10 3일 -->
+<section class="slide" data-part="PART 4">
+  <h2>3일 동안 <span class="g">손에 쥔 것</span></h2>
+  <table class="t">
+    <tr><th>Day</th><th>손에 쥔 것</th></tr>
+    <tr><td><b>Day 1</b></td><td>내 도메인 경력은 약점이 아니라 <b>출발점</b> — 정체성·지도·함께 배우는 환경</td></tr>
+    <tr><td><b>Day 2</b></td><td><b>막힘은 정상 신호</b> — 막힘을 연료로 바꾸는 내 루틴</td></tr>
+    <tr><td><b>Day 3</b></td><td><b>AI에게 일을 시키는 사고법</b> — 큰 문제를 네 동작으로 나누기</td></tr>
+  </table>
+  <div class="big" style="margin-top:14px">세 가지는 따로가 아닙니다<br><span class="y">출발점(Day 1)에 서서, 막혀도 버틸 루틴(Day 2)을 들고<br>AI에게 일을 또렷하게 시키는 사고법(Day 3)으로</span><br><small>내일부터 첫 결과물을 만들러 갑니다</small></div>
+  <aside>이 슬라이드가 온보딩의 마지막 정서적 매듭입니다. 내일부터 실제로 키보드를 잡습니다.</aside>
+</section>
+
+<!-- 11 출처 -->
+<section class="slide" data-part="PART 4">
+  <h2>📚 출처 · 더 찾아보기</h2>
+  <ul class="pts">
+    <li><b>컴퓨팅 사고법(Computational Thinking)</b> — Jeannette M. Wing (2006), "Computational Thinking," <i>Communications of the ACM</i> 49(3), 33–35 · cs.cmu.edu/~15110-s13/Wing06-ct.pdf — <b>이 용어를 대중화한 원 글</b></li>
+    <li><b>분해 · 패턴 인식 · 추상화 · 알고리즘</b>은 컴퓨터과학에서 오래 쓰여 온 일반 개념으로, <b>윙이 이를 '일상 사고의 도구'로 다시 정리</b>한 것입니다</li>
+    <li><b>사람·AI·조합 성능 비교(메타분석)</b> — Michelle Vaccaro, Abdullah Almaatouq &amp; Thomas Malone (2024), "When combinations of humans and AI are useful: a systematic review and meta-analysis," <i>Nature Human Behaviour</i> 8, 2293–2303 · doi.org/10.1038/s41562-024-02024-1 — 106개 실험 종합. <b>조합의 이득은 사람이 AI보다 나은 과제에서 커진다</b></li>
+  </ul>
+  <aside>윙의 원 글은 3쪽 분량이라 읽어 볼 만합니다. 2006년 글인데 지금 읽어도 유효합니다.</aside>
+</section>
+
+<!-- 12 핵심 정리 -->
+<section class="slide" data-part="PART 4">
+  <h2>🎯 핵심 정리 — <span class="g">손에 쥐고 갈 것</span></h2>
+  <table class="t">
+    <tr><th>소단원</th><th>손에 쥐고 갈 것</th></tr>
+    <tr><td><b>①</b></td><td>핵심 한 문장 — 컴퓨팅 사고법 = <b>큰 문제를 AI가 풀 수 있는 작은 조각으로 나누는 사고법</b></td></tr>
+    <tr><td><b>②</b></td><td>하나의 사고법, 네 동작 — <b>분해·패턴 인식·추상화·알고리즘.</b> 한 사이클로 오감</td></tr>
+    <tr><td><b>③</b></td><td><b>나는 이미 이 사고법을 쓰고 있다</b> + 컴퓨팅 사고법이 못 푸는 영역(<b>창의·맥락·가치 판단</b>)은 사람의 자리</td></tr>
+    <tr><td><b>④</b></td><td>내 도메인 문제 한 가지를 <b>네 동작으로 쪼갠 한 페이지</b> + AI 전달 형식 초안</td></tr>
+  </table>
+  <aside>네 줄 중 ③이 이 강의의 태도이고, ④가 산출물입니다.</aside>
+</section>
+
+<!-- 13 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 마지막 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 제출 루브릭 세 항목은 네 동작 중 무엇에 대응하나?</div>
+    <div class="q a"><b>A1.</b> <b>분해 / 알고리즘(절차) / 패턴+추상화.</b> 네 동작을 성실히 채우면 자연히 충족된다.</div>
+    <div class="q"><b>Q2.</b> 좋은 [검증 기준]의 요소는?</div>
+    <div class="q a"><b>A2.</b> <b>측정 가능한 기준 + 누가 판단하는지 + 도메인 전문가만 아는 합격선.</b> 예: "매일 1시간 이내에 초안 완성 / 중소기업 대표가 '우리 회사 얘기 같다'고 느낄 것".</div>
+    <div class="q"><b>Q3.</b> OT 3일을 한 줄로 잇는다면?</div>
+    <div class="q a"><b>A3.</b> <b>출발점(Day 1)에 서서, 막혀도 버틸 루틴(Day 2)을 들고, AI에게 일을 또렷하게 시키는 사고법(Day 3)으로</b> 내일부터 첫 결과물을 만들러 간다.</div>
+  </div>
+  <aside>Q2의 예시는 실제 제출물에서 나온 것입니다 — 학습자에게 자기 기준을 다시 써 보게 하면 좋습니다.</aside>
+</section>
+
+<!-- 14 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>내일 키보드를 잡습니다 ⌨️</h1>
+    <div class="big" style="margin-top:26px">코드는 AI가 짜고<br><span class="y">나누는 일과 합격을 정하는 일은 내가 합니다</span></div>
+    <p class="sub" style="margin-top:24px">Computational Thinking — 강의 완결 (5/5 + 제출)</p>
+  </div>
+  <aside>대단원 1 강 5 완결입니다. 다음은 대단원 2 AIFFEL_LMS — 바이브코딩 작업대를 차리고 실제로 만들기 시작합니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

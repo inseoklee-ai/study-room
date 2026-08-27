@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>의사도 변호사도 이미 매일 하고 있다 (Computational Thinking ③)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 1 · 아이펠 적용하기 · Computational Thinking ③</span>
+    <h1 style="margin:18px 0">의사도 변호사도<br>이미 매일 하고 있다</h1>
+    <p class="sub">새 능력을 배우는 게 아니라, 가진 능력에 이름을 붙이는 일</p>
+  </div>
+  <aside>컴퓨팅 사고법이 낯선 새 기술처럼 느껴진다면 한 가지 사실을 먼저 짚어야 합니다 — 여러분은 이 사고법을 자기 분야에서 이미 매일 쓰고 있습니다. 단지 "분해", "추상화" 같은 이름을 붙여 본 적이 없을 뿐입니다.</aside>
+</section>
+
+<!-- 2 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">의사가 응급실에서 첫 1분에 하는 일</h2>
+  <p style="margin-top:11px">그냥 "진료"라고 부르는 네 동작</p><span class="who">③ 이미 하고 있다</span></div>
+  <aside>한 도메인을 깊이 들여다보고, 다음 소단원에서 여러분 자신의 도메인으로 옮깁니다.</aside>
+</section>
+
+<!-- 3 의사 -->
+<section class="slide" data-part="PART 1">
+  <h2>경력 있는 의사의 <span class="g">첫 1분</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">분해</span><span class="t">환자 상태를 <b>기도·호흡·순환·의식·노출</b>로 나눠 본다 (<b>ABCDE</b>)</span></div>
+    <div class="st"><span class="n">패턴</span><span class="t">"이건 <b>흉통 + 식은땀 + 방사통</b> — 익숙한 그 패턴"</span></div>
+    <div class="st"><span class="n">추상화</span><span class="t">수많은 정보 중 <b>응급도를 결정하는 핵심만</b> 남긴다</span></div>
+    <div class="st"><span class="n">알고리즘</span><span class="t">어떤 검사를 <b>어떤 순서로</b> 할지 정한다</span></div>
+  </div>
+  <ul class="pts">
+    <li>의사는 이 네 동작을 "컴퓨팅 사고법"이라 부르지 않습니다 — <b>그냥 "진료"</b>라고 부릅니다. 하지만 <b class="g">구조는 똑같습니다</b></li>
+    <li>흥미로운 점 — 같은 ABCDE라도 <b>5년 차와 30년 차의 적용이 다릅니다.</b> 30년 차는 표준 단계에 <b>미묘한 직관과 예외 케이스</b>를 결합합니다</li>
+  </ul>
+  <div class="hl">💎 <b>이 깊이가 AI에게 옮길 수 없는, 도메인 전문가만의 자산입니다</b></div>
+  <aside>비전공자 학습자가 위축되지 않게 하는 슬라이드입니다. 이미 가진 것이 자산이라는 메시지.</aside>
+</section>
+
+<!-- 4 세 도메인 -->
+<section class="slide" data-part="PART 1">
+  <h2>변호사·마케터·디자이너의 <span class="b">같은 네 동작</span></h2>
+  <table class="t">
+    <tr><th>도메인</th><th>분해</th><th>패턴 인식</th><th>추상화</th><th>알고리즘</th></tr>
+    <tr><td><b>변호사</b></td><td>사건을 사실·쟁점·법률로 나눔</td><td>유사 판례를 알아봄</td><td>핵심 쟁점 한 줄로</td><td>사실→쟁점→법률→판례→결론</td></tr>
+    <tr><td><b>마케터</b></td><td>캠페인을 채널·지표·시간대로 나눔</td><td>"주말 저녁 전환율↑" 패턴</td><td>"이벤트=클릭률↑" 본질</td><td>예산 배분→실행→주간 점검</td></tr>
+    <tr><td><b>디자이너</b></td><td>화면을 헤더·CTA·푸터로 나눔</td><td>유사 앱의 UI 패턴</td><td>핵심 액션 1개만 남김</td><td>인터뷰→와이어프레임→테스트</td></tr>
+  </table>
+  <div class="hl">🎯 세 도메인 모두 "코딩"과는 거리가 멀어 보이지만, <b>일하는 머릿속 구조는 컴퓨팅 사고법과 같습니다</b></div>
+  <aside>변호사의 판례 패턴 인식, 마케터의 캠페인 분류, 디자이너의 본질 추출 — 전부 이미 하고 있는 네 동작입니다.</aside>
+</section>
+
+<!-- 5 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">그렇다면 AI는 어디에 끼어드나</h2>
+  <p style="margin-top:11px">빠르지만 도메인 깊이가 없다</p><span class="who">③ 이미 하고 있다</span></div>
+  <aside>2026년 현재, AI 도구는 네 동작을 "어느 정도" 대신해 줄 수 있습니다. 하지만 결정적인 한계가 있습니다.</aside>
+</section>
+
+<!-- 6 사람 vs AI -->
+<section class="slide" data-part="PART 2">
+  <h2>같은 네 동작, <span class="g">다른 강점</span></h2>
+  <table class="t">
+    <tr><th>동작</th><th>사람(도메인 전문가)의 강점</th><th>AI의 강점</th></tr>
+    <tr><td><b>분해</b></td><td>도메인 깊이로 <b>진짜</b> 단위를 찾음</td><td>일반적 분해를 빠르게 생성</td></tr>
+    <tr><td><b>패턴 인식</b></td><td><b>미묘한</b> 도메인 패턴을 알아봄</td><td>대량 데이터에서 패턴을 빠르게 추출</td></tr>
+    <tr><td><b>추상화</b></td><td>무엇이 본질인지 <b>판단</b></td><td>일반적 추상화를 빠르게</td></tr>
+    <tr><td><b>알고리즘</b></td><td>도메인 맥락에 맞는 순서</td><td>표준 순서를 빠르게</td></tr>
+  </table>
+  <div class="big" style="margin-top:14px">AI는 네 동작을 모두 빠르게 하지만<br><span class="y">여러분 도메인의 진짜 깊이가 없습니다</span></div>
+  <ul class="pts">
+    <li>도메인 맥락을 <b class="g">정확히 알려 주면</b> AI는 그 안에서 빠르게 일합니다. <b class="r">안 알려 주면 일반적이고 흔한 답</b>을 줍니다</li>
+    <li>그래서 <b>AI 시대일수록 도메인 깊이가 더 중요해집니다</b></li>
+  </ul>
+  <aside>소단원 ④의 전달 형식에서 [도메인 맥락] 칸이 가장 중요한 이유가 이 슬라이드입니다.</aside>
+</section>
+
+<!-- 7 메타분석 -->
+<section class="slide" data-part="PART 2">
+  <h2>📊 연구가 말하는 것 — <span class="r">조합이 항상 낫지는 않다</span></h2>
+  <p>사람 단독·AI 단독·둘의 조합을 비교한 <b>대규모 메타분석(106개 실험 종합)</b>에 따르면 —</p>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">사람과 AI의 조합이 <b class="r">항상 더 낫지는 않았습니다.</b> 평균적으로는 '사람 혼자'나 'AI 혼자' 중 <b>더 나은 쪽에 못 미치는 경우</b>도 있었고, 특히 <b class="r">결정·판단 과제</b>에서 그랬습니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">반대로 <b class="g">사람이 AI보다 나은 영역</b>일수록 조합의 이득이 커졌습니다 — 한 예로 새 사진 분류에서 <b>사람 81% · AI 73% · 조합 90%</b></span></div>
+  </div>
+  <div class="hl">🎯 정리하면 — <b>조합의 이득은 '사람이 무엇을 더 잘하느냐'에서 나옵니다.</b> 도메인 전문가의 판단이 바로 그 '더 잘하는 부분'입니다</div>
+  <aside>출처: Michelle Vaccaro, Abdullah Almaatouq &amp; Thomas Malone (2024), "When combinations of humans and AI are useful: a systematic review and meta-analysis", Nature Human Behaviour 8, 2293–2303.</aside>
+</section>
+
+<!-- 8 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">정직하게 — 컴퓨팅 사고법은 만능이 아닙니다</h2>
+  <p style="margin-top:11px">쪼개기 어려운 세 영역</p><span class="who">③ 이미 하고 있다</span></div>
+  <aside>컴퓨팅 사고법으로 모든 문제를 풀 수 있다고 말하면 거짓말입니다. 이 정직함이 이 강의의 신뢰를 만듭니다.</aside>
+</section>
+
+<!-- 9 만능 아님 -->
+<section class="slide" data-part="PART 3">
+  <h2>네 동작으로 <span class="r">쪼개기 어려운</span> 영역</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>본질적으로 창의적인 작업</b> — 시·소설 쓰기, 새로운 콘셉트 발상. <b class="r">분해·순서로 다 풀리지 않습니다</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>사람 사이의 미묘한 영역</b> — 환자의 <b>"괜찮아요" 한 마디</b>를 표정·맥락에서 읽어 내는 일</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>정답 없는 가치 판단</b> — 치료 우선순위, 변론 전략, 사용자에게 미칠 영향에 대한 <b>윤리적 결정</b></span></div>
+  </div>
+  <div class="hl">💎 이 영역들은 컴퓨팅 사고법이 <b>"한 가지 시각"일 뿐, 모든 답이 아니라는</b> 증거이자 — <b class="g">도메인 전문가의 사라지지 않는 자리</b>입니다</div>
+  <ul class="pts">
+    <li>AI가 잘게 쪼갤 수 있는 일은 AI에게 맡기고, <b>사람은 이 깊은 판단으로 옮겨 갑니다</b></li>
+  </ul>
+  <aside>이 슬라이드가 온보딩 전체의 정서적 핵심입니다 — 대체되는 게 아니라 옮겨 간다는 것.</aside>
+</section>
+
+<!-- 10 판단해보세요 -->
+<section class="slide" data-part="확인">
+  <h2>🔍 판단해보세요</h2>
+  <p>한 사람이 AI에게 이렇게 시켰습니다 — <b>"우리 부서 신입을 평가해서 누구를 승진시킬지 정해 줘."</b></p>
+  <div class="qa">
+    <div class="q"><b>Q.</b> 여러분 도메인의 전문가로서, 이 지시의 <b>어디가 위험한가요?</b> 메모장에 한 줄 적어 보세요</div>
+    <div class="q a"><b>A1.</b> "승진 결정"은 <b>정답 없는 가치 판단</b> 영역 — 컴퓨팅 사고법으로 쪼개 AI에게 넘길 일이 아니다</div>
+    <div class="q a"><b>A2.</b> AI에게 넘길 수 있는 건 <b>판단을 돕는 자료 정리</b>(예: 객관 지표를 표로 묶기)까지</div>
+    <div class="q a"><b>A3.</b> 최종 판단·그 판단의 <b>책임은 사람에게</b> 남아야 한다. <b class="g">"무엇을 AI에게 맡기고 무엇을 안 맡길지" 자체가 사람의 결정</b></div>
+  </div>
+  <aside>먼저 한 줄 적게 한 뒤 정답을 보여 주세요. 스스로 답을 내 보는 경험이 중요합니다.</aside>
+</section>
+
+<!-- 11 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 5년 차와 30년 차 의사의 ABCDE 적용이 다른 이유는? 그게 무엇을 뜻하나?</div>
+    <div class="q a"><b>A1.</b> 30년 차는 표준 단계에 <b>미묘한 직관과 예외 케이스</b>를 결합한다. 그 깊이가 <b>AI에게 옮길 수 없는 도메인 전문가의 자산</b>이다.</div>
+    <div class="q"><b>Q2.</b> 메타분석이 말하는 '조합의 이득'은 어디서 나오나?</div>
+    <div class="q a"><b>A2.</b> <b>사람이 AI보다 나은 영역</b>일수록 커진다. 결정·판단 과제에서는 조합이 오히려 더 못한 경우도 있었다.</div>
+    <div class="q"><b>Q3.</b> 컴퓨팅 사고법으로 쪼개면 안 되는 세 영역은?</div>
+    <div class="q a"><b>A3.</b> <b>본질적 창의 · 사람 사이의 미묘한 맥락 · 정답 없는 가치 판단.</b> 여기가 도메인 전문가의 자리다.</div>
+  </div>
+  <aside>Q3은 반드시 짚어 주세요. 이걸 모르면 AI에게 넘기면 안 되는 결정을 넘깁니다.</aside>
+</section>
+
+<!-- 12 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>이미 하고 있다 · 깊이 · 자리 💎</h1>
+    <div class="big" style="margin-top:26px">새 능력을 배우는 게 아니라<br><span class="y">이미 가진 능력에 이름을 붙이고 AI에게 옮기는 일</span></div>
+    <p class="sub" style="margin-top:24px">Computational Thinking ③ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ④에서 드디어 손을 움직입니다 — 내 도메인의 진짜 문제 하나를 네 동작으로 쪼갠 한 페이지를 만듭니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
