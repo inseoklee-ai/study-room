@@ -195,6 +195,16 @@
    - ✅ ⑦. 프로젝트 맥락 파일 — CLAUDE.md·AGENTS.md (상시 로드·규칙과 사실 분리) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/project-context-files/) · 📊 [PPT](project-context-files/project-context-files.pptx)
    - ✅ ⑧. 캐싱과 비용의 경제학 (프리픽스 캐싱·적중률≠품질) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/caching-economics/) · 📊 [PPT](caching-economics/caching-economics.pptx)
    - ✅ ⑨. 컨텍스트 엔지니어링의 원칙과 마무리 (여섯 판정 사슬·중단원 종합) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/context-principles/) · 📊 [PPT](context-principles/context-principles.pptx)
+4. **도구와 하네스 — 무엇을 할 수 있게 하는가** ✅ 완결 (9/9)
+   - ✅ ①. 실패의 세 순간과 도구 호출의 작동 모델 (모델·에이전트·하네스·루프) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/three-failures/) · 📊 [PPT](three-failures/three-failures.pptx)
+   - ✅ ②. 도구 설명은 모델이 읽는 지시다 (계약·MCP·실측 랩) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/tool-description/) · 📊 [PPT](tool-description/tool-description.pptx)
+   - ✅ ③. 실습 1 — 도구 정의서와 실패 사례 리디자인 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/tool-definition-lab/) · 📊 [PPT](tool-definition-lab/tool-definition-lab.pptx)
+   - ✅ ④. 최소 하네스 — 여섯 개의 설계 지점 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/minimal-harness/) · 📊 [PPT](minimal-harness/minimal-harness.pptx)
+   - ✅ ⑤. 실습 2 — 도구를 만들어 실행하고 RAG를 MCP로 붙이기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/build-and-mcp-lab/) · 📊 [PPT](build-and-mcp-lab/build-and-mcp-lab.pptx)
+   - ✅ ⑥. 권한과 신뢰 경계 — 계약의 안전 층 (네 층·최소 권한·인젝션) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/permission-trust-boundary/) · 📊 [PPT](permission-trust-boundary/permission-trust-boundary.pptx)
+   - ✅ ⑦. 과제 — 서비스 가이드 챗봇 설계 (설계 패킷·루브릭) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/service-agent-project/) · 📊 [PPT](service-agent-project/service-agent-project.pptx)
+   - ✅ ⑧. 도구를 쓰는 평가 — 전후 판정과 회귀 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/tool-eval/) · 📊 [PPT](tool-eval/tool-eval.pptx)
+   - ✅ ⑨. 안티패턴 회수와 관통 질문의 답 (중단원 종합) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/antipatterns-wrapup/) · 📊 [PPT](antipatterns-wrapup/antipatterns-wrapup.pptx)
 
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
@@ -292,6 +302,15 @@
 > - 대4-3-⑦ https://inseoklee-ai.github.io/study-room/project-context-files/
 > - 대4-3-⑧ https://inseoklee-ai.github.io/study-room/caching-economics/
 > - 대4-3-⑨ https://inseoklee-ai.github.io/study-room/context-principles/
+> - 대4-4-① https://inseoklee-ai.github.io/study-room/three-failures/
+> - 대4-4-② https://inseoklee-ai.github.io/study-room/tool-description/
+> - 대4-4-③ https://inseoklee-ai.github.io/study-room/tool-definition-lab/
+> - 대4-4-④ https://inseoklee-ai.github.io/study-room/minimal-harness/
+> - 대4-4-⑤ https://inseoklee-ai.github.io/study-room/build-and-mcp-lab/
+> - 대4-4-⑥ https://inseoklee-ai.github.io/study-room/permission-trust-boundary/
+> - 대4-4-⑦ https://inseoklee-ai.github.io/study-room/service-agent-project/
+> - 대4-4-⑧ https://inseoklee-ai.github.io/study-room/tool-eval/
+> - 대4-4-⑨ https://inseoklee-ai.github.io/study-room/antipatterns-wrapup/
 >
 > 📊 **PPT**: 각 강의 폴더의 `<폴더명>.pptx` (예: `vlm/vlm.pptx`). GitHub 저장소나 라이브 사이트에서 내려받아 PowerPoint로 열 수 있습니다.
 >

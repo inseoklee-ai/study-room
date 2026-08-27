@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>실습 1: 도구 정의서 · 실패를 계약 문장으로 되돌리기</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 도구와 하네스 · ③</span>
+    <h1 style="margin:18px 0">실습 1:<br>도구 정의서</h1>
+    <p class="sub">실패 사례를 계약 문장 서너 줄로 되돌리기</p>
+  </div>
+  <aside>이 실습은 재고 조회라는 하나의 도구를 예로, 모델이 읽는 지시를 계약 문장으로 직접 씁니다. 도구의 이름·설명·입력 스키마에 반환 형식과 실패 뒤 행동까지 더한 여섯 항목을 한 표에 모으고, 실행 전에 채점 기준을 저장한 뒤, 실패 기록을 다시 정의서로 되돌리는 흐름을 따라갑니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>PART 1</small><b>도구 정의서 여섯 항목</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>PART 2</small><b class="g">실행 전 scorecard</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>PART 3</small><b>설명·실패 다시 설계</b></div>
+  </div>
+  <ul class="pts">
+    <li>재고 조회의 <b>계약</b>을 여섯 항목으로 먼저 고정한다</li>
+    <li>결과를 보기 전에 <b>통과의 이진 정의</b>를 scorecard에 저장한다</li>
+    <li>설명만 바꿔(<b>minimal / contextual</b>) 실행하고 관찰한다</li>
+    <li>실패 기록을 <b>비어 있던 정의서 항목</b>으로 되돌려 보완한다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 실패 사례가 <b>계약 문장 서너 줄</b>로 되돌려지는 경험이 기록을 읽는 눈을 만든다.</div>
+  <aside>세 파트는 계약을 쓰고, 기준을 미리 정하고, 실패를 다시 계약으로 되돌리는 순환입니다. 도구 하나에 대한 이 순환이 이후 하네스 설계 전체의 축소판입니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">도구 정의서로 재고 조회를 묶는다</h2>
+    <p style="margin-top:11px">도구 설명 문장이 곧 모델이 읽는 지시다</p>
+    <span class="who">이름 · 설명 · 입력 스키마 · 반환 · 실패</span>
+  </div>
+  <aside>고객이 '부산 창고의 A-17 재고'를 다시 물었을 때 모델이 창고와 상품을 추측하지 않게 하려면, 조회의 계약부터 직접 써야 합니다. 도구 설명 문장이 모델이 읽는 지시이므로, 재고 조회의 계약을 여섯 항목으로 고정합니다.</aside>
+</section>
+
+<!-- 4 도구 정의서란 -->
+<section class="slide" data-part="PART 1">
+  <h2>📋 도구 정의서란 <span class="g">무엇인가</span></h2>
+  <ul class="pts">
+    <li><b>도구 정의서(tool definition)</b> = 도구의 <b>이름·설명·입력 스키마</b>를 정리한 문서</li>
+    <li>MCP 사양·Anthropic·LangChain이 쓰는 표현이다</li>
+    <li>여기에 <b>반환 형식</b>과 <b>실패 뒤 행동</b>까지 더해 여섯 항목을 한 표에 모은다</li>
+  </ul>
+  <div class="hl">여섯 항목을 <b>한눈에 비교</b>해야 계약의 어느 칸이 비어 실패가 생겼는지 바로 가리킬 수 있다.</div>
+  <aside>정의서를 표 하나로 모으는 이유는 실패를 항목별로 지목하기 위해서입니다. 설명이 흩어져 있으면 어느 칸이 비었는지 보이지 않지만, 여섯 칸을 나란히 두면 빈 칸이 곧 실패의 원인이 됩니다.</aside>
+</section>
+
+<!-- 5 여섯 항목 표 -->
+<section class="slide" data-part="PART 1">
+  <h2>🧱 정의서 <span class="g">여섯 항목</span> — 재고 조회</h2>
+  <table class="t">
+    <tr><th>항목</th><th>기록할 내용</th></tr>
+    <tr><td>① 이름</td><td>동사+대상: <b>get_inventory</b></td></tr>
+    <tr><td>② 하는 일 한 문장</td><td>승인된 창고의 특정 SKU 가용 수량을 <b>읽기 전용</b>으로 조회</td></tr>
+    <tr><td>③ 언제 쓰고 안 쓰는지</td><td>수량 질문엔 쓰고, <b>수량 변경·창고 미지정</b>엔 안 씀</td></tr>
+    <tr><td>④ 인자 스키마</td><td><b>sku</b> 문자열 3~32자, <b>warehouse_id</b>는 SEOUL-01·BUSAN-02</td></tr>
+    <tr><td>⑤ 반환 형식</td><td>SKU · 창고 · 가용 수량 · 확인 시각</td></tr>
+    <tr><td>⑥ 실패 정의와 뒤 행동</td><td>오류별로 <b>한 번 재시도 · 허용 창고 질문 · 또는 중단</b></td></tr>
+  </table>
+  <aside>여섯 항목은 뒤에서 실패를 되돌릴 좌표계가 됩니다. 실패가 나면 이 번호 중 어느 것이 비었는지 표시하고, 그 항목을 한 문장으로 보완하게 됩니다.</aside>
+</section>
+
+<!-- 6 하나=하나, 반환 제한 -->
+<section class="slide" data-part="PART 1">
+  <h2>✂️ 도구 하나는 <span class="g">동작 하나</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b class="g">과업 단위로 자른다</b> — 재고 조회와 수량 변경을 <b>한 엔드포인트에 함께 넣지 않는다.</b> 도구 하나는 동작 하나여야 한다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b class="g">반환값을 제한한다</b> — 원본 재고 데이터 덤프가 아니라 답의 근거가 될 <b>available_quantity · checked_at</b> 같은 필드로 한정한다</span></div>
+  </div>
+  <div class="hl">⚠️ <b>과한 반환은 컨텍스트를 잠식</b>해 필요한 근거를 흐린다.</div>
+  <aside>도구를 잘게 자르고 반환을 좁히는 것은 절제가 아니라 근거 관리입니다. 필요 없는 필드가 답에 끼어들면 모델이 무엇을 근거로 삼았는지 흐려지고, 뒤에서 볼 원가 인용 같은 실패가 생깁니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">실행 전에 scorecard를 저장한다</h2>
+    <p style="margin-top:11px">결과를 본 뒤 기준을 만들면 마음에 드는 호출을 정당화하게 된다</p>
+    <span class="who">tool-lab/scorecard.md · 이진 정의</span>
+  </div>
+  <aside>결과를 본 뒤 기준을 만들면, 마음에 드는 호출을 성공이라 사후 정당화하게 됩니다. 그래서 채점 기준을 실행 전에 파일로 저장하고, 각 기준은 통과 여부를 둘로만 가르는 이진 정의로 씁니다.</aside>
+</section>
+
+<!-- 8 scorecard 표 -->
+<section class="slide" data-part="PART 2">
+  <h2>📝 실행 전 <span class="g">채점 기준</span> 네 줄</h2>
+  <table class="t">
+    <tr><th>채점 기준</th><th>통과의 이진 정의</th><th>확인 위치</th></tr>
+    <tr><td>스키마 준수</td><td>호출이 <b>sku 문자열</b>과 허용된 <b>warehouse_id</b>만 사용</td><td>도구 호출 인자</td></tr>
+    <tr><td>호출 성공</td><td>유효 입력에서 성공 반환 또는 <b>명시된 오류 코드</b>가 남음</td><td>도구 응답</td></tr>
+    <tr><td>결과 사용 가능성</td><td>최종 답이 <b>available_quantity·checked_at</b>만 근거로 삼음</td><td>최종 답변</td></tr>
+    <tr><td>실패 처리</td><td>오류 뒤 수량을 추정하지 않고 <b>정해진 행동</b>을 택함</td><td>호출·최종 답변</td></tr>
+  </table>
+  <div class="hl">각 기준은 <b>둘 중 하나</b>로만 판정된다 — 인상이 아니라 위치를 지목해 확인한다.</div>
+  <aside>네 기준은 각각 호출 인자, 도구 응답, 최종 답변이라는 확인 위치를 갖습니다. 위치가 정해져 있어야 나중에 두 실행을 같은 자리에서 비교할 수 있습니다.</aside>
+</section>
+
+<!-- 9 계약 고정 코드 -->
+<section class="slide" data-part="PART 2">
+  <h2>🐍 계약을 <span class="g">코드로 고정</span></h2>
+  <pre>ALLOWED_WAREHOUSES = {"SEOUL-01", "BUSAN-02"}
+DESCRIPTIONS = {
+    "minimal": "상품 재고를 조회합니다.",
+    "contextual": ("승인된 창고에서 특정 상품의 현재 가용 재고를 "
+        "읽기 전용으로 조회합니다. ... INVALID_SKU이면 SKU를 "
+        "확인해 달라고 묻고, WAREHOUSE_NOT_ALLOWED이면 허용된 "
+        "창고를 요청하며, TEMPORARY_UNAVAILABLE이면 한 번만 "
+        "재시도한 뒤 중단합니다."),
+}
+INPUT_SCHEMA = {"type": "object", "properties": {
+    "sku": {"type": "string", "minLength": 3, "maxLength": 32},
+    "warehouse_id": {"type": "string",
+        "enum": sorted(ALLOWED_WAREHOUSES)}},
+    "required": ["sku", "warehouse_id"],
+    "additionalProperties": False}</pre>
+  <div class="hl">두 설명 <b>minimal / contextual</b>을 제외한 계약을 코드로 고정한다 — 스키마·허용 범위·실패 코드까지.</div>
+  <aside>설명 두 종류만 변수로 남기고 스키마와 허용 범위는 코드로 못박습니다. contextual 설명은 언제 쓰는지, 어떤 인자를 넣는지, 오류 코드별로 무엇을 할지를 문장으로 담아, 정의서 여섯 항목이 그대로 설명 안에 들어가 있습니다.</aside>
+</section>
+
+<!-- 10 이름·스키마·검사 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔧 이름 · 스키마 · <span class="g">문법 검사</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>이름</b>은 <b>get_inventory</b>처럼 동사+대상으로</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>인자 스키마</b>는 서버도 검사할 수 있도록 <b>형식·허용 범위</b>를 분명히</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b class="g">ast.parse()</b>로 <b>실행 없이 문법만</b> 검사한다</span></div>
+  </div>
+  <div class="hl">스키마를 분명히 두면 <b>모델의 설명</b>과 <b>서버의 검사</b>가 같은 계약을 가리킨다.</div>
+  <aside>스키마는 모델에게 주는 지시인 동시에 서버가 실제로 걸러낼 수 있는 규칙입니다. ast.parse는 계약 코드를 실행하지 않고 문법만 확인하므로, 실제 호출 없이도 정의가 깨지지 않았는지 점검할 수 있습니다.</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">설명과 실패를 다시 설계한다</h2>
+    <p style="margin-top:11px">같은 모델·같은 요청·같은 스키마, 설명만 바꾼다</p>
+    <span class="who">minimal ↔ contextual · 실패 되돌리기</span>
+  </div>
+  <aside>이제 같은 모델, 같은 요청, 같은 스키마에서 설명만 minimal과 contextual로 바꿔 실행합니다. 다른 조건을 고정했기 때문에, 결과 차이는 설명 한 항목의 효과로 읽을 수 있습니다.</aside>
+</section>
+
+<!-- 12 실행 방법 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔬 설명만 바꿔 <span class="g">같은 순서로</span> 넣는다</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--gy)"><small>고정</small><b>모델 · 요청<br>· 스키마</b></div>
+    <span class="ar">·</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>변경</small><b class="g">설명만<br>minimal↔contextual</b></div>
+    <span class="ar">·</span>
+    <div class="cell" style="min-width:190px;border-color:var(--bl)"><small>같은 순서로 투입</small><b>정상 요청 → "어느 창고든<br>SKU A-17 재고"</b></div>
+  </div>
+  <div class="hl">두 입력을 같은 순서로 넣어 <b>scorecard에 표시</b>한다 — 실패 기록은 정의서 여섯 항목으로 되돌린다.</div>
+  <aside>정상 요청과 창고를 지정하지 않은 요청을 같은 순서로 두 설명에 넣습니다. 창고를 지정하지 않은 요청은 계약의 빈 칸을 드러내려는 의도된 자극이고, scorecard의 네 기준이 어디서 어긋나는지 표시합니다.</aside>
+</section>
+
+<!-- 13 실패 되돌리기 표 -->
+<section class="slide" data-part="PART 3">
+  <h2>♻️ 실패를 <span class="g">비어 있던 항목</span>으로</h2>
+  <table class="t">
+    <tr><th>실패 사례</th><th>비어 있던 항목</th><th>보완 문장</th></tr>
+    <tr><td>존재하지 않는 창고 코드를 임의로 넣어 WAREHOUSE_NOT_ALLOWED를 반복 호출</td><td>③ 언제 쓰는지<br>⑥ 실패 뒤 행동</td><td>허용되지 않은 창고면 <b>허용 코드를 질문</b>하고 재호출하지 않음</td></tr>
+    <tr><td>SKU 없이 가장 비슷한 상품을 골라 조회</td><td>④ 인자 스키마<br>⑥ 실패 뒤 행동</td><td>SKU는 <b>필수</b>이며 없으면 상품 식별자를 질문</td></tr>
+    <tr><td>응답의 내부 원가까지 최종 답에 인용</td><td>⑤ 반환 형식</td><td><b>가용 수량과 확인 시각만</b> 반환하고 답의 근거로 씀</td></tr>
+  </table>
+  <div class="hl">실패 사례가 <b>계약 문장 서너 줄</b>로 되돌려지는 경험이 기록을 읽는 눈을 만든다.</div>
+  <aside>세 실패는 모두 정의서의 특정 빈 칸을 가리킵니다. 반복 호출은 언제 쓰는지와 실패 뒤 행동이, 유사 상품 조회는 인자 스키마가, 원가 인용은 반환 형식이 비었기 때문입니다. 빈 칸을 한 문장으로 채우면 계약이 다시 닫힙니다.</aside>
+</section>
+
+<!-- 14 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 4문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">도구 설명 문장이 <b>모델이 읽는 지시</b> — 이름·설명·스키마에 반환·실패까지 <b>여섯 항목</b>으로 고정한다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>도구 하나는 동작 하나</b>, 반환은 근거가 될 필드로 제한한다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t">채점 기준은 <b>실행 전에</b> 이진 정의로 저장한다 — 사후 정당화를 막는다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">실패는 <b>비어 있던 정의서 항목</b>으로 되돌려 한 문장으로 보완한다.</span></div>
+  </div>
+  <aside>여섯 항목·이진 채점·되돌리기는 하나의 순환입니다. 이 순환이 도구 하나에서 몸에 익으면, 다음의 여러 도구가 얽힌 하네스에서도 실패를 항목으로 지목하는 눈이 이어집니다. 출처: MCP 사양·Anthropic·LangChain의 도구 정의 표현.</aside>
+</section>
+
+<!-- 15 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 도구 정의서의 <b>여섯 항목</b>은 무엇인가? (이름·설명 외 넷)</div>
+    <div class="q"><b>Q2.</b> 재고 조회와 수량 변경을 한 엔드포인트에 넣지 않는 이유는?</div>
+    <div class="q"><b>Q3.</b> 채점 기준(scorecard)을 <b>실행 전에</b> 저장하는 이유는?</div>
+    <div class="q"><b>Q4.</b> 두 실행을 비교할 때 <b>고정</b>하는 것과 <b>바꾸는</b> 것은 각각 무엇인가?</div>
+    <div class="q"><b>Q5.</b> "내부 원가까지 최종 답에 인용"한 실패는 <b>어느 항목</b>이 비어서인가?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q4는 비교의 방법을, Q5는 실패를 항목으로 되돌리는 감각을 가장 잘 가립니다.</aside>
+</section>
+
+<!-- 16 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> 이름 · 하는 일 한 문장 · <b>언제 쓰고 안 쓰는지</b> · <b>인자 스키마</b> · <b>반환 형식</b> · <b>실패 정의와 뒤 행동</b>.</div>
+    <div class="q a"><b>A2.</b> <b>도구 하나는 동작 하나</b>여야 하므로 과업 단위로 자른다 — 읽기와 변경을 섞으면 계약과 권한이 흐려진다.</div>
+    <div class="q a"><b>A3.</b> 결과를 본 뒤 기준을 만들면 <b>마음에 드는 호출을 성공으로 정당화</b>하게 되기 때문.</div>
+    <div class="q a"><b>A4.</b> <b>고정</b>: 모델·요청·스키마. <b>변경</b>: 설명만(minimal↔contextual).</div>
+    <div class="q a"><b>A5.</b> <b>⑤ 반환 형식</b> — 가용 수량과 확인 시각만 반환·근거로 쓰도록 보완한다.</div>
+  </div>
+  <aside>A4와 A5를 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다. 특히 A5처럼 실패를 항목 번호로 지목하는 습관이 계약을 다시 닫는 힘입니다.</aside>
+</section>
+
+<!-- 17 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>계약 문장으로 되돌린다 ♻️</h1>
+    <div class="big" style="margin-top:26px">도구 하나의 <span class="y">여섯 항목</span>을 고정하고<br>실패를 <span class="y">비어 있던 칸</span>으로 되돌리면<br><br>기록을 읽는 눈이 생긴다</div>
+    <p class="sub" style="margin-top:24px">실습 1: 도구 정의서 — 여기까지 · 다음: 최소 하네스 — 여섯 개의 설계 지점</p>
+  </div>
+  <aside>도구 하나에서 계약·채점·되돌리기를 익혔다면, 다음은 이 도구가 놓이는 실행 구조입니다. 최소 하네스의 여섯 개 설계 지점에서, 같은 눈으로 실패를 항목으로 지목하는 연습을 이어 갑니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

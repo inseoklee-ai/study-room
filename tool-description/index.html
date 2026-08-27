@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>도구 설명은 모델이 읽는 지시다 · 계약을 쓰는 일은 프롬프트를 쓰는 일</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 도구와 하네스 · ②</span>
+    <h1 style="margin:18px 0">도구 설명은<br>모델이 읽는 지시다</h1>
+    <p class="sub">계약을 쓰는 일은 곧 프롬프트를 쓰는 일</p>
+  </div>
+  <aside>부산 창고 재고를 물었는데 모델이 주문 조회 도구를 골랐다면, 잘못은 어느 문장에서 시작됐을까요? 도구는 함수 이름만 등록하는 기능이 아니라 설명·인자 스키마·반환/실패를 묶은 계약이며, 모델은 그 계약을 읽고 행동을 고릅니다. 이 소단원은 그 계약이 결국 프롬프트임을 코드로 확인합니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>PART 1</small><b>계약의 세 자리</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>PART 2</small><b class="g">도구를 주는 방식의 계보</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>PART 3</small><b>주입된 문장을 꺼내기</b></div>
+  </div>
+  <ul class="pts">
+    <li>도구를 <b>설명·인자 스키마·반환/실패</b>를 묶은 계약으로 다시 본다</li>
+    <li>텍스트 규약 → function calling → M×N → <b>MCP</b>로 이어진 계보를 따라간다</li>
+    <li>능력을 건네는 <b>세 경로</b>(시스템 프롬프트·Skill·MCP)를 비교한다</li>
+    <li>실측 랩에서 도구 설명이 <b>프롬프트 안에 그대로 놓임</b>을 코드로 확인한다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 모델의 관점에서 도구는 결국 <b>모델이 읽는 문장</b>으로 환원된다.</div>
+  <aside>세 파트를 지나면 "도구를 등록한다"는 일이 곧 "모델이 읽을 지시를 쓴다"는 일과 같음을 보게 됩니다. 마지막 랩에서는 주입된 JSON과 채팅 템플릿을 직접 꺼내 이를 증명합니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">도구는 계약이다 — 세 자리를 함께 쓴다</h2>
+    <p style="margin-top:11px">함수 이름 등록이 아니라, 모델이 읽고 선택하는 계약</p>
+    <span class="who">설명 · 인자 스키마 · 반환/실패</span>
+  </div>
+  <aside>고칠 자리를 찾으려면 모델이 실제로 읽은 도구 설명을 펼쳐야 합니다. 도구는 설명(description)과 인자 스키마, 그리고 반환 형식과 실패 뒤 행동을 묶은 계약이며, 이 세 자리는 각자 다른 일을 맡습니다.</aside>
+</section>
+
+<!-- 4 계약의 세 자리 -->
+<section class="slide" data-part="PART 1">
+  <h2>📑 계약의 <span class="g">세 자리</span>, 각자 맡는 일</h2>
+  <div class="steps">
+    <div class="st"><span class="n">설</span><span class="t"><b class="g">설명</b> — 도구의 목적과 사용할 조건을 문장으로. "허용된 창고의 현재 재고를 조회하며 수량은 바꾸지 않는다"는 선택의 <b>경계</b>를 준다</span></div>
+    <div class="st"><span class="n">인</span><span class="t"><b class="g">인자 스키마</b> — 호출의 빈칸을 기계적으로 제한. 식별자의 의미·필수 여부·허용값을 규격화해 <b>형식 오류가 실행 경계를 넘지 못하게</b> 한다</span></div>
+    <div class="st"><span class="n">반</span><span class="t"><b class="g">반환/실패</b> — 성공엔 식별자·상태·기준 시각처럼 필요한 값만, 실패엔 재입력·권한 요청·재조회 중 <b>다음 행동</b>을 드러낸다</span></div>
+  </div>
+  <div class="hl"><b>실패 조건을 빼면</b> 모델은 빈자리를 추측으로 메운다. 정상값뿐 아니라 인자 누락·범위 밖 값·일시적 서버 실패로도 계약을 확인한다.</div>
+  <aside>설명은 목적과 맥락을, 스키마는 형식을 맡습니다. 둘은 겹치지 않고 서로를 보완합니다. 반환 형식은 다음 판단을 정하므로, 실패 응답이 무엇을 하라고 말하는지가 정상 응답만큼 중요합니다.</aside>
+</section>
+
+<!-- 5 세 자리 대비 표 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔍 목적 · 형식 · 다음 판단으로 <span class="g">나눠 쓴다</span></h2>
+  <table class="t">
+    <tr><th>자리</th><th>맡는 일</th><th>빠지면 생기는 일</th></tr>
+    <tr><td>설명</td><td>목적·맥락·사용 조건을 문장으로</td><td>실패 조건이 없으면 <b>추측으로 메움</b></td></tr>
+    <tr><td>인자 스키마</td><td>입력·출력의 구조·자료형·필수값 규격</td><td>형식 오류가 <b>실행 경계를 넘음</b></td></tr>
+    <tr><td>반환 형식</td><td>성공 시 필요한 값만(식별자·상태·시각)</td><td>다음 판단의 근거가 흐려짐</td></tr>
+    <tr><td>실패 뒤 행동</td><td>재입력·권한 요청·재조회 중 무엇을</td><td>오류에서 다음 행동을 못 고름</td></tr>
+  </table>
+  <div class="hl">설명은 <b>목적·맥락</b>을, 스키마는 <b>형식</b>을 맡는다. 계약은 정상값과 <b>실패 경로</b>를 모두 적어야 완성된다.</div>
+  <aside>표의 각 행은 계약의 한 자리입니다. 도구를 설계할 때 이 네 항목을 체크리스트처럼 확인하면, 나중에 모델이 이상하게 행동할 때 어느 문장을 고쳐야 할지가 분명해집니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">도구를 주는 방식의 계보</h2>
+    <p style="margin-top:11px">텍스트 규약에서 표준 프로토콜까지, 무엇이 달라졌나</p>
+    <span class="who">텍스트 규약 · function calling · M×N · MCP</span>
+  </div>
+  <aside>도구를 모델에 건네는 방식은 개발자가 문장을 파싱하던 데서 API가 호출 구조를 보장하는 방식으로, 다시 표준 프로토콜로 진화했습니다. 각 단계가 앞 단계의 어떤 문제를 풀었는지를 따라가면 MCP가 왜 등장했는지 보입니다.</aside>
+</section>
+
+<!-- 7 계보 개요 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧬 네 단계로 본 <span class="g">계보</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--gy)"><small>①</small><b>초기 텍스트 규약<br><small class="g">개발자가 파싱</small></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>②</small><b>네이티브 툴 호출 API<br><small class="g">API가 구조 보장</small></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--pp)"><small>③</small><b>M×N 문제<br><small class="g">연결이 폭증</small></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gold)"><small>④</small><b>MCP<br><small class="g">표준 연결</small></b></div>
+  </div>
+  <div class="hl">각 단계는 앞 단계의 문제를 푼다 — 표기법의 불일치 → 호출 구조 보장 → 연결의 폭증 → <b>표준 프로토콜</b>.</div>
+  <aside>이 네 칸이 파트 2의 지도입니다. 이어지는 두 슬라이드에서 ①→②, ③→④를 각각 자세히 봅니다. 뒤로 갈수록 "모델의 요청을 다른 실행기가 그대로 읽는다"는 보장이 강해집니다.</aside>
+</section>
+
+<!-- 8 텍스트규약 → 네이티브 API -->
+<section class="slide" data-part="PART 2">
+  <h2>① 텍스트 규약 → ② <span class="g">네이티브 툴 호출</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b class="g">초기 텍스트 규약</b> — 시스템 프롬프트에 도구 이름·인자·규칙을 텍스트로 적고, 모델이 만든 <b>Action: 검색</b> 같은 문장을 개발자가 직접 파싱(ReAct 계열). 표기법이 벤더·구현마다 달라 <b>호환 보장이 약함</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b class="g">네이티브 툴 호출 API</b> — OpenAI가 2023년 6월 function calling 도입: JSON 스키마로 함수를 선언하고 구조화된 함수 호출을 받음. Anthropic의 tool use도 이름·설명·입력 스키마를 보내고 <b>tool_use 블록</b>을 받음</span></div>
+  </div>
+  <div class="hl">모델이 실행용 문장을 지어내고 개발자가 해석하던 방식 → <b>API가 호출 구조를 보장</b>하는 방식으로.</div>
+  <aside>ReAct 계열은 Yao 외의 연구에서 정리된 접근입니다. 텍스트 규약은 유연하지만, 한 모델의 요청을 다른 실행기가 그대로 읽는다는 보장이 약했습니다. 네이티브 API는 그 호출 구조를 계약으로 고정했습니다.</aside>
+</section>
+
+<!-- 9 M×N → MCP -->
+<section class="slide" data-part="PART 2">
+  <h2>③ M×N 문제 → ④ <span class="g">MCP</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">3</span><span class="t"><b class="p">M×N 문제</b> — 애플리케이션 M개·도구 N개면 각 조합을 따로 연결하는 <b>M×N개의 작업</b>. API마다 도구 선언·인증·반환값 해석 규칙도 다름. 개별 호출 구조는 갖췄지만 <b>여러 제품이 연결을 함께 쓰는 문제</b>는 남음</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b class="g">MCP(Model Context Protocol)</b> — Anthropic이 2024년 11월 25일 공개 표준으로 발표. 서버는 도구·리소스·프롬프트를 <b>표준 형식</b>으로 내놓고, 클라이언트는 공통 규약으로 소비. stdio·HTTP 같은 표준 전송 계층 사용</span></div>
+  </div>
+  <div class="hl">벤더별 연동을 <b>표준 연결로</b> — M×N개의 개별 작업이 하나의 공통 규약으로 수렴한다.</div>
+  <aside>function calling은 한 호출의 구조는 보장했지만, 제품마다 도구를 다시 연결하는 M×N 부담은 남았습니다. MCP는 그 연결 자체를 표준화해, 서버가 한 번 공개한 도구를 여러 클라이언트가 공통 규약으로 소비하게 합니다.</aside>
+</section>
+
+<!-- 10 세 경로 표 -->
+<section class="slide" data-part="PART 2">
+  <h2>🚪 능력을 건네는 <span class="g">세 경로</span></h2>
+  <table class="t">
+    <tr><th>경로</th><th>주로 맡는 것</th><th>좋은 점 / 주의</th></tr>
+    <tr><td>시스템 프롬프트</td><td>규칙</td><td>모든 요청에 적용되는 짧고 안정적인 규칙엔 알맞음 / 드문 절차까지 넣으면 <b>매번 문맥 비용</b></td></tr>
+    <tr><td>Skill(불러오는 안내 문서)</td><td>절차</td><td>과업별 절차·참고자료·완료 기준 재사용 / <b>언제 불러오고 누가 갱신할지</b> 관리 필요</td></tr>
+    <tr><td>MCP</td><td>연결</td><td>서버의 도구·스키마를 표준 방식으로 연결 / <b>인증·권한·서버 운영</b>을 대신 해결하지 않음</td></tr>
+  </table>
+  <div class="hl">세 경로는 각각 <b>규칙·절차·연결</b>을 맡는다. 어느 것도 인증·권한·운영을 마법처럼 없애 주지는 않는다.</div>
+  <aside>세 경로는 배타적이지 않고 역할이 다릅니다. 규칙은 시스템 프롬프트에, 재사용할 절차는 Skill에, 외부 도구 연결은 MCP에 두는 식으로 나눠 쓰면 각자의 비용과 관리 지점이 분명해집니다.</aside>
+</section>
+
+<!-- 11 환원 -->
+<section class="slide" data-part="PART 2">
+  <h2>🧠 그러나 모델의 관점에서는…</h2>
+  <div class="big">시스템 프롬프트도 · Skill도 · MCP도<br><span class="y">결국 모델이 읽는 문장</span>으로 환원된다<small>능력을 어떤 경로로 건네든, 모델 입장에서는 하나의 프롬프트 안 텍스트가 된다</small></div>
+  <div class="hl">경로는 개발자에게 다르지만, <b>모델에게는 같은 자리</b>다. 그래서 도구를 설계하는 일과 프롬프트를 쓰는 일은 나뉘지 않는다.</div>
+  <aside>이것이 파트 3으로 넘어가는 다리입니다. 경로가 셋이어도 모델이 실제로 받는 것은 하나의 텍스트입니다. 다음 랩에서 그 텍스트를 직접 꺼내 눈으로 확인합니다.</aside>
+</section>
+
+<!-- 12 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">실측 랩 — 주입된 문장을 꺼내기</h2>
+    <p style="margin-top:11px">클라이언트가 실제로 보내는 JSON과 렌더된 프롬프트를 펼친다</p>
+    <span class="who">2026-08-27 · colab-mcp · qwen3.5:2b</span>
+  </div>
+  <aside>MCP 도구를 로드하고 클라이언트가 주입할 JSON을 직접 출력해, 도구 설명이 어디에 어떤 형태로 들어가는지 확인합니다. 이어 채팅 템플릿으로 같은 입력을 직접 렌더해 두 입력이 사실상 같은 텍스트임을 대조합니다.</aside>
+</section>
+
+<!-- 13 코드1 로드+JSON -->
+<section class="slide" data-part="PART 3">
+  <h2>🧪 랩 ① — MCP 도구를 <span class="g">JSON으로 꺼내기</span></h2>
+  <pre>client = MultiServerMCPClient({"colab": {"transport": "stdio",
+    "command": "uv", "args": ["run", "--directory",
+    "colab-mcp 설치 경로", "colab-mcp"]}})
+tools = await client.get_tools()
+print(json.dumps([convert_to_openai_tool(t) for t in tools],
+      ensure_ascii=False, indent=1))</pre>
+  <ul class="pts">
+    <li><b>MultiServerMCPClient</b> — 이름별 MCP 서버 접속 설정을 받는 클라이언트</li>
+    <li><b>get_tools()</b> — 서버가 공개한 도구 목록을 비동기로 가져옴</li>
+    <li><b>convert_to_openai_tool()</b> — 각 도구를 함수 호출 형식으로 변환</li>
+  </ul>
+  <aside>이 코드는 실행하지 않고, 클라이언트가 모델에 보낼 도구 정의 JSON을 그대로 출력하기만 합니다. 다음 슬라이드에서 그 JSON 안에 무엇이 들어있는지 봅니다.</aside>
+</section>
+
+<!-- 14 description 그대로 -->
+<section class="slide" data-part="PART 3">
+  <h2>📤 출력 — <span class="g">description 문장이 그대로</span></h2>
+  <p>도구 정의 JSON에 사람이 쓴 설명 문장이 손대지 않은 채 들어간다:</p>
+  <pre>open_colab_browser_connection —
+  "Opens a connection to a Google Colab browser
+   session and unlocks notebook editing tools…"</pre>
+  <div class="hl">우리가 도구에 적은 <b>description 문장이 JSON에 그대로</b> 실린다. 즉 도구 설명을 쓰는 순간 모델이 읽을 지시를 쓴 것이다.</div>
+  <aside>여기서 계약의 첫 자리인 설명이 어디로 가는지가 드러납니다. 설명은 별도 메타데이터가 아니라, 모델에게 전달되는 도구 정의 안에 문장 그대로 들어갑니다. 부정확한 설명은 곧 부정확한 지시입니다.</aside>
+</section>
+
+<!-- 15 코드2 호출 요청 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧪 랩 ② — 호출 요청은 <span class="g">쓰기만</span> 한다</h2>
+  <pre>llm = ChatOllama(model="qwen3.5:2b",
+                 temperature=0, reasoning=False)
+r = await llm.bind_tools(tools).ainvoke(
+        "구글 코랩을 브라우저로 연결해 줘")
+print("tool_calls:", [(tc["name"], tc["args"])
+                      for tc in r.tool_calls])
+print("prompt_eval_count:",
+      r.response_metadata.get("prompt_eval_count"))</pre>
+  <div class="chain">
+    <div class="cell" style="min-width:220px;border-color:var(--gr)"><small>tool_calls</small><b>[('open_colab_browser_connection', {})]</b></div>
+    <span class="ar">·</span>
+    <div class="cell" style="min-width:160px;border-color:var(--gold)"><small>prompt_eval_count</small><b class="g">289</b></div>
+  </div>
+  <div class="hl">모델은 <b>실행하지 않고 요청만 쓴다</b>. 서버는 이 요청 처리에 프롬프트 <b>289토큰</b>을 읽었다.</div>
+  <aside>모델의 출력은 실행 결과가 아니라 "이 도구를 이 인자로 부르겠다"는 요청입니다. 실제 실행과 결과 해석은 클라이언트의 몫입니다. prompt_eval_count 289는 서버가 이 요청을 처리하며 읽은 프롬프트 토큰 수입니다.</aside>
+</section>
+
+<!-- 16 tools 시스템 블록 + 288 -->
+<section class="slide" data-part="PART 3">
+  <h2>🔧 채팅 템플릿을 렌더하면 <span class="g">&lt;tools&gt;</span> 안에</h2>
+  <ul class="pts">
+    <li>GGUF(모델 가중치·설정 파일 형식)에서 공식 <b>채팅 템플릿</b>을 꺼내 같은 입력을 직접 렌더</li>
+    <li>도구 JSON이 <b>시스템 블록 안 &lt;tools&gt;</b>에 놓이고, 그 아래 &lt;tool_call&gt; 호출 형식 안내·사용자 발화·모델 응답 자리가 이어짐</li>
+    <li>특수 토큰(<b>&lt;|im_start|&gt;</b> 등)은 서버가 문자가 아니라 <b>토큰</b>으로 취급</li>
+  </ul>
+  <div class="chain">
+    <div class="cell" style="min-width:180px;border-color:var(--bl)"><small>서버 처리값</small><b>prompt_eval_count 289</b></div>
+    <span class="ar">≈</span>
+    <div class="cell" style="min-width:180px;border-color:var(--gold)"><small>raw 렌더 입력</small><b class="g">prompt_eval_count 288</b></div>
+  </div>
+  <div class="hl">1토큰 차이는 시작 토큰·빈 생각 블록 처리 차이(<b>reasoning=False</b>로 고정해 재현) — <b>두 입력은 사실상 같은 텍스트</b>다.</div>
+  <aside>렌더한 텍스트를 raw 입력으로 보내면 288토큰이 나옵니다. 서버 처리값 289와의 1토큰 차이는 시작 토큰과 빈 생각 블록 처리 차이에서 오며, reasoning=False로 고정하면 재현됩니다. 도구 설명은 별도 채널이 아니라 시스템 지시와 같은 프롬프트 안에 놓입니다.</aside>
+</section>
+
+<!-- 17 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 4문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">도구는 <b>설명·인자 스키마·반환/실패</b>를 묶은 계약이며, 모델은 이 계약을 읽고 행동을 고른다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">도구를 주는 방식은 <b>텍스트 규약 → function calling → M×N → MCP</b>로, 표준 연결을 향해 왔다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t">시스템 프롬프트·Skill·MCP는 규칙·절차·연결을 맡지만, 모델에겐 <b>모두 문장</b>이다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t">랩에서 확인 — description은 JSON에 그대로, 도구 JSON은 <b>&lt;tools&gt; 시스템 블록</b>에 주입된다(289≈288).</span></div>
+  </div>
+  <aside>4번이 이 소단원의 결론입니다. 도구 설명 문장이 시스템 지시와 같은 프롬프트 안에 놓이는 이상, 계약을 쓰는 일은 곧 프롬프트를 쓰는 일입니다.</aside>
+</section>
+
+<!-- 18 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 도구 계약의 <b>세 자리</b>는 무엇이며 각각 무엇을 맡는가?</div>
+    <div class="q"><b>Q2.</b> 설명에서 <b>실패 조건을 빼면</b> 모델은 어떻게 행동하나?</div>
+    <div class="q"><b>Q3.</b> 도구를 주는 방식의 <b>네 단계 계보</b>를 순서대로 말하라.</div>
+    <div class="q"><b>Q4.</b> 능력을 건네는 세 경로(시스템 프롬프트·Skill·MCP)는 각각 무엇을 맡나?</div>
+    <div class="q"><b>Q5.</b> 랩에서 <b>289</b>와 <b>288</b>은 각각 무엇이고, 그 차이가 뜻하는 바는?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인하세요. Q2와 Q5가 오늘의 핵심을 가장 잘 가립니다.</aside>
+</section>
+
+<!-- 19 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> <b>설명</b>(목적·조건 문장) · <b>인자 스키마</b>(호출의 형식 제한) · <b>반환/실패</b>(다음 판단과 다음 행동).</div>
+    <div class="q a"><b>A2.</b> 빈자리를 <b>추측으로 메운다</b>. 그래서 인자 누락·범위 밖 값·일시적 서버 실패로도 계약을 확인해야 한다.</div>
+    <div class="q a"><b>A3.</b> ① 초기 텍스트 규약 → ② 네이티브 툴 호출 API(function calling) → ③ M×N 문제 → ④ <b>MCP</b>.</div>
+    <div class="q a"><b>A4.</b> 시스템 프롬프트=<b>규칙</b>, Skill=<b>절차</b>, MCP=<b>연결</b>. 그러나 모델에겐 모두 읽는 문장으로 환원된다.</div>
+    <div class="q a"><b>A5.</b> 289=서버 처리 프롬프트 토큰, 288=직접 렌더한 raw 입력 토큰. 1토큰 차이는 시작 토큰·빈 생각 블록 처리 차이로, <b>두 입력이 사실상 같음</b>을 뜻한다.</div>
+  </div>
+  <aside>A2와 A5를 자기 말로 설명할 수 있으면 오늘 목표는 달성입니다. 더 읽기 — ReAct(Yao 외), OpenAI function calling(2023.6), MCP 발표(2024.11.25).</aside>
+</section>
+
+<!-- 20 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>계약을 쓰는 일 = 프롬프트를 쓰는 일 🔧</h1>
+    <div class="big" style="margin-top:26px">도구 설명은 <span class="y">시스템 지시와 같은 프롬프트</span> 안에 놓인다<br><br>그러니 도구를 설계하는 일은<br><span class="y">모델이 읽을 지시를 쓰는 일</span>이다</div>
+    <p class="sub" style="margin-top:24px">도구 설명은 모델이 읽는 지시다 — 여기까지 · 다음: 실습 1 — 도구 정의서와 실패 사례 리디자인</p>
+  </div>
+  <aside>도구 설명 문장이 프롬프트 안에 놓이는 이상, 계약을 쓰는 일은 곧 프롬프트를 쓰는 일입니다. 다음 실습에서는 도구 정의서를 직접 쓰고 실패 사례를 리디자인해 봅니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

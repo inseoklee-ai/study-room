@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>안티패턴 회수와 관통 질문의 답 · 도구와 하네스 종합 정리</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 도구와 하네스 · ⑨</span>
+    <h1 style="margin:18px 0">안티패턴 회수와<br>관통 질문의 답</h1>
+    <p class="sub">도구를 준다 = 계약·권한·관찰·판정·중단을 함께 설계한다</p>
+  </div>
+  <aside>이 소단원은 중단원 「도구와 하네스」의 마지막이자 종합 정리입니다. 하루 동안 만든 설계가 실제 행동을 어떻게 바꾸는지 되짚습니다. 작동하는 모델을 상상하는 일과 그 모델이 고르고 읽고 멈추게 하는 일을 분리했기에, 실패도 막연한 불안이 아니라 설계에서 찾을 수 있는 순간이 됩니다.</aside>
+</section>
+
+<!-- 2 오늘의 여정 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘의 여정 — <span class="g">되짚고 꿰기</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>PART 1</small><b>네 안티패턴 회수</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>PART 2</small><b class="g">관통 질문에 답</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:130px;border-color:var(--gold)"><small>PART 3</small><b>중단원을 한 줄로</b></div>
+  </div>
+  <ul class="pts">
+    <li>자주 반복되는 나쁜 설계 습관 <b>네 가지</b>를 실패 순간과 이어 본다</li>
+    <li>세 실패 순간에 <b>무엇이 비어 있는지</b>로 관통 질문에 답한다</li>
+    <li>"도구를 준다"의 뜻을 <b>다섯 요소</b>의 설계로 다시 정의한다</li>
+    <li>중단원 전체를 <b>한 줄</b>로 꿰고, 아직 남는 열린 질문으로 닫는다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 한 문장 — 실패는 불안이 아니라 <b>설계에서 찾을 수 있는 순간</b>이다.</div>
+  <aside>전후 판정의 관찰을 도구 하나의 호출 너머로 확장하는 것이 오늘의 목표입니다. 세 파트를 지나면, 안티패턴을 잔소리가 아니라 어느 실패 순간을 키우는지로 구분하고, 그 순간에 비어 있는 계약을 채우는 일로 볼 수 있습니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part">
+    <div class="pno">1</div>
+    <h2 style="margin:0">네 안티패턴을 회수한다</h2>
+    <p style="margin-top:11px">자주 반복되는 나쁜 설계 습관을 실패 순간에 잇는다</p>
+    <span class="who">도구 남발 · 데이터 덤프 · 권한 방치 · 중단 없는 순환</span>
+  </div>
+  <aside>안티패턴은 자주 반복되는 나쁜 설계 습관입니다. 하나의 습관이 실패를 한곳에만 만들지는 않지만, 어느 순간을 특히 크게 만드는지는 구분할 수 있습니다. 그 구분이 처방을 어디에 둘지를 정합니다.</aside>
+</section>
+
+<!-- 4 안티패턴이란 -->
+<section class="slide" data-part="PART 1">
+  <h2>🔁 안티패턴 — <span class="g">습관과 실패 순간</span></h2>
+  <ul class="pts">
+    <li><b>안티패턴</b> = 자주 반복되는 나쁜 설계 습관</li>
+    <li>한 습관이 실패를 <b>한곳에만</b> 만들지는 않는다</li>
+    <li>그러나 <b>어느 순간을 특히 크게 만드는지</b>는 구분할 수 있다</li>
+  </ul>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--gy)"><small>순간 A</small><b>잘못 고름</b></div>
+    <span class="ar">·</span>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>순간 B</small><b>잘못 읽음</b></div>
+    <span class="ar">·</span>
+    <div class="cell" style="min-width:150px;border-color:var(--red)"><small>순간 C</small><b>같은 실수 반복</b></div>
+  </div>
+  <div class="hl">각 안티패턴이 <b>키우는 실패 순간</b>을 짚으면, 처방을 그 순간에 정확히 놓을 수 있다.</div>
+  <aside>세 실패 순간(잘못 고름·잘못 읽음·같은 실수 반복)은 이 중단원 내내 관통해 온 질문입니다. 네 안티패턴을 이 순간들에 매핑하면, 어떤 습관이 어떤 순간을 부풀리는지가 드러나고 처방의 위치가 정해집니다.</aside>
+</section>
+
+<!-- 5 네 안티패턴 큰 표 -->
+<section class="slide" data-part="PART 1">
+  <h2>📋 네 안티패턴 — <span class="g">키우는 실패 순간과 처방</span></h2>
+  <table class="t">
+    <tr><th>안티패턴</th><th>키우는 실패 순간</th><th>처방</th></tr>
+    <tr><td>도구 남발<br><small>수십 개를 한꺼번에 주입</small></td><td>잘못 고름</td><td>비슷한 이름·겹친 목적에서 잘못 고르고 설명을 오래 읽는 동안 컨텍스트 낭비 → 기본 목록은 필요한 것만, 드문 기능은 필요할 때 연결</td></tr>
+    <tr><td>반환값 데이터 덤프<br><small>원본을 통째로</small></td><td>잘못 읽음</td><td>중요한 값과 잡음을 구별 못 함 → 결정에 필요한 필드·근거 위치·잘린 사실만 반환(숨기는 게 아니라 관찰 대상을 드러냄)</td></tr>
+    <tr><td>권한 방치<br><small>읽기·쓰기 미구분</small></td><td><b>세 순간 모두</b></td><td>잘못 고른 도구가 곧 외부 상태를 바꾸고, 잘못 읽은 값이 잘못된 대상에 쓰임 → 읽기·변경 권한 분리, 대상·작업 종류·승인 조건을 서버에서도 확인</td></tr>
+    <tr><td>중단 없는 순환<br><small>실패해도 같은 호출 계속</small></td><td>같은 실수 반복</td><td>오류 문구만 바꿔 재시도·입력 추측은 해결의 증거가 아님 → 재시도 횟수·시간 한도, 한 번에 하나만 수정 후 전후 비교, 조건 넘기면 사람 이관</td></tr>
+  </table>
+  <aside>권한 방치가 세 순간 모두를 키우는 이유는, 잘못 고른 도구가 곧 외부 상태를 바꾸고, 잘못 읽은 값이 잘못된 대상에 쓰이며, 재시도가 피해를 넓히기 때문입니다. 권한은 다른 세 안티패턴의 실패를 실제 피해로 증폭시키는 곱셈 인자입니다.</aside>
+</section>
+
+<!-- 6 도구 남발·데이터 덤프 초점 -->
+<section class="slide" data-part="PART 1">
+  <h2>🎚️ 처방의 공통 원리 — <span class="g">드러내되 줄인다</span></h2>
+  <div class="grid2">
+    <div class="box">
+      <h3 class="r">도구 남발</h3>
+      <p>수십 개를 한꺼번에 주면 <b>비슷한 이름·겹친 목적</b>에서 잘못 고르고, 설명을 오래 읽는 동안 컨텍스트를 낭비한다. 기본은 <b>과업에 필요한 것만</b>, 드문 기능은 필요할 때 연결한다.</p>
+    </div>
+    <div class="box">
+      <h3 class="r">반환값 데이터 덤프</h3>
+      <p>원본을 통째로 반환하면 <b>중요한 값과 잡음</b>을 구별하지 못한다. 결정에 필요한 필드·근거 위치·잘린 사실만 반환하는 것은 <b>정보를 숨기는 게 아니라 관찰 대상을 드러내는</b> 일이다.</p>
+    </div>
+  </div>
+  <div class="hl">둘 다 원리는 하나 — <b>모델이 고르고 읽을 대상을 좁혀</b> 잘못 고름·잘못 읽음의 순간을 줄인다.</div>
+  <aside>줄인다는 것은 능력을 빼앗는 게 아닙니다. 도구 남발의 처방과 데이터 덤프의 처방은 모두 모델이 실제로 판단에 쓸 대상만 남겨, 선택과 독해의 실수 표면을 작게 만드는 같은 원리입니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part">
+    <div class="pno">2</div>
+    <h2 style="margin:0">관통 질문에 답하기</h2>
+    <p style="margin-top:11px">세 실패 순간에 무엇이 비어 있는가</p>
+    <span class="who">계약 · 관찰 · 판정 · 중단 · 권한</span>
+  </div>
+  <aside>이 중단원을 관통해 온 질문은 "세 실패 순간이 왜 열리는가"였습니다. 이제 각 순간에 무엇이 비어 있는지로 답합니다. 답은 새로운 기법이 아니라, 이미 배운 요소 중 그 순간에서 빠진 것을 지목하는 방식입니다.</aside>
+</section>
+
+<!-- 8 세 순간에 무엇이 비어 있나 -->
+<section class="slide" data-part="PART 2">
+  <h2>🕳️ 세 순간 — <span class="g">무엇이 비어 있나</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">고</span><span class="t"><b>도구를 잘못 고르는 순간</b> — 언제 쓰는지와 <b class="g">인자·반환·실패 뒤 행동을 적은 계약</b>이 비어 있다</span></div>
+    <div class="st"><span class="n">읽</span><span class="t"><b>결과를 잘못 읽는 순간</b> — 반환 근거를 남기는 <b class="g">관찰</b>과 그 기록을 비교하는 <b class="g">판정</b>이 비어 있다</span></div>
+    <div class="st"><span class="n">반</span><span class="t"><b>같은 실수를 반복하는 순간</b> — 한 번에 한 곳만 고치게 하는 <b class="g">중단 기준</b>과 사람에게 넘기는 <b class="g">이관 조건</b>이 비어 있다</span></div>
+  </div>
+  <div class="hl">실패의 처방은 "더 똑똑한 모델"이 아니라, 그 순간에 <b>비어 있던 설계 요소를 채우는 것</b>이다.</div>
+  <aside>각 순간의 답은 앞 소단원들의 회수입니다. 계약은 도구 정의서에서, 관찰과 판정은 트레이스와 전후 비교에서, 중단과 이관은 최소 하네스의 중단 지점에서 왔습니다. 관통 질문은 이 요소들을 순간별로 다시 배치합니다.</aside>
+</section>
+
+<!-- 9 권한과 승인 경계 추가 -->
+<section class="slide" data-part="PART 2">
+  <h2>🔐 여기에 더할 하나 — <span class="g">최소 권한과 승인 경계</span></h2>
+  <ul class="pts">
+    <li>계약·관찰·판정·중단을 채워도, 호출은 결국 <b>실제 행동</b>으로 이어진다</li>
+    <li>그래서 <b>최소 권한과 승인 경계</b>를 더해야 한다</li>
+    <li>그래야 호출이 행동이 되어도 <b>피해 범위를 제한</b>할 수 있다</li>
+  </ul>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>계약</small><b>잘못 고름을 막음</b></div>
+    <span class="ar">+</span>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>관찰·판정</small><b>잘못 읽음을 막음</b></div>
+    <span class="ar">+</span>
+    <div class="cell" style="min-width:150px;border-color:var(--red)"><small>중단·이관</small><b>반복을 막음</b></div>
+    <span class="ar">+</span>
+    <div class="cell" style="min-width:150px;border-color:var(--gold)"><small>권한·승인</small><b>피해를 제한</b></div>
+  </div>
+  <aside>앞의 세 요소가 실패 순간을 줄이는 예방이라면, 권한과 승인 경계는 예방이 뚫렸을 때의 피해 상한입니다. 완벽한 예방이 불가능하기에, 최소 권한은 선택이 아니라 나머지 넷과 짝을 이루는 필수 요소입니다.</aside>
+</section>
+
+<!-- 10 도구를 준다의 정의 -->
+<section class="slide" data-part="PART 2">
+  <h2>🎁 "도구를 준다"의 <span class="g">진짜 뜻</span></h2>
+  <div class="big">도구를 준다는 말은<br><span class="y">기능을 연결</span>한다는 뜻이 아니라<br><span class="y">계약·권한·관찰·판정·중단</span>을 함께 설계한다는 뜻<small>다섯 요소를 한 패킷에 적어야 호출이 행동이 되어도 실패 순간이 설계로 되돌아온다</small></div>
+  <div class="hl">기능만 연결하면 세 실패 순간이 그대로 열린다. 다섯 요소를 함께 적어야 <b>실패가 계약 문장으로 되돌아온다.</b></div>
+  <aside>이 문장이 중단원 전체의 결론입니다. "도구를 연결했다"와 "도구를 설계했다"의 차이가 곧 실패가 열린 채로 남느냐, 설계로 회수되느냐의 차이입니다. 다섯 요소는 각각 앞의 소단원에서 하나씩 세워 온 것들입니다.</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part">
+    <div class="pno">3</div>
+    <h2 style="margin:0">중단원을 한 줄로</h2>
+    <p style="margin-top:11px">말하는 모델에서 안전한 개선 측정까지</p>
+    <span class="who">계약 → 하네스 → 트레이스 → 경계 → 판정</span>
+  </div>
+  <aside>마지막으로 「도구와 하네스」 전체를 하나의 흐름으로 꿰어 봅니다. 각 소단원은 독립된 주제가 아니라, 도구를 연결하면 열리는 실패를 하나씩 설계로 되돌리는 연속된 단계였습니다.</aside>
+</section>
+
+<!-- 12 중단원 한 줄로 흐름 -->
+<section class="slide" data-part="PART 3">
+  <h2>🧵 중단원을 <span class="g">한 줄로 꿴다</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">말하는 모델이 도구에 연결되면 <b>세 실패 순간</b>(잘못 고름·잘못 읽음·같은 실수 반복)이 열린다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">도구 설명은 모델이 읽는 <b>지시(계약)</b>이고, 그 계약은 곧 <b>프롬프트</b>다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">도구 정의서 <b>여섯 항목</b>으로 실패를 계약 문장으로 되돌린다</span></div>
+    <div class="st"><span class="n">4</span><span class="t">최소 하네스의 <b>여섯 지점</b>(시스템 지시·도구·권한·실행 환경·관찰·중단)이 도구의 바깥을 설계한다</span></div>
+    <div class="st"><span class="n">5</span><span class="t"><b>트레이스</b>를 남기고 <b>한 번에 한 곳만</b> 고쳐 재실행한다</span></div>
+    <div class="st"><span class="n">6</span><span class="t"><b>권한과 신뢰 경계(네 층)</b>로 안전을 지키고, <b>전후 판정과 회귀</b>로 개선을 측정한다</span></div>
+  </div>
+  <aside>이 여섯 단계가 각 소단원의 순서였습니다. 앞 단계가 다음 단계의 전제를 만듭니다. 실패 순간을 열고, 그것을 계약으로 이름 붙이고, 계약의 바깥을 하네스로 감싸고, 흔적을 남겨 고치고, 경계로 지키고, 마지막으로 측정합니다.</aside>
+</section>
+
+<!-- 13 핵심 정리 -->
+<section class="slide" data-part="마무리">
+  <h2>📌 이것만은 꼭 — <span class="g">핵심 4문장</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>안티패턴</b>은 나쁜 설계 습관 — 각각이 <b>키우는 실패 순간</b>을 짚어 처방을 그곳에 놓는다.</span></div>
+    <div class="st"><span class="n">2</span><span class="t">세 순간에 비어 있는 것은 각각 <b>계약</b> · <b>관찰·판정</b> · <b>중단·이관</b>이다.</span></div>
+    <div class="st"><span class="n">3</span><span class="t">여기에 <b>최소 권한과 승인 경계</b>를 더해야 호출이 행동이 되어도 피해가 제한된다.</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>도구를 준다 = 계약·권한·관찰·판정·중단을 함께 설계한다.</b></span></div>
+  </div>
+  <aside>특히 4번이 중단원 전체의 태도입니다. 도구를 연결했다고 끝난 것이 아니라, 다섯 요소를 한 패킷에 적었을 때 비로소 도구를 준 것입니다. 이 네 문장은 앞의 모든 소단원을 압축합니다.</aside>
+</section>
+
+<!-- 14 질문 -->
+<section class="slide" data-part="마무리">
+  <h2>🎯 이해도 확인 질문</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> <b>안티패턴</b>이란 무엇이며, 각 안티패턴을 볼 때 무엇을 구분해야 하는가?</div>
+    <div class="q"><b>Q2.</b> 네 안티패턴 중 <b>세 실패 순간 모두</b>를 키우는 것은 무엇이며 왜인가?</div>
+    <div class="q"><b>Q3.</b> 도구를 <b>잘못 고르는 순간</b>과 <b>잘못 읽는 순간</b>에는 각각 무엇이 비어 있나?</div>
+    <div class="q"><b>Q4.</b> 계약·관찰·판정·중단을 채운 뒤에도 <b>더해야 할 하나</b>는 무엇이고 왜인가?</div>
+    <div class="q"><b>Q5.</b> "도구를 준다"는 말의 <b>진짜 뜻</b>을 한 문장으로 말하면?</div>
+  </div>
+  <aside>답이 바로 떠오르지 않으면 앞 장으로 돌아가 확인해 보세요. Q3와 Q5가 이 소단원의 핵심을 가장 잘 가립니다.</aside>
+</section>
+
+<!-- 15 정답 -->
+<section class="slide" data-part="마무리">
+  <h2>✅ 정답 &amp; 해설</h2>
+  <div class="qa">
+    <div class="q a"><b>A1.</b> <b>자주 반복되는 나쁜 설계 습관.</b> 실패를 한곳에만 만들진 않지만, <b>어느 순간을 특히 크게 만드는지</b>를 구분한다.</div>
+    <div class="q a"><b>A2.</b> <b>권한 방치.</b> 잘못 고른 도구가 곧 외부 상태를 바꾸고, 잘못 읽은 값이 잘못된 대상에 쓰이며, 재시도가 피해를 넓히기 때문.</div>
+    <div class="q a"><b>A3.</b> 잘못 고름 → <b>계약</b>(언제 쓰는지·인자·반환·실패 뒤 행동)이, 잘못 읽음 → <b>관찰과 판정</b>이 비어 있다.</div>
+    <div class="q a"><b>A4.</b> <b>최소 권한과 승인 경계.</b> 호출은 결국 실제 행동이 되므로, 이것이 있어야 <b>피해 범위를 제한</b>한다.</div>
+    <div class="q a"><b>A5.</b> 기능을 연결하는 게 아니라 <b>계약·권한·관찰·판정·중단을 함께 설계</b>하는 것.</div>
+  </div>
+  <aside>A3와 A5를 자기 말로 설명할 수 있으면 이 중단원의 목표는 달성입니다. 세 순간에 비는 요소와 "도구를 준다"의 정의가 전체를 관통하는 뼈대입니다.</aside>
+</section>
+
+<!-- 16 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>도구와 하네스 —<br>여기까지 🧭</h1>
+    <div class="big" style="margin-top:26px">도구를 준다 =<br><span class="y">계약·권한·관찰·판정·중단</span>을 함께 설계한다<br><br>그러고도 남는 열린 질문 —<br><span class="y">환경과 요청이 바뀔 때<br>어느 계약을 먼저 다시 측정해야 하는가</span></div>
+    <p class="sub" style="margin-top:24px">중단원 「도구와 하네스」 종합 정리 · 여기까지</p>
+  </div>
+  <aside>다섯 요소를 한 패킷에 적은 뒤에도 남는 질문이 이것입니다. 설계는 한 번 적고 끝나는 게 아니라, 환경과 요청이 바뀔 때마다 어느 계약을 먼저 다시 측정할지 고르는 일입니다. 이 열린 질문을 품고 다음 중단원으로 넘어갑니다.</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
