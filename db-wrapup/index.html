@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>마무리 · 회고와 핵심 정리 (데이터베이스 ⑧)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 데이터베이스 ⑧</span>
+    <h1 style="margin:18px 0">마무리<br>— 회고와 핵심 정리</h1>
+    <p class="sub">여덟 소단원을 한 장으로 · 그리고 내가 할 수 있는 행동</p>
+  </div>
+  <aside>강의를 닫는 소단원입니다. 회고 질문으로 스스로 말해 보게 하고, 핵심 정리 표로 '행동'까지 이어 줍니다.</aside>
+</section>
+
+<!-- 2 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">오늘의 회고 — 자기 노트에 짧게</h2>
+  <p style="margin-top:11px">네 가지 질문</p><span class="who">⑧ 마무리</span></div>
+  <aside>읽고 끝내면 남지 않습니다. 네 질문에 자기 말로 답하게 하세요.</aside>
+</section>
+
+<!-- 3 회고 질문 -->
+<section class="slide" data-part="PART 1">
+  <h2>이 <span class="g">네 가지</span>를 자기 말로</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>데이터베이스가 도서관 또는 마법 장난감 상자와 어떻게 닮았는지</b> 한 문장으로?</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>SQL 한 줄</b>(<code>SELECT … FROM … WHERE …</code>)을 <b>내 서비스 예로 바꿔</b> 말로 풀어 본다면?</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>"Little Bobby Tables"</b>가 내 서비스에서 일어나지 않게 하려면, <b>AI에게 무엇을 요구</b>해야 할까?</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>백업 참사 중 가장 섬뜩했던 것</b>은? 나는 어떻게 예방할까?</span></div>
+  </div>
+  <div class="hl">✍️ 네 질문 모두 <b>'외웠는가'가 아니라 '내 서비스로 옮길 수 있는가'</b>를 묻습니다</div>
+  <aside>3번의 정답은 "파라미터화 쿼리로 처리해줘, 사용자 입력을 그대로 신뢰하지 마"입니다. 4번은 픽사·GitLab·Ma.gnolia 중 아무거나 — 대비책은 3-2-1 + 복구 확인.</aside>
+</section>
+
+<!-- 4 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">핵심 정리 — 배운 것과 할 수 있는 행동</h2>
+  <p style="margin-top:11px">다섯 줄로</p><span class="who">⑧ 마무리</span></div>
+  <aside>이 표 한 장이 강의 전체의 요약입니다.</aside>
+</section>
+
+<!-- 5 핵심 정리 표 -->
+<section class="slide" data-part="PART 2">
+  <h2>다섯 줄 <span class="g">요약</span></h2>
+  <table class="t">
+    <tr><th>오늘 배운 것</th><th>한 문장 정리</th><th>내가 할 수 있는 행동</th></tr>
+    <tr><td><b>데이터베이스의 역할</b></td><td>서비스의 '기억' — 데이터를 남기고 빠르게 찾아 줍니다</td><td>새로고침해도 남아야 할 데이터를 <b>구분</b>합니다</td></tr>
+    <tr><td><b>역사와 갈래</b></td><td>파일→SQL→NoSQL(4종)→클라우드로 발전했습니다</td><td>표(SQL)와 유연한 상자(NoSQL)의 <b>성격</b>을 압니다</td></tr>
+    <tr><td><b>SQL 알아보기</b></td><td>SQL은 거의 영어 문장이며, 코드는 AI가 씁니다</td><td><code>SELECT … FROM … WHERE …</code>를 <b>말로 풀 수</b> 있습니다</td></tr>
+    <tr><td><b>보안·백업</b></td><td>SQL 주입은 파라미터화로 막고, 데이터는 백업으로 지킵니다</td><td>AI에게 <b>'파라미터화·해시·자동 백업'</b>을 요구합니다</td></tr>
+    <tr><td><b>무료 DB 고르기</b></td><td>무료 티어로 시작하되 한도·백업·정책을 압니다</td><td>첫 서비스엔 <b>Supabase(Postgres)</b>를 후보로 둡니다</td></tr>
+  </table>
+  <aside>세 번째 열이 중요합니다. '안다'가 아니라 '한다'로 끝나야 강의가 남습니다.</aside>
+</section>
+
+<!-- 6 여덟 걸음 되짚기 -->
+<section class="slide" data-part="PART 2">
+  <h2>여덟 걸음 <span class="b">되짚기</span> ①~④</h2>
+  <div class="steps">
+    <div class="st"><span class="n">①</span><span class="t"><b>저장할 곳이 필요한 이유</b> — 메모리는 사라지고 DB는 남는다. 다른 건 <b>규칙·속도·동시성</b> 셋</span></div>
+    <div class="st"><span class="n">②</span><span class="t"><b>역사</b> — 파일(60s) → 표(1970 코드) → SQL(1974) → 오라클(1979) → NoSQL(2000s) → 클라우드. <b>NoSQL = Not Only SQL</b></span></div>
+    <div class="st"><span class="n">③</span><span class="t"><b>SQL과 데이터의 모양</b> — CRUD · 표/행/열 · 1:N과 N:M · <b>색인</b> · <b>트랜잭션(ACID)</b> · <b>정규화</b> · 마이그레이션</span></div>
+    <div class="st"><span class="n">④</span><span class="t"><b>사용자를 다루기</b> — 회원 표와 CRUD · <b>세션 vs 토큰</b> · 캐시와 Redis · <b>인증은 직접 만들지 않는다</b></span></div>
+  </div>
+  <aside>되짚기는 빠르게 넘깁니다. 학습자가 "아 그거"라고 떠올릴 수 있으면 충분합니다.</aside>
+</section>
+
+<!-- 7 여덟 걸음 되짚기 2 -->
+<section class="slide" data-part="PART 2">
+  <h2>여덟 걸음 <span class="b">되짚기</span> ⑤~⑧</h2>
+  <div class="steps">
+    <div class="st"><span class="n">⑤</span><span class="t"><b>보안과 백업</b> — <b>Bobby Tables</b>와 파라미터화 · TalkTalk(15만 7천 명, 4,200만 파운드) · 최소 수집 · <b>3-2-1 규칙</b></span></div>
+    <div class="st"><span class="n">⑥</span><span class="t"><b>무료 DB 고르기</b> — Supabase·Neon·Turso · 로컬(SQLite·Docker) · <b>용량·일시정지·백업·정책·요금</b> 다섯 점검</span></div>
+    <div class="st"><span class="n">⑦</span><span class="t"><b>실습</b> — PRD → <b>구조도 먼저 합의</b> → 로컬 SQLite로 만들고 → 클라우드(Supabase, <b>RLS 켜기</b>)로</span></div>
+    <div class="st"><span class="n">⑧</span><span class="t"><b>마무리</b> — 회고 네 질문과 핵심 정리 다섯 줄</span></div>
+  </div>
+  <div class="hl">🎯 강의를 꿴 한 줄 — <b>코드는 AI가 쓰고, 무엇을 어떤 모양으로 남기고 어떻게 지킬지는 내가 정한다</b></div>
+  <aside>이 한 줄이 소단원 ①의 '오늘의 핵심 한 문장'과 같습니다. 처음과 끝이 같은 문장으로 닫힙니다.</aside>
+</section>
+
+<!-- 8 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">출처 · 더 찾아보기</h2>
+  <p style="margin-top:11px">직접 읽어 볼 것들</p><span class="who">⑧ 마무리</span></div>
+  <aside>수업 뒤에 스스로 확인할 수 있게 링크를 남깁니다.</aside>
+</section>
+
+<!-- 9 출처 1 -->
+<section class="slide" data-part="PART 3">
+  <h2>개념 · 역사 · 갈래</h2>
+  <ul class="pts">
+    <li><b>비전공자를 위한 데이터베이스란</b> — Stackby, "What is a database: A beginner's guide" · stackby.com/blog/what-is-a-database/</li>
+    <li><b>데이터베이스의 역사</b> — Cockroach Labs, "A brief history of databases" · cockroachlabs.com/blog/history-of-databases-distributed-sql/</li>
+    <li><b>NoSQL 종류</b> — MongoDB, "What Is NoSQL? NoSQL Databases Explained" · mongodb.com/resources/basics/databases/nosql-explained</li>
+    <li><b>트랜잭션 격리</b> — PostgreSQL, "Transaction Isolation" · postgresql.org/docs/current/transaction-iso.html</li>
+    <li><b>LHC 충돌 수</b> — CERN, "Facts and figures about the LHC" · home.cern/resources/faqs/facts-and-figures-about-lhc <small>(2026-02 확인)</small></li>
+  </ul>
+  <aside>PostgreSQL 공식 문서는 개발자로 더 갈 사람에게 권합니다. 격리 수준은 DB마다 실제 동작이 달라 문서 확인이 필수입니다.</aside>
+</section>
+
+<!-- 10 출처 2 -->
+<section class="slide" data-part="PART 3">
+  <h2>보안 · 백업 · 무료 정책</h2>
+  <ul class="pts">
+    <li><b>SQL 주입과 방어</b> — OWASP, "SQL Injection Prevention Cheat Sheet" · cheatsheetseries.owasp.org</li>
+    <li><b>Little Bobby Tables</b> — xkcd, "Exploits of a Mom" · xkcd.com/327/</li>
+    <li><b>SQL 주입 막는 법(언어별 예시)</b> — bobby-tables.com</li>
+    <li><b>데이터 손실 참사와 백업 교훈</b> — EnvisionIT, "Six Horror Stories of Data Loss" · blog.envisionitsolutions.com</li>
+    <li><b>무료 데이터베이스 비교(2026)</b> — agentdeals, "Database Free Tier Comparison 2026" · agentdeals.dev/database-free-tier-comparison-2026</li>
+    <li><b>무료 정책 공식 페이지</b> — Supabase · Neon · Turso · PlanetScale 가격 페이지 <small>(2026-02 확인)</small></li>
+  </ul>
+  <div class="hl">🔎 무료 정책은 <b>가입 직전에 공식 페이지에서 다시</b> 확인하세요 — 이 강의의 수치도 확인 시점 기준입니다</div>
+  <aside>bobby-tables.com은 언어별 방어 코드를 모아 둔 사이트라 실습에 바로 쓸 수 있습니다.</aside>
+</section>
+
+<!-- 11 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 마지막 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 이 강의를 한 줄로 요약하면?</div>
+    <div class="q a"><b>A1.</b> <b>코드는 AI가 쓰고, 무엇을 어떤 모양으로 남기고 어떻게 지킬지는 내가 정한다.</b></div>
+    <div class="q"><b>Q2.</b> AI에게 DB를 붙여 달라고 할 때 빠뜨리면 안 되는 조건 두 가지는?</div>
+    <div class="q a"><b>A2.</b> ① 접속 정보는 코드가 아니라 <b>환경변수(.env)</b>로 ② 값은 <b>파라미터화 쿼리</b>로 넣고 비밀번호는 <b>해시</b>로 저장.</div>
+    <div class="q"><b>Q3.</b> 실습에서 클라우드(Supabase)로 옮길 때 반드시 켜야 하는 것은?</div>
+    <div class="q a"><b>A3.</b> <b>RLS(행 수준 보안).</b> 안 켜면 공개 키로 누구나 데이터에 접근할 수 있다.</div>
+  </div>
+  <aside>세 문제 모두 '행동'을 묻습니다. 개념 암기가 아니라 실제로 요구할 문장을 답하게 하세요.</aside>
+</section>
+
+<!-- 12 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>기억을 설계한다 🗂️</h1>
+    <div class="big" style="margin-top:26px">데이터베이스는 서비스의 <span class="y">기억</span>입니다<br>코드는 AI가 쓰고 <span class="y">기억의 모양은 내가 설계합니다</span></div>
+    <p class="sub" style="margin-top:24px">데이터베이스 — 강의 완결 (8/8)</p>
+  </div>
+  <aside>대단원 2 중단원② 강 3 완결입니다. 다음 강 4는 'AI 에이전트 도구 — 내 AI를 더 강하게'로, 오늘 만든 Todo 앱을 'AI가 아는' 앱으로 바꾸는 실습이 이어집니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

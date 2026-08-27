@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>무료로 쓸 수 있는 DB 고르기 · 한도·백업·정책 (데이터베이스 ⑥)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 데이터베이스 ⑥</span>
+    <h1 style="margin:18px 0">무료로 쓸 수 있는<br>DB 고르기</h1>
+    <p class="sub">공짜로 시작하기 — 한도·백업·정책을 알고 고른다</p>
+  </div>
+  <aside>비전공자도 무료로 진짜 데이터베이스를 쓸 수 있습니다. 다만 시작 전에 하나만 기억하세요 — 무료 티어는 배우기·MVP용이지 큰 규모의 운영용은 아닙니다.</aside>
+</section>
+
+<!-- 2 여는 장면 -->
+<section class="slide" data-part="표지">
+  <h2>발표 직전에 <span class="r">앱이 멈추는</span> 이유</h2>
+  <p>프로젝트를 막 시작한 학생이 "무료로 시작하고 싶은데 뭘 골라야 하지?"라며 서비스마다 다른 제한을 비교하고 있습니다. <b>가입은 쉬워도 저장 용량이나 사용량 제한을 놓치면, 발표 직전에 앱이 멈출 수 있습니다.</b></p>
+  <div class="hl">🎯 그래서 <b>목적과 제한을 함께 보고</b> 고르는 기준이 필요합니다</div>
+  <ul class="pts">
+    <li>표를 보기 전에 먼저 적어 보세요 — <b>내 서비스가 SQL 표와 로그인·파일저장을 한 번에 원하는지</b>, 아니면 <b>DB만 필요한지</b></li>
+    <li>무료 한도는 <b>가입 직전에 공식 가격 페이지에서 다시 확인</b>합니다</li>
+  </ul>
+  <aside>기능을 만들기 전부터 표가 부담스러울 수 있습니다. 내 필요를 한 줄로 적고 나서 표를 보면 훨씬 쉽습니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">무료 데이터베이스 비교</h2>
+  <p style="margin-top:11px">2026-02 공식 가격 페이지 확인 · 정책은 바뀔 수 있음</p><span class="who">⑥ 무료 DB 고르기</span></div>
+  <aside>수치는 확인 시점을 반드시 함께 말합니다. 무료 정책은 자주 바뀝니다.</aside>
+</section>
+
+<!-- 4 비교표 -->
+<section class="slide" data-part="PART 1">
+  <h2>네 후보 — <span class="g">공식 정책에서 확인한 것</span></h2>
+  <table class="t">
+    <tr><th>서비스</th><th>종류</th><th>공식 무료/시작 정책에서 확인한 점</th><th>비전공자에게</th></tr>
+    <tr><td><b>Supabase</b></td><td>PostgreSQL<br><small>(SQL)</small></td><td>Free 프로젝트당 <b>DB 500MB</b>, 스토리지 1GB. <b class="r">자동 백업은 Free에 포함되지 않으며</b> 1주 미사용 뒤 일시정지될 수 있음</td><td>로그인·파일까지 한 번에 실습할 때 후보</td></tr>
+    <tr><td><b>Neon</b></td><td>PostgreSQL<br><small>(SQL)</small></td><td>Free는 <b>개발·프로토타이핑용</b>이며, 유휴 컴퓨트가 scale-to-zero될 수 있음</td><td>순수 Postgres와 브랜치를 써 보고 싶을 때</td></tr>
+    <tr><td><b>Turso</b></td><td>SQLite</td><td>Free: DB 100개, 저장소 <b>5GB</b>, 월 읽기 5억 행·쓰기 1천만 행, PITR 1일</td><td>SQLite 기반의 가벼운 서비스를 실험할 때</td></tr>
+    <tr><td><b>PlanetScale</b></td><td>Postgres / Vitess</td><td>현재 시작 요금은 개발용 Postgres 단일 노드 <b class="r">월 $5부터</b>로, 무료 티어 표에는 넣지 않음</td><td>무료만이 조건이면 다른 후보부터 검토</td></tr>
+  </table>
+  <aside>확인 링크(2026-02): supabase.com/pricing · neon.com/pricing · turso.tech/pricing · planetscale.com/pricing. 정책·지역·가입 시점에 따라 한도와 기능이 달라질 수 있습니다. PlanetScale은 예전에 무료 티어가 있었다가 없어진 사례로, "무료가 사라질 수 있다"는 산 증거입니다.</aside>
+</section>
+
+<!-- 5 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">클라우드 말고, 내 컴퓨터에 직접 설치해서 무료로</h2>
+  <p style="margin-top:11px">SQLite · PostgreSQL · MySQL · Docker</p><span class="who">⑥ 무료 DB 고르기</span></div>
+  <aside>지금까지는 '남의 컴퓨터(클라우드)'를 빌리는 무료 티어를 봤습니다. DB는 내 컴퓨터에 직접 설치해서도 무료로 쓸 수 있습니다 — 대부분 오픈소스라 설치도 사용도 공짜입니다.</aside>
+</section>
+
+<!-- 6 로컬 세 가지 -->
+<section class="slide" data-part="PART 2">
+  <h2>내 컴퓨터에서 무료로 — <span class="g">세 가지 길</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>SQLite — 설치도 서버도 없다.</b> DB 전체가 <b>파일 하나</b>. 서버를 따로 켤 필요 없이 그 파일을 앱이 직접 읽고 쓴다. 작은 앱·프로토타입·모바일 앱이 즐겨 쓴다 (파이썬 등에 기본 내장돼 사실상 '설치 없이' 쓰기도)</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>PostgreSQL · MySQL — 진짜 DB를 내 컴퓨터에.</b> 회사들이 실제로 쓰는 그 오픈소스 DB를 무료로 설치할 수 있다. 클라우드에서 빌리던 것과 <b>같은 것을 내 손안에서</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>Docker — 명령 한 줄로 띄우기.</b> 설치가 번거로우면 DB를 '컨테이너'로 띄운다. 내 컴퓨터를 어지럽히지 않고 켜고, 필요 없으면 <b>통째로 지운다</b></span></div>
+  </div>
+  <aside>SQLite가 실습(소단원 ⑦)의 기본값이 되는 이유가 1번입니다. 파일 하나라서 설치·계정·네트워크 문제가 아예 없습니다.</aside>
+</section>
+
+<!-- 7 로컬 vs 클라우드 -->
+<section class="slide" data-part="PART 2">
+  <h2>로컬 vs 클라우드 — <span class="b">언제 뭘</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>💻 로컬 (내 컴퓨터)</h3><p>완전 무료, 오프라인에서도 되고 내 데이터가 내 손안에. <b class="g">개발·학습·실험에 최고.</b> 단, 남에게 열려면 배포나 터널이 필요하고(지난 시간의 '집 서버'), <b class="r">내 컴퓨터가 꺼지면 멈춘다</b></p></div>
+    <div class="box"><h3>☁️ 클라우드</h3><p><b>24시간 켜져 있고</b> 남에게 안정적으로 열린다. <b class="g">실제 서비스엔 이쪽</b></p></div>
+  </div>
+  <div class="chain">
+    <div class="cell" style="min-width:160px"><small>만들 때</small><b>내 컴퓨터<br>(로컬 SQLite)</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:160px;border-color:var(--gr)"><small>세상에 낼 때</small><b class="g">클라우드 DB</b></div>
+  </div>
+  <div class="hl">🗣️ AI에게 — <b>"개발용으로는 가벼운 로컬 SQLite로 시작하고, 배포할 때 클라우드 DB로 바꿀 수 있게 해줘."</b></div>
+  <aside>이 흐름이 소단원 ⑦ 실습의 길 A → 길 B 구조와 정확히 같습니다.</aside>
+</section>
+
+<!-- 8 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">무료 티어, 시작 전에 확인할 것</h2>
+  <p style="margin-top:11px">용량 · 일시정지 · 백업 · 정책 · 요금</p><span class="who">⑥ 무료 DB 고르기</span></div>
+  <aside>발표 직전에 멈추는 사고를 막는 다섯 가지 점검입니다.</aside>
+</section>
+
+<!-- 9 확인 5가지 -->
+<section class="slide" data-part="PART 3">
+  <h2>다섯 가지 <span class="r">점검</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>용량 한도</b> — 예: 500MB. <b>이미지 같은 큰 파일을 많이 넣으면 금방 찹니다</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>미사용 시 일시정지</b> — 예: Supabase는 <b>1주일 안 쓰면 프로젝트가 잠깐 멈춥니다</b>(다시 켜면 됨)</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>백업 방법</b> — 앞에서 본 참사를 피하려면 <b>자동 백업이 되는 요금제인지</b>(무료면 직접 백업이 필요한지) 꼭 확인</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>정책 변경</b> — <b class="r">PlanetScale처럼 무료가 사라질 수 있습니다</b></span></div>
+    <div class="st"><span class="n">5</span><span class="t"><b>트래픽이 늘면 유료</b> — 서비스가 커지면 자연스럽게 넘어갑니다. <b>요금·용량 알림</b>을 켜 두세요</span></div>
+  </div>
+  <aside>3번이 소단원 ⑤의 백업 참사와 직접 연결됩니다. "무료라서 자동 백업이 없다"는 사실을 모르고 쓰는 경우가 가장 위험합니다.</aside>
+</section>
+
+<!-- 10 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">AI에게 데이터베이스를 붙여 달라고 하기</h2>
+  <p style="margin-top:11px">문법 대신 '무엇을 + 조건'</p><span class="who">⑥ 무료 DB 고르기</span></div>
+  <aside>이 프롬프트가 이 강의의 실질적 산출물입니다.</aside>
+</section>
+
+<!-- 11 프롬프트 -->
+<section class="slide" data-part="PART 4">
+  <h2>이 <span class="g">네 줄</span>이면 충분합니다</h2>
+  <pre>내 서비스에 데이터를 저장하려고 해. 나는 비전공자고 무료로 시작하고 싶어.
+1. 내가 저장할 것은 [예: 상품, 주문]인데, 어떤 표(테이블)와 항목(열)이
+   필요할지 스키마를 제안해줘.
+2. 무료 SQL 데이터베이스(예: Supabase, PostgreSQL) 기준으로
+   이 스키마를 만드는 방법을 알려줘.
+3. 접속 정보(비밀번호·키)는 코드에 넣지 말고 환경변수로 빼줘.
+4. DB에 값을 넣을 때는 파라미터화 쿼리로 처리하고,
+   비밀번호는 해시로 저장해줘.</pre>
+  <div class="hl">🔗 3·4번은 지난 시간의 <b>환경변수·보안</b>, 그리고 오늘 배운 <b>SQL 주입 방어</b>와 그대로 이어집니다</div>
+  <aside>문법을 몰라도 '무엇을 저장할지 + 조건'만 주면 AI가 스키마 설계부터 연결·보안까지 도와줍니다. 조건 문장을 빠뜨리면 AI는 가장 흔한(그래서 때로 안전하지 않은) 방식으로 만듭니다.</aside>
+</section>
+
+<!-- 12 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 무료 티어는 무엇을 위한 것인가?</div>
+    <div class="q a"><b>A1.</b> <b>배우기·MVP(초기 버전)용.</b> 큰 규모의 운영용이 아니다.</div>
+    <div class="q"><b>Q2.</b> Supabase 무료 요금제에서 특히 주의할 두 가지는?</div>
+    <div class="q a"><b>A2.</b> ① <b>자동 백업이 포함되지 않는다</b>(직접 백업 필요) ② <b>1주 미사용 시 일시정지</b>될 수 있다. 용량은 프로젝트당 DB 500MB.</div>
+    <div class="q"><b>Q3.</b> 로컬과 클라우드의 흔한 사용 흐름은?</div>
+    <div class="q a"><b>A3.</b> <b>내 컴퓨터(로컬)에서 만들고 → 세상에 낼 때 클라우드로.</b> 개발·학습은 로컬, 24시간 열려야 하면 클라우드.</div>
+  </div>
+  <aside>Q2의 수치는 2026-02 확인값입니다. 학습자에게 "가입 직전에 공식 페이지를 다시 보라"는 습관을 함께 심어 주세요.</aside>
+</section>
+
+<!-- 13 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>한도 · 백업 · 정책 💸</h1>
+    <div class="big" style="margin-top:26px">무료로 시작하되<br><span class="y">한도와 백업과 정책을 알고 고릅니다</span></div>
+    <p class="sub" style="margin-top:24px">데이터베이스 ⑥ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑦은 실습입니다. 지금까지 배운 것을 모아 에이전트와 함께 Todo 앱을 내 컴퓨터에 만듭니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

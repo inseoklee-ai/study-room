@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>데이터를 저장할 곳이 필요한 이유 · 서비스의 기억 (데이터베이스 ①)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 데이터베이스 ①</span>
+    <h1 style="margin:18px 0">데이터를 저장할<br>곳이 필요한 이유</h1>
+    <p class="sub">껐다 켜면 사라지는 것과, 남아 있는 것 — 서비스의 '기억'을 만든다</p>
+  </div>
+  <aside>지난 시간에 백엔드라는 '주방'을 봤습니다. 오늘은 그 주방이 쓰는 재료를 어디에 두는지를 봅니다. 지금까지 우리가 다룬 데이터는 새로고침하면 사라졌습니다. 서비스가 되려면 남아야 합니다. 그 영구 창고가 데이터베이스입니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>🗺️ 오늘 <span class="g">네 걸음</span></h2>
+  <div class="chain">
+    <div class="cell"><small>1</small><b>왜 필요한가</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="border-color:var(--bl)"><small>2</small><b class="b">엑셀과<br>무엇이 다른가</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="border-color:var(--pp)"><small>3</small><b class="p">얼마나<br>커질 수 있나</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="border-color:var(--gr)"><small>4</small><b class="g">내가 정할 것</b></div>
+  </div>
+  <ul class="pts">
+    <li>오늘도 마찬가지입니다 — <b>DB에 넣고 꺼내는 코드는 AI가 씁니다</b></li>
+    <li>여러분은 <b>무엇을 어떤 모양으로 저장할지</b>, <b>어떤 DB를 고를지</b>를 판단합니다</li>
+  </ul>
+  <div class="hl">🎯 오늘의 산출물 — 내 서비스가 무엇을 기억해야 하는지 그린 <b>데이터 설계도 한 장</b></div>
+  <aside>강의 전체가 '코드'가 아니라 '판단'으로 향한다는 걸 처음에 못 박아 둡니다. 문법을 못 외워도 이 강의는 따라갈 수 있습니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">주방은 봤는데, 재료는 어디에?</h2>
+  <p style="margin-top:11px">잠깐 기억 · 영구 창고 · 데이터베이스</p><span class="who">① 저장할 곳이 필요한 이유</span></div>
+  <aside>지난 시간 백엔드 강의에서 빠져 있던 조각 하나를 채우는 파트입니다.</aside>
+</section>
+
+<!-- 4 사라지는 데이터 -->
+<section class="slide" data-part="PART 1">
+  <h2>지금까지 우리 데이터는 <span class="r">사라졌습니다</span></h2>
+  <p>지난 시간에 우리는 백엔드(눈에 안 보이는 주방)를 살펴봤습니다. 주방이 주문을 처리하는 건 알았죠. 그런데 한 가지가 빠져 있습니다 — <b>만든 데이터를 어디에 둘까요?</b></p>
+  <div class="grid2">
+    <div class="box"><h3>🫧 잠깐 기억 (메모리)</h3><p>목업 데이터, 화면에 잠깐 뜬 값. <b class="r">껐다 켜면·새로고침하면 사라진다</b></p></div>
+    <div class="box"><h3>🗄️ 영구 창고 (데이터베이스)</h3><p>적어 두면 <b class="g">남는다</b>. 서비스가 되려면 데이터가 남아 있어야 한다</p></div>
+  </div>
+  <ul class="pts">
+    <li>우리 데이터는 결국 <b>하드디스크·SSD 같은 물리적 장치 어딘가에 실제로 적힙니다</b> — '재료를 두는 곳'이 거기입니다</li>
+  </ul>
+  <div class="hl">📦 <b>데이터베이스(DB)</b> = 서비스의 영구 창고. 껐다 켜도 남는 쪽</div>
+  <aside>여기서 학습자가 처음으로 "아, 지금까지 내가 만든 건 반쪽이었구나"를 느낍니다. 목업으로 화면을 만들어 본 경험이 있으니 새로고침하면 사라지는 감각은 이미 있습니다.</aside>
+</section>
+
+<!-- 5 두 가지 그림 -->
+<section class="slide" data-part="PART 1">
+  <h2>데이터베이스가 뭐냐면 — <span class="g">두 가지 그림</span>이면 충분</h2>
+  <div class="grid2">
+    <div class="box"><h3>📚 도서관</h3><p>책이 수만 권 있어도 원하는 책을 금방 찾는다. <b>데이터베이스 = 도서관</b>, <b>데이터 = 책</b>, <b>관리하는 소프트웨어 = 사서</b></p></div>
+    <div class="box"><h3>🧸 마법 장난감 상자</h3><p>장난감을 마구 넣어도 <b>"파란색 자동차만 다 꺼내 줘"</b> 하면 정리해서 딱 그것만 꺼내 준다</p></div>
+  </div>
+  <div class="hl">🎯 핵심 — 데이터베이스는 <b>그냥 쌓아 두는 곳이 아니라, 원하는 것만 빠르게 찾아 주는 곳</b>입니다</div>
+  <ul class="pts">
+    <li>그래서 창고보다 <b>서고</b>에 가깝습니다 — 잘 정리돼 언제든 원하는 걸 꺼낼 수 있는 곳</li>
+  </ul>
+  <aside>출처: Stackby, "What is a database: A beginner's guide". 비유는 두 개만 씁니다. 도서관은 '찾기'를, 장난감 상자는 '조건으로 골라내기'를 담당합니다. 뒤에서 색인(index)을 배울 때 도서관 비유가 다시 쓰입니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">그럼 엑셀·메모장이랑 뭐가 다른가요?</h2>
+  <p style="margin-top:11px">규칙 · 속도 · 동시성</p><span class="who">① 저장할 곳이 필요한 이유</span></div>
+  <aside>가장 자주 나오는 질문입니다. "작을 때는 엑셀로도 된다"를 먼저 인정하고 시작하는 게 설득에 유리합니다.</aside>
+</section>
+
+<!-- 7 세 가지 차이 -->
+<section class="slide" data-part="PART 2">
+  <h2>좋은 질문입니다 — 다른 건 <span class="g">세 가지</span></h2>
+  <p>작을 때는 엑셀로도 됩니다. 하지만 데이터베이스는 이 셋이 다릅니다.</p>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>규칙(스키마)이 있다</b> — "이 표에는 이름·가격·분류가 들어간다"처럼 모양을 정해 둔다. 대부분의 DB는 이 규칙을 <b>강제</b>해 데이터가 뒤죽박죽이 되는 걸 막는다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>수만 건에서도 순식간에 찾는다</b> — 엑셀은 커지면 느려지고 멈추지만, DB는 <b>그러라고 만들어졌다</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>여러 사람이 동시에 안전하게</b> 쓸 수 있다 — 서비스에는 필수</span></div>
+  </div>
+  <ul class="pts">
+    <li>즉 <b>규칙 · 속도 · 동시성</b> — 이 셋이 "서비스용 저장소"의 조건입니다</li>
+  </ul>
+  <aside>출처: Servermall, "Simple Database Basics". 세 번째(동시성)가 가장 과소평가됩니다. 엑셀 파일을 둘이 동시에 고쳐 하루 주문이 꼬이는 이야기는 다음 소단원(역사)의 출발점이기도 합니다.</aside>
+</section>
+
+<!-- 8 판단 -->
+<section class="slide" data-part="PART 2">
+  <h2>그래서 <span class="b">언제 무엇을</span> 쓰나</h2>
+  <table class="t">
+    <tr><th>상황</th><th>적당한 도구</th><th>왜</th></tr>
+    <tr><td>혼자 보는 목록 수십 줄</td><td><b>엑셀 · 메모장</b></td><td>충분하다. 굳이 DB를 세울 이유가 없다</td></tr>
+    <tr><td>서비스 데이터 (회원·주문·상품)</td><td><b class="g">데이터베이스</b></td><td>규칙을 강제하고, 커져도 빠르고, 동시 접속에 안전</td></tr>
+    <tr><td>새로고침하면 사라져도 되는 값</td><td><b>메모리 · 목업</b></td><td>화면에서만 쓰는 임시값</td></tr>
+  </table>
+  <div class="hl">🧭 판단 한 줄 — <b>"새로고침해도 남아야 하는 데이터인가?"</b> 그렇다면 DB로 갑니다</div>
+  <aside>비전공자가 실제로 써먹을 수 있는 판단은 이 한 줄입니다. 뒤 실습에서 Todo 앱을 만들 때 정확히 이 질문을 다시 씁니다.</aside>
+</section>
+
+<!-- 9 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">스케일 이야기 — 가장 큰 데이터베이스는 얼마나 클까</h2>
+  <p style="margin-top:11px">의회도서관 · CERN · 그리고 클라우드</p><span class="who">① 저장할 곳이 필요한 이유</span></div>
+  <aside>"크다"는 게 얼마나 큰지 감을 주는 파트입니다. 숫자를 그대로 씁니다.</aside>
+</section>
+
+<!-- 10 의회도서관 -->
+<section class="slide" data-part="PART 3">
+  <h2>📚 미국 의회도서관 — <span class="p">1억 7,800만 점</span></h2>
+  <p>세계에서 가장 큰 도서관입니다. 책·사진·지도·녹음·필름 등을 소장합니다.</p>
+  <table class="t">
+    <tr><th>항목</th><th>수치</th></tr>
+    <tr><td>소장 자료</td><td><b>1억 7,800만 점 이상</b></td></tr>
+    <tr><td>책장을 늘어놓으면</td><td><b>약 838마일</b></td></tr>
+    <tr><td>하루에 받는 자료 / 새로 소장</td><td>약 <b>1만 5천 점</b> 접수 → <b>1만여 점</b> 소장</td></tr>
+    <tr><td>디지털 보존 자료</td><td><b>페타바이트(PB) 단위</b></td></tr>
+  </table>
+  <ul class="pts">
+    <li>도서관 비유가 그냥 비유가 아닙니다 — <b>실제로 이 규모를 다루는 것이 데이터베이스의 일</b></li>
+  </ul>
+  <aside>출처: Library of Congress, "Fascinating Facts", loc.gov. 838마일은 서울–부산 왕복을 몇 번 하는 거리라고 환산해 주면 감이 더 잘 옵니다.</aside>
+</section>
+
+<!-- 11 CERN -->
+<section class="slide" data-part="PART 3">
+  <h2>⚛️ CERN — <span class="r">초당 1페타바이트</span>가 쏟아지는 곳</h2>
+  <div class="chain">
+    <div class="cell"><small>발생</small><b>초당 약<br>10억 번 충돌</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="border-color:var(--red)"><small>이론상</small><b class="r">초당 1PB</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="border-color:var(--pp)"><small>트리거</small><b class="p">1%도 안 되는<br>극소수만 선택</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="border-color:var(--gr)"><small>누적</small><b class="g">2023년<br>1엑사바이트 돌파</b></div>
+  </div>
+  <ul class="pts">
+    <li>LHC 검출기에서는 초당 약 10억 번의 입자 충돌이 일어나, 이론상 <b>초당 1페타바이트</b>가 쏟아집니다</li>
+    <li>하지만 '<b>트리거</b>'가 의미 있는 극소수만 골라 저장합니다 — <b>1%도 안 됩니다</b></li>
+    <li>그렇게 걸러 저장해도 CERN의 저장 용량은 <b>2023년에 1엑사바이트(= 100만 테라바이트)를 넘어섰습니다</b></li>
+  </ul>
+  <div class="hl">💡 큰 데이터에서는 <b>무엇을 저장할지 고르는 일</b>이 저장장치 크기만큼 중요합니다</div>
+  <aside>출처: CERN, home.cern; The Register, 2023. 이 슬라이드의 교훈은 용량 자랑이 아니라 '선택'입니다. 뒤 소단원 5의 개인정보 최소 수집("가장 안전한 데이터는 애초에 안 가진 데이터")과 같은 결에 있습니다.</aside>
+</section>
+
+<!-- 12 클라우드 반전 -->
+<section class="slide" data-part="PART 3">
+  <h2>그런데 재미있는 사실 — 이제 <span class="g">누구나</span> 씁니다</h2>
+  <p>예전엔 "얼마나 크냐"로 자랑했습니다. 요즘은 <b>클라우드</b> 덕분에 비전공자도 이런 거대한 기술을 <b>무료로 조금 빌려</b> 씁니다.</p>
+  <div class="grid2">
+    <div class="box"><h3>옛날 이야기</h3><p>규모가 곧 실력. 서버를 사고 켜 두고 관리할 사람이 필요했다</p></div>
+    <div class="box"><h3>지금</h3><p><b class="g">규모의 문제가 아니라, 누구나 쓸 수 있는 도구</b>가 됐다. 무료 티어로 진짜 DB를 쓴다</p></div>
+  </div>
+  <ul class="pts">
+    <li>무료로 쓸 수 있는 DB를 고르는 법은 <b>소단원 ⑥</b>에서 따로 다룹니다</li>
+  </ul>
+  <aside>이 강의가 비전공자를 대상으로 성립하는 이유가 이 슬라이드입니다. 10년 전이라면 이 수업 자체가 불가능했습니다.</aside>
+</section>
+
+<!-- 13 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">그래서 내가 할 일은 무엇인가</h2>
+  <p style="margin-top:11px">AI가 쓰는 것 · 내가 정하는 것</p><span class="who">① 저장할 곳이 필요한 이유</span></div>
+  <aside>역할 분담을 명확히 하고 소단원을 닫습니다.</aside>
+</section>
+
+<!-- 14 역할 분담 -->
+<section class="slide" data-part="PART 4">
+  <h2>코드는 AI가, <span class="g">판단은 내가</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>🤖 AI가 쓴다</h3><p>SQL 문장 · 표 만들기 · 연결 코드 · 색인 제안 · 마이그레이션 스크립트</p></div>
+    <div class="box"><h3>🧑 내가 정한다</h3><p><b>무엇을</b> 저장할지 · <b>어떤 모양</b>으로 나눌지 · <b>어떤 DB</b>를 고를지 · <b>어떻게 지킬지</b>(보안·백업)</p></div>
+  </div>
+  <div class="big" style="margin-top:14px">데이터베이스는 서비스의 <span class="y">'기억'</span>입니다<br><small>넣고 꺼내는 코드(SQL)는 AI가 쓰지만, 무엇을 어떤 모양으로 저장할지·어떤 DB를 고를지·어떻게 안전하게 지킬지는 여러분이 정합니다</small></div>
+  <aside>오늘의 핵심 한 문장입니다. 이 문장이 8개 소단원 전체를 꿰는 축입니다. 다음 소단원부터 '어떤 모양으로'(③), '어떻게 지킬지'(⑤), '어떤 DB를'(⑥)로 하나씩 내려갑니다.</aside>
+</section>
+
+<!-- 15 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 목업 데이터와 데이터베이스에 저장한 데이터의 결정적 차이는?</div>
+    <div class="q a"><b>A1.</b> <b>새로고침·재시작 후에도 남는가.</b> 목업은 잠깐 기억(메모리)에만 있어 사라지고, DB는 물리 저장장치에 적혀 남는다.</div>
+    <div class="q"><b>Q2.</b> 엑셀 대신 DB를 쓰는 이유 세 가지는?</div>
+    <div class="q a"><b>A2.</b> ① <b>규칙(스키마)을 강제</b>해 뒤죽박죽을 막는다 ② <b>커져도 빠르다</b> ③ <b>여러 사람이 동시에</b> 안전하게 쓴다.</div>
+    <div class="q"><b>Q3.</b> CERN 사례가 남기는 교훈은?</div>
+    <div class="q a"><b>A3.</b> 저장장치 크기만큼 <b>무엇을 저장할지 고르는 일</b>이 중요하다. 초당 1PB가 발생하지만 1%도 안 되는 극소수만 저장한다.</div>
+  </div>
+  <aside>Q2에서 세 번째(동시성)를 빠뜨리는 사람이 많습니다. 서비스에는 이게 필수라는 점을 다시 짚어 주세요.</aside>
+</section>
+
+<!-- 16 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>기억 · 규칙 · 판단 🗄️</h1>
+    <div class="big" style="margin-top:26px">데이터베이스는 서비스의 <span class="y">기억</span>이고<br>코드는 AI가 쓰지만 <span class="y">무엇을 어떻게 남길지는 내가 정한다</span></div>
+    <p class="sub" style="margin-top:24px">데이터베이스 ① — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ②에서는 "DB 종류가 왜 이렇게 많은가"를 60년 역사로 풀어 봅니다. 프레임워크가 많았던 이유와 같은 구조입니다 — 시대마다 병목이 달랐습니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

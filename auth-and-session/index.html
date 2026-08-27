@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>회원가입과 로그인 · 회원 표·세션·토큰·캐시 (데이터베이스 ④)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 데이터베이스 ④</span>
+    <h1 style="margin:18px 0">회원가입과 로그인<br>— 사용자를 다루기</h1>
+    <p class="sub">회원 표 · 세션과 토큰 · 캐시 — 전부 '데이터를 다루는 일'</p>
+  </div>
+  <aside>서비스에 사람이 로그인하기 시작하면 다룰 것이 훅 늘어납니다. 회원을 어떻게 저장하고, 로그인 상태를 어떻게 유지하며, 그걸 빠르고 안전하게 하느냐. 데이터베이스 강의에서 이걸 짚는 건 결국 전부 데이터를 다루는 일이기 때문입니다.</aside>
+</section>
+
+<!-- 2 지도 -->
+<section class="slide" data-part="표지">
+  <h2>원리는 지난 시간에, 오늘은 <span class="g">데이터·저장 관점</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:140px"><small>1</small><b>회원 표<br><small>무엇을 저장하나</small></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:160px;border-color:var(--bl)"><small>2</small><b class="b">로그인 상태 유지<br><small>세션 vs 토큰</small></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--pp)"><small>3</small><b class="p">캐시와 Redis<br><small>빠름의 비결</small></b></div>
+  </div>
+  <ul class="pts">
+    <li>인증·인가·쿠키/세션의 <b>원리 자체는 지난 시간(백엔드)</b>에 봤습니다</li>
+    <li>오늘은 <b>"그 데이터가 DB에 어떻게 담기나"</b>로 이어 봅니다</li>
+  </ul>
+  <div class="hl">🎯 결론을 먼저 — <b>인증은 직접 만들지 않습니다.</b> 이해하고, 믿을 만한 도구에 맡기는 판단까지가 우리 몫</div>
+  <aside>이 소단원의 결론을 처음에 던져 둡니다. 뒤 내용은 "왜 그 결론인가"의 근거가 됩니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">회원가입·로그인을 '데이터'로 보면</h2>
+  <p style="margin-top:11px">표 하나와 CRUD 두 동작</p><span class="who">④ 사용자를 다루기</span></div>
+  <aside>화면 기능처럼 보이지만 뿌리는 데이터입니다.</aside>
+</section>
+
+<!-- 4 회원 표 -->
+<section class="slide" data-part="PART 1">
+  <h2>먼저 <span class="g">회원 표</span> 하나가 필요합니다</h2>
+  <table class="t">
+    <tr><th>회원(users) 표</th><th>예시 한 줄</th></tr>
+    <tr><td>id · email · <b>password_hash</b> · created_at(가입일)</td><td>1 · hong@example.com · <b>(해시값)</b> · 2026-03-02</td></tr>
+  </table>
+  <div class="steps">
+    <div class="st"><span class="n">C</span><span class="t"><b>회원가입 = 회원 표에 행 하나 넣기(Create)</b> — 사용자가 입력한 이메일로 새 줄을 만든다</span></div>
+    <div class="st"><span class="n">R</span><span class="t"><b>로그인 = 그 이메일로 행을 찾아(Read) 비밀번호를 대조</b> — 맞으면 통과, 틀리면 거절</span></div>
+  </div>
+  <div class="hl">🔁 결국 앞서 본 <b>CRUD</b>의 조합입니다 — 새로운 마법이 아닙니다</div>
+  <aside>칸 이름을 password가 아니라 password_hash로 두면 "원문 금지"를 스스로 상기하기 좋습니다. 이 작은 명명 습관이 사고를 막습니다.</aside>
+</section>
+
+<!-- 5 세 가지 원칙 -->
+<section class="slide" data-part="PART 1">
+  <h2>여기서 꼭 지킬 <span class="r">세 가지</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>비밀번호는 절대 원문으로 저장하지 않는다</b> — 칸에 원문이 아니라 <b>해시(솔트 + bcrypt)</b>를 저장한다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>이메일은 '유일'하게</b> — 같은 이메일로 두 번 가입되지 않도록 email 칸에 <b>유일(unique) 제약</b>을 건다. 없으면 중복 계정·로그인 혼란이 생긴다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>필요한 것만 모은다</b> — 가입에 꼭 필요한 것 외엔 받지 않는다 (최소 수집)</span></div>
+  </div>
+  <div class="hl">⚠️ <b>인증은 직접 만들지 마세요.</b> 로그인·비밀번호 재설정·소셜 로그인은 함정이 많아 자작하면 사고로 이어지기 십상입니다</div>
+  <ul class="pts">
+    <li>검증된 <b>Auth 서비스·라이브러리</b>(예: Supabase Auth)를 씁니다</li>
+    <li>AI에게 — <i>"인증은 처음부터 만들지 말고 검증된 Auth를 붙여줘. 비밀번호는 해시로, 이메일은 유일하게."</i></li>
+  </ul>
+  <aside>출처: OWASP Authentication Cheat Sheet. 세 원칙 모두 소단원 ⑤(보안)에서 실화와 함께 다시 나옵니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">로그인 상태는 어떻게 유지되나</h2>
+  <p style="margin-top:11px">무상태 · 쿠키 · 세션 vs 토큰(JWT)</p><span class="who">④ 사용자를 다루기</span></div>
+  <aside>"한 번 로그인하면 페이지를 넘겨도 왜 계속 로그인 상태일까"에 답하는 파트입니다.</aside>
+</section>
+
+<!-- 7 무상태와 쿠키 -->
+<section class="slide" data-part="PART 2">
+  <h2>HTTP는 <span class="r">무상태</span> — 매 요청이 남남입니다</h2>
+  <p>지난 시간에 봤듯 HTTP는 '무상태'라 <b>매번 '나 아까 그 사람'을 다시 증명해야</b> 합니다. 그 증명을 실어 나르는 게 <b>쿠키</b>입니다.</p>
+  <div class="grid2">
+    <div class="box"><h3>🍪 쿠키란</h3><p>사이트가 브라우저에 건네는 <b>작은 메모</b>. 브라우저가 보관했다가 <b>요청할 때마다 자동으로 함께 보낸다</b> (지난 시간의 '지갑 속 카드')</p></div>
+    <div class="box"><h3>❓ 그래서 갈림길</h3><p>이 쿠키(또는 그 자리)에 <b>무엇을 담느냐</b> — 여기서 <b class="g">세션</b>과 <b class="b">토큰</b>으로 갈린다</p></div>
+  </div>
+  <div class="hl">🔑 로그인이 계속 유지되는 건 <b>이 쿠키 덕분</b>입니다</div>
+  <aside>지난 시간 내용을 한 슬라이드로 복습하고 바로 두 갈래로 넘어갑니다.</aside>
+</section>
+
+<!-- 8 세션 -->
+<section class="slide" data-part="PART 2">
+  <h2>갈래 1 — <span class="g">세션</span>: 서버가 기억한다</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:140px"><small>로그인</small><b>서버가 상태를<br>세션 저장소에 적음</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:140px;border-color:var(--gr)"><small>브라우저에</small><b class="g">번호표<br>(세션 ID)만</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:140px"><small>요청마다</small><b>번호표 제시</b></div>
+  </div>
+  <ul class="pts">
+    <li>서버가 상태를 쥐고 있어서 <b class="g">로그아웃·강제 차단을 바로 할 수 있습니다</b> — 저장소에서 지우면 번호표는 즉시 휴지 조각</li>
+    <li>단점 — 서버가 여러 대로 늘면 그 저장소를 <b>함께 나눠 써야</b> 합니다</li>
+  </ul>
+  <div class="hl">✅ 단순한 웹앱 + <b>즉시 로그아웃·차단이 중요</b>하면 세션이 더 단순하고 안전합니다</div>
+  <aside>출처: MDN, "Session management". '저장소를 함께 나눠 쓰는 문제'는 파트 3의 Redis로 해결됩니다.</aside>
+</section>
+
+<!-- 9 토큰 -->
+<section class="slide" data-part="PART 2">
+  <h2>갈래 2 — <span class="b">토큰(JWT)</span>: 서버가 기억하지 않는다</h2>
+  <p>로그인하면 서버가 사용자 정보와 만료 시각을 담아 <b>위조 못 하게 서명(도장)한 증명서(JWT)</b>를 통째로 내줍니다. 이후 브라우저는 요청마다 이 토큰을 내밀고, 서버는 저장소를 뒤질 필요 없이 <b>서명만 확인</b>합니다.</p>
+  <div class="grid2">
+    <div class="box"><h3>✅ 강한 곳</h3><p><b>서버 확장</b>·여러 서비스 연동·모바일. 저장소 조회가 없어 '무상태'</p></div>
+    <div class="box"><h3>⚠️ 꼭 알 것</h3><p>토큰 내용은 <b class="r">암호가 아니라 그냥 인코딩</b>이라 가진 사람은 누구나 열어 봅니다. 서명이 막는 건 '못 바꾸게'이지 <b>'못 보게'가 아닙니다</b> → <b>민감정보를 토큰에 넣으면 안 됩니다</b></p></div>
+  </div>
+  <ul class="pts">
+    <li>단점 — 한 번 내준 토큰은 <b class="r">즉시 무효화가 어렵습니다</b>(서버에 지울 기록이 없으니)</li>
+    <li>그래서 보통 <b>만료를 짧게 두고 '리프레시 토큰'으로 조용히 갱신</b>하는 방식을 씁니다</li>
+  </ul>
+  <aside>출처: Auth0, "JSON Web Tokens". JWT를 '암호화'로 오해하는 사람이 아주 많습니다. 이 슬라이드에서 반드시 짚어 주세요.</aside>
+</section>
+
+<!-- 10 그래서 뭘 -->
+<section class="slide" data-part="PART 2">
+  <h2>그래서 뭘 쓰나 — 그리고 <span class="r">직접 만들지 마세요</span></h2>
+  <table class="t">
+    <tr><th>내 상황</th><th>유리한 쪽</th><th>왜</th></tr>
+    <tr><td>단순한 웹앱, 즉시 로그아웃·차단 필요</td><td><b class="g">세션</b></td><td>서버가 상태를 쥐고 있어 지우면 끝</td></tr>
+    <tr><td>여러 서비스·모바일·큰 확장</td><td><b class="b">토큰</b></td><td>저장소 조회 없이 서명만 확인 → 확장에 강함</td></tr>
+  </table>
+  <div class="big" style="margin-top:14px">MDN조차 <span class="y">"세션 관리를 직접 구현하지 말고 검증된 라이브러리를 쓰라"</span>고 못 박습니다</div>
+  <ul class="pts">
+    <li>Auth 서비스(<b>Supabase Auth · Clerk · Auth0</b> 등)가 세션이든 토큰이든 <b>발급·만료·갱신·저장까지</b> 알아서 안전하게 처리합니다</li>
+    <li>우리 몫은 <b>"무슨 방식인지 이해하고, 믿을 만한 도구에 맡기는" 판단</b>까지</li>
+  </ul>
+  <aside>출처: MDN, "Session management". 이 강의에서 가장 실용적인 결론입니다. 두 갈래를 배운 이유도 '고르기 위해서'가 아니라 '맡긴 것을 이해하기 위해서'입니다.</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">캐시와 Redis — 로그인이 빠른 비결</h2>
+  <p style="margin-top:11px">계산대 옆 바구니 · TTL · 저장 위치</p><span class="who">④ 사용자를 다루기</span></div>
+  <aside>소단원 ③에서 본 키-값 NoSQL이 여기서 실제 역할을 얻습니다.</aside>
+</section>
+
+<!-- 12 캐시 -->
+<section class="slide" data-part="PART 3">
+  <h2>캐시 — 자주 쓰는 걸 <span class="p">가까이</span> 둔다</h2>
+  <p><b>캐시(cache)</b>는 자주 쓰는 데이터를 <b>메모리에 잠깐 두어 빠르게</b> 꺼내 쓰는 것입니다. 매번 창고(디스크·DB) 깊숙이 다녀오는 대신, <b>자주 찾는 물건을 계산대 옆 바구니에 올려 두는</b> 셈이죠.</p>
+  <div class="grid2">
+    <div class="box"><h3>얻는 것</h3><p>속도가 <b class="g">크게</b> 오른다</p></div>
+    <div class="box"><h3>대신 감당할 것</h3><p><b class="r">원본과 잠깐 어긋날 수 있다</b> → '언제까지 신선한 걸로 볼지'(수명, <b>TTL</b>)를 정해 둔다</p></div>
+  </div>
+  <div class="hl">⚖️ 캐시는 <b>속도와 신선함의 거래</b>입니다 — 공짜가 아니라는 점이 색인과 같습니다</div>
+  <aside>출처: MDN, "HTTP caching". 색인도, 캐시도 "빠르게 만드는 대신 무엇을 내주는가"를 묻습니다. 이 감각이 성능 이야기의 기본입니다.</aside>
+</section>
+
+<!-- 13 Redis -->
+<section class="slide" data-part="PART 3">
+  <h2>세션 저장소에 <span class="g">Redis</span>가 딱 맞는 이유</h2>
+  <p>로그인에서 캐시가 등장하는 자리가 바로 <b>세션 저장소</b>입니다. 세션 확인은 거의 <b>모든 요청마다</b> 일어나 '빠름'이 생명인데, 소단원 ③에서 본 <b>Redis(키-값, 메모리 기반)</b>가 딱 맞습니다.</p>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>조회가 매우 빠르다</b> — 메모리 기반 키-값</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>키마다 자동 만료(TTL)</b>를 걸 수 있다 → <b>"30분 활동 없으면 자동 로그아웃"</b>을 손쉽게 만든다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">여러 서버가 <b>같은 저장소를 나눠 쓴다</b> → 앞서 본 세션의 단점이 해결된다</span></div>
+  </div>
+  <div class="hl">🤝 "세션을 여러 서버가 나눠 쓰는 문제"와 "캐시로 속도를 얻는 것"이 <b>같은 도구(Redis) 하나</b>로 만납니다</div>
+  <aside>출처: Redis 공식, "Session management". 소단원 ③의 NoSQL 4갈래 표를 다시 띄워 키-값 줄을 짚어 주면 연결이 잘 됩니다.</aside>
+</section>
+
+<!-- 14 저장 위치 -->
+<section class="slide" data-part="PART 3">
+  <h2>브라우저에서 <span class="r">어디에 두느냐</span>도 중요합니다</h2>
+  <table class="t">
+    <tr><th>저장 위치</th><th>위험</th><th>권장</th></tr>
+    <tr><td><code>localStorage</code></td><td><b class="r">악성 스크립트(XSS)에 그대로 읽힌다</b></td><td>피한다</td></tr>
+    <tr><td><b>httpOnly 쿠키</b></td><td>자바스크립트가 읽을 수 없다</td><td><b class="g">보안 표준(OWASP) 권장</b></td></tr>
+  </table>
+  <div class="hl">🧭 비전공자는 세 줄만 — <b>① 저장·갱신은 Auth 서비스에 맡기고 ② 민감정보는 토큰에 넣지 말고 ③ 저장 위치는 안전한 곳으로</b></div>
+  <aside>출처: OWASP HTML5 Security Cheat Sheet. 이 세 줄이 이 소단원 전체의 실천 요약입니다.</aside>
+</section>
+
+<!-- 15 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 회원가입과 로그인을 CRUD로 말하면?</div>
+    <div class="q a"><b>A1.</b> 회원가입 = 회원 표에 <b>행 하나 넣기(Create)</b>, 로그인 = 이메일로 <b>행을 찾아(Read)</b> 비밀번호 대조.</div>
+    <div class="q"><b>Q2.</b> 세션과 토큰의 결정적 차이는?</div>
+    <div class="q a"><b>A2.</b> <b>서버가 상태를 기억하는가.</b> 세션은 서버가 기억해 즉시 로그아웃·차단이 되고, 토큰은 기억하지 않아 확장에 강하지만 즉시 무효화가 어렵다.</div>
+    <div class="q"><b>Q3.</b> JWT에 비밀번호를 넣으면 안 되는 이유는?</div>
+    <div class="q a"><b>A3.</b> 토큰 내용은 <b>암호화가 아니라 인코딩</b>이라 가진 사람은 누구나 열어 볼 수 있다. 서명은 '못 바꾸게' 할 뿐 '못 보게' 하지 않는다.</div>
+    <div class="q"><b>Q4.</b> Redis가 세션 저장소로 적합한 두 가지 이유는?</div>
+    <div class="q a"><b>A4.</b> ① 메모리 기반이라 <b>조회가 매우 빠르다</b> ② 키마다 <b>자동 만료(TTL)</b>를 걸 수 있어 자동 로그아웃을 쉽게 만든다.</div>
+  </div>
+  <aside>Q3이 이 소단원의 핵심 오해입니다. 여기서 막히면 토큰 슬라이드로 되돌아가세요.</aside>
+</section>
+
+<!-- 16 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>표 · 상태 · 위임 🔐</h1>
+    <div class="big" style="margin-top:26px">로그인도 결국 <span class="y">데이터를 다루는 일</span>입니다<br>이해는 내가 하고, <span class="y">구현은 검증된 도구에 맡깁니다</span></div>
+    <p class="sub" style="margin-top:24px">데이터베이스 ④ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑤에서는 데이터를 모아 두는 순간 따라오는 두 위험 — 누가 훔쳐 가는 것(보안)과 실수로 날아가는 것(백업)을 실화로 봅니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

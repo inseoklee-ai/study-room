@@ -23,7 +23,9 @@ const LESSONS = process.argv.slice(2).length
      "three-failures","tool-description","tool-definition-lab","minimal-harness","build-and-mcp-lab",
      "permission-trust-boundary","service-agent-project","tool-eval","antipatterns-wrapup",
      "why-server","network-basics","backend-request-response","ai-code-weakness","deploy",
-     "free-hosting","home-server","fullstack-connect","backend-project"];
+     "free-hosting","home-server","fullstack-connect","backend-project",
+     "why-database","db-history","sql-and-tables","auth-and-session",
+     "db-security-backup","free-db-choice","todo-db-lab","db-wrapup"];
 
 // ---- palette (deck light theme) ----
 const INK="2A2723", SOFT="6B6357", GR="3F6B5F", GR2="2C4D44", GOLD="C8A15A",

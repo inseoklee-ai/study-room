@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>실습 · 에이전트로 내 Todo 앱 만들기 (데이터베이스 ⑦)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 2 · AIFFEL_LMS · 데이터베이스 ⑦ · 실습</span>
+    <h1 style="margin:18px 0">에이전트로 '내 Todo 앱'을<br>내 컴퓨터에 만들기</h1>
+    <p class="sub">따라 하기 — 목표(PRD)를 주면 에이전트가 만들고, 나는 검토·판단·수정한다</p>
+  </div>
+  <aside>이제 배운 걸 모아 직접 만들어 봅니다. 만들 것은 내 컴퓨터에서 도는 작은 Todo(할 일) 앱입니다. 할 일을 추가·확인·완료·삭제하고, 그 데이터가 내 컴퓨터의 무료 DB에 저장돼 껐다 켜도 남습니다.</aside>
+</section>
+
+<!-- 2 만들 것 -->
+<section class="slide" data-part="표지">
+  <h2>왜 <span class="g">Todo 앱</span>인가 — CRUD의 교과서</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:110px"><small>C</small><b>추가</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px"><small>R</small><b>목록 보기</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px"><small>U</small><b>완료 표시</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px"><small>D</small><b>삭제</b></div>
+  </div>
+  <ul class="pts">
+    <li>Todo 앱은 <b>저장·조회·수정·삭제(CRUD)</b>의 교과서라 DB를 손에 익히기에 딱입니다</li>
+    <li>방식은 <b>에이전틱</b> — 목표(PRD)를 주면 에이전트가 <b>계획·설치·구현</b>을 하고, 우리는 <b class="g">검토·판단·수정</b>합니다</li>
+  </ul>
+  <div class="grid2">
+    <div class="box"><h3>길 A — 내 컴퓨터(로컬)</h3><p>무료 로컬 DB(예: <b>SQLite</b>)에 저장. <b>인터넷 없이 내 PC에서 완결</b></p></div>
+    <div class="box"><h3>길 B — 클라우드(Supabase)</h3><p>같은 앱을 클라우드 DB로. <b>남에게 링크로 보여줄 때</b></p></div>
+  </div>
+  <aside>두 가지 길을 다 해 봅니다(원하는 쪽부터). 도구는 Claude Code나 Cursor의 에이전트 모드처럼 명령 실행·파일 생성·설치를 스스로 하는 것을 씁니다. AI가 짠 코드는 한 번씩 훑어보세요.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">PRD로 시작하고, DB 구조를 설계받기</h2>
+  <p style="margin-top:11px">만들 것 한 장 → 구조도</p><span class="who">⑦ 실습</span></div>
+  <aside>앞서 배운 대로 PRD부터 씁니다. 코드보다 먼저 '무엇을'입니다.</aside>
+</section>
+
+<!-- 4 PRD -->
+<section class="slide" data-part="PART 1">
+  <h2>PRD — <span class="g">기본 기능 + 내가 넣고 싶은 기능</span></h2>
+  <pre>[무엇] 내 컴퓨터에서 도는 Todo(할 일) 앱.
+[기본 기능(CRUD)] 할 일 추가 / 목록 보기 / 완료 표시 / 삭제
+[저장] 데이터는 내 컴퓨터의 무료 DB에 저장(껐다 켜도 남기)
+[내가 넣고 싶은 기능]   &lt;- 여기에 1~2개 직접 적기
+   예: 마감일 표시 / 카테고리(태그) / 오늘 할 일만 보기 / 검색
+[규칙] 무료 도구만. 비밀값은 .env로.
+       (로그인 같은 걸 넣는다면 직접 만들지 말고 검증된 라이브러리로.)</pre>
+  <div class="hl">✍️ <b>'내가 넣고 싶은 기능' 한두 개</b>를 꼭 적으세요 — 그게 남의 튜토리얼과 내 프로젝트를 가릅니다</div>
+  <aside>규칙 줄의 "로그인은 직접 만들지 말고"는 소단원 ④의 결론이 그대로 실습 규칙이 된 것입니다.</aside>
+</section>
+
+<!-- 5 구조 먼저 -->
+<section class="slide" data-part="PART 1">
+  <h2>코드보다 <span class="b">DB 구조</span>부터 받습니다</h2>
+  <pre>"위 PRD로 만들 Todo 앱의 DB 구조(어떤 표·열·관계)를 먼저 설계해서
+ 구조도로 그려 보여 줘. 내 커스텀 기능(마감일·태그 등)도 반영해서.
+ 로컬 무료 DB(예: SQLite)를 쓸 거야."</pre>
+  <div class="steps">
+    <div class="st"><span class="n">✔</span><span class="t"><b>확인</b> — AI가 표(예: <code>todos</code>, 태그를 넣었다면 <code>tags</code>와 <b>연결표</b>)와 열(제목·완료여부·마감일…)을 <b>구조도</b>로 보여 준다</span></div>
+    <div class="st"><span class="n">✔</span><span class="t">앞서 배운 <b>표 사이 관계</b>대로 잡혔는지 <b class="g">눈으로 확인</b>한다</span></div>
+  </div>
+  <ul class="pts">
+    <li>예시 — 할 일(<code>todos</code>)과 태그(<code>tags</code>)는 <b>연결표(<code>todo_tags</code>)</b>로 이어집니다(<b>다대다</b>)</li>
+    <li>소단원 ③에서 배운 <b>N:M → 연결 표</b>가 여기서 실제로 나옵니다</li>
+  </ul>
+  <aside>학생 ↔ 수업 예시로 배운 N:M이 태그에서 그대로 반복됩니다. 구조도를 받았을 때 "왜 표가 세 개인가"를 스스로 설명할 수 있으면 소단원 ③을 이해한 것입니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">길 A — 내 컴퓨터에 만들어 돌리기 (로컬)</h2>
+  <p style="margin-top:11px">SQLite 파일 하나 · localhost</p><span class="who">⑦ 실습</span></div>
+  <aside>DB 구조에 합의했으면 실제 구현을 맡깁니다.</aside>
+</section>
+
+<!-- 7 작업 지시서 -->
+<section class="slide" data-part="PART 2">
+  <h2>작업 지시서 — <span class="g">이대로 붙여 넣으세요</span></h2>
+  <pre>"이 PRD와 방금 합의한 DB 구조로 Todo 앱을 만들어 줘.
+ 데이터는 로컬 SQLite 파일 하나(todo.db)에 저장하고,
+ 브라우저에서 localhost로 열리게 해 줘.
+ .env · todo.db 는 .gitignore 에 넣어.
+ 먼저 전체 계획을 보여주고, 각 단계 끝에 뭘 확인하면 되는지 알려 줘."</pre>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>계획 한 번 읽기</b> — PRD와 맞는지</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>위험한 명령은 승인</b> — 이 프로젝트 폴더 안인지 확인</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>잘 되던 순간마다 Git 커밋</b> — 되돌릴 지점을 남긴다</span></div>
+  </div>
+  <aside>에이전트가 계획→설치→파일 생성→DB 만들기까지 스스로 합니다. 우리가 할 일은 이 셋뿐입니다.</aside>
+</section>
+
+<!-- 8 통과 기준 -->
+<section class="slide" data-part="PART 2">
+  <h2>통과 기준 — <span class="g">새로고침해도 남는가</span></h2>
+  <div class="hl">✅ 브라우저에서 할 일을 추가하면 목록에 뜨고, <b>새로고침·앱 재시작 후에도 남는다</b></div>
+  <ul class="pts">
+    <li>DB 뷰어로 <code>todo.db</code>를 열어 <code>todos</code> 표에 <b>행이 실제로 쌓였는지</b> 확인</li>
+    <li>확인 툴은 AI에게 추천받기 — SQLite는 <b>'DB Browser for SQLite'</b>나 <b>VS Code의 SQLite 확장</b></li>
+  </ul>
+  <div class="grid2">
+    <div class="box"><h3>화면에서 보이는 것</h3><p>제목 <b>My Todo</b>, 입력창과 추가 버튼, <b>마감일이 붙은 할 일 목록</b></p></div>
+    <div class="box"><h3>실제로 남는 곳</h3><p>내 컴퓨터의 <code>todo.db</code> 파일 — <b class="g">껐다 켜도 남는다</b></p></div>
+  </div>
+  <aside>소단원 ①의 판단 한 줄("새로고침해도 남아야 하는 데이터인가")이 여기서 통과 기준이 됩니다. 화면만 보고 넘어가지 말고 DB 뷰어로 행을 직접 보는 게 중요합니다.</aside>
+</section>
+
+<!-- 9 자주 막히는 곳 -->
+<section class="slide" data-part="PART 2">
+  <h2>자주 막히는 곳 — <span class="r">증상</span>과 확인</h2>
+  <table class="t">
+    <tr><th>증상</th><th>확인 / 해결</th></tr>
+    <tr><td><code>npm install</code>에서 better-sqlite3 빌드 에러(node-gyp)</td><td>네이티브 모듈이라 빌드 도구가 필요. 에러를 그대로 에이전트에 주고 <b>"내 OS(맥/윈도우) 기준 빌드 도구를 설치·확인해 줘"</b> (맥: Xcode Command Line Tools, 윈도우: 빌드 툴·Python). Node는 <b>LTS 권장</b></td></tr>
+    <tr><td>포트가 already in use(EADDRINUSE)</td><td>이전 서버가 아직 떠 있음. <b>그 창을 끄거나 다른 포트로</b></td></tr>
+    <tr><td>추가했는데 새로고침하면 사라짐</td><td>화면에만 있고 DB엔 안 들어감. <b>"추가한 할 일을 DB에 저장하고 다시 읽어오게 해 줘"</b></td></tr>
+    <tr><td>코드 고쳤는데 반영 안 됨</td><td><b>개발 서버를 껐다 켜기</b> (특히 <code>.env</code> 수정 후)</td></tr>
+    <tr><td><code>todo.db</code>를 GitHub에 올려버림</td><td><code>.gitignore</code>에 추가. 이미 커밋했다면 에이전트에게 <b>'git 이력에서도 빼 줘'</b>까지</td></tr>
+  </table>
+  <aside>세 번째 증상이 이 강의의 핵심 오해입니다 — 화면에 보이는 것과 저장된 것은 다릅니다.</aside>
+</section>
+
+<!-- 10 안 되면 -->
+<section class="slide" data-part="PART 2">
+  <h2>안 되면 — <span class="g">에러를 그대로</span> 붙여넣기</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">에러 메시지를 <b>그대로</b> 에이전트에게 붙여넣어 고치게 한다 (<b>관찰 → 수정</b> 반복)</span></div>
+    <div class="st"><span class="n">2</span><span class="t">같은 걸 계속 못 고치면 <b>마지막으로 되던 지점으로 되돌리고</b>(그래서 커밋을 남겼습니다)</span></div>
+    <div class="st"><span class="n">3</span><span class="t">문제를 <b>잘게 쪼개</b> 다시 시킨다</span></div>
+  </div>
+  <div class="hl">🧭 에이전트와 일할 때의 규율 — <b>되돌릴 지점을 남기고, 한 번에 한 가지만 고친다</b></div>
+  <aside>바이브 코딩 루프에서 배운 관찰→수정 반복이 그대로 적용됩니다. 에러를 요약하지 말고 원문 그대로 주는 게 요령입니다.</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">길 B — 클라우드(Supabase)로도</h2>
+  <p style="margin-top:11px">그리고 RLS 꼭 켜기</p><span class="who">⑦ 실습</span></div>
+  <aside>같은 앱을 클라우드 DB로도 만들어 두면 나중에 남에게 링크로 보여줄 수 있습니다(로컬은 내 PC에서만 열리니까요).</aside>
+</section>
+
+<!-- 12 Supabase -->
+<section class="slide" data-part="PART 3">
+  <h2>같은 앱을 <span class="b">클라우드 Postgres</span>로</h2>
+  <pre>"같은 Todo 앱을, 로컬 SQLite 대신 Supabase(무료 클라우드 Postgres)에
+ 저장하도록 바꿔 줘. 접속 키는 .env로 빼고,
+ RLS(행 수준 보안)를 켜서 허용된 접근만 되게 해 줘."</pre>
+  <ul class="pts">
+    <li><b>확인</b> — Supabase 대시보드의 <b>Table Editor</b>에서 <code>todos</code> 표에 <b>행이 쌓이는지 눈으로</b></li>
+  </ul>
+  <div class="hl">⚠️ <b>RLS 꼭 켜기</b> — 안 켜면 <b class="r">공개 키로 누구나 데이터에 접근할 수 있습니다</b></div>
+  <aside>RLS는 소단원 ⑤의 '접근을 제한하는 보안'이 클라우드 DB에서 구체화된 형태입니다. 무료 실습에서 가장 흔히 빠뜨리는 설정이라 반드시 짚어 주세요.</aside>
+</section>
+
+<!-- 13 정리 -->
+<section class="slide" data-part="PART 3">
+  <h2>로컬 vs 클라우드 — <span class="g">언제 뭘</span></h2>
+  <table class="t">
+    <tr><th>상황</th><th>쓰는 쪽</th></tr>
+    <tr><td>개발 · 학습 · 오프라인</td><td><b class="g">로컬</b> (SQLite 파일 하나)</td></tr>
+    <tr><td>남에게 보여주고 24시간 열려면</td><td><b class="b">클라우드</b> (Supabase 등)</td></tr>
+  </table>
+  <div class="chain">
+    <div class="cell" style="min-width:170px"><small>흔한 흐름</small><b>로컬에서 만들고</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:170px;border-color:var(--gr)"><small>낼 때</small><b class="g">클라우드로</b></div>
+  </div>
+  <ul class="pts">
+    <li>로컬로 익힌 뒤 배포할 땐 <b>연결만 클라우드로 바꾸면 됩니다</b></li>
+  </ul>
+  <aside>소단원 ⑥에서 예고한 흐름을 실습으로 완성했습니다.</aside>
+</section>
+
+<!-- 14 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>PRD · 구조 · 확인 🧪</h1>
+    <div class="big" style="margin-top:26px">구조를 먼저 합의하고, 만들게 하고<br><span class="y">DB에 실제로 남았는지 내 눈으로 확인합니다</span></div>
+    <p class="sub" style="margin-top:24px">데이터베이스 ⑦ 실습 — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑧에서 회고와 핵심 정리로 강의를 닫습니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

@@ -54,15 +54,15 @@
    - ✅ ②-7. 내 컴퓨터를 서버로 — 집에서 돌려보기 (NAT·터널) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/home-server/) · 📊 [PPT](home-server/home-server.pptx)
    - ✅ ②-8. 바이브 코딩으로 프론트-백엔드 연결하기 (계약 불일치·API 명세) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/fullstack-connect/) · 📊 [PPT](fullstack-connect/fullstack-connect.pptx)
    - ✅ ②-9. 내 서비스에 백엔드 붙이기와 과제 (세 가지 길·RLS·📦 제출 루브릭) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/backend-project/) · 📊 [PPT](backend-project/backend-project.pptx)
-3. 데이터베이스 — 고객의 데이터는 어떻게 관리될까
-   - ③-1. 데이터를 저장할 곳이 필요한 이유
-   - ③-2. 왜 종류가 많을까 — 데이터베이스의 역사
-   - ③-3. SQL 구경과 데이터의 모양
-   - ③-4. 회원가입과 로그인 — 사용자를 다루기
-   - ③-5. 데이터를 안전하게 — 보안과 백업
-   - ③-6. 무료로 쓸 수 있는 DB 고르기
-   - ③-7. 실습 — 에이전트로 '내 Todo 앱'을 내 컴퓨터에 만들기
-   - ③-8. 마무리 — 회고와 핵심 정리
+3. **데이터베이스 — 고객의 데이터는 어떻게 관리될까** ✅ 완결 (8/8)
+   - ✅ ③-1. 데이터를 저장할 곳이 필요한 이유 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/why-database/) · 📊 [PPT](why-database/why-database.pptx)
+   - ✅ ③-2. 왜 종류가 많을까 — 데이터베이스의 역사 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/db-history/) · 📊 [PPT](db-history/db-history.pptx)
+   - ✅ ③-3. SQL 구경과 데이터의 모양 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/sql-and-tables/) · 📊 [PPT](sql-and-tables/sql-and-tables.pptx)
+   - ✅ ③-4. 회원가입과 로그인 — 사용자를 다루기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/auth-and-session/) · 📊 [PPT](auth-and-session/auth-and-session.pptx)
+   - ✅ ③-5. 데이터를 안전하게 — 보안과 백업 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/db-security-backup/) · 📊 [PPT](db-security-backup/db-security-backup.pptx)
+   - ✅ ③-6. 무료로 쓸 수 있는 DB 고르기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/free-db-choice/) · 📊 [PPT](free-db-choice/free-db-choice.pptx)
+   - ✅ ③-7. 실습 — 에이전트로 '내 Todo 앱'을 내 컴퓨터에 만들기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/todo-db-lab/) · 📊 [PPT](todo-db-lab/todo-db-lab.pptx)
+   - ✅ ③-8. 마무리 — 회고와 핵심 정리 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/db-wrapup/) · 📊 [PPT](db-wrapup/db-wrapup.pptx)
 4. [프로젝트] AI 에이전트 도구 — 내 AI를 더 강하게
    - ④-1. 어시스턴트에서 에이전트로 — 도구의 정체
    - ④-2. MCP — AI를 내 데이터에 꽂는 USB-C
@@ -281,6 +281,14 @@
 > - 대2-백엔드-②7 https://inseoklee-ai.github.io/study-room/home-server/
 > - 대2-백엔드-②8 https://inseoklee-ai.github.io/study-room/fullstack-connect/
 > - 대2-백엔드-②9 https://inseoklee-ai.github.io/study-room/backend-project/
+> - 대2-DB-③1 https://inseoklee-ai.github.io/study-room/why-database/
+> - 대2-DB-③2 https://inseoklee-ai.github.io/study-room/db-history/
+> - 대2-DB-③3 https://inseoklee-ai.github.io/study-room/sql-and-tables/
+> - 대2-DB-③4 https://inseoklee-ai.github.io/study-room/auth-and-session/
+> - 대2-DB-③5 https://inseoklee-ai.github.io/study-room/db-security-backup/
+> - 대2-DB-③6 https://inseoklee-ai.github.io/study-room/free-db-choice/
+> - 대2-DB-③7 https://inseoklee-ai.github.io/study-room/todo-db-lab/
+> - 대2-DB-③8 https://inseoklee-ai.github.io/study-room/db-wrapup/
 > - 대4-① https://inseoklee-ai.github.io/study-room/prompt-engineering-intro/
 > - 대4-② https://inseoklee-ai.github.io/study-room/agent-structure/
 > - 대4-③ https://inseoklee-ai.github.io/study-room/model-inputs/
