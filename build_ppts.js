@@ -32,7 +32,9 @@ const LESSONS = process.argv.slice(2).length
      "supabase-auth","my-domain-build","four-disciplines","mainquest-wrapup",
      "why-decompose","four-moves","domain-already","my-problem-workbook","ct-submit",
      "late-start-reframe","three-asymmetries","four-month-map",
-     "learning-together","first-ai-audit","day1-wrapup"];
+     "learning-together","first-ai-audit","day1-wrapup",
+     "rag-project-overview","rag-prd-questions","chunk-design","embedding-vectorstore",
+     "hybrid-retrieval","prompt-and-streaming","llm-as-judge","rubric-experiments","rag-submit"];
 
 // ---- palette (deck light theme) ----
 const INK="2A2723", SOFT="6B6357", GR="3F6B5F", GR2="2C4D44", GOLD="C8A15A",

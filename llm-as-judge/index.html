@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>답을 판정합니다 · LLM-as-a-Judge (나만의 챗봇 ⑦)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 프롬프트 엔지니어링 · 나만의 챗봇 ⑦</span>
+    <h1 style="margin:18px 0">답을 판정합니다<br>— LLM-as-a-Judge</h1>
+    <p class="sub">평가자를 만드는 일이 곧 답변을 만드는 일입니다</p>
+  </div>
+  <aside>출처 칩이 보인다는 사실만으로 답변 전체가 근거에 충실하다고 판정할 수는 없습니다. 그래서 질문·검색 근거·생성 답변을 함께 읽는 별도 평가자를 답변 뒤에 배치합니다.</aside>
+</section>
+
+<!-- 2 리허설 -->
+<section class="slide" data-part="표지">
+  <h2>리허설에는 <span class="r">무근거 질문</span>을 포함합니다</h2>
+  <p>"내일 날씨 알려줘" 같은 질문은 챗봇이 <b>확인할 근거가 없다는 문장을 남기고, 날씨 정보를 지어내지 않으며, 빈 출처를 꾸며 내지 않는지</b>를 확인하는 사례입니다.</p>
+  <div class="hl">🔎 대화가 중단된 것처럼 보이는 결과와 <b class="g">자료 경계가 화면에서 작동한 결과</b>를 구분하려면 — <b>답변 본문과 출처 칩을 함께</b> 읽어야 합니다</div>
+  <ul class="pts">
+    <li>무근거 질문은 판정 배지보다 먼저 <b>검색·생성 단계의 경계가 실제로 지켜지는지</b> 드러내는 검증 입력입니다</li>
+    <li>기록에는 질문만 남기지 말고 — <b>검색 결과가 비었는지, 답변이 자료 밖 사실을 보태지 않았는지, 판정이 어느 필드로 그 판단을 드러냈는지</b>를 나란히 적습니다</li>
+  </ul>
+  <aside>이 순서가 있어야 생성 단계의 조심스러운 문장과 판정 단계의 해석을 섞지 않고 볼 수 있습니다. 거부 문장이 있어도 엉뚱한 청크를 인용했다면 근거성과 인용은 다시 확인할 대상이고, 답이 짧다는 이유만으로 실패라고 판단하지 않습니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">답변 뒤에 평가자를 한 번 더 둡니다</h2>
+  <p style="margin-top:11px">교육적 계측 장치</p><span class="who">⑦ LLM-as-a-Judge</span></div>
+  <aside>이 평가는 모델이 자기 문장을 객관적으로 증명하는 장치가 아닙니다.</aside>
+</section>
+
+<!-- 4 평가자 -->
+<section class="slide" data-part="PART 1">
+  <h2>무엇을 위한 <span class="g">평가자</span>인가</h2>
+  <div class="grid2">
+    <div class="box"><h3>❌ 아닌 것</h3><p>모델이 <b class="r">자신의 문장을 완전히 객관적으로 증명</b>하는 장치</p></div>
+    <div class="box"><h3>✅ 인 것</h3><p>학생이 <b class="g">근거성·환각·인용·정당한 거부</b>를 <b>같은 화면에서 관찰</b>하도록 만드는 <b>교육적 계측 장치</b></p></div>
+  </div>
+  <ul class="pts">
+    <li>평가자는 <b class="r">답변을 다시 쓰거나 감추지 않고</b>, 답변이 어떤 기준에서 통과하거나 불확실했는지를 <b>판정 배지와 짧은 평어</b>로 남겨 사용자가 <b>검색과 생성 사이의 빈틈</b>을 되짚게 합니다</li>
+    <li>특히 근거가 없는 질문에 답을 꾸며 내지 않고 없다고 말한 경우를 <b class="r">실패가 아니라</b> <b class="g"><code>refusal:true</code></b>로 분리해야, 챗봇이 <b>무엇이든 답하는 도구가 아니라 확인 가능한 자료 안에서만 답하는 안내 도구</b>가 됩니다</li>
+  </ul>
+  <aside>판정 프롬프트가 평가 기준을 모호한 칭찬이나 인상으로 남기지 않고 JSON 필드로 명시한다는 점이 중요합니다.</aside>
+</section>
+
+<!-- 5 judge 프롬프트 -->
+<section class="slide" data-part="PART 1">
+  <h2>판정 기준을 <span class="b">데이터 구조</span>로 읽습니다</h2>
+  <pre>당신은 RAG 챗봇 답변의 평가자입니다. 아래 [질문], [근거자료], [답변]을 읽고
+다음 기준으로 JSON만 출력합니다.
+grounded: 답변 내용이 근거자료에서 나왔는가 (true/false)
+noHalluc: 근거에 없는 사실을 지어내지 않았는가 (true/false)
+cited: 답변 안에 근거 조각의 [ID] 표시가 있는가 (true/false)
+refusal: 근거에 답이 없어서 '없다'고 답한 경우 true, 그 외 false
+score: 0-100 정수 (grounded·noHalluc·cited 반영)
+comment: 한두 문장 평어 (한국어)
+출력 형식: {"grounded":bool,"noHalluc":bool,"cited":bool,"refusal":bool,
+"score":int,"comment":"..."} — JSON 외 텍스트 금지.
+
+[질문] …   [근거자료] …   [답변] …</pre>
+  <div class="hl">🎯 세 입력을 고정하고 <b>여섯 필드만 JSON으로</b> 반환하게 하므로 — 화면을 만드는 쪽은 <b class="g">설명 문장을 추측해 해석하지 않고 정해진 필드를 배지와 기록으로 연결</b>할 수 있습니다</div>
+  <aside>출력 형식을 강제하는 문장이 UI 구현을 단순하게 만듭니다.</aside>
+</section>
+
+<!-- 6 필드 표 -->
+<section class="slide" data-part="PART 1">
+  <h2>여섯 필드의 <span class="g">뜻</span></h2>
+  <table class="t">
+    <tr><th>필드</th><th>뜻</th><th>true/false 각각의 의미</th></tr>
+    <tr><td><code>grounded</code></td><td>답변 내용이 검색 근거에서 나왔는지</td><td>true는 근거에 닿았음을, false는 <b class="r">근거 밖 진술</b>이 있음을 뜻합니다</td></tr>
+    <tr><td><code>noHalluc</code></td><td>근거에 없는 사실을 만들지 않았는지</td><td>true는 지어낸 사실이 없음을, false는 <b class="r">환각 가능성</b>을 뜻합니다</td></tr>
+    <tr><td><code>cited</code></td><td>답변 안의 <code>[ID]</code> 인용 여부</td><td>true는 추적 가능한 근거 표기가 있음을, false는 <b class="r">출처 연결이 빠졌음</b>을 뜻합니다</td></tr>
+    <tr><td><code>refusal</code></td><td>근거 부재를 정직하게 거부했는지</td><td>true는 <b class="g">정당한 거부</b>를, false는 답변했거나 다른 사유로 거부했음을 뜻합니다</td></tr>
+    <tr><td><code>score</code></td><td>세 핵심 기준을 반영한 정수 점수</td><td>높은 값은 기준 충족이 많음을, 낮은 값은 <b>다시 읽을 대상</b>을 뜻합니다</td></tr>
+    <tr><td><code>comment</code></td><td>한국어 한두 문장 평어</td><td>긍정 평어는 통과 근거를, 부정 평어는 <b>확인할 결함</b>을 설명합니다</td></tr>
+  </table>
+  <aside>배지 하나로 결론내지 않고, 답변 본문·검색 근거·평어를 같은 기록 칸에서 비교해야 합니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">로컬 자기평가의 한계까지 함께 기록합니다</h2>
+  <p style="margin-top:11px">같은 2B 모델이 답과 판정을 모두</p><span class="who">⑦ LLM-as-a-Judge</span></div>
+  <aside>키 발급이나 서버 구성보다 판정 결과가 생성 결과와 어떻게 붙는지에 집중할 수 있는 경로입니다.</aside>
+</section>
+
+<!-- 8 한계 -->
+<section class="slide" data-part="PART 2">
+  <h2>독립 심사가 <span class="r">아닙니다</span></h2>
+  <p>로컬 엔진에서는 답변 생성에 쓴 <code>qwen3.5:2b</code>에게 <b>같은 질문·근거·답변을 다시</b> 보내되, 스트리밍을 끄고 사고 출력도 끄며 JSON 형식과 온도 0을 지정합니다.</p>
+  <pre>stream:false, think:false, format:"json", options:{temperature:0}</pre>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b class="r">답변 모델과 평가 모델이 같은 2B 모델</b>이므로 이 평가는 <b>독립 심사가 아니며</b>, 세밀한 사실 차이나 문맥 누락을 <b>거칠게 판정</b>할 수 있다는 한계를 <b class="g">화면과 기록에서 숨기지 않아야</b> 합니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">모델이 간혹 <b>5점 만점처럼 <code>score</code>를 반환</b>하면 <code>score ≤ 5</code>일 때 <b>(score/5)×100</b>으로 환산해 점수 체계의 오해를 방어합니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>JSON 파싱이나 호출이 실패하면</b> <code>judgeError</code> 배지만 남긴 채 <b class="g">이미 생성된 답변과 UI는 유지</b>합니다</span></div>
+  </div>
+  <aside>수용 기준의 "판정 실패 뒤에도 UI가 유지된다"가 여기서 구현됩니다.</aside>
+</section>
+
+<!-- 9 사람 피드백 -->
+<section class="slide" data-part="PART 2">
+  <h2>사람의 피드백과 <span class="b">나란히</span> 읽습니다</h2>
+  <div class="grid2">
+    <div class="box"><h3>같은 방향일 때</h3><p>사람의 좋아요·싫어요가 판정 배지와 같은 방향이면 <b class="g">자동 기준과 사용 경험이 일단 맞물린 사례</b>로 읽습니다</p></div>
+    <div class="box"><h3>어긋날 때</h3><p><b class="r">판정 기준이 놓친 유용성</b> 또는 <b class="r">사용자가 놓친 근거</b>를 답변·출처·평어와 함께 다시 읽습니다</p></div>
+  </div>
+  <div class="hl">🎯 배지 하나로 결론내지 않고 — <b>답변 본문 · 검색 근거 · 평가 평어</b>를 같은 기록 칸에서 비교합니다</div>
+  <aside>이렇게 남긴 리허설은 예상 밖 질문이 들어왔을 때 무엇을 먼저 읽을지 정하는 관찰 순서가 됩니다.</aside>
+</section>
+
+<!-- 10 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">실습 6 — 근거 없는 질문에서 정당한 거부 확인</h2>
+  <p style="margin-top:11px">확인하려는 것은 날씨를 알아내는 능력이 아닙니다</p><span class="who">⑦ LLM-as-a-Judge</span></div>
+  <aside>세 걸음으로 진행합니다.</aside>
+</section>
+
+<!-- 11 실습 -->
+<section class="slide" data-part="PART 3">
+  <h2>세 걸음과 <span class="g">기록</span></h2>
+  <pre>내일 날씨 어때?</pre>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">생성된 문장이 <b class="r">모르는 정보를 채워 넣지 않는지</b> 먼저 읽습니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">판정 배지에서 <b><code>refusal:true</code></b>와 <code>grounded</code>, <code>noHalluc</code>, <code>cited</code>, <code>score</code>, <code>comment</code>가 어떤 조합으로 나타나는지 관찰 — <b class="g">정당한 거부가 낮은 품질의 침묵이 아니라 근거 경계를 지킨 답변</b>임을 확인</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>질문 원문 · 답변의 핵심 문장 · 판정 배지와 평어</b>를 실습 기록에 함께 적어, <b class="r">점수 하나만 남기지 않고</b> 판정이 나온 맥락을 보존</span></div>
+  </div>
+  <div class="hl">⚠️ <code>refusal:true</code>가 보이지 않거나 근거 없는 날씨 정보가 생성되면 — <b class="r">답변 문장만 고치기보다</b> <b class="g">검색 근거와 프롬프트의 근거 부재 분기를 먼저 열어</b> 원인을 기록합니다</div>
+  <aside>확인하려는 것은 벡터스토어에 없는 정보를 발견했을 때 검색·생성·판정이 각각 어떤 경계에서 멈추는가입니다.</aside>
+</section>
+
+<!-- 12 더 깊이 -->
+<section class="slide" data-part="PART 3">
+  <h2>더 깊이 갈 사람을 위한 길</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">같은 답변을 <b>로컬 judge와 Gemini judge 양쪽</b>에 보내 <b>점수와 평어가 어디에서 갈리는지</b> 관찰 — 예시 구현은 처음부터 두 엔진을 판정자로 둘 수 있게 설계돼 있습니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>judge 프롬프트의 기준 문구</b>를 바꿔 <b>판정의 민감도</b>가 달라지는지 관찰</span></div>
+    <div class="st"><span class="n">3</span><span class="t">judge가 남긴 판정을 <b>사람이 다시 채점</b>해 보는 <b>메타 평가</b> 실험</span></div>
+  </div>
+  <ul class="pts">
+    <li>판정 배지는 답변마다 자동으로 쌓이므로, <b>답변 길이처럼 관찰 가능한 품질 신호</b>와 함께 기록합니다</li>
+    <li>"답이 가끔 길다"는 인상은 <b class="g">질문 유형·답변 길이·판정 결과를 같은 표본에서 비교</b>해야 개선 실험의 가설이 됩니다</li>
+  </ul>
+  <div class="big" style="margin-top:12px">평가자를 만드는 일이<br><span class="y">곧 답변을 만드는 일</span>입니다</div>
+  <aside>기록된 판정과 답변을 나란히 보면 막연한 인상을 측정 대상으로 바꿀 수 있습니다.</aside>
+</section>
+
+<!-- 13 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 이 judge를 '독립 평가'라고 부르면 안 되는 이유는?</div>
+    <div class="q a"><b>A1.</b> <b>답변 모델과 평가 모델이 같은 2B 모델</b>이기 때문. 교육용의 거친 신호로 읽어야 하며 그 한계를 화면과 기록에서 숨기지 않는다.</div>
+    <div class="q"><b>Q2.</b> <code>refusal:true</code>는 실패인가?</div>
+    <div class="q a"><b>A2.</b> <b>아니다.</b> 근거가 없을 때 지어내지 않고 없다고 말한 <b>정당한 거부</b>다. 이걸 실패와 분리해야 "확인 가능한 자료 안에서만 답하는 안내 도구"가 된다.</div>
+    <div class="q"><b>Q3.</b> 판정 호출이나 JSON 파싱이 실패하면?</div>
+    <div class="q a"><b>A3.</b> <code>judgeError</code> 배지만 남기고 <b>이미 생성된 답변과 UI는 유지</b>한다.</div>
+    <div class="q"><b>Q4.</b> 사람 피드백과 판정 배지가 어긋나면?</div>
+    <div class="q a"><b>A4.</b> 어느 쪽이 옳다고 즉시 정하지 않고, <b>판정 기준이 놓친 유용성</b>인지 <b>사용자가 놓친 근거</b>인지를 답변·출처·평어와 함께 다시 읽는다.</div>
+  </div>
+  <aside>Q1의 정직함이 이 프로젝트 전체의 태도입니다.</aside>
+</section>
+
+<!-- 14 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>근거성 · 인용 · 정당한 거부 ⚖️</h1>
+    <div class="big" style="margin-top:26px">판정 배지 하나로 결론내지 않고<br><span class="y">답변·근거·평어를 같은 기록 칸에서 비교합니다</span></div>
+    <p class="sub" style="margin-top:24px">나만의 챗봇 ⑦ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑧에서 이 판정 필드를 재료로, 스스로 세운 루브릭으로 실험을 돌립니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

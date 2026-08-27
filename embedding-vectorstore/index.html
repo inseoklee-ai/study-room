@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>임베딩과 벡터스토어 구축하기 (나만의 챗봇 ④)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 프롬프트 엔지니어링 · 나만의 챗봇 ④</span>
+    <h1 style="margin:18px 0">임베딩과<br>벡터스토어 구축하기</h1>
+    <p class="sub">질문과 문서가 같은 공간에 있어야 거리가 말을 합니다</p>
+  </div>
+  <aside>모두콘 문서를 검색 재료로 바꾸는 단계입니다. 여기서 가장 흔한 사고는 성능이 아니라 '공간이 다른 벡터'입니다.</aside>
+</section>
+
+<!-- 2 384 함정 -->
+<section class="slide" data-part="표지">
+  <h2>과거 스크립트를 그대로 돌리면 <span class="r">384차원</span>이 남습니다</h2>
+  <p>과거에 쓰던 경로는 <b>BGE 384차원 벡터</b>를 남깁니다. 화면에서 숫자 배열은 정상처럼 보이지만, <b class="r">질문이 다른 공간에서 만들어진다면 '가까움'이라는 판단 자체가 성립하지 않습니다.</b></p>
+  <div class="hl">🎯 문서와 질문의 <b>출발점을 먼저 맞추어야</b> 합니다</div>
+  <table class="t">
+    <tr><th>항목</th><th>현재 경로</th></tr>
+    <tr><td>모델</td><td><code>onnx-community/embeddinggemma-300m-ONNX</code></td></tr>
+    <tr><td>차원</td><td><b>768차원</b> (문장·질문 각각 벡터 하나)</td></tr>
+    <tr><td>첫 방문</td><td>모델 파일 <b>약 200MB</b> · 첫 로드 실측 <b>5~15초</b></td></tr>
+  </table>
+  <ul class="pts">
+    <li>그래서 화면은 <b class="g">멈춘 것처럼 보이지 않게 진행 상태와 캐시 여부</b>를 보여 주어야 합니다</li>
+    <li>임베딩은 <b class="r">답을 만드는 과정이 아니라</b>, <b class="g">답의 근거 후보를 찾기 위한 색인 과정</b>입니다</li>
+  </ul>
+  <aside>로드가 끝난 모델은 행사 소개·참가 방법·발표 신청처럼 표현이 다른 문장 사이의 의미 관계를 좌표의 거리로 다룰 수 있게 합니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">캐시는 재방문 경험의 계약입니다</h2>
+  <p style="margin-top:11px">성능 장식이 아닙니다</p><span class="who">④ 임베딩과 벡터스토어</span></div>
+  <aside>모델 파일을 매 질문마다 다시 내려받으면 검색을 시작하기도 전에 사용자를 기다리게 만듭니다.</aside>
+</section>
+
+<!-- 4 캐시 -->
+<section class="slide" data-part="PART 1">
+  <h2>HTTP 캐시만 믿기 <span class="r">어려운 이유</span></h2>
+  <ul class="pts">
+    <li>Hugging Face의 <code>resolve</code> URL이 <b>서명된 CDN URL로 리다이렉트</b>되며 <b class="r">캐시 적중이 불안정</b>할 수 있습니다</li>
+    <li>따라서 <b class="g">원래 URL을 키로 삼아 Cache Storage에 직접 보관</b>하고, 캐시 적중 때에는 <b>완료 상태와 캐시 사용 여부를 즉시</b> 알리는 편이 낫습니다</li>
+    <li>Cache Storage가 실패할 수 있으므로 <b>한 번의 재시도 뒤에도 실패하면 다운로드를 계속하는 경로</b>를 남겨 두고, 브라우저 환경에 따라 <b class="r">저장을 보장한다고 단정하지 않아야</b> 합니다</li>
+  </ul>
+  <div class="hl">🎯 캐시 전략의 목적은 — 사용자가 다시 방문했을 때 <b>모델 준비가 아니라 질문 자체에 집중</b>하게 만드는 것</div>
+  <aside>캐시를 "빠르게 하는 기술"이 아니라 "재방문 경험의 약속"으로 보는 관점이 이 슬라이드의 요지입니다.</aside>
+</section>
+
+<!-- 5 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">기본 파이프라인이 멈추는 지점을 우회합니다</h2>
+  <p style="margin-top:11px">토크나이저와 세션을 분리</p><span class="who">④ 임베딩과 벡터스토어</span></div>
+  <aside>브라우저에서 pipeline()을 곧바로 호출하는 방식은 간결해 보이지만 실패할 수 있습니다.</aside>
+</section>
+
+<!-- 6 우회 -->
+<section class="slide" data-part="PART 2">
+  <h2><code>no_gather_q4</code> 경로로 <span class="g">역할을 분리</span>합니다</h2>
+  <p>기본 q4 또는 q8 경로가 선택되면 <b class="r">WASM ONNX Runtime이 <code>GatherBlockQuantized</code> 연산을 지원하지 않아 실패</b>할 수 있습니다. 해결은 모델 전체를 포기하는 일이 아니라 <b>역할을 분리하는 일</b>입니다.</p>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>토크나이저</b>는 transformers.js의 <code>AutoTokenizer</code>로 사용</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>추론 세션</b>은 <code>model_no_gather_q4.onnx</code>와 데이터 파일을 <b>ONNX Runtime에 직접</b> 넘긴 뒤 <b>WASM 실행 공급자</b>를 지정</span></div>
+  </div>
+  <pre>// rag.ts의 핵심 경로를 짧게 확인합니다.
+const tokenizer = await AutoTokenizer.from_pretrained(modelId);
+const session = await ort.InferenceSession.create(modelUrl, {
+  executionProviders: ["wasm"],
+});</pre>
+  <div class="hl">🗣️ 에이전트에게는 <b class="r">오류 문구만 전달하지 말고</b> — <b>토크나이저와 ORT 세션을 분리해야 하는 이유</b>와 <b><code>no_gather_q4</code> 파일을 써야 하는 조건</b>을 함께 요구해야 합니다</div>
+  <aside>이 우회는 문서 임베딩과 브라우저 질문 임베딩이 같은 모델 계열의 계산을 거치게 하는 조건이기도 합니다.</aside>
+</section>
+
+<!-- 7 pooling -->
+<section class="slide" data-part="PART 2">
+  <h2>평균을 만들고 <span class="b">길이를 맞춰야</span> 비교가 공정해집니다</h2>
+  <p>모델 출력의 <code>last_hidden_state</code>는 <b>토큰마다 하나씩</b> 생기므로, 문장 하나를 대표하는 벡터로 줄이는 규칙이 필요합니다.</p>
+  <div class="chain">
+    <div class="cell" style="min-width:220px"><small>1</small><b>mean pooling<br><small>attention_mask가 가리키는 실제 토큰만 평균</small></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:200px;border-color:var(--gr)"><small>2</small><b class="g">L2 정규화<br><small>벡터 길이를 1로</small></b></div>
+  </div>
+  <ul class="pts">
+    <li>이 순서가 없으면 <b class="r">패딩 토큰이 문장 표현에 섞이거나</b>, <b class="r">문장 길이 차이가 점수에 과도하게 영향</b>을 줄 수 있습니다</li>
+    <li>정규화된 벡터끼리는 <b>내적이 곧 코사인 유사도</b>로 읽히므로, 검색 단계가 별도 길이 보정을 반복하지 않아도 됩니다</li>
+  </ul>
+  <div class="hl">🗣️ 에이전트에게 명시할 것 — <b>출력 텐서의 첫 값만 사용하지 말 것 · 마스크를 분모와 분자에 함께 반영할 것 · 0으로 나누는 경우를 방어할 것</b></div>
+  <aside>숫자로 바꾸는 과정의 작은 생략이 검색 결과 전체의 편향으로 이어질 수 있습니다.</aside>
+</section>
+
+<!-- 8 차원 계약 -->
+<section class="slide" data-part="PART 2">
+  <h2>차원이 같다고 <span class="r">비교가 되는 것은 아닙니다</span></h2>
+  <ul class="pts">
+    <li>과거 BGE 경로는 <b>384차원</b>, 현재 모두콘 코퍼스는 Gemma의 <b>768차원</b> — <b class="r">두 결과를 섞으면 계산이 실패하거나 의미 없는 거리</b>를 만듭니다</li>
+    <li>더 위험한 경우는 <b class="r">차원이 우연히 같아도 서로 다른 모델의 공간을 섞는 경우</b>입니다 — 숫자는 나오지만 <b>가까움의 뜻이 보장되지 않습니다</b></li>
+  </ul>
+  <div class="big">문서 벡터를 만들 때 쓴 <span class="y">모델 · pooling 방식 · 정규화 규칙</span>을<br>질문 임베딩에도 <span class="y">똑같이</span> 적용합니다</div>
+  <div class="hl">🧭 기존 스크립트가 있다는 이유만으로 재실행하지 말고, <b>현재 코퍼스의 차원과 생성 모델을 먼저 확인</b>하는 태도가 필요합니다</div>
+  <aside>벡터스토어에 이 사실을 확인할 수 있는 생성 경로를 남겨 두어야 합니다.</aside>
+</section>
+
+<!-- 9 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">실습 3 — 문서 벡터스토어를 만듭니다</h2>
+  <p style="margin-top:11px">그리고 검색으로 되짚어 확인합니다</p><span class="who">④ 임베딩과 벡터스토어</span></div>
+  <aside>현재 경로는 embed-docs-browser-path.mjs 입니다.</aside>
+</section>
+
+<!-- 10 실습 -->
+<section class="slide" data-part="PART 3">
+  <h2>생성 조건을 <span class="g">고정</span>합니다</h2>
+  <p><code>embed-docs-browser-path.mjs</code>는 Node 환경에서 같은 모델의 feature-extraction pipeline을 사용하고, <b><code>dtype:"q4"</code>, <code>pooling:"mean"</code>, <code>normalize:true</code></b> 조건으로 문서 벡터를 만들며 결과를 <code>app/public/moducon-docs.json</code>에 둡니다.</p>
+  <pre>모두콘 공개 문서 청크 배열을 읽어 브라우저 RAG용 벡터스토어를 만드는
+embed-docs-browser-path.mjs를 작성합니다. onnx-community/embeddinggemma-300m-ONNX를
+사용하고 dtype은 q4, pooling은 mean, normalize는 true로 고정합니다.
+각 청크의 id, text, url, section을 보존하고 vector를 추가하여
+app/public/moducon-docs.json에 저장합니다. 기존 BGE 384차원 경로는 사용하지 말고,
+생성 후 모든 vector가 768차원인지 검사하는 검증도 포함합니다.</pre>
+  <div class="hl">✅ 생성된 스크립트의 <b>모델 ID, q4 설정, mean pooling, 정규화, 출력 필드</b>를 <b class="g">한 줄씩 대조</b>합니다</div>
+  <aside>확인은 차원 수만 대조하는 데서 멈추지 않고, 모델 ID와 pooling·정규화 규칙까지 문서 생성과 질문 처리 양쪽에서 같은지 점검합니다. 그래야 상위 결과가 우연히 익숙한 표현을 골랐는지, 실제로 비교 가능한 좌표에서 가까운 청크를 골랐는지 분리해 읽을 수 있습니다.</aside>
+</section>
+
+<!-- 11 스팟체크 -->
+<section class="slide" data-part="PART 3">
+  <h2>스팟체크 — <span class="b">검색 결과를 거꾸로</span> 읽습니다</h2>
+  <p><b class="r">생성 명령이 성공했다는 메시지만으로 벡터스토어가 올바르다고 판단할 수 없습니다.</b></p>
+  <pre>python3 check_retrieval.py</pre>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">예상 질문을 넣고 <b>top-1과 top-3에 어떤 청크가 놓이는지</b> 읽습니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">문서에 근거가 있는 질문(모두콘이 무엇인지·참가 방법·발표 신청)은 <b class="g">관련 청크가 상위에 나타나는지</b> 확인</span></div>
+    <div class="st"><span class="n">3</span><span class="t">문서 범위 밖 질문은 <b class="r">억지로 관련 청크가 정답처럼 보이지 않는지</b>도 관찰</span></div>
+  </div>
+  <div class="hl">⚠️ top-1이 기대와 다를 때 <b class="r">곧바로 임계값을 바꾸기보다</b> — 질문과 문서가 <b>같은 임베딩 경로를 지나갔는지</b>, <b>청크의 사실 경계가 적절한지</b>부터 역순으로 점검합니다</div>
+  <aside>여기서 확인하는 대상은 모델의 지능이 아니라 문서 청크·생성 모델·정규화·검색 점수의 연결입니다.</aside>
+</section>
+
+<!-- 12 더 깊이 -->
+<section class="slide" data-part="PART 3">
+  <h2>더 깊이 갈 사람을 위한 길</h2>
+  <div class="grid2">
+    <div class="box"><h3>WebGPU 백엔드</h3><p>WASM 대신 <b>WebGPU</b>를 <code>executionProviders</code>에 지정해 보면, 지원 브라우저에서 <b>임베딩 준비와 계산이 어떻게 달라지는지</b> 관찰할 수 있습니다</p></div>
+    <div class="box"><h3>양자화 비교</h3><p>모델 파일의 양자화를 <b>q4와 q8</b>로 바꿔 가며 <b>검색 상위 결과의 순서 변화</b>를 기록해 보는 것도 같은 코퍼스로 할 수 있는 실험입니다</p></div>
+  </div>
+  <div class="big" style="margin-top:14px">질문과 문서가 <span class="y">같은 공간에 있어야</span> 거리가 말을 합니다</div>
+  <aside>두 실험 모두 소단원 ⑧의 실험 기록 형식으로 남기면 좋습니다.</aside>
+</section>
+
+<!-- 13 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 문서 384차원, 질문 768차원이면 무슨 일이 생기나?</div>
+    <div class="q a"><b>A1.</b> 배열이 있어도 <b>비교 계약이 성립하지 않는다.</b> 계산이 실패하거나 의미 없는 거리가 나온다. 차원이 우연히 같아도 <b>다른 모델의 공간</b>이면 마찬가지.</div>
+    <div class="q"><b>Q2.</b> 기본 <code>pipeline()</code> 호출이 실패할 수 있는 이유와 우회는?</div>
+    <div class="q a"><b>A2.</b> WASM ONNX Runtime이 <code>GatherBlockQuantized</code>를 지원하지 않는다. <b>토크나이저(AutoTokenizer)와 ORT 세션(<code>model_no_gather_q4.onnx</code>)을 분리</b>해 WASM 공급자를 지정한다.</div>
+    <div class="q"><b>Q3.</b> mean pooling과 L2 정규화를 하는 이유는?</div>
+    <div class="q a"><b>A3.</b> 패딩 토큰이 섞이거나 <b>문장 길이가 점수에 과도하게 영향</b>을 주는 것을 막는다. 정규화 뒤에는 <b>내적이 곧 코사인 유사도</b>가 된다.</div>
+    <div class="q"><b>Q4.</b> top-1이 기대와 다를 때 먼저 할 일은?</div>
+    <div class="q a"><b>A4.</b> <b>임계값 조정이 아니라</b> 같은 임베딩 경로를 지났는지, 청크의 사실 경계가 적절한지 <b>역순 점검</b>.</div>
+  </div>
+  <aside>Q4의 습관이 소단원 ⑤·⑧에서 반복됩니다.</aside>
+</section>
+
+<!-- 14 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>같은 공간 · 같은 규칙 📐</h1>
+    <div class="big" style="margin-top:26px">벡터 파일이 만들어졌다는 사실이 아니라<br><span class="y">실제 질문에서 관련 청크가 위로 올라오는지</span>가 확인 대상입니다</div>
+    <p class="sub" style="margin-top:24px">나만의 챗봇 ④ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑤에서 그 좌표로 가까운 청크를 고릅니다 — 코사인과 BM25를 함께.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

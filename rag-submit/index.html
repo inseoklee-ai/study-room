@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>내 도메인에서 동작하는 챗봇 제출하기 (나만의 챗봇 ⑨)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 프롬프트 엔지니어링 · 나만의 챗봇 ⑨ + 제출</span>
+    <h1 style="margin:18px 0">내 도메인에서 동작하는<br>챗봇 제출하기</h1>
+    <p class="sub">설계 · 구현 · 실험 · 배포 · 제출</p>
+  </div>
+  <aside>제출은 끝이 아니라 자기 도메인에서 측정이 계속되는 시작입니다.</aside>
+</section>
+
+<!-- 2 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">설계 — 내 도메인의 PRD를 완성합니다</h2>
+  <p style="margin-top:11px"><code>[결정 필요]</code>를 하나씩 닫습니다</p><span class="who">⑨ 제출</span></div>
+  <aside>앞에서 초안으로 남긴 PRD는 제출 직전에 완성본으로 닫습니다.</aside>
+</section>
+
+<!-- 3 PRD 완성 -->
+<section class="slide" data-part="PART 1">
+  <h2>빈칸을 유지한 채 구현을 시작하면 <span class="r">코드가 약속을 대신합니다</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><code>[결정 필요]</code>를 하나씩 찾아 <b>사용자, 해결하려는 질문, 사용할 자료의 범위, 답변의 근거 표시, 실패했을 때의 안내 문구</b>로 바꿔 적습니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">자료에 없는 질문은 <b class="r">그럴듯하게 넓혀 답하지 않고</b> — <b class="g">자료 범위 밖임을 밝힌 뒤 관련 자료를 요청하거나 답할 수 없다고 안내</b>한다고 명시합니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">수용 기준에는 <b>어떤 답에 출처가 있어야 하는지</b>와 <b>어떤 경우에 거부가 정당한지</b>도 적습니다</span></div>
+  </div>
+  <ul class="pts">
+    <li>이 기준은 <b class="r">거절 횟수를 줄이려는 장치가 아니라</b> <b class="g">사용자가 답변의 경계를 이해하게 하는 약속</b>입니다</li>
+    <li>완성한 PRD를 읽고 <b>처음 보는 사람이 무엇을 묻고 무엇을 기대하면 안 되는지 판단할 수 있는지</b> 확인합니다</li>
+    <li>기능 목록에는 답변이 아니라 <b>사용자의 판단을 돕는 이유</b>를 붙이고, <b>자료의 갱신 주체와 출처 링크의 책임</b>도 적어 둡니다</li>
+  </ul>
+  <aside>갱신 주체를 적어 두면 이후 자료가 바뀌었을 때 무엇을 다시 검토해야 하는지 분명해집니다.</aside>
+</section>
+
+<!-- 4 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">구현 — 모두콘 구조를 내 자료로 바꿉니다</h2>
+  <p style="margin-top:11px">스키마와 파이프라인은 그대로</p><span class="who">⑨ 제출</span></div>
+  <aside>바꾸는 것은 데이터와 문구이지 구조가 아닙니다.</aside>
+</section>
+
+<!-- 5 교체 -->
+<section class="slide" data-part="PART 2">
+  <h2>무엇을 <span class="g">바꾸고</span> 무엇을 <span class="r">그대로 두나</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>✅ 바꾸는 것</h3><p><b>청크 배열</b>을 내 자료의 사실 단위로 · <b>소개와 페이지 문구</b>를 PRD에서 확정한 사용자와 질문으로</p></div>
+    <div class="box"><h3>🔒 그대로 두는 것</h3><p><code>id</code>·<code>text</code>·<code>url</code>·<code>section</code>·<code>vector</code> <b>스키마</b> · <b>검색 순서</b> · 답변 프롬프트의 <b>출처·거부 규칙</b></p></div>
+  </div>
+  <ul class="pts">
+    <li>임베딩은 <b><code>embeddinggemma-300m</code></b>으로 만들어 <b>768차원 벡터 공간</b>을 맞춥니다 — <b class="r">자료 벡터만 바꾸고 질의 임베딩을 다른 모델로 만들면 검색 점수는 비교할 자리를 잃습니다</b></li>
+    <li>규칙을 그대로 두어야 <b class="g">바뀐 결과를 '내 자료의 차이'로 읽을 수</b> 있습니다</li>
+  </ul>
+  <pre>**스키마와 검색·프롬프트 파이프라인은 변경하지 마세요.** 모두콘 예시 코드에서
+청크 데이터와 소개·페이지 문구를 [내 도메인]으로 교체해 주세요.
+청크는 [자료 경로]를 근거로 만들고 id, text, url, section, vector 필드를 유지하세요.
+임베딩은 embeddinggemma-300m의 768차원으로 통일하고,
+[도메인 밖 질문 처리 기준]을 문구에 반영하세요.</pre>
+  <aside>교체를 에이전트에 맡길 때도 데이터 구조를 바꾸지 말라는 조건을 먼저 줍니다.</aside>
+</section>
+
+<!-- 6 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">실험 — 내 루브릭으로 한 바퀴</h2>
+  <p style="margin-top:11px">실패한 답도 지우지 않습니다</p><span class="who">⑨ 제출</span></div>
+  <aside>앞에서 정한 자기 루브릭을 새 챗봇에 그대로 적용합니다.</aside>
+</section>
+
+<!-- 7 실험 -->
+<section class="slide" data-part="PART 3">
+  <h2>고정 질문 세 종류로 <span class="g">경계를 관찰</span>합니다</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px"><small>1</small><b>자료를 직접 묻는 것</b></div>
+    <div class="cell" style="min-width:160px;border-color:var(--bl)"><small>2</small><b class="b">여러 청크를 잇는 것</b></div>
+    <div class="cell" style="min-width:150px;border-color:var(--red)"><small>3</small><b class="r">자료 밖을 묻는 것</b></div>
+  </div>
+  <ul class="pts">
+    <li>확인할 것 — <b>출처를 인용한 답</b>, <b>도메인 밖 질문의 거부</b>, 판정 배지의 <b><code>grounded</code></b> 여부, <b>짧은 답변에서도 근거 표시가 남는지</b></li>
+    <li>한 번의 실행에서는 <b>프롬프트 문구나 검색 설정처럼 변수 하나만</b> 바꾸고, <b class="g">나머지 조건과 질문 순서는 유지</b>합니다</li>
+  </ul>
+  <div class="hl">📓 <code>README.md</code>에는 실행 날짜 대신 — <b>실험 이름 · 바꾼 변수 · 고정 질문 · 각 질문의 <code>cited</code>·<code>refusal</code>·<code>grounded</code> 판정 · 관찰한 근거 · 채택 또는 되돌림 결정</b>을 기록합니다</div>
+  <aside>실패한 답도 지우지 않아야 다음 수정이 무엇을 보존해야 하는지 알 수 있습니다. 루브릭의 목표값과 실제 판정값을 나란히 남기면, 개선이라는 말이 어떤 관찰에 근거하는지도 동료와 사용자에게 설명할 수 있습니다.</aside>
+</section>
+
+<!-- 8 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">배포 — 내 주소로 세상에 내놓기</h2>
+  <p style="margin-top:11px">주소가 열리는 것만으로 배포가 끝나지 않습니다</p><span class="who">⑨ 제출</span></div>
+  <aside>정적 페이지가 답변을 대신 실행하는 것은 아닙니다.</aside>
+</section>
+
+<!-- 9 배포 -->
+<section class="slide" data-part="PART 4">
+  <h2>빌드와 <span class="r">실행 조건</span></h2>
+  <pre>npm run build     # 정적 결과물 생성 → dist 를 GitHub Pages 에 올림
+                  # 프로젝트 설정의 base:'./' 가 배포 주소 아래에서도
+                  # 자산 경로를 상대적으로 찾게 합니다</pre>
+  <ul class="pts">
+    <li><b class="r">그러나 정적 페이지가 답변을 대신 실행하지 않습니다.</b> 페이지를 연 사용자의 브라우저가 <b><code>localhost:11434</code>의 Ollama <code>qwen3.5:2b</code>를 직접 호출</b>합니다</li>
+    <li>따라서 그 사용자 컴퓨터에서 <b>Ollama가 실행 중</b>이어야 하며, Pages 출처의 요청을 허용하도록 <b><code>OLLAMA_ORIGINS</code></b>를 설정해야 합니다</li>
+  </ul>
+  <div class="steps">
+    <div class="st"><span class="n">✔</span><span class="t">배포 주소에서 <b>소개 질문과 도메인 밖 질문을 각각</b> 입력해 <b>자산 로드 · 모델 연결 · 출처 표시 · 거부 안내</b>를 확인합니다</span></div>
+    <div class="st"><span class="n">✔</span><span class="t">연결 실패 시 <b>모델이 없다는 안내와 재시도 방법</b>이 보이는지 확인해, 사용자가 <b class="g">페이지 오류와 자신의 실행 조건을 구별</b>할 수 있게 합니다</span></div>
+  </div>
+  <aside>주소가 열리는 것만으로 배포가 끝났다고 판단하지 않고, 사용 조건을 갖춘 브라우저에서 실제 경로를 따라갑니다.</aside>
+</section>
+
+<!-- 10 PART 5 -->
+<section class="slide" data-part="PART 5">
+  <div class="part"><div class="pno">5</div><h2 style="margin:0">📦 제출 — 저장소와 안내 페이지</h2>
+  <p style="margin-top:11px">자랑하는 자리가 아니라 조건을 판단하는 자리</p><span class="who">📦 제출</span></div>
+  <aside>제출 저장소에는 README.md, PRD.md, 코드, 배포 주소를 함께 둡니다.</aside>
+</section>
+
+<!-- 11 제출물 -->
+<section class="slide" data-part="PART 5">
+  <h2>무엇을 <span class="g">함께 두나</span></h2>
+  <table class="t">
+    <tr><th>파일</th><th>담을 내용</th></tr>
+    <tr><td><b><code>README.md</code></b></td><td>서비스 소개 · 설계 결정 요약 · <b>실험 결과</b> · <b>배포 주소와 사용 조건</b></td></tr>
+    <tr><td><b><code>PRD.md</code></b></td><td><b>누구의 어떤 질문을 자료 범위 안에서 다루는지</b>와 <b>도메인 밖 질문 처리 기준</b></td></tr>
+    <tr><td><b>코드 · 배포 주소</b></td><td>실행 가능한 저장소와 실제 열리는 주소</td></tr>
+  </table>
+  <div class="hl">⚠️ 사용 조건은 <b class="r">숨기지 않는 항목</b>입니다 — <b>Ollama 실행</b> · <b>첫 방문의 임베딩 다운로드 약 200MB</b> · <b>CORS 설정 필요</b></div>
+  <ul class="pts">
+    <li>안내 페이지는 <b class="r">결과를 자랑하는 자리가 아니라</b> — <b class="g">처음 보는 사람이 실행 전에 조건을 판단하는 자리</b>입니다</li>
+  </ul>
+  <aside>이 관점이 이 프로젝트의 마지막 태도입니다.</aside>
+</section>
+
+<!-- 12 사용 순서 -->
+<section class="slide" data-part="PART 5">
+  <h2>사용자가 밟을 <span class="b">네 걸음</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>배포 주소를 열고</b> 서비스가 다루는 자료와 질문을 읽습니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">자신의 컴퓨터에서 <b>Ollama를 실행</b>하고 <b><code>qwen3.5:2b</code></b>를 준비합니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">첫 방문에는 <b>임베딩 다운로드가 있을 수 있음</b>을 확인하고 기다립니다</span></div>
+    <div class="st"><span class="n">4</span><span class="t">Pages 주소에서 호출하려면 <b><code>OLLAMA_ORIGINS</code>에 해당 출처를 허용</b>한 뒤, <b>안내한 질문과 자료 밖 질문을 각각</b> 입력합니다</span></div>
+  </div>
+  <div class="hl">✅ 이 순서가 <b>README와 안내 페이지에서 같은 말로 보이는지</b> 마지막으로 대조합니다</div>
+  <aside>말이 두 곳에서 어긋나면 사용자는 자기 환경 문제인지 제품 문제인지 판단할 수 없습니다.</aside>
+</section>
+
+<!-- 13 마무리 정리 -->
+<section class="slide" data-part="확인">
+  <h2>제출 뒤에 <span class="g">남는 것</span></h2>
+  <p>오늘 만든 것은 자료를 넣고 답을 내는 화면만이 아닙니다. <b>PRD로 질문의 범위와 거절의 기준을 정하고, 같은 스키마와 임베딩 공간 안에서 자료를 교체하고, 루브릭과 고정 질문으로 답변을 판정하고, 사용 조건까지 안내하는 흐름</b>을 한 번 연결했습니다.</p>
+  <table class="t">
+    <tr><th>남는 것</th><th>무엇이 되나</th></tr>
+    <tr><td><b><code>README</code></b></td><td>사용자의 <b>출발점</b></td></tr>
+    <tr><td><b><code>PRD</code></b></td><td><b>바꿀 수 없는 약속과 다시 검토할 결정</b>을 가르는 기준</td></tr>
+    <tr><td><b>실험 기록</b></td><td><b>다음 변경을 비교할 기준</b></td></tr>
+  </table>
+  <div class="hl">🎯 답변 하나가 좋아 보인다는 인상보다 — <b class="g">어떤 질문에서 어떤 근거와 판정이 나왔는지 남긴 기록</b>이 챗봇을 설명 가능하게 합니다</div>
+  <aside>자료가 바뀌거나 질문이 넓어질 때는 같은 고정 질문으로 다시 관찰하고, PRD의 범위와 안내 문구를 함께 고칩니다. 그 비교 기록은 새 기능을 급히 더하는 대신 '자료에 근거한 답변'이라는 약속을 지키는 데 쓰입니다.</aside>
+</section>
+
+<!-- 14 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 마지막 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 내 자료로 바꿀 때 그대로 두어야 하는 것은?</div>
+    <div class="q a"><b>A1.</b> <b>스키마(id·text·url·section·vector) · 검색 순서 · 프롬프트의 출처·거부 규칙.</b> 그래야 바뀐 결과를 '내 자료의 차이'로 읽을 수 있다.</div>
+    <div class="q"><b>Q2.</b> 자료 벡터만 새 모델로 만들고 질의는 그대로 두면?</div>
+    <div class="q a"><b>A2.</b> <b>검색 점수가 비교할 자리를 잃는다.</b> 임베딩은 <code>embeddinggemma-300m</code>의 768차원으로 통일한다.</div>
+    <div class="q"><b>Q3.</b> 배포 주소가 열리면 배포가 끝난 것인가?</div>
+    <div class="q a"><b>A3.</b> <b>아니다.</b> 사용자의 Ollama 실행과 <code>OLLAMA_ORIGINS</code> 허용이 필요하고, 소개 질문·자료 밖 질문을 각각 넣어 출처 표시와 거부 안내까지 확인해야 한다.</div>
+    <div class="q"><b>Q4.</b> README의 '사용 조건'에 반드시 들어갈 세 가지는?</div>
+    <div class="q a"><b>A4.</b> <b>Ollama 실행 · 첫 방문 임베딩 다운로드 약 200MB · CORS 설정 필요.</b> 숨기지 않는다.</div>
+  </div>
+  <aside>네 문제 모두 "무엇을 숨기지 않는가"를 묻습니다.</aside>
+</section>
+
+<!-- 15 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>약속 · 교체 · 측정 🚀</h1>
+    <div class="big" style="margin-top:26px">제출은 끝이 아니라<br><span class="y">자기 도메인에서 측정이 계속되는 시작</span>입니다</div>
+    <p class="sub" style="margin-top:24px">나만의 챗봇 서비스 만들기 — 강의 완결 (9/9)</p>
+  </div>
+  <aside>대단원 4 중단원 5 완결입니다. 근거를 공개하고 판정을 남기는 제품 한 벌을 자기 도메인에서 갖추게 됐습니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

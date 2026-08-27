@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>스스로 세운 목표를 실험으로 · 프롬프트 엔지니어링 (나만의 챗봇 ⑧)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 프롬프트 엔지니어링 · 나만의 챗봇 ⑧</span>
+    <h1 style="margin:18px 0">스스로 세운 목표를 실험으로<br>— 프롬프트 엔지니어링</h1>
+    <p class="sub">루브릭을 스스로 적는 순간 개선은 감이 아니라 기록이 됩니다</p>
+  </div>
+  <aside>답변 길이는 프롬프트·검색 세팅을 검토할 수 있는 관찰 항목입니다. 다만 답변을 짧게 바꾸더라도 근거 청크의 내용과 [ID] 표시가 빠지면 자료 경계가 흐려지므로, 길이만으로 개선을 판단해서는 안 됩니다.</aside>
+</section>
+
+<!-- 2 수용 기준 vs 루브릭 -->
+<section class="slide" data-part="표지">
+  <h2>수용 기준은 <span class="b">문</span>, 루브릭은 <span class="g">자</span>입니다</h2>
+  <div class="grid2">
+    <div class="box"><h3>🚪 PRD의 수용 기준</h3><p>제품이 <b>밖으로 나가기 전에 통과해야 하는 문.</b> 근거 없는 질문에서 정당한 거부와 판정 배지가 보이는지는 <b>제품 전체가 지켜야 할 약속</b></p></div>
+    <div class="box"><h3>📏 루브릭</h3><p>그 문을 통과한 뒤에도 <b class="g">프롬프트와 검색 세팅을 비교할 때 쓰는 자</b></p></div>
+  </div>
+  <ul class="pts">
+    <li>학생은 자신의 자료와 사용자를 떠올려 <b>출처를 인용한 답, 도메인 밖 질문의 거부, <code>grounded</code> 비율, 짧은 답변에서도 근거를 유지하는지</b>를 지표로 삼을 수 있습니다</li>
+    <li><b class="r">목표값과 현재 값을 비워 두면</b> — 남의 성공 수치를 베끼지 않고 <b class="g">실제 실행 결과로 칸을 채우게</b> 됩니다</li>
+  </ul>
+  <aside>개선을 실험으로 검증하려면 먼저 무엇을 좋아졌다고 판단할지 도메인에 맞는 루브릭으로 정의해야 합니다.</aside>
+</section>
+
+<!-- 3 루브릭 표 -->
+<section class="slide" data-part="표지">
+  <h2>루브릭 — <span class="g">비워 둔 채</span> 시작합니다</h2>
+  <table class="t">
+    <tr><th>지표</th><th>측정 방법</th><th>목표값</th><th>지금 값</th></tr>
+    <tr><td>출처를 인용한 답변</td><td>고정 질문의 <code>cited:true</code> 답 수 기록</td><td>[목표값]</td><td>[실험 전 측정값]</td></tr>
+    <tr><td>도메인 밖 질문의 거부</td><td>무근거 질문의 <code>refusal:true</code> 답 수 기록</td><td>[목표값]</td><td>[실험 전 측정값]</td></tr>
+    <tr><td>근거성</td><td>판정 배지의 <code>grounded:true</code> 비율 기록</td><td>[목표값]</td><td>[실험 전 측정값]</td></tr>
+    <tr><td>짧은 답변의 근거 유지</td><td>답변 길이와 <code>[ID]</code> 표시를 함께 검토</td><td>[목표값]</td><td>[실험 전 측정값]</td></tr>
+  </table>
+  <div class="hl">🎯 이 표는 <b class="r">모델을 좋은 학생과 나쁜 학생으로 가르는 성적표가 아니라</b> — <b class="g">고정 질문 세트를 각 실행 행에서 같은 기준으로 바라보게 하는 관찰의 기준</b>입니다</div>
+  <aside>지표는 3~5개면 충분합니다. 각 지표가 어떤 판정 필드 또는 사람의 검토와 연결되는지 함께 적게 하세요.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">한 번에 하나만 바꿉니다</h2>
+  <p style="margin-top:11px">실험의 신뢰를 지키는 제약</p><span class="who">⑧ 루브릭 실험</span></div>
+  <aside>"답이 길다"는 반응을 들었을 때 검색 결과 수와 프롬프트의 길이 지시를 동시에 고치지 않습니다.</aside>
+</section>
+
+<!-- 5 한 바퀴 -->
+<section class="slide" data-part="PART 1">
+  <h2>실험 <span class="g">한 바퀴</span>의 순서</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:170px"><small>1</small><b>현재 세팅을<br>기준 행으로 기록</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:180px;border-color:var(--bl)"><small>2</small><b class="b">한 변수만 바꾼<br>새 세팅을 다음 행에</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:200px;border-color:var(--gr)"><small>3</small><b class="g">같은 질문 세트의 판정 배지와<br>답변 본문을 행 간 비교</b></div>
+  </div>
+  <ul class="pts">
+    <li>두 가지를 동시에 고치면 <b class="r">어느 변경이 <code>grounded</code>·<code>cited</code>·답변 길이에 영향을 주었는지 분리할 수 없습니다</b></li>
+    <li><b class="g">결과가 기대와 달라도 실패를 숨기지 않으면</b> 다음 변경을 고를 근거가 남습니다</li>
+  </ul>
+  <aside>"한 번에 하나"라는 제약 자체가 실험의 신뢰를 지키는 장치입니다.</aside>
+</section>
+
+<!-- 6 두 축 -->
+<section class="slide" data-part="PART 1">
+  <h2>바꿀 수 있는 <span class="b">두 축</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>🔍 검색 축</h3><p><b>top-k</b> · 최고 점수가 <b>0.55보다 낮을 때 적용되는 약한 근거 문구</b> · <b>벡터 검색과 BM25를 어떻게 구성하는지</b></p></div>
+    <div class="box"><h3>✍️ 프롬프트 축</h3><p><b>근거 원칙의 문구</b> · <b>답변 길이 지시</b> · <b><code>[ID]</code> 표시 규칙</b> · <b>질문 시점에 맞춘 시간 컨텍스트 문구</b></p></div>
+  </div>
+  <div class="hl">📌 0.55는 <b class="r">검색 결과를 버리는 차단선이 아니라</b> — 근거에 있는 내용만 짧게 답하도록 <b>프롬프트를 보수화하고 UI 경고를 보이는 기준</b>이라는 점도 기록합니다</div>
+  <ul class="pts">
+    <li>어느 축이든 <b class="g">한 번의 실험에서는 하나만</b> 선택합니다</li>
+  </ul>
+  <aside>기록에 "무엇을 바꿨는지"와 "왜 그 축을 골랐는지"를 같이 남기면 나중에 읽힙니다.</aside>
+</section>
+
+<!-- 7 질문 세트 -->
+<section class="slide" data-part="PART 1">
+  <h2>질문 세트도 <span class="r">도중에 바꾸지 않습니다</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px"><small>3개 이상</small><b>정상 질문</b></div>
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>3개 이상</small><b class="b">경계 질문</b></div>
+    <div class="cell" style="min-width:130px;border-color:var(--red)"><small>3개 이상</small><b class="r">무근거 질문</b></div>
+  </div>
+  <ul class="pts">
+    <li><b>Q1~Q9</b>로 고정하고, <b class="g">모든 실행 행에서 똑같이</b> 실행합니다</li>
+    <li>각 답변에서 <code>grounded</code>, <code>noHalluc</code>, <code>cited</code>, <code>refusal</code>, <code>score</code>, <code>comment</code>를 수집하되 — <b class="r">점수 하나만으로 결론내지 않고</b> <b>근거 청크와 실제 문장을 함께</b> 읽습니다</li>
+  </ul>
+  <div class="hl">⚠️ 질문을 더 그럴듯하게 고치거나 새 질문을 보태면 <b class="r">행 간 비교의 기준도 달라집니다</b> — 질문 원문과 실행 순서를 기록 파일에 그대로 남깁니다</div>
+  <aside>질문 세트가 흔들리면 그 뒤의 모든 비교가 무의미해집니다.</aside>
+</section>
+
+<!-- 8 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">실습 7 — 자기 루브릭으로 실험 한 바퀴</h2>
+  <p style="margin-top:11px">여섯 걸음</p><span class="who">⑧ 루브릭 실험</span></div>
+  <aside>지표 선정부터 결정 한 줄까지 이어집니다.</aside>
+</section>
+
+<!-- 9 실습 -->
+<section class="slide" data-part="PART 2">
+  <h2>여섯 걸음</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">자신의 서비스에 중요한 <b>지표를 3~5개</b> 고르고, 각 지표가 <b>어떤 판정 필드 또는 사람의 검토와 연결</b>되는지 적습니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">정상·경계·무근거 질문을 <b>각각 최소 세 개씩</b> 골라 기준 질문 세트를 고정합니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>현재 세팅</b>으로 전 질문을 실행해 답변·근거 청크·판정 배지·루브릭 스코어를 <b><code>README.md</code></b>에 기록</span></div>
+    <div class="st"><span class="n">4</span><span class="t">루브릭의 한 지표와 관계있는 <b>변수 하나</b>를 고릅니다 (길이를 살피려면 <b>길이 지시만</b>, 보수성을 살피려면 <b>0.55 조건의 문구만</b>)</span></div>
+    <div class="st"><span class="n">5</span><span class="t">그 변수만 변경한 뒤 <b>같은 질문 세트를 같은 순서로</b> 다시 실행하고 judge 판정 필드를 모읍니다</span></div>
+    <div class="st"><span class="n">6</span><span class="t">새 세팅과 스코어를 기록하고, <b class="r">기대와 다른 답변도 삭제하지 않은 채</b> 다음 결정을 <b>한 줄</b>로 씁니다</span></div>
+  </div>
+  <aside>판정 배지가 자동 채점 도구라 해도, 배지의 true와 false가 실제 답변 및 근거 청크의 관계를 잘 설명하는지는 학생이 다시 확인해야 합니다.</aside>
+</section>
+
+<!-- 10 에이전트 -->
+<section class="slide" data-part="PART 2">
+  <h2>에이전트에게 <span class="g">실험 설계를 검토</span>받습니다</h2>
+  <pre>내 루브릭과 질문 세트를 읽고, 한 번에 하나의 변수만 바꾸는 실험 순서를
+제안해 줘. 변경이 루브릭의 어느 지표에 영향을 줄지 예측도 함께.
+측정되지 않은 예측은 [추정]으로 표시해 줘.</pre>
+  <div class="hl">⚠️ 에이전트의 제안은 <b>변경 후보를 정리하는 보조 자료일 뿐</b>이며 — <b class="r">실제 판정 필드와 답변을 다시 실행해 기록하기 전에는 개선의 증거가 되지 않습니다</b></div>
+  <aside>[추정] 표시를 요구하는 것이 이 프롬프트의 핵심입니다.</aside>
+</section>
+
+<!-- 11 README -->
+<section class="slide" data-part="PART 2">
+  <h2>실험 결과는 <span class="b">README</span>에 남깁니다</h2>
+  <ul class="pts">
+    <li>무엇을 남길지는 스스로 정하되, 적어도 <b class="g">어느 세팅으로 돌렸을 때 어떤 루브릭 스코어가 나왔는지</b>를 나중에도 읽을 수 있으면 충분합니다</li>
+    <li><b>변경의 이유, 기대와 달랐던 결과, 답변이나 근거 청크를 다시 읽으며 확인한 점</b>도 필요한 만큼 남길 수 있습니다</li>
+    <li><b>고정 질문 세트(Q1~Q9류)로 같은 질문을 돌렸다는 사실</b>이 결과 옆에 남아야 결과끼리 비교할 수 있습니다</li>
+    <li>judge 판정 필드는 <b>루브릭 스코어가 나온 근거</b>이므로 결과와 함께 확인합니다 — 점수가 달라졌을 때에는 <b class="g">그 판정과 실제 답변을 함께 읽어</b> 변화가 무엇을 뜻하는지 판단합니다</li>
+  </ul>
+  <div class="hl">📓 기록은 <b class="r">완성된 보고서가 아니라</b> — <b>다시 실험할 때 당시의 판단과 결과를 되짚는 자료</b></div>
+  <aside>이 기록이 소단원 ⑨의 제출물이 됩니다.</aside>
+</section>
+
+<!-- 12 더 깊이 -->
+<section class="slide" data-part="확인">
+  <h2>더 깊이 갈 사람을 위한 길</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">같은 답변을 <b>로컬 judge와 Gemini judge에 각각</b> 보내고 <b>엔진별 판정을 같은 실험 기록에</b> 남깁니다 — 두 판정이 다르면 <b class="r">어느 쪽이 맞다고 즉시 정하기보다</b> 답변·근거 청크·평어를 사람이 다시 읽어 <b class="g">루브릭의 정의가 충분히 구체적인지</b> 확인</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>프롬프트 세 종을 A/B로</b> 비교할 때도 <b>질문 세트와 나머지 세팅을 고정</b>하고, 각 프롬프트가 <b>어느 지표를 겨냥하는지만</b> 다르게 둡니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b class="r">단일 실행의 우연한 차이를 큰 개선으로 선언하지 않고</b>, 재실행한 기록이 늘어날 때 해석의 근거도 함께 늘립니다</span></div>
+  </div>
+  <div class="big" style="margin-top:12px">루브릭을 스스로 적는 순간<br>개선은 <span class="y">감이 아니라 기록</span>이 됩니다</div>
+  <aside>그 기록이 배포 전 수용 기준과 배포 뒤 관찰을 연결하는 출발점이 됩니다.</aside>
+</section>
+
+<!-- 13 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 수용 기준과 루브릭의 차이는?</div>
+    <div class="q a"><b>A1.</b> 수용 기준은 <b>제품이 나가기 전에 통과할 문</b>, 루브릭은 <b>통과 뒤에도 세팅을 비교할 자</b>.</div>
+    <div class="q"><b>Q2.</b> "답이 길다"는 반응에 검색 top-k와 길이 지시를 동시에 고치면?</div>
+    <div class="q a"><b>A2.</b> <b>어느 변경이 영향을 줬는지 분리할 수 없다.</b> 한 번의 실험에서는 축 하나, 변수 하나만 바꾼다.</div>
+    <div class="q"><b>Q3.</b> 질문 세트를 실험 도중에 바꾸면?</div>
+    <div class="q a"><b>A3.</b> <b>행 간 비교의 기준이 달라진다.</b> Q1~Q9로 고정하고 질문 원문과 실행 순서를 기록에 남긴다.</div>
+    <div class="q"><b>Q4.</b> 에이전트가 제안한 실험 예측은 어떻게 다루나?</div>
+    <div class="q a"><b>A4.</b> <b>보조 자료일 뿐</b>이며 <b>[추정]</b>으로 표시하게 한다. 실제 판정 필드와 답변을 다시 실행해 기록하기 전에는 개선의 증거가 아니다.</div>
+  </div>
+  <aside>Q2·Q3이 실험을 무의미하게 만드는 가장 흔한 두 실수입니다.</aside>
+</section>
+
+<!-- 14 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>루브릭 · 한 변수 · 기록 📊</h1>
+    <div class="big" style="margin-top:26px">고정 질문 세트를 같은 기준으로 바라보면<br><span class="y">개선이라는 말이 관찰에 근거하게 됩니다</span></div>
+    <p class="sub" style="margin-top:24px">나만의 챗봇 ⑧ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑨에서 내 도메인으로 바꾸고, 배포하고, 제출합니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>메인 프로젝트 개관 · RAG 가이드 챗봇 (나만의 챗봇 ①)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 프롬프트 엔지니어링 · 나만의 챗봇 ①</span>
+    <h1 style="margin:18px 0">메인 프로젝트 — RAG 가이드 챗봇을<br>만들고 배포하고 평가하기</h1>
+    <p class="sub">근거를 공개하고, 판정까지 남기는 제품</p>
+  </div>
+  <aside>오늘 만들 제품은 공개 자료에 근거해 답하고, 그 근거를 화면에 공개하며, 답변 품질의 자동 판정 결과까지 남기는 RAG 가이드 챗봇입니다.</aside>
+</section>
+
+<!-- 2 참조 구현 -->
+<section class="slide" data-part="표지">
+  <h2>참조 구현 — <span class="g">서버 없는</span> 모두콘 안내 챗봇</h2>
+  <p>완성형 참조 구현은 모두의연구소 컨퍼런스 <b>모두콘</b>을 안내하는 <b>서버 없는 RAG 챗봇</b>입니다. 브라우저에서 임베딩과 검색을 수행하고, <b>로컬 Ollama가 답변을 생성</b>하며, 각 답변에 자동 판정을 연결합니다.</p>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b class="r">서버에서 답을 만들지 않습니다.</b> 페이지를 연 <b>사용자 컴퓨터의 Ollama(<code>qwen3.5:2b</code>)</b>가 답변을 생성합니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">처음 열 때 <b>임베딩 모델을 내려받습니다</b> (첫 방문 1회, <b>약 200MB</b>)</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>Ollama가 실행 중</b>이어야 답변이 시작됩니다</span></div>
+    <div class="st"><span class="n">4</span><span class="t">원격 주소의 페이지가 사용자 컴퓨터의 Ollama와 통신하는 일은 <b>CORS 허용 설정(<code>OLLAMA_ORIGINS</code>)</b>으로 가능합니다 — 구현 단계에서 다룹니다</span></div>
+  </div>
+  <div class="hl">🔗 <b>suncreation.github.io/moducon-chatbot</b> 에서 직접 열어 동작을 확인할 수 있습니다</div>
+  <aside>오늘 실습에서도 같은 구조를 만들어 배포해 보고, 수업이 끝날 때에는 자신의 도메인에 적용한 근거 기반 답변과 자동 판정 안내 챗봇을 갖추게 됩니다.</aside>
+</section>
+
+<!-- 3 두 가지 다른 점 -->
+<section class="slide" data-part="표지">
+  <h2>기존 실습과 <span class="b">두 가지</span>가 다릅니다</h2>
+  <div class="grid2">
+    <div class="box"><h3>1. 언어와 실행 위치</h3><p>파이썬 스크립트가 아니라 <b class="g">브라우저에서 동작하는 타입스크립트 앱</b>으로 구현합니다</p></div>
+    <div class="box"><h3>2. 완성 후의 일</h3><p><b>프롬프트와 검색 설정을 바꿔 가면서</b> 직접 설계한 <b class="g">루브릭으로 성능을 측정하는 실험</b>까지 수행합니다</p></div>
+  </div>
+  <ul class="pts">
+    <li>구현과 평가의 출발점은 <b>첫 단계에서 함께</b> 정리합니다</li>
+  </ul>
+  <aside>만드는 것으로 끝나지 않고 측정까지 간다는 점이 이 프로젝트의 성격을 결정합니다.</aside>
+</section>
+
+<!-- 4 학습 목표 -->
+<section class="slide" data-part="표지">
+  <h2>학습 목표 <span class="g">여섯</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">자기 도메인의 안내 챗봇을 <b>PRD부터 스스로에게 질문하며 기획</b>합니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">공개 자료를 수집하고 <b>청크와 임베딩</b>을 구성해 브라우저 벡터스토어를 만듭니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">로컬 Ollama <code>qwen3.5:2b</code>의 <b>스트리밍</b>과 브라우저 임베딩을 결합한 <b>RAG 파이프라인</b>을 이해합니다</span></div>
+    <div class="st"><span class="n">4</span><span class="t">답변의 <b>근거성과 거절을 판정</b>하고, 사람 피드백과 함께 읽습니다</span></div>
+    <div class="st"><span class="n">5</span><span class="t">자기 루브릭으로 프롬프트와 RAG 세팅을 <b>실험</b>하고 성능 변화를 표로 남깁니다</span></div>
+    <div class="st"><span class="n">6</span><span class="t">정적 앱을 <b>배포</b>한 뒤 <b>수용 기준</b>으로 동작을 다시 확인합니다</span></div>
+  </div>
+  <aside>여섯 목표가 아홉 소단원에 그대로 대응합니다.</aside>
+</section>
+
+<!-- 5 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">만들 것의 전체 모습</h2>
+  <p style="margin-top:11px">소개와 검색과 판정</p><span class="who">① 프로젝트 개관</span></div>
+  <aside>첫 화면은 단순한 대화창이 아닙니다.</aside>
+</section>
+
+<!-- 6 전체 모습 -->
+<section class="slide" data-part="PART 1">
+  <h2>첫 화면은 <span class="g">안내 공간</span>입니다</h2>
+  <p>모두콘 안내 앱의 첫 화면은 <b>행사 소개, 연혁, 프로그램, FAQ와 챗봇 상태</b>를 함께 보여 줍니다.</p>
+  <div class="chain">
+    <div class="cell" style="min-width:150px"><small>질문 입력</small><b>브라우저 임베딩<br><small>embeddinggemma-300m-ONNX</small></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:180px;border-color:var(--bl)"><small>비교</small><b class="b">공개 원문 37개 청크<br>코사인 + BM25</b></div>
+  </div>
+  <ul class="pts">
+    <li>두 검색은 <b>의미와 정확한 표기</b>라는 서로 다른 단서를 제공하여, <b class="g">어느 한쪽만으로 놓칠 수 있는 근거를 보완</b>합니다</li>
+    <li>선택된 청크는 본문만 전달하지 않고 <b>ID, URL, 섹션 정보를 잃지 않은 채</b> 프롬프트에 들어갑니다</li>
+    <li>이후 로컬 Ollama의 <code>qwen3.5:2b</code>가 응답을 <b>스트리밍</b>하고, 화면은 답변 뒤에 <b>필드 여섯 개를 담은 판정 배지</b>를 표시합니다</li>
+  </ul>
+  <aside>임베딩 경로는 onnx-community/embeddinggemma-300m-ONNX 입니다. 이 이름은 소단원 ④에서 다시 나옵니다.</aside>
+</section>
+
+<!-- 7 두 사실 -->
+<section class="slide" data-part="PART 1">
+  <h2>0.55 미만일 때 — <span class="r">버리지 않고 드러냅니다</span></h2>
+  <p>최고 유사도가 <b>0.55보다 낮으면</b> 검색 결과를 버리는 대신 <b class="r">약한 근거를 프롬프트와 UI에서 드러내며</b>, 모델은 단정 대신 <b>자료의 한계 또는 답변 범위</b>를 말해야 합니다.</p>
+  <div class="big">생성 문장이 <span class="y">자연스럽다는 사실</span>과<br><span class="y">출처를 가진 답</span>이라는 사실은 다릅니다<br><small>그래서 이 앱은 두 사실을 구분해서 보여 줍니다</small></div>
+  <aside>이 문장이 프로젝트 전체의 설계 철학입니다. 소단원 ⑤·⑥·⑦에서 각각 검색·프롬프트·판정으로 구현됩니다.</aside>
+</section>
+
+<!-- 8 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">질문에서 판정까지의 한 바퀴</h2>
+  <p style="margin-top:11px">각 상자는 앞 상자의 산출물을 보존합니다</p><span class="who">① 프로젝트 개관</span></div>
+  <aside>데이터의 전달과, 생성 뒤에도 남는 검토를 구분해 봅니다.</aside>
+</section>
+
+<!-- 9 한 바퀴 -->
+<section class="slide" data-part="PART 2">
+  <h2>한 바퀴 — <span class="g">질문에서 판정까지</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px"><small>질문</small><b>"모두콘은?"</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px"><small>임베딩</small><b>768차원</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>하이브리드 검색</small><b class="b">코사인 + BM25</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--pp)"><small>근거 청크</small><b class="p">id · url · text</b></div>
+  </div>
+  <div class="chain">
+    <div class="cell" style="min-width:190px"><small>프롬프트 조립</small><b>시간 맥락 · 약한 근거 주의</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:160px"><small>Ollama 스트리밍</small><b>qwen3.5:2b</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:220px;border-color:var(--gr)"><small>판정 배지</small><b class="g">출처 칩 · 약한 근거 경고 · 판정</b></div>
+  </div>
+  <ul class="pts">
+    <li>왼쪽에서 오른쪽 화살표는 <b>데이터의 전달</b>을, 아래로 꺾이는 화살표는 <b>생성 뒤에도 남는 검토</b>를 뜻합니다</li>
+  </ul>
+  <aside>이 그림 한 장이 아홉 소단원의 지도입니다. 각 소단원이 이 사슬의 한 칸씩을 만듭니다.</aside>
+</section>
+
+<!-- 10 보존 -->
+<section class="slide" data-part="PART 2">
+  <h2>하나가 빠지면 <span class="r">무엇이 무너지나</span></h2>
+  <table class="t">
+    <tr><th>빠지면</th><th>무너지는 것</th></tr>
+    <tr><td><b>청크가 없으면</b></td><td>임베딩은 <b class="r">비교할 대상이 없습니다</b></td></tr>
+    <tr><td><b>URL이 없으면</b></td><td>생성 문장은 사용자가 <b class="r">확인할 출발점을 잃습니다</b></td></tr>
+    <tr><td><b>judge가 없으면</b></td><td>답을 어떻게 읽을지에 관한 <b class="r">별도 신호가 사라집니다</b></td></tr>
+  </table>
+  <div class="hl">⚠️ 반대로 <b>judge만 추가해도 출처 없는 문장이 근거를 얻지는 않습니다</b> — 각 상자는 <b class="g">앞 상자의 산출물을 보존해야</b> 합니다</div>
+  <aside>"판정만 붙이면 신뢰가 생긴다"는 오해를 여기서 미리 차단합니다.</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">오늘의 지도 — 열두 걸음</h2>
+  <p style="margin-top:11px">나중 단계가 앞 단계의 선택을 검증할 수 있도록</p><span class="who">① 프로젝트 개관</span></div>
+  <aside>기능을 급히 붙이는 순서가 아니라, 검증할 수 있게 쌓는 순서입니다.</aside>
+</section>
+
+<!-- 12 열두 걸음 1 -->
+<section class="slide" data-part="PART 3">
+  <h2>①~⑥ — <span class="g">준비와 자료</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">①</span><span class="t"><b>Vite, React, TypeScript</b>의 정적 앱과 <b>GitHub Pages 상대 경로</b>를 준비합니다</span></div>
+    <div class="st"><span class="n">②</span><span class="t"><b>모두콘 소개 화면</b>을 만듭니다</span></div>
+    <div class="st"><span class="n">③</span><span class="t">공개 원문을 <b>출처 URL이 붙은 사실 단위 청크</b>로 수집합니다</span></div>
+    <div class="st"><span class="n">④</span><span class="t">청크 <b>JSON 스키마</b>와 <code>MC-001</code>부터의 <b>ID 규칙</b>을 정합니다</span></div>
+    <div class="st"><span class="n">⑤</span><span class="t"><b>768차원 벡터</b>를 생성하여 <b>정적 벡터스토어</b>에 배치합니다</span></div>
+    <div class="st"><span class="n">⑥</span><span class="t">브라우저 임베딩 경로에서 WASM에서 동작하는 <b><code>no_gather_q4</code> 경로</b>를 사용합니다</span></div>
+  </div>
+  <aside>①~⑥이 소단원 ③④에 해당합니다.</aside>
+</section>
+
+<!-- 13 열두 걸음 2 -->
+<section class="slide" data-part="PART 3">
+  <h2>⑦~⑫ — <span class="b">검색·생성·판정·배포</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">⑦</span><span class="t">모델과 자료의 <b>캐시 및 진행률</b>을 다룹니다</span></div>
+    <div class="st"><span class="n">⑧</span><span class="t"><b>코사인과 BM25 하이브리드 검색</b>을 붙입니다</span></div>
+    <div class="st"><span class="n">⑨</span><span class="t"><b>시간 컨텍스트와 약한 근거 규칙</b>을 포함해 프롬프트를 조립합니다</span></div>
+    <div class="st"><span class="n">⑩</span><span class="t">Ollama의 <b>상태 확인, 스트리밍, 취소 UI</b>를 결합합니다</span></div>
+    <div class="st"><span class="n">⑪</span><span class="t"><b>출처 칩과 근거 모달, 검색 단계, 경고 배지</b>를 보이게 합니다</span></div>
+    <div class="st"><span class="n">⑫</span><span class="t"><b>선택 엔진, LLM-as-a-Judge, 사람 피드백, Pages 배포와 수용 기준 점검</b>을 한 화면의 사용 경험으로 묶습니다</span></div>
+  </div>
+  <div class="hl">🎯 이 순서는 특정 도구의 정답이 아니라 — <b>질문이 입력된 순간부터 근거와 답변과 판정이 각각 관찰 가능해야 한다</b>는 설계 원칙을 <b>구현 순서로 바꾼 것</b>입니다</div>
+  <aside>기본 경로는 로컬 Ollama만으로 완결되지만, 예시 구현에는 Gemini API를 쓰는 선택 엔진도 있어 로컬 무료 경로를 유지하면서 API 키 경로를 비교해 볼 수 있습니다. 두 엔진을 나란히 두면 같은 질문에 대한 답변 리듬과 판정 결과가 어떻게 달라지는지 관찰할 수 있고, 이 비교가 판정 섹션의 실험 재료가 됩니다.</aside>
+</section>
+
+<!-- 14 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 이 앱에서 답변은 어디서 생성되나?</div>
+    <div class="q a"><b>A1.</b> 서버가 아니라 <b>페이지를 연 사용자 컴퓨터의 로컬 Ollama(<code>qwen3.5:2b</code>)</b>. 그래서 Ollama 실행과 <code>OLLAMA_ORIGINS</code> 설정이 필요하다.</div>
+    <div class="q"><b>Q2.</b> 최고 유사도가 0.55보다 낮으면?</div>
+    <div class="q a"><b>A2.</b> 결과를 <b>버리지 않고</b> 약한 근거를 프롬프트와 UI에 드러낸다. 모델은 단정 대신 자료의 한계를 말한다.</div>
+    <div class="q"><b>Q3.</b> "judge만 붙이면 신뢰가 생긴다"가 틀린 이유는?</div>
+    <div class="q a"><b>A3.</b> <b>judge를 추가해도 출처 없는 문장이 근거를 얻지는 않는다.</b> 각 상자는 앞 상자의 산출물(청크·URL)을 보존해야 한다.</div>
+  </div>
+  <aside>Q3이 이 프로젝트에서 가장 자주 오해되는 지점입니다.</aside>
+</section>
+
+<!-- 15 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>근거 · 답변 · 판정 🔍</h1>
+    <div class="big" style="margin-top:26px">질문이 입력된 순간부터<br><span class="y">근거와 답변과 판정이 각각 관찰 가능해야 합니다</span></div>
+    <p class="sub" style="margin-top:24px">나만의 챗봇 ① — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ②에서 코드보다 먼저 — PRD를 스스로에게 질문하는 여덟 질문을 봅니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

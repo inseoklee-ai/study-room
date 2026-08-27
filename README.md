@@ -217,6 +217,17 @@
    - ✅ ⑧. 도구를 쓰는 평가 — 전후 판정과 회귀 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/tool-eval/) · 📊 [PPT](tool-eval/tool-eval.pptx)
    - ✅ ⑨. 안티패턴 회수와 관통 질문의 답 (중단원 종합) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/antipatterns-wrapup/) · 📊 [PPT](antipatterns-wrapup/antipatterns-wrapup.pptx)
 
+5. **나만의 챗봇 서비스 만들기** ✅ 완결 (9/9)
+   - ✅ ⑤-1. 메인 프로젝트 — RAG 가이드 챗봇을 만들고 배포하고 평가하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/rag-project-overview/) · 📊 [PPT](rag-project-overview/rag-project-overview.pptx)
+   - ✅ ⑤-2. 바이브 코딩의 첫 문장 — PRD를 스스로에게 질문하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/rag-prd-questions/) · 📊 [PPT](rag-prd-questions/rag-prd-questions.pptx)
+   - ✅ ⑤-3. 자료 수집과 청크 설계 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/chunk-design/) · 📊 [PPT](chunk-design/chunk-design.pptx)
+   - ✅ ⑤-4. 임베딩과 벡터스토어 구축하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/embedding-vectorstore/) · 📊 [PPT](embedding-vectorstore/embedding-vectorstore.pptx)
+   - ✅ ⑤-5. 가까운 청크를 고릅니다 — 하이브리드 검색 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/hybrid-retrieval/) · 📊 [PPT](hybrid-retrieval/hybrid-retrieval.pptx)
+   - ✅ ⑤-6. 프롬프트 조립과 로컬 LLM 스트리밍 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/prompt-and-streaming/) · 📊 [PPT](prompt-and-streaming/prompt-and-streaming.pptx)
+   - ✅ ⑤-7. 답을 판정합니다 — LLM-as-a-Judge — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/llm-as-judge/) · 📊 [PPT](llm-as-judge/llm-as-judge.pptx)
+   - ✅ ⑤-8. 스스로 세운 목표를 실험으로 — 프롬프트 엔지니어링 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/rubric-experiments/) · 📊 [PPT](rubric-experiments/rubric-experiments.pptx)
+   - ✅ ⑤-9. 내 도메인에서 동작하는 챗봇 제출하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/rag-submit/) · 📊 [PPT](rag-submit/rag-submit.pptx)
+
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
 > ⚠️ **웹 슬라이드는 반드시 라이브 사이트에서 열어야 합니다.** GitHub 저장소 화면(github.com)에서 위 링크를 누르면 슬라이드가 아니라 소스 폴더로 갑니다. 아래 라이브 주소로 접속하세요:
@@ -327,6 +338,15 @@
 > - 대1-첫날-④4 https://inseoklee-ai.github.io/study-room/learning-together/
 > - 대1-첫날-④5 https://inseoklee-ai.github.io/study-room/first-ai-audit/
 > - 대1-첫날-④6 https://inseoklee-ai.github.io/study-room/day1-wrapup/
+> - 대4-챗봇-⑤1 https://inseoklee-ai.github.io/study-room/rag-project-overview/
+> - 대4-챗봇-⑤2 https://inseoklee-ai.github.io/study-room/rag-prd-questions/
+> - 대4-챗봇-⑤3 https://inseoklee-ai.github.io/study-room/chunk-design/
+> - 대4-챗봇-⑤4 https://inseoklee-ai.github.io/study-room/embedding-vectorstore/
+> - 대4-챗봇-⑤5 https://inseoklee-ai.github.io/study-room/hybrid-retrieval/
+> - 대4-챗봇-⑤6 https://inseoklee-ai.github.io/study-room/prompt-and-streaming/
+> - 대4-챗봇-⑤7 https://inseoklee-ai.github.io/study-room/llm-as-judge/
+> - 대4-챗봇-⑤8 https://inseoklee-ai.github.io/study-room/rubric-experiments/
+> - 대4-챗봇-⑤9 https://inseoklee-ai.github.io/study-room/rag-submit/
 > - 대4-① https://inseoklee-ai.github.io/study-room/prompt-engineering-intro/
 > - 대4-② https://inseoklee-ai.github.io/study-room/agent-structure/
 > - 대4-③ https://inseoklee-ai.github.io/study-room/model-inputs/

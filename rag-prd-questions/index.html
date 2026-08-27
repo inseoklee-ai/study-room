@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>바이브 코딩의 첫 문장 · PRD를 스스로에게 질문하기 (나만의 챗봇 ②)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 4 · 프롬프트 엔지니어링 · 나만의 챗봇 ②</span>
+    <h1 style="margin:18px 0">바이브 코딩의 첫 문장<br>— PRD를 스스로에게 질문하기</h1>
+    <p class="sub">에이전트가 빠르게 코드를 만든다는 사실이, 그 코드가 무엇을 증명해야 하는지를 대신 정하지 않습니다</p>
+  </div>
+  <aside>에이전트에게 화면 구현을 요청하기 전에, 방문자가 답을 통해 무엇을 확인해야 하는지와 공개 자료로 답할 수 없는 질문을 받으면 화면이 어떤 상태로 남아야 하는지를 PRD에 먼저 정리해야 합니다.</aside>
+</section>
+
+<!-- 2 왜 먼저 -->
+<section class="slide" data-part="표지">
+  <h2>화면이 보인다는 사실만으로 <span class="r">성공을 판정할 수 없습니다</span></h2>
+  <p>바이브 코딩은 요구를 말하면 에이전트가 화면과 파일을 만들어 주는 경험에서 시작되지만, 그 요청이 <b>무엇을 성공으로 볼지 비워 둔 채</b> 길어지면 <b class="r">결과물은 빠르게 생겨도 검증할 대상이 사라집니다.</b></p>
+  <div class="big">PRD는 에이전트에게 넘길 답안을 미리 쓰는 문서가 아니라<br><span class="y">만들 사람 스스로가 아직 결정하지 못한 경계를 발견하는 질문지</span>입니다</div>
+  <ul class="pts">
+    <li>공개 정보에 답해야 하는 제품에서는 특히 <b>"답할 수 있는 질문"과 "답하지 않아야 하는 질문"이 같은 중요도</b>를 가집니다</li>
+    <li>요구를 받는 일보다 <b class="g">요구의 경계를 질문으로 정리하는 일</b>이 먼저입니다</li>
+  </ul>
+  <aside>성공으로 읽힐 장면과 이번에 만들지 않을 기능을 문장으로 고정합니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">스스로에게 묻는 여덟 질문</h2>
+  <p style="margin-top:11px">정답을 채우는 양식이 아니라 경계를 탐색하는 질문</p><span class="who">② PRD 질문지</span></div>
+  <aside>모두콘에서 확인한 답을 함께 보되, 그대로 베끼지 않습니다.</aside>
+</section>
+
+<!-- 4 여덟 질문 -->
+<section class="slide" data-part="PART 1">
+  <h2>여덟 질문과 <span class="g">모두콘의 답</span></h2>
+  <table class="t">
+    <tr><th>스스로에게 묻는 질문</th><th>모두콘에서 확인할 답</th></tr>
+    <tr><td>① 누구의 어떤 불편을 다룹니까</td><td>행사 정보를 찾는 방문자가 공개 사실에 접근하도록 돕습니다</td></tr>
+    <tr><td>② 사용자가 끝내 할 수 있어야 합니까</td><td>질문 뒤 <b>답변의 근거와 원문 출처</b>를 확인합니다</td></tr>
+    <tr><td>③ 제품의 한 문장 목표는 무엇입니까</td><td>소개와 RAG를 연결해 <b>근거 있는 안내</b>를 제공합니다</td></tr>
+    <tr><td>④ 이번 범위에서 하지 않을 일은 무엇입니까</td><td><b class="r">로그인과 전문 DB 검색을 포함하지 않습니다</b></td></tr>
+    <tr><td>⑤ 어떤 자료를 사실로 삼습니까</td><td>공개 원문과 <b>그 URL을 함께</b> 보관합니다</td></tr>
+    <tr><td>⑥ 답하지 못할 때 어떤 행동을 합니까</td><td><b>근거 부족을 드러내고</b> 보수적으로 제한합니다</td></tr>
+    <tr><td>⑦ 사용자가 성공을 어떻게 알아봅니까</td><td>스트리밍 답과 <b>출처 칩, 판정 배지</b>를 확인합니다</td></tr>
+    <tr><td>⑧ 어떤 관찰로 수용 여부를 판정합니까</td><td>수용 기준의 <b>질문과 화면 상태</b>를 하나씩 확인합니다</td></tr>
+  </table>
+  <aside>아직 판단할 근거가 없는 칸에는 모른다고 적거나 [결정 필요]로 남기는 것이 답이며, 그 표식이 추가 조사나 에이전트의 확인 질문이 필요한 위치를 드러냅니다. 이 항목들은 에이전트 툴에게 인터뷰를 받으며 구체화하면 더 풍부하게 작성할 수 있습니다.</aside>
+</section>
+
+<!-- 5 목표는 변화 -->
+<section class="slide" data-part="PART 1">
+  <h2>목표는 <span class="r">기능 목록</span>이 아니라 <span class="g">사용자의 변화</span>입니다</h2>
+  <p>"모두콘 챗봇을 만든다"는 문장은 <b>작업 목록으로는</b> 쓸 수 있지만 <b class="r">제품 요구로는 충분하지 않습니다.</b></p>
+  <div class="hl">✍️ <b>사용자가 행사 소개를 읽고 역대 정보를 찾으며, 질문한 답의 출처를 열어 본다</b>는 변화까지 적어야 소개 페이지·청크·검색·생성 UI가 <b>하나의 목표를 향하게</b> 됩니다</div>
+  <ul class="pts">
+    <li>모두콘 PRD의 목표에는 <b>2018~2025 소개, 검색 단계를 공개하는 RAG, 출처 표시, 스트리밍, judge, 좋아요·싫어요 피드백, KST 상대시간 해석</b>이 함께 들어갑니다</li>
+    <li>각각은 화려한 부가 기능이 아니라 <b class="g">사용자가 답을 믿거나 유보할 근거를 제공하는 장치</b>입니다</li>
+  </ul>
+  <aside>기능 하나하나를 "왜 넣는가"로 되물으면 목록이 정리됩니다.</aside>
+</section>
+
+<!-- 6 비목표 -->
+<section class="slide" data-part="PART 1">
+  <h2>비목표는 <span class="b">사과가 아니라 안전 장치</span>입니다</h2>
+  <p>비목표는 목표를 축소하는 사과가 아니라, <b>이번 구현에서 어떤 계약을 약속하지 않는지 선언하는</b> 장치입니다.</p>
+  <div class="chain">
+    <div class="cell" style="min-width:110px"><small>비목표</small><b>로그인</b></div>
+    <div class="cell" style="min-width:130px"><small>비목표</small><b>전문 DB 검색</b></div>
+    <div class="cell" style="min-width:110px"><small>비목표</small><b>다국어</b></div>
+    <div class="cell" style="min-width:130px"><small>비목표</small><b>모바일 최적화</b></div>
+    <div class="cell" style="min-width:120px"><small>비목표</small><b>서버 수집</b></div>
+  </div>
+  <ul class="pts">
+    <li>이렇게 적으면 에이전트는 <b class="g">사용자 계정이나 서버 동기화가 필요한 것처럼 구조를 부풀리지 않아도</b> 됩니다</li>
+    <li><b>정적 브라우저 앱</b>이라는 선택과도 맞물립니다 — 공개 문서를 정적 파일로 두고 브라우저에서 검색하며 사용자의 로컬 Ollama를 호출하는 구조에서, <b class="r">서버 측 계정 관리와 비공개 데이터 검색을 한 요청 안에 섞는 것은 목표의 확장이 아니라 다른 제품의 시작</b>일 수 있습니다</li>
+  </ul>
+  <aside>비목표가 없으면 검색 범위도 무한히 넓어집니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">수용 기준을 읽는 법</h2>
+  <p style="margin-top:11px">"좋은 챗봇"을 화면에서 확인할 문장으로</p><span class="who">② PRD 질문지</span></div>
+  <aside>해석이 갈리는 표현을 관찰 가능한 문장으로 바꾸는 장치입니다.</aside>
+</section>
+
+<!-- 8 수용 기준 -->
+<section class="slide" data-part="PART 2">
+  <h2>모두콘의 <span class="g">수용 기준</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>소개에 출처를 표시</b>할 것</span></div>
+    <div class="st"><span class="n">2</span><span class="t">"모두콘이 뭐야?"라는 질문에 <b><code>[ID]</code> 근거를 가진 스트리밍 답변</b>을 보일 것</span></div>
+    <div class="st"><span class="n">3</span><span class="t">"내일 날씨"처럼 도메인 밖 질문에는 <b><code>refusal=true</code></b>로 제한할 것</span></div>
+    <div class="st"><span class="n">4</span><span class="t">모든 답변에 <b>판정 배지</b>를 보일 것</span></div>
+  </div>
+  <ul class="pts">
+    <li>이 기준들은 <b class="r">모델이 말을 잘하는가만 묻지 않고</b>, <b class="g">근거의 존재와 제품 경계가 실제 UI까지 도착했는지</b>를 묻습니다</li>
+  </ul>
+  <aside>기준 하나는 기능 하나를 추가하라는 명령이 아니라, 실패해도 사용자가 사라진 상태를 겪지 않게 하는 관찰 가능성의 약속입니다.</aside>
+</section>
+
+<!-- 9 수용 기준 2 -->
+<section class="slide" data-part="PART 2">
+  <h2>실패했을 때도 <span class="b">사라지지 않게</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">5</span><span class="t"><b>API 키가 없어도 로컬 자기평가를 시도</b>할 것</span></div>
+    <div class="st"><span class="n">6</span><span class="t"><b class="g">판정에 실패해도 기존 UI를 무너뜨리지 않을</b> 것</span></div>
+    <div class="st"><span class="n">7</span><span class="t"><b>상대시간 질문은 질문 시점의 KST</b>로 해석할 것</span></div>
+    <div class="st"><span class="n">8</span><span class="t"><b>출처 칩에서 원문을 열 수</b> 있을 것</span></div>
+    <div class="st"><span class="n">9</span><span class="t"><b>Ollama가 꺼졌을 때 배너와 재시도</b>를 보일 것</span></div>
+    <div class="st"><span class="n">10</span><span class="t"><b>CORS 설정 뒤 <code>github.io</code> 환경에서도 동작</b>할 것</span></div>
+  </div>
+  <div class="hl">⚠️ 여기서 <b>로컬 judge는 같은 2B 모델이 답과 판정을 모두 다루므로 독립 평가가 아니며</b>, <b class="r">교육용의 거친 신호</b>로 읽어야 합니다</div>
+  <aside>이 한계를 숨기지 않고 기준 안에 적어 두는 것이 이 프로젝트의 태도입니다.</aside>
+</section>
+
+<!-- 10 PRD 발췌 -->
+<section class="slide" data-part="PART 2">
+  <h2>모두콘 버전 <span class="g">PRD 발췌</span></h2>
+  <pre># 모두콘 안내 챗봇 PRD
+
+## 목표
+- 2018~2025 모두콘의 공개 소개 정보를 안내합니다.
+- 공개 문서를 검색한 단계와 출처를 드러내는 RAG 답변을 제공합니다.
+- 답변을 스트리밍으로 표시하고, judge 결과와 좋아요·싫어요 피드백을
+  함께 기록할 수 있게 합니다.
+- 상대시간이 들어간 질문은 KST 기준의 질문 시점 맥락을 사용합니다.
+
+## 비목표
+- 로그인과 사용자 계정 관리를 만들지 않습니다.
+- 전문 데이터베이스 검색과 서버 수집을 만들지 않습니다.
+- 다국어 지원과 모바일 최적화를 이번 범위에 포함하지 않습니다.
+
+## 수용 기준
+- 소개 정보에는 확인 가능한 출처가 표시됩니다.
+- "모두콘이 뭐야?"에 [ID] 근거를 포함한 스트리밍 답변이 표시됩니다.
+- "내일 날씨"에는 refusal=true로 도메인 밖 질문임을 드러냅니다.
+- 모든 답변에는 판정 배지가 있으며, 판정 실패 뒤에도 UI가 유지됩니다.
+- 출처 칩을 누르면 원문을 확인할 수 있고, Ollama가 꺼지면 배너와 재시도가 보입니다.</pre>
+  <aside>이 발췌는 형태를 따라 하기보다, 앞의 여덟 질문을 자기 도메인에 적용해 답을 채운 새 PRD를 만들기 위한 참고입니다. 행사명만 치환하지 말고 공개 자료의 범위와 도메인 밖 질문의 처리까지 함께 바꾸어야 합니다. "공개 문서", "도메인 밖", "판정 실패" 같은 표현은 구현 전에 예시 질문으로 검토해야 나중에 해석이 갈리지 않습니다.</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">자기 도메인의 PRD 초안 만들기</h2>
+  <p style="margin-top:11px">세 걸음</p><span class="who">② PRD 질문지</span></div>
+  <aside>모두콘을 기준점으로 삼되 자기 도메인으로 옮깁니다.</aside>
+</section>
+
+<!-- 12 초안 -->
+<section class="slide" data-part="PART 3">
+  <h2>세 걸음과 <span class="r">[결정 필요]</span>의 뜻</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">안내하고 싶은 <b>도메인을 하나</b> 정합니다. 그 도메인은 <b class="g">자료를 공개 URL로 확인할 수 있어야</b> 하며, 자료가 충분한지 확신할 수 없다면 <b>그 불확실성 자체를 PRD의 조사 항목</b>으로 남깁니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">여덟 질문에 <b>한 문장씩 답한 뒤</b>, 답을 <b>목표·비목표·수용 기준</b>의 세 제목 아래로 재배열합니다 — 어느 답도 사라지지 않았는지 확인</span></div>
+    <div class="st"><span class="n">3</span><span class="t">수용 기준은 <b>실제로 입력할 질문과 관찰할 화면 상태</b>를 포함한 문장으로 바꿉니다</span></div>
+  </div>
+  <div class="grid2">
+    <div class="box"><h3>❌ 검증 불가</h3><p>"정확한 정보를 제공한다"</p></div>
+    <div class="box"><h3>✅ 검증 가능</h3><p>"소개 정보에 <b>출처가 표시된다</b>", "행사 밖 질문에는 <b>근거 부족 또는 거절 상태가 드러난다</b>"</p></div>
+  </div>
+  <div class="hl">📌 초안의 빈칸을 <b class="r">에이전트가 임의로 채우게 하지 말고</b> <code>[결정 필요]</code>를 남깁니다 — <b class="g">빈칸은 실패가 아니라, 에이전트가 확인 질문을 해야 할 위치를 보이게 하는 관찰 표식</b></div>
+  <aside>반대로 "자료가 없는 주제를 그럴듯하게 답하게 한다"는 문장은 RAG의 목표와 맞지 않습니다.</aside>
+</section>
+
+<!-- 13 첫 대화 -->
+<section class="slide" data-part="PART 3">
+  <h2>첫 대화에서 에이전트에게 <span class="g">맡길 범위</span></h2>
+  <p>이 요청의 목적은 즉시 모든 파일을 생성하게 하는 것이 아니라, <b class="g">에이전트가 PRD의 모순과 빠진 판정 기준을 먼저 찾아내게</b> 하는 데 있습니다.</p>
+  <pre>당신은 브라우저 기반 RAG 안내 챗봇의 제품 설계 검토자입니다.
+아래 PRD 초안을 읽고 구현을 시작하지 말고 먼저 검토합니다.
+
+도메인: [내 도메인]
+목표: [사용자가 할 수 있어야 하는 일]
+비목표: [이번 범위에서 하지 않을 일]
+공개 자료 후보: [URL 또는 자료 종류]
+수용 기준: [질문과 관찰 가능한 결과]
+
+반드시 다음 순서로 답합니다.
+1. 목표와 비목표가 충돌하거나 모호한 지점을 질문으로 제시합니다.
+2. 공개 자료만으로 검증할 수 없는 수용 기준을 표시합니다.
+3. 도메인 밖 질문, 근거 부족, 판정 실패의 처리 기준을 제안합니다.
+4. 수정된 PRD 목차를 작성하되, 확인되지 않은 사실과 수치를 추가하지 않습니다.
+5. 파일 생성이나 코드 작성은 제가 명시적으로 요청할 때까지 하지 않습니다.</pre>
+  <div class="hl">🚧 마지막 문장은 속도를 늦추는 장식이 아니라 — <b>설계와 구현을 분리해 검토 결과가 코드에 의해 덮이지 않게 하는 경계</b>입니다</div>
+  <aside>에이전트의 제안이 목표를 넓힌다면 기능의 매력보다 이번 계약에 필요한가를 먼저 판단합니다. PRD의 문장 하나하나가 나중에 채점 문항이 됩니다.</aside>
+</section>
+
+<!-- 14 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> PRD는 무엇을 위한 문서인가?</div>
+    <div class="q a"><b>A1.</b> 에이전트에게 넘길 답안이 아니라 <b>스스로가 아직 결정하지 못한 경계를 발견하는 질문지.</b></div>
+    <div class="q"><b>Q2.</b> 아직 정하지 못한 칸은 어떻게 하나?</div>
+    <div class="q a"><b>A2.</b> 에이전트가 임의로 채우게 하지 말고 <b><code>[결정 필요]</code></b>를 남긴다 — 확인 질문이 필요한 위치를 보이게 하는 표식.</div>
+    <div class="q"><b>Q3.</b> "정확한 정보를 제공한다"가 수용 기준으로 부적절한 이유는?</div>
+    <div class="q a"><b>A3.</b> 화면에서 <b>관찰할 수 없다.</b> "소개 정보에 출처가 표시된다"처럼 <b>입력할 질문과 관찰할 화면 상태</b>로 바꿔야 한다.</div>
+    <div class="q"><b>Q4.</b> 첫 대화 프롬프트의 마지막 문장(코드 작성 금지)의 목적은?</div>
+    <div class="q a"><b>A4.</b> <b>설계와 구현을 분리</b>해 검토 결과가 코드에 의해 덮이지 않게 하는 경계.</div>
+  </div>
+  <aside>Q4가 이 소단원의 실전 핵심입니다.</aside>
+</section>
+
+<!-- 15 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>질문 · 경계 · 관찰 📋</h1>
+    <div class="big" style="margin-top:26px">에이전트가 빠르게 코드를 만든다는 사실이<br><span class="y">그 코드가 무엇을 증명해야 하는지를 대신 정하지 않습니다</span></div>
+    <p class="sub" style="margin-top:24px">나만의 챗봇 ② — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ③에서 자료를 모읍니다 — 검색 가능한 자료와 답할 수 있는 자료는 다릅니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
