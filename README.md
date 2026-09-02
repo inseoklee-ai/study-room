@@ -230,12 +230,18 @@
 
 ### 5. 에이전트 시스템 마스터
 **중단원 ②**
-2. **에이전트 하네스 톺아보기** ✅ 1~5 완료 · 같은 루프를 감싼 일곱 개의 하네스를 열어 구조를 확인합니다
+2. **에이전트 하네스 톺아보기** ✅ 완결 (11강) · 같은 루프를 감싼 일곱 개의 하네스를 열어 구조를 확인합니다
    - ✅ ②-1. 맡길 일을 하네스 기능 질문으로 바꾸기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/harness-question-map/) · 📊 [PPT](harness-question-map/harness-question-map.pptx)
    - ✅ ②-2. 화면에서 하네스의 경계 먼저 관찰하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/harness-observation/) · 📊 [PPT](harness-observation/harness-observation.pptx)
    - ✅ ②-3. 모델의 행동을 실패하기 어렵게 만드는 문법 (행동 포맷) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/action-format/) · 📊 [PPT](action-format/action-format.pptx)
    - ✅ ②-4. 필요한 것만 남겨 다시 꺼내기 (컨텍스트 관리) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/context-budget/) · 📊 [PPT](context-budget/context-budget.pptx)
    - ✅ ②-5. 한 번의 성공을 다음 실행의 자산으로 (경험·스킬 축적) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/skill-accumulation/) · 📊 [PPT](skill-accumulation/skill-accumulation.pptx)
+   - ✅ ②-6. 실패를 설명으로 바꾸되 틀린 교훈은 쌓지 않기 (반성) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/reflexion-loop/) · 📊 [PPT](reflexion-loop/reflexion-loop.pptx)
+   - ✅ ②-7. 기능을 덜 넣어도 끝까지 도는 루프 만들기 (미니멀) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/minimal-loop/) · 📊 [PPT](minimal-loop/minimal-loop.pptx)
+   - ✅ ②-8. 무엇을 실행할 수 있는지 먼저 경계 짓기 (권한·보안) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/permission-boundary/) · 📊 [PPT](permission-boundary/permission-boundary.pptx)
+   - ✅ ②-9. 결과와 궤적을 분리해 검증하기 (평가 루프) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/eval-loop/) · 📊 [PPT](eval-loop/eval-loop.pptx)
+   - ✅ ②-10. 일곱 하네스를 기능 지도 위에 놓기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/harness-map/) · 📊 [PPT](harness-map/harness-map.pptx)
+   - ✅ ②-11. 논문 가설을 내 개선 실험으로 바꾸기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/hypothesis-experiment/) · 📊 [PPT](hypothesis-experiment/hypothesis-experiment.pptx)
 
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
@@ -361,6 +367,12 @@
 > - 대5-하네스-②3 https://inseoklee-ai.github.io/study-room/action-format/
 > - 대5-하네스-②4 https://inseoklee-ai.github.io/study-room/context-budget/
 > - 대5-하네스-②5 https://inseoklee-ai.github.io/study-room/skill-accumulation/
+> - 대5-하네스-②6 https://inseoklee-ai.github.io/study-room/reflexion-loop/
+> - 대5-하네스-②7 https://inseoklee-ai.github.io/study-room/minimal-loop/
+> - 대5-하네스-②8 https://inseoklee-ai.github.io/study-room/permission-boundary/
+> - 대5-하네스-②9 https://inseoklee-ai.github.io/study-room/eval-loop/
+> - 대5-하네스-②10 https://inseoklee-ai.github.io/study-room/harness-map/
+> - 대5-하네스-②11 https://inseoklee-ai.github.io/study-room/hypothesis-experiment/
 > - 대4-① https://inseoklee-ai.github.io/study-room/prompt-engineering-intro/
 > - 대4-② https://inseoklee-ai.github.io/study-room/agent-structure/
 > - 대4-③ https://inseoklee-ai.github.io/study-room/model-inputs/

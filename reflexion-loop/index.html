@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>실패를 설명으로 바꾸되 틀린 교훈은 쌓지 않기 · 반성 (에이전트 하네스 ⑥)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 하네스 톺아보기 ⑥</span>
+    <h1 style="margin:18px 0">실패를 설명으로 바꾸되<br>틀린 교훈은 쌓지 않기</h1>
+    <p class="sub">반성(Reflexion) — 평가하는 글이 아니라 다음 행동을 바꾸는 피드백</p>
+  </div>
+  <aside>Reflexion은 실패 후 스스로 반성 문장을 남겨 다음 시도에 쓰는 방식을 제안한 연구입니다(NeurIPS).</aside>
+</section>
+
+<!-- 2 정의 -->
+<section class="slide" data-part="표지">
+  <h2>반성은 <span class="g">압축된 피드백</span>이어야 합니다</h2>
+  <div class="grid2">
+    <div class="box"><h3>❌ 긴 평가문</h3><p>"결과가 틀렸다"는 문장만 길게 반복하면 — <b class="r">다음 도구 호출과 검색 범위는 바뀌지 않습니다</b></p></div>
+    <div class="box"><h3>✅ 압축된 피드백</h3><p>실패한 실행 기록에서 <b class="g">다음 시도에 바꿀 행동 하나와 그 근거</b>를 짧게</p></div>
+  </div>
+  <div class="hl">🎯 반성은 <b>답을 길게 평가하는 글이 아니라 다음 행동을 바꾸는 기능</b>입니다</div>
+  <aside>이 소단원의 핵심 대비입니다. 길이가 아니라 '다음 행동이 실제로 달라지는가'가 기준입니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">반성은 기록을 다시 쓸 수 있게 압축합니다</h2>
+  <p style="margin-top:11px">Reflexion · Generative Agents</p><span class="who">⑥ 반성</span></div>
+  <aside>모든 실패 기록을 보관하는 대신, 다음 행동을 고칠 근거만 압축해 재진입하는 설계입니다.</aside>
+</section>
+
+<!-- 4 Reflexion -->
+<section class="slide" data-part="PART 1">
+  <h2>Reflexion — 가중치 없이 <span class="b">언어 피드백</span>으로</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:110px"><small>1</small><b>trial</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px;border-color:var(--red)"><small>2</small><b class="r">error</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>3</small><b class="b">reflection</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>4</small><b class="g">memory</b></div>
+  </div>
+  <ul class="pts">
+    <li>모델 <b>가중치를 바꾸지 않고</b> 언어 피드백만으로 루프를 구성했습니다</li>
+    <li>episodic memory만 둔 조건에 반성을 더했을 때 이점은 <b class="g">8%p</b></li>
+    <li>장기 기억에는 <b>최근 반성 1~3개만</b> 남겨 다음 시도에 다시 넣었습니다</li>
+  </ul>
+  <div class="hl">📌 모든 실패 기록을 보관하는 대신 — <b>다음 행동을 고칠 근거만 압축해 재진입</b>하는 설계</div>
+  <aside>출처: Shinn et al., NeurIPS 2023, arXiv:2303.11366. 가중치 없이 언어 피드백을 쓰며, MBPP는 GPT-4 기준선보다 낮았고 WebShop 개선도 없었습니다.</aside>
+</section>
+
+<!-- 5 Generative Agents -->
+<section class="slide" data-part="PART 1">
+  <h2>Generative Agents — 이 설계의 <span class="p">원조</span></h2>
+  <p>스탠퍼드 연구진의 마을 시뮬레이션 연구로, <b>기록 → 반성 → 검색 → 재진입</b> 설계의 출발점입니다.</p>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">관찰을 <b>memory stream</b>에 쌓습니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>시간별 반성</b>으로 의미를 묶습니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b class="g">최근성 · 관련성 · 중요도</b>로 찾아 계획에 다시 넣습니다</span></div>
+  </div>
+  <div class="hl">⚠️ 이 연구의 평가 대상은 <b class="r">과업 성공률이 아니라 에이전트 행동의 그럴듯함</b>입니다 — 코딩 하네스의 성능 우위로 넓혀 말하지 않습니다</div>
+  <aside>출처: Park et al., UIST 2023, arXiv:2304.03442. ablation은 과업 성공률이 아닌 행동의 그럴듯함을 평가했습니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">틀린 설명도 기억이 될 수 있습니다</h2>
+  <p style="margin-top:11px">이 소단원의 반대 근거</p><span class="who">⑥ 반성</span></div>
+  <aside>반성은 항상 성능을 높이지 않았습니다. 저자가 직접 밝힌 결과입니다.</aside>
+</section>
+
+<!-- 7 반대 근거 -->
+<section class="slide" data-part="PART 2">
+  <h2>반성이 <span class="r">더 나빴던</span> 조건</h2>
+  <table class="t">
+    <tr><th>과업</th><th>결과</th></tr>
+    <tr><td>MBPP</td><td><b class="r">77.1%</b> — GPT-4 기준선 <b>80.1%</b>보다 <b class="r">낮음</b></td></tr>
+    <tr><td>WebShop</td><td><b class="r">개선 없음</b> (저자가 직접 밝힘)</td></tr>
+  </table>
+  <div class="big">실패 원인을 <span class="y">잘못 설명한 문장</span>이 다음 시도에 다시 들어오면<br><small>틀린 교훈이 누적됩니다</small></div>
+  <aside>이 표는 5장의 insight 오염 문제와 같은 구조입니다 — 저장한 것이 틀렸을 때 무엇이 일어나는가.</aside>
+</section>
+
+<!-- 8 작성법 -->
+<section class="slide" data-part="PART 2">
+  <h2>결론 대신 <span class="g">검증할 행동</span>을 남깁니다</h2>
+  <div class="grid2">
+    <div class="box"><h3>❌ 정답처럼 보이는 결론</h3><p>"<b class="r">검색이 부족했다</b>"</p></div>
+    <div class="box"><h3>✅ 관찰 가능한 변경</h3><p>"<b class="g">다음 시도에서는 오류가 난 파일의 호출 지점을 먼저 읽고, 그 뒤에만 검색 범위를 넓힌다</b>"</p></div>
+  </div>
+  <ul class="pts">
+    <li>다음 실행의 결과가 이 설명을 <b>지지하지 않으면 반성을 수정하거나 버립니다</b></li>
+  </ul>
+  <div class="hl">🎯 반성 문장에는 <b>작성 시각 · 근거가 된 실행 기록 · 다음에 바꿀 행동</b>을 함께 연결합니다 — 그래야 <b class="g">어느 실패에서 나왔는지 확인하고, 틀렸을 때 지울 수 있습니다</b></div>
+  <aside>반성을 '지울 수 있게' 만드는 것이 이 절의 실무 결론입니다.</aside>
+</section>
+
+<!-- 9 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">Hermes를 반성 기능으로 다시 봅니다</h2>
+  <p style="margin-top:11px">반성이 남는 곳은 새 기능이 아닙니다</p><span class="who">⑥ 반성</span></div>
+  <aside>소단원 ⑤에서 본 Hermes의 최소 카드를 기능만 바꿔 다시 읽습니다.</aside>
+</section>
+
+<!-- 10 Hermes 표 -->
+<section class="slide" data-part="PART 3">
+  <h2>Hermes — <span class="b">지속 상태</span>가 곧 반성이 남는 곳</h2>
+  <table class="t">
+    <tr><th>칸</th><th>내용</th></tr>
+    <tr><td><b>기능 재조명</b></td><td>과거 세션과 memory를 <b>다음 맥락에 다시 넣을 수 있습니다</b></td></tr>
+    <tr><td><b>남는 상태</b></td><td>FTS5로 찾은 과거 세션, memory, user model, <b>활성 스킬</b></td></tr>
+    <tr><td><b>대표 행동</b></td><td>실패 기록을 찾아 <b>다음 요청의 맥락으로</b> 다시 가져옵니다</td></tr>
+    <tr><td><b>권한 경계</b></td><td>command approval · DM pairing · container isolation의 <b class="r">실제 적용 범위는 설정과 실행 환경에서 확인</b></td></tr>
+    <tr><td><b>1차 근거</b></td><td><code>hermes-agent</code> README와 공개 설정·실행 기록을 대조</td></tr>
+    <tr><td><b>한계</b></td><td><b class="r">반성이 자동으로 정확해지거나 잘못된 기록이 자동 폐기된다는 근거는 확인하지 못했습니다</b></td></tr>
+  </table>
+  <aside>Hermes에서 반성이 남는 곳은 새로운 별도 기능이 아니라 이미 남는 지속 상태입니다.</aside>
+</section>
+
+<!-- 11 미해결 -->
+<section class="slide" data-part="PART 3">
+  <h2>미해결 질문 — <span class="p">몇 개까지</span> 남겨야 합니까</h2>
+  <p>Reflexion의 <b>최근 1~3개 제한을 그대로 답으로 삼지 않습니다.</b> 같은 모델·과업·도구 예산에서 직접 비교합니다.</p>
+  <div class="chain">
+    <div class="cell" style="min-width:120px"><small>조건 A</small><b>반성 1개</b></div>
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>조건 B</small><b class="b">반성 3개</b></div>
+    <div class="cell" style="min-width:120px;border-color:var(--pp)"><small>조건 C</small><b class="p">전체 반성</b></div>
+  </div>
+  <ul class="pts">
+    <li>성공률뿐 아니라 — <b class="r">틀린 설명이 다음 시도에 재사용된 횟수</b>와 <b>반성을 읽는 토큰</b>도 함께 기록</li>
+  </ul>
+  <div class="hl">📌 기억과 반성을 더할수록 좋아 보이지만 — <b>그 기능 자체가 비용과 새로운 실패 지점을 만듭니다</b></div>
+  <aside>이 문장이 다음 소단원 ⑦(미니멀)로 이어지는 다리입니다.</aside>
+</section>
+
+<!-- 12 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 좋은 반성 문장의 조건은?</div>
+    <div class="q a"><b>A1.</b> 정답처럼 보이는 결론이 아니라 <b>다음 시도에 바꿀 관찰 가능한 행동 하나</b>. 그리고 작성 시각·근거 실행 기록을 함께 묶어 <b>틀렸을 때 지울 수 있게</b> 한다.</div>
+    <div class="q"><b>Q2.</b> 반성이 항상 좋다고 말할 수 없는 근거는?</div>
+    <div class="q a"><b>A2.</b> Reflexion의 <b>MBPP 77.1%가 GPT-4 기준선 80.1%보다 낮았고</b>, WebShop에서는 개선이 없었다.</div>
+    <div class="q"><b>Q3.</b> Generative Agents의 수치를 코딩 하네스로 넓히면 안 되는 이유는?</div>
+    <div class="q a"><b>A3.</b> 그 연구의 평가 대상은 <b>과업 성공률이 아니라 행동의 그럴듯함</b>이기 때문.</div>
+  </div>
+  <aside>Q1이 이 소단원의 실무 결론입니다.</aside>
+</section>
+
+<!-- 13 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>지울 수 있는 반성만 자산입니다 🔁</h1>
+    <div class="big" style="margin-top:26px">실패를 설명으로 바꾸되<br><span class="y">틀린 교훈은 쌓지 않습니다</span></div>
+    <p class="sub" style="margin-top:24px">에이전트 하네스 톺아보기 ⑥ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑦ — 기억과 반성을 더할수록 좋아 보이지만, 기능 자체가 비용입니다. 가장 작은 루프의 조건을 찾습니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

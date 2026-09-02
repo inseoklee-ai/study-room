@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>결과와 궤적을 분리해 검증하기 · 평가 루프 (에이전트 하네스 ⑨)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 하네스 톺아보기 ⑨</span>
+    <h1 style="margin:18px 0">결과와 궤적을<br>분리해 검증하기</h1>
+    <p class="sub">평가 루프 — 패치가 맞았다는 사실만으로는 구분되지 않는 것들</p>
+  </div>
+  <aside>최종 패치가 맞았다는 사실만으로 검색 낭비, 우연한 성공, 과도한 권한 사용을 구분할 수 없습니다.</aside>
+</section>
+
+<!-- 2 문제 -->
+<section class="slide" data-part="표지">
+  <h2>패치가 맞아도 <span class="r">구분되지 않는 것</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:140px;border-color:var(--red)"><small>①</small><b class="r">검색 낭비</b></div>
+    <div class="cell" style="min-width:140px;border-color:var(--red)"><small>②</small><b class="r">우연한 성공</b></div>
+    <div class="cell" style="min-width:160px;border-color:var(--red)"><small>③</small><b class="r">과도한 권한 사용</b></div>
+  </div>
+  <div class="hl">🎯 평가 루프는 <b>최종 패치가 과업을 해결했는지</b>와 <b class="g">그 결과에 이른 검색·편집·실행 궤적이 적절했는지</b>를 <b>분리해</b> 확인합니다</div>
+  <aside>결과(patch)와 경로(trajectory)를 한 덩어리로 보면 위 셋이 모두 '성공'으로 보입니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">구성요소와 결과를 따로 측정합니다</h2>
+  <p style="margin-top:11px">SWE-agent ablation · SWE-bench · Verified</p><span class="who">⑨ 평가 루프</span></div>
+  <aside>같은 모델이라도 무엇을 읽고 어떤 형식으로 행동했는지를 고정해야 구성요소의 기여를 물을 수 있습니다.</aside>
+</section>
+
+<!-- 4 ACI ablation -->
+<section class="slide" data-part="PART 1">
+  <h2>SWE-agent ACI ablation — <span class="b">구성요소를 바꿔 봅니다</span></h2>
+  <p>검색, 편집, 관측 형식처럼 <b>인터페이스 구성요소를 바꾸고 결과를 비교</b>할 수 있음을 보였습니다.</p>
+  <ul class="pts">
+    <li>같은 모델이라도 — <b class="g">무엇을 읽고 어떤 형식으로 행동했는지를 고정해야</b> 구성요소의 기여를 물을 수 있습니다</li>
+    <li>이 결과는 <b>SWE-bench Lite와 논문에 적힌 실행 조건</b>의 결과입니다</li>
+  </ul>
+  <div class="hl">⚠️ <b class="r">다른 모델이나 저장소에서도 같은 구성요소가 같은 기여를 한다고 해석해서는 안 됩니다</b></div>
+  <aside>출처: Yang 외, NeurIPS 2024, arXiv:2405.15793. SWE-bench Lite ablation 결과이며 모델·저장소·실행 조건 밖으로 일반화하지 않습니다.</aside>
+</section>
+
+<!-- 5 SWE-bench -->
+<section class="slide" data-part="PART 1">
+  <h2>SWE-bench — <span class="g">실행 기반</span> 채점</h2>
+  <p>실제 <b>GitHub 이슈와 저장소</b>로 코딩 에이전트를 측정하는 벤치마크입니다.</p>
+  <table class="t">
+    <tr><th>항목</th><th>내용</th></tr>
+    <tr><td>규모</td><td><b>12개 Python 저장소 · 2,294개 문제</b></td></tr>
+    <tr><td>채점</td><td><code>FAIL_TO_PASS</code>와 <code>PASS_TO_PASS</code> 테스트로 최종 패치를 채점</td></tr>
+    <tr><td>의의</td><td><b class="g">문제를 푸는 루프와 채점하는 루프를 구분할 근거</b>를 제공</td></tr>
+    <tr><td>한계</td><td><b class="r">테스트 통과 ≠ 유지보수 품질 전체</b>, 정적 문제에는 <b class="r">contamination 위험</b></td></tr>
+  </table>
+  <aside>출처: Jimenez 외, ICLR 2024 Oral, arXiv:2310.06770. contamination 검증과 다른 언어 일반화에는 한계가 있습니다.</aside>
+</section>
+
+<!-- 6 Verified -->
+<section class="slide" data-part="PART 1">
+  <h2>SWE-bench Verified — <span class="p">인간 검증 500문제</span></h2>
+  <ul class="pts">
+    <li>12개 저장소에서 <b>인간이 검증한 500개 문제</b>를 제공하는 공식 데이터셋 카드</li>
+    <li><b>사후 PR 테스트 행동을 정답 대리물</b>로 둡니다 — <b class="r">검수자 수와 합의 절차는 확인하지 못했습니다</b></li>
+  </ul>
+  <div class="big">이 등급은 <span class="y">해결 가능성 검토의 근거</span>이며<br><small>특정 하네스가 더 낫다는 근거는 아닙니다</small></div>
+  <aside>출처: Princeton NLP 공식 데이터셋 카드, SWE-bench_Verified. 소단원 ⑦의 mini-swe-agent 74% 초과도 이 데이터셋 위의 자체 보고였습니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">SWE-agent를 평가 기능으로 다시 봅니다</h2>
+  <p style="margin-top:11px">같은 실행 단위에 무엇이 남는가</p><span class="who">⑨ 평가 루프</span></div>
+  <aside>소단원 ③·④에서 본 SWE-agent를 이번에는 평가 기능만 떼어 읽습니다.</aside>
+</section>
+
+<!-- 8 재조명 표 -->
+<section class="slide" data-part="PART 2">
+  <h2>같은 실행 단위에 <span class="b">네 가지</span>를 남깁니다</h2>
+  <table class="t">
+    <tr><th>기능 재조명</th><th>확인할 기록</th><th>1차 근거</th></tr>
+    <tr><td>SWE-agent 평가 루프</td><td><b>문제 설명·저장소</b> · <b class="g">trajectory</b> · <b>patch</b> · <b>테스트 결과</b>를 같은 실행 단위에 남겨 결과와 경로를 함께 검토</td><td>SWE-agent 공개 저장소와 실행 기록, ACI 논문</td></tr>
+  </table>
+  <div class="hl">📌 네 가지가 <b>같은 실행 단위</b>에 있어야 — "이 패치는 어떤 경로로 나왔는가"를 되짚을 수 있습니다</div>
+  <aside>이 구조가 소단원 ⑪ 과제에서 before·after trace를 링크하라는 요구로 이어집니다.</aside>
+</section>
+
+<!-- 9 trajectory -->
+<section class="slide" data-part="PART 2">
+  <h2>trajectory가 <span class="g">하는 일</span>과 <span class="r">못 하는 일</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>❌ 못 하는 일</h3><p><b class="r">모델의 의도나 패치의 정답성을 스스로 증명하지 못합니다</b></p></div>
+    <div class="box"><h3>✅ 하는 일</h3><p><b class="g">1차 근거로 남깁니다</b> — 어느 검색이 먼저였는지, 테스트 실패 뒤 무엇을 편집했는지, 어떤 명령이 실행됐는지</p></div>
+  </div>
+  <ul class="pts">
+    <li>이 기록에서 다시 확인할 것 — <b>다음 행동을 바꾼 관측이었는지</b>, <b class="r">같은 탐색을 반복했는지</b>, <b class="r">승인한 권한이 과도했는지</b></li>
+  </ul>
+  <aside>소단원 ②의 사실/해석 분리가 여기서도 그대로 적용됩니다 — 기록은 사실, 적절성 판단은 해석입니다.</aside>
+</section>
+
+<!-- 10 통과만으론 부족 -->
+<section class="slide" data-part="PART 2">
+  <h2>통과 결과만으로는 <span class="r">충분하지 않습니다</span></h2>
+  <p>정적 벤치마크의 테스트 통과는 <b class="r">장기 유지보수 · 설명 가능성 · 코드 검토 · 의존성 변화 대응</b>을 모두 재지 못합니다. 공개된 문제와 해답이 <b>학습 또는 도구 설정에 섞였을 가능성</b>도 비교를 흐릴 수 있습니다.</p>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>결과 점수</b>와 함께</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>실행 환경 · 모델 · 권한 정책</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>비용 · 승인 횟수</b></span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b class="g">trajectory</b>를 남기고 <b>실제 검토를 별도로</b> 합니다</span></div>
+  </div>
+  <div class="hl">❓ 남은 질문 — <b class="p">어떤 trajectory 신호가 좋은 하네스를 가리는지</b>는 아직 열려 있습니다</div>
+  <aside>이제 일곱 도구를 기능 수가 아니라 내 병목을 해결하는 증거로 다시 배열할 수 있습니다 — 다음 소단원 ⑩.</aside>
+</section>
+
+<!-- 11 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 결과와 궤적을 왜 분리하나?</div>
+    <div class="q a"><b>A1.</b> 패치가 맞았다는 사실만으로는 <b>검색 낭비 · 우연한 성공 · 과도한 권한 사용</b>을 구분할 수 없기 때문.</div>
+    <div class="q"><b>Q2.</b> trajectory가 증명하는 것과 증명하지 않는 것은?</div>
+    <div class="q a"><b>A2.</b> 모델의 의도나 패치의 정답성은 <b>증명하지 못한다.</b> 다만 검색 순서·편집 시점·실행 명령을 <b>1차 근거로 남긴다.</b></div>
+    <div class="q"><b>Q3.</b> SWE-bench Verified 등급이 뜻하는 것은?</div>
+    <div class="q a"><b>A3.</b> <b>해결 가능성 검토의 근거</b>일 뿐 <b>특정 하네스가 낫다는 근거가 아니다.</b> 사후 PR 테스트 행동을 정답 대리물로 삼는다.</div>
+  </div>
+  <aside>Q3은 벤치마크 수치를 도구 광고로 읽지 않기 위한 방어선입니다.</aside>
+</section>
+
+<!-- 12 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>결과와 경로를 따로 봅니다 🧾</h1>
+    <div class="big" style="margin-top:26px">패치는 <span class="y">무엇이 됐는지</span>를 말하고<br>궤적은 <span class="y">어떻게 됐는지</span>를 말합니다</div>
+    <p class="sub" style="margin-top:24px">에이전트 하네스 톺아보기 ⑨ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑩에서 일곱 도구를 기능 지도 위에 놓습니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

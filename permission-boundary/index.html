@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>무엇을 실행할 수 있는지 먼저 경계 짓기 · 권한·보안 (에이전트 하네스 ⑧)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 하네스 톺아보기 ⑧</span>
+    <h1 style="margin:18px 0">무엇을 실행할 수 있는지<br>먼저 경계 짓기</h1>
+    <p class="sub">권한 · 보안 — 한 입력이 곧바로 모든 도구 권한으로 이어지지 않게</p>
+  </div>
+  <aside>파일을 읽는 능력, 명령을 실행하는 능력, 외부 메시지를 받는 능력은 서로 다른 위험을 만듭니다.</aside>
+</section>
+
+<!-- 2 세 행동 -->
+<section class="slide" data-part="표지">
+  <h2>세 행동은 <span class="r">서로 다른 위험</span>입니다</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px"><small>능력 1</small><b>파일을 읽는다</b></div>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>능력 2</small><b class="b">명령을 실행한다</b></div>
+    <div class="cell" style="min-width:170px;border-color:var(--red)"><small>능력 3</small><b class="r">외부 메시지를 받는다</b></div>
+  </div>
+  <div class="hl">🎯 권한·보안 기능은 <b>이 세 행동의 입구와 실행 범위를 나누어</b> — <b class="r">한 입력이 곧바로 모든 도구 권한으로 이어지지 않게</b> 합니다</div>
+  <aside>세 능력을 한 덩어리로 다루면 어디서 위험이 들어왔는지 사후에 구분할 수 없습니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">차단 수치와 과업 결과를 함께 봅니다</h2>
+  <p style="margin-top:11px">Spotlighting · ToolEmu · CaMeL · AgentDojo</p><span class="who">⑧ 권한·보안</span></div>
+  <aside>많이 막으면 안전해 보이지만 과업도 끝내지 못할 수 있습니다.</aside>
+</section>
+
+<!-- 4 Spotlighting -->
+<section class="slide" data-part="PART 1">
+  <h2>Spotlighting — <span class="g">출처를 구분</span>하는 변환</h2>
+  <p>외부 문서의 지시가 모델 행동을 바꾸는 문제에서, <b>외부 입력의 출처를 구분하는 변환</b>을 적용했습니다.</p>
+  <div class="chain">
+    <div class="cell" style="min-width:180px;border-color:var(--red)"><small>변환 전</small><b class="r">공격 성공률<br>50% 초과</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:180px;border-color:var(--gr)"><small>변환 후</small><b class="g">공격 성공률<br>2% 미만</b></div>
+  </div>
+  <div class="hl">⚠️ 이는 <b>출처 경계가 공격을 줄일 수 있다는 조건부 근거</b>이지 — <b class="r">모든 문서와 공격에 같은 방어를 보장한다는 뜻이 아닙니다</b></div>
+  <aside>출처: Spotlighting, arXiv:2403.14720. 공격 성공률 수치는 저자 실험 조건입니다.</aside>
+</section>
+
+<!-- 5 ToolEmu -->
+<section class="slide" data-part="PART 1">
+  <h2>ToolEmu — <span class="r">최고 에이전트도 23.9% 실패</span></h2>
+  <p>고위험 도구 사용의 안전성을 <b>에뮬레이션으로 평가</b>하는 방법을 제안한 연구입니다.</p>
+  <table class="t">
+    <tr><th>조건</th><th>내용</th></tr>
+    <tr><td>도구</td><td><b>36개 고위험 도구</b></td></tr>
+    <tr><td>사례</td><td><b>144개</b></td></tr>
+    <tr><td>결과</td><td>해당 논문 조건에서 <b class="r">최고 에이전트도 23.9% 실패</b></td></tr>
+  </table>
+  <div class="big">안전 장치가 있어도<br><span class="y">도구 사용의 위험을 없앨 수 없습니다</span></div>
+  <aside>출처: ToolEmu, arXiv:2309.15817. 해당 논문 조건의 결과이며, 실제 컨테이너 격리나 모든 업무 환경의 결과로 넓혀 읽지 않습니다.</aside>
+</section>
+
+<!-- 6 CaMeL + AgentDojo -->
+<section class="slide" data-part="PART 1">
+  <h2>구조적 분리와 <span class="b">이중 측정</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>🧱 CaMeL</h3><p><b>권한 · 데이터 흐름 · 제어 흐름</b>을 구조적으로 분리해 <b class="g">외부 입력이 민감한 도구를 제어하지 못하게</b> 합니다</p></div>
+    <div class="box"><h3>📊 AgentDojo</h3><p><b>공격 성공률</b>과 <b class="g">과업 완수율</b>을 함께 측정하는 벤치마크 — 97개 과업 · 629개 보안 테스트</p></div>
+  </div>
+  <div class="hl">🎯 AgentDojo가 둘을 함께 재는 이유 — <b class="r">많이 막으면 안전해 보이지만 과업도 끝내지 못할 수 있기 때문</b>입니다</div>
+  <aside>출처: DeepMind CaMeL 설계 문서 arXiv:2506.08837, AgentDojo arXiv:2406.13352(97개 과업·629개 보안 테스트 조건).</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">입구를 어느 세션과 권한으로 연결합니까</h2>
+  <p style="margin-top:11px">OpenClaw — 여러 채널을 받는 도구</p><span class="who">⑧ 권한·보안</span></div>
+  <aside>OpenClaw는 Discord, Slack, Telegram 등 여러 채널에서 상시 대기하는 오픈소스 에이전트입니다.</aside>
+</section>
+
+<!-- 8 OpenClaw 카드 -->
+<section class="slide" data-part="PART 2">
+  <h2>OpenClaw <span class="b">최소 카드</span></h2>
+  <table class="t">
+    <tr><th>칸</th><th>OpenClaw에서 확인할 내용</th></tr>
+    <tr><td><b>입구</b></td><td>Gateway가 <b>Discord · Slack · Telegram</b>을 비롯한 여러 채널 메시지를 받습니다</td></tr>
+    <tr><td><b>상태</b></td><td>Gateway는 채널·세션 라우팅의 기준점이며 <b>에이전트·작업공간·발신자별 격리 세션</b>을 둡니다</td></tr>
+    <tr><td><b>대표 행동</b></td><td>상시 대기한 Gateway가 메시지를 <b>해당 세션과 에이전트로 라우팅</b></td></tr>
+    <tr><td><b>권한 경계</b></td><td><code>pairing</code> · <code>allowFrom</code> · <b>그룹 멘션 요구</b></td></tr>
+    <tr><td><b>1차 근거</b></td><td>OpenClaw 공식 문서에서 구조와 설정을 확인</td></tr>
+    <tr><td><b>한계</b></td><td><b class="r">이 권한 설계의 공격 방어 또는 과업 성능을 검증한 학술 근거는 확인하지 못했습니다</b></td></tr>
+  </table>
+  <aside>출처: OpenClaw 공식 문서 — 구조·설정 확인용입니다.</aside>
+</section>
+
+<!-- 9 세 설정 -->
+<section class="slide" data-part="PART 2">
+  <h2>세 설정 — <span class="g">안 정하면 / 정하면</span></h2>
+  <table class="t">
+    <tr><th>설정</th><th>안 정하면</th><th>정하면</th></tr>
+    <tr><td><code>pairing</code></td><td>처음 보는 발신자가 <b class="r">신뢰된 대화 입구인지 확인 불가</b></td><td>승인한 짝의 메시지만 정해진 채널 연결로 <b class="g">해당 세션에 라우팅</b></td></tr>
+    <tr><td><code>allowFrom</code></td><td>채널의 접근 규칙만으로는 <b class="r">허용 발신자가 명시적으로 좁혀지지 않음</b></td><td>목록 밖 발신자의 메시지는 <b class="g">에이전트 실행으로 이어지지 않음</b></td></tr>
+    <tr><td>그룹 멘션 요구</td><td>일반 대화가 <b class="r">처리해야 할 요청과 섞임</b></td><td>에이전트를 부른 메시지만 처리, <b class="g">멘션 없는 메시지는 무시</b></td></tr>
+  </table>
+  <div class="hl">📌 이 세 설정은 <b>발신자와 호출을 가르는 경계</b>이며 — <b class="r">도구가 허용된 뒤 실행 피해를 가두는 격리 환경과는 다른 경계</b>입니다</div>
+  <aside>기본 정책에서는 짝이 맞지 않은 발신자를 승인 절차로 분리합니다.</aside>
+</section>
+
+<!-- 10 도구 권한 설정 -->
+<section class="slide" data-part="PART 2">
+  <h2>도구 안의 <span class="b">권한 규칙</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>Claude Code — 권한 모드</h3><p>어떤 도구 행동을 <b>자동 허용</b>하고 어떤 행동을 <b>승인 대상</b>으로 둘지 정합니다. 정하면 파일 변경·명령 실행이 규칙에 따라 <b class="g">바로 실행되거나 승인 화면에서 멈춥니다</b></p></div>
+    <div class="box"><h3>opencode — <code>allow</code>·<code>ask</code>·<code>deny</code></h3><p>도구와 행동별로 <b>허용·확인·거부</b>를 정합니다. 여러 규칙이 맞으면 <b class="g">마지막 매치</b>가 적용되고, <b class="g">에이전트별 규칙이 전역 규칙보다 우선</b>합니다</p></div>
+  </div>
+  <ul class="pts">
+    <li>규칙을 정하지 않으면 — <b class="r">기본 정책에 따라 처리되어 과업별 예외가 어느 규칙에서 왔는지 읽기 어렵습니다</b></li>
+    <li>따라서 <b>특정 에이전트의 편집은 묻고 다른 에이전트의 읽기는 허용</b>하는 식으로 동작을 나눌 수 있습니다</li>
+  </ul>
+  <aside>출처: Anthropic 공식 문서, opencode 공식 문서 — 구조·설정 확인용이며 정량 실험은 없습니다.</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">권한과 격리는 다른 질문입니다</h2>
+  <p style="margin-top:11px">하나가 다른 하나를 대신하지 않습니다</p><span class="who">⑧ 권한·보안</span></div>
+  <aside>이 구분이 이 소단원에서 가장 중요합니다.</aside>
+</section>
+
+<!-- 12 권한 vs 격리 -->
+<section class="slide" data-part="PART 3">
+  <h2><span class="b">권한</span>과 <span class="p">격리</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>🔑 권한</h3><p><b>누가 무엇을 허용할지</b> — <b class="b">실행 전의 판단</b>을 다룹니다</p></div>
+    <div class="box"><h3>📦 격리</h3><p><b>허용된 실행의 피해를 어디에 가둘지</b> — Docker 같은 외부 환경이 <b class="p">파일·네트워크·운영체제 범위</b>를 제한합니다</p></div>
+  </div>
+  <table class="t">
+    <tr><th>도구</th><th>배치</th></tr>
+    <tr><td>pi</td><td>내장 권한 체계가 <b class="r">없어</b> 실행 사용자 권한으로 도구를 실행하며, <b>격리는 Docker 등 외부 환경에</b> 맡깁니다</td></tr>
+    <tr><td>Claude Code</td><td>권한 규칙을 <b class="g">도구 안에</b> 두어 행동의 허용과 승인을 먼저 다룹니다</td></tr>
+  </table>
+  <div class="hl">🎯 두 도구는 같은 위험을 없애는 단일 해법이 아니라 — <b>권한 판단과 실행 환경을 서로 다르게 배치한 답</b>입니다</div>
+  <aside>출처: pi 저자 에세이·공식 문서 — 구조 확인용.</aside>
+</section>
+
+<!-- 13 세션 격리 -->
+<section class="slide" data-part="PART 3">
+  <h2>세션 격리 ≠ <span class="r">컨테이너 격리</span></h2>
+  <ul class="pts">
+    <li>OpenClaw는 <b>에이전트 · 작업공간 · 발신자별 세션을 분리</b>해 <b class="g">대화 상태가 섞이는 범위</b>를 줄입니다</li>
+    <li>그러나 이 세션 격리는 <b class="r">컨테이너 격리와 같지 않으며</b> — host 도구의 실행 범위는 <b>별도 sandbox 정책과 실행 환경에서 확인</b>해야 합니다</li>
+    <li>macOS <code>sandbox-exec</code>나 Docker의 구체 명령은 <b>이 강의 범위 밖</b>이므로 다루지 않습니다</li>
+  </ul>
+  <div class="big">대화가 섞이지 않는 것과<br><span class="y">프로세스가 닿는 범위가 좁은 것</span>은 다른 문제입니다</div>
+  <aside>세션 격리는 '누구의 대화인가', 컨테이너 격리는 '무엇에 닿는가'를 다룹니다.</aside>
+</section>
+
+<!-- 14 측정 -->
+<section class="slide" data-part="PART 3">
+  <h2>경계의 작동을 <span class="g">과업에서 확인</span>합니다</h2>
+  <p>권한 설정은 <b class="r">안전하다는 선언으로 끝나지 않습니다.</b> 같은 과업에서 허용 규칙을 <b>하나만</b> 바꾸고 함께 기록합니다.</p>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>처리된 요청 수</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>승인 횟수</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b class="r">막힌 정상 작업</b></span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>의도하지 않은 도구 호출</b></span></div>
+  </div>
+  <ul class="pts">
+    <li>외부 메시지가 있는 도구라면 — <b>허용 발신자와 멘션 없는 메시지가 실제로 어느 세션에도 들어가지 않는지</b> 확인합니다</li>
+    <li><b class="r">권한을 촘촘히 할수록 공격을 덜 받는다고 바로 결론 내리지 않습니다</b> — <b class="g">정상 작업을 막은 비율과 어떤 경계가 그 차단을 만들었는지</b>를 함께 남겨야 다음 설정을 바꿀 근거가 생깁니다</li>
+  </ul>
+  <aside>AgentDojo가 과업 완수율을 함께 재는 이유가 여기서 실무로 이어집니다.</aside>
+</section>
+
+<!-- 15 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 권한과 격리의 차이는?</div>
+    <div class="q a"><b>A1.</b> 권한은 <b>누가 무엇을 허용할지(실행 전 판단)</b>, 격리는 <b>허용된 실행의 피해를 어디에 가둘지(파일·네트워크·OS 범위)</b>. 하나가 다른 하나를 대신하지 않는다.</div>
+    <div class="q"><b>Q2.</b> AgentDojo가 공격 성공률과 과업 완수율을 함께 재는 이유는?</div>
+    <div class="q a"><b>A2.</b> <b>많이 막으면 안전해 보이지만 과업도 끝내지 못할 수 있기 때문.</b></div>
+    <div class="q"><b>Q3.</b> 권한 설정을 바꾼 뒤 무엇을 기록하나?</div>
+    <div class="q a"><b>A3.</b> 처리된 요청 수 · 승인 횟수 · <b>막힌 정상 작업</b> · 의도하지 않은 도구 호출.</div>
+  </div>
+  <aside>Q1을 구분하지 못하면 "컨테이너를 썼으니 안전하다" 또는 "승인 화면이 있으니 안전하다"로 잘못 결론냅니다.</aside>
+</section>
+
+<!-- 16 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>먼저 경계를 짓습니다 🔐</h1>
+    <div class="big" style="margin-top:26px">막은 만큼 안전해지는 것이 아니라<br><span class="y">무엇이 막혔는지 기록될 때</span> 다음 설정을 바꿀 수 있습니다</div>
+    <p class="sub" style="margin-top:24px">에이전트 하네스 톺아보기 ⑧ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑨에서 결과와 궤적을 분리해 검증합니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

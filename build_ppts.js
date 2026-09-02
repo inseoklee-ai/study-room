@@ -36,7 +36,9 @@ const LESSONS = process.argv.slice(2).length
      "rag-project-overview","rag-prd-questions","chunk-design","embedding-vectorstore",
      "hybrid-retrieval","prompt-and-streaming","llm-as-judge","rubric-experiments","rag-submit",
      "harness-question-map","harness-observation","action-format",
-     "context-budget","skill-accumulation"];
+     "context-budget","skill-accumulation",
+     "reflexion-loop","minimal-loop","permission-boundary",
+     "eval-loop","harness-map","hypothesis-experiment"];
 
 // ---- palette (deck light theme) ----
 const INK="2A2723", SOFT="6B6357", GR="3F6B5F", GR2="2C4D44", GOLD="C8A15A",

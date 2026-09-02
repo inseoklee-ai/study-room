@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>기능을 덜 넣어도 끝까지 도는 루프 · 미니멀 (에이전트 하네스 ⑦)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 하네스 톺아보기 ⑦</span>
+    <h1 style="margin:18px 0">기능을 덜 넣어도<br>끝까지 도는 루프 만들기</h1>
+    <p class="sub">미니멀 — 적게 넣는 것이 목표가 아니라, 끝낼 수 있는 가장 작은 루프의 조건</p>
+  </div>
+  <aside>더 많은 기능이 항상 더 좋은 하네스를 뜻한다면 작은 루프가 살아남을 이유는 없습니다.</aside>
+</section>
+
+<!-- 2 정의 -->
+<section class="slide" data-part="표지">
+  <h2>미니멀의 목표는 <span class="r">적게 넣는 것이 아닙니다</span></h2>
+  <div class="hl">🎯 <b>과업을 끝낼 수 있는 가장 작은 루프의 조건</b>을 찾는 일입니다</div>
+  <div class="grid2">
+    <div class="box"><h3>✅ 기능 하나를 덜면</h3><p><b class="g">문맥 비용과 설정 부담</b>이 줄 수 있습니다</p></div>
+    <div class="box"><h3>⚠️ 그러나</h3><p><b class="r">필요한 행동이나 안전 경계까지</b> 빠질 수 있습니다</p></div>
+  </div>
+  <aside>이 절은 '작을수록 좋다'가 아니라 '어디까지 덜어도 끝나는가'를 묻습니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">작은 루프도 조건 아래에서는 작동합니다</h2>
+  <p style="margin-top:11px">mini-swe-agent · pi</p><span class="who">⑦ 미니멀</span></div>
+  <aside>두 사례 모두 근거 등급이 낮다는 점을 함께 읽습니다.</aside>
+</section>
+
+<!-- 4 mini-swe-agent -->
+<section class="slide" data-part="PART 1">
+  <h2>mini-swe-agent — <span class="b">100줄 에이전트</span></h2>
+  <p>SWE-agent 팀이 만든 <b>실험용 최소 에이전트</b>입니다. 스스로를 "100줄 에이전트"라 소개하며 <b>Bash만</b> 사용하고, 셸 상태와 <b>선형 이력</b>을 단순하게 다룹니다.</p>
+  <div class="big">README는 SWE-bench Verified <span class="y">74% 초과</span>를 보고합니다<br><small>다만 이 수치는 모델과 측정 시점이 고정되어 있지 않습니다</small></div>
+  <ul class="pts">
+    <li>읽는 법 — <b class="r">풍성한 인터페이스보다 항상 낫다는 결론이 아니라</b>, <b class="g">복잡한 기능을 뺀 조건에서도 과업이 끝날 수 있다는 출발점</b></li>
+  </ul>
+  <aside>출처: mini-swe-agent README, 공식 자료. SWE-bench Verified 자체 보고이며 독립 학술 논문은 확인하지 못했습니다.</aside>
+</section>
+
+<!-- 5 pi -->
+<section class="slide" data-part="PART 1">
+  <h2>pi — 도구 <span class="g">네 개</span>와 짧은 프롬프트</h2>
+  <p>한 명의 개발자 <b>Mario Zechner</b>가 만든 미니멀 코딩 에이전트입니다.</p>
+  <div class="chain">
+    <div class="cell" style="min-width:100px"><small>도구 1</small><b>read</b></div>
+    <div class="cell" style="min-width:100px"><small>도구 2</small><b>write</b></div>
+    <div class="cell" style="min-width:100px"><small>도구 3</small><b>edit</b></div>
+    <div class="cell" style="min-width:100px;border-color:var(--red)"><small>도구 4</small><b class="r">bash</b></div>
+  </div>
+  <ul class="pts">
+    <li>시스템 프롬프트와 도구 정의를 합쳐 <b class="g">1,000토큰 미만</b></li>
+    <li>저자의 가설 — <b>모델이 좋아질수록 복잡한 하네스가 덜 필요할 수 있다</b></li>
+    <li>단, 이는 <b class="r">저자 에세이의 설계 가설이며 이를 뒷받침하는 독립 학술 근거는 확인하지 못했습니다</b></li>
+  </ul>
+  <aside>출처: Mario Zechner 저자 에세이 및 pi 공식 문서. 저자 설계 가설이며 Terminal-Bench 2.0 수치는 미확인입니다.</aside>
+</section>
+
+<!-- 6 pi 카드 -->
+<section class="slide" data-part="PART 1">
+  <h2>pi <span class="g">최소 카드</span></h2>
+  <table class="t">
+    <tr><th>칸</th><th>pi에서 확인할 내용</th></tr>
+    <tr><td><b>입구</b></td><td>터미널에서 여는 <b>대화형 코딩 CLI</b></td></tr>
+    <tr><td><b>상태</b></td><td>세션 안의 대화와 도구 결과가 다음 판단으로 이어집니다</td></tr>
+    <tr><td><b>대표 행동</b></td><td><code>read</code> <code>write</code> <code>edit</code> <code>bash</code> 네 도구로 읽고 바꾸고 실행</td></tr>
+    <tr><td><b>권한 경계</b></td><td><b class="r">내장 permission system이 없으므로</b> — 컨테이너 등 <b>외부 격리</b>에 권한 경계를 맡깁니다</td></tr>
+    <tr><td><b>1차 근거</b></td><td>공식 문서와 저자 에세이를 함께 확인</td></tr>
+    <tr><td><b>한계</b></td><td>Terminal-Bench 2.0을 과업당 5회 실행했다는 언급은 있으나 <b class="r">측정 수치는 확인하지 못했습니다</b></td></tr>
+  </table>
+  <aside>권한 경계 칸이 소단원 ⑧(권한·보안)으로 그대로 이어집니다.</aside>
+</section>
+
+<!-- 7 대비 -->
+<section class="slide" data-part="PART 1">
+  <h2>기능 수만 다른 <span class="r">비교가 아닙니다</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>🧰 SWE-agent의 풍성한 ACI</h3><p>모델이 쓸 <b>행동과 관측을 인터페이스로 정교하게</b> 만듭니다</p></div>
+    <div class="box"><h3>🔧 mini-swe-agent의 100줄 Bash 루프</h3><p>그 가운데 <b class="g">필요한 부분이 현재 모델에서는 줄어들 수 있는지</b> 묻습니다</p></div>
+  </div>
+  <div class="hl">⚠️ <b>같은 모델과 과업을 고정하지 않으면</b> — 이 차이를 <b class="r">하네스 효과라고 말할 수 없습니다</b></div>
+  <aside>소단원 ③에서 본 SWE-agent를 여기서는 '풍성한 ACI의 비교 대상'으로 다시 읽습니다.</aside>
+</section>
+
+<!-- 8 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">"미니멀이면 충분하다"는 아직 가설입니다</h2>
+  <p style="margin-top:11px">근거 등급과 실패 조건</p><span class="who">⑦ 미니멀</span></div>
+  <aside>이 절이 이 소단원의 균형입니다.</aside>
+</section>
+
+<!-- 9 근거 등급 -->
+<section class="slide" data-part="PART 2">
+  <h2>근거 <span class="r">등급을 숨기지 않습니다</span></h2>
+  <table class="t">
+    <tr><th>주장</th><th>근거 등급</th><th>미확인</th></tr>
+    <tr><td>mini-swe-agent 74% 초과</td><td><b class="r">벤더 자체 보고</b></td><td>모델·시점 미고정, 독립 논문 ✗</td></tr>
+    <tr><td>pi의 단순성 주장</td><td><b class="r">저자 경험담</b></td><td>독립 학술 검증 ✗</td></tr>
+  </table>
+  <div class="hl">⚠️ 작은 루프가 <b class="r">오히려 실패할 수 있는 조건</b> — <b>복잡한 ACI가 필요한 과업</b> · <b>긴 이력에서 관측을 골라야 하는 과업</b> · <b>외부 격리로 해결되지 않는 권한 요구</b></div>
+  <aside>세 실패 조건은 각각 소단원 ③·④·⑧과 대응합니다.</aside>
+</section>
+
+<!-- 10 상용 관찰 -->
+<section class="slide" data-part="PART 2">
+  <h2>상용 도구에서도 <span class="g">덜어내는 방향</span>이 관찰됩니다</h2>
+  <table class="t">
+    <tr><th>사례</th><th>덜어낸 것</th><th>보고된 결과</th></tr>
+    <tr><td>Claude Code</td><td>시스템 프롬프트 <b class="g">80% 이상 제거</b></td><td>코딩 평가에서 <b>측정 가능한 손실 없음</b></td></tr>
+    <tr><td>장기 실행 멀티에이전트</td><td><b>sprint 구조 제거</b>, 평가를 실행 끝 <b>한 번</b>으로</td><td>모델 개선을 검토한 뒤의 조정</td></tr>
+  </table>
+  <ul class="pts">
+    <li>관찰의 내용 — <b>과거 최악 시나리오를 막기 위한 규칙이 모델 개선 뒤에는 필요 없어졌고</b>, <b class="r">서로 충돌하는 지시가 과잉 제약</b>이 되었습니다</li>
+    <li>이는 미니멀 가설의 반대 사례가 아니라 — <b class="g">현재 모델이 스스로 해내는 일을 스트레스 테스트해 불필요한 장치를 덜어낸 상용 관찰</b>입니다</li>
+  </ul>
+  <aside>출처: Thariq Shihipar의 Claude 공식 블로그(시스템 프롬프트 80% 이상 제거, 자체 보고)와 Anthropic Engineering 공식 문서(장기 실행 하네스 사례).</aside>
+</section>
+
+<!-- 11 미해결 -->
+<section class="slide" data-part="PART 2">
+  <h2>미해결 질문 — <span class="p">격차가 줄어들까요</span></h2>
+  <p>모델 세대가 오를수록 <b>풍성한 ACI</b>와 <b>Bash-only 선형 이력</b>의 성능 격차가 줄어들까요.</p>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">mini-swe-agent의 74% 초과가 나온 <b>모델 · 시점 · 과업 조건을 먼저 고정</b>합니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">같은 조건에서 두 루프의 <b class="g">성공률 · 토큰 · 실행 횟수 · 권한 요청</b>을 비교합니다</span></div>
+  </div>
+  <div class="big">조건을 고정하기 전에는<br><span class="y">숫자를 재현했다고 말하지 않습니다</span></div>
+  <aside>기능을 덜어도 되는 범위를 정하려면, 단순한 루프가 어디까지 실행하도록 허용되는지도 함께 봐야 합니다 — 다음 소단원 ⑧.</aside>
+</section>
+
+<!-- 12 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 미니멀 기능의 목표는?</div>
+    <div class="q a"><b>A1.</b> 적게 넣는 것이 아니라 <b>과업을 끝낼 수 있는 가장 작은 루프의 조건</b>을 찾는 것.</div>
+    <div class="q"><b>Q2.</b> 74% 초과와 pi의 단순성 주장을 그대로 인용하면 안 되는 이유는?</div>
+    <div class="q a"><b>A2.</b> 각각 <b>벤더 자체 보고(모델·시점 미고정)</b>와 <b>저자 경험담(독립 검증 없음)</b>이기 때문.</div>
+    <div class="q"><b>Q3.</b> Claude Code의 프롬프트 80% 제거가 뜻하는 것은?</div>
+    <div class="q a"><b>A3.</b> 과거 최악 시나리오용 규칙이 <b>모델 개선 뒤 불필요해졌고</b>, 충돌하는 지시가 <b>과잉 제약</b>이 되었다는 관찰. 스트레스 테스트로 덜어낸 결과.</div>
+  </div>
+  <aside>Q2가 이 중단원 전체의 읽기 규칙입니다.</aside>
+</section>
+
+<!-- 13 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>가장 작은 루프의 조건 🔩</h1>
+    <div class="big" style="margin-top:26px">덜어도 되는 범위를 정하려면<br><span class="y">어디까지 실행하도록 허용되는지</span>도 봐야 합니다</div>
+    <p class="sub" style="margin-top:24px">에이전트 하네스 톺아보기 ⑦ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑧에서 권한과 격리의 경계를 나눕니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
