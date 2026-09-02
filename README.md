@@ -230,7 +230,7 @@
 
 ### 5. 에이전트 시스템 마스터
 **중단원 ②**
-2. **에이전트 하네스 톺아보기** ✅ 완결 (11강) · 같은 루프를 감싼 일곱 개의 하네스를 열어 구조를 확인합니다
+2. **에이전트 하네스 돌아보기** ✅ 완결 (11강) · 같은 루프를 감싼 일곱 개의 하네스를 열어 구조를 확인합니다
    - ✅ ②-1. 맡길 일을 하네스 기능 질문으로 바꾸기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/harness-question-map/) · 📊 [PPT](harness-question-map/harness-question-map.pptx)
    - ✅ ②-2. 화면에서 하네스의 경계 먼저 관찰하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/harness-observation/) · 📊 [PPT](harness-observation/harness-observation.pptx)
    - ✅ ②-3. 모델의 행동을 실패하기 어렵게 만드는 문법 (행동 포맷) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/action-format/) · 📊 [PPT](action-format/action-format.pptx)
