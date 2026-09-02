@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>한 번의 성공을 다음 실행의 자산으로 · 경험·스킬 축적 (에이전트 하네스 ⑤)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 하네스 톺아보기 ⑤</span>
+    <h1 style="margin:18px 0">한 번의 성공을<br>다음 실행의 자산으로</h1>
+    <p class="sub">경험·스킬 축적 — 로그를 저장했다고 경험이 된 것은 아닙니다</p>
+  </div>
+  <aside>다시 찾고 적용할 수 있는 형태여야 다음 실행의 자산이 됩니다.</aside>
+</section>
+
+<!-- 2 자산의 조건 -->
+<section class="slide" data-part="표지">
+  <h2>보관과 <span class="g">자산</span>은 다릅니다</h2>
+  <p>작업 전체를 보관하는 일과 다음 과업에서 쓸 판단을 남기는 일은 다릅니다. <b class="r">실패한 명령, 우연히 통과한 설정, 현재 과업에만 맞는 해결책까지 다시 불러오면 기록은 오히려 판단을 흐릴 수 있습니다.</b></p>
+  <div class="chain">
+    <div class="cell" style="min-width:190px"><small>조건 1</small><b>원문 기록에서<br>근거를 확인할 수 있다</b></div>
+    <div class="cell" style="min-width:170px;border-color:var(--bl)"><small>조건 2</small><b class="b">필요한 때<br>검색할 수 있다</b></div>
+    <div class="cell" style="min-width:190px;border-color:var(--gr)"><small>조건 3</small><b class="g">다음 행동으로<br>바꿔 적용할 수 있다</b></div>
+  </div>
+  <div class="hl">🎯 이 셋을 만족할 때 <b>경험이 자산</b>이 됩니다</div>
+  <aside>세 조건 중 하나라도 빠지면 기록은 쌓이지만 다음 실행에 쓰이지 않습니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">경험은 어떻게 다음 행동이 됩니까</h2>
+  <p style="margin-top:11px">ExpeL · Voyager · AWM · WikiSkill</p><span class="who">⑤ 경험·스킬 축적</span></div>
+  <aside>점점 진화하는 계보로 읽으면 각 연구가 남긴 문제가 다음 연구의 출발점이 됩니다.</aside>
+</section>
+
+<!-- 4 ExpeL -->
+<section class="slide" data-part="PART 1">
+  <h2>ExpeL — 반복 판단을 <span class="g">insight</span>로</h2>
+  <p><b>ExpeL</b>은 한 번의 실행에서 나온 관측과 성공·실패 경험을 <b class="r">바로 다음 프롬프트에 쌓아 두지 않습니다.</b> 여러 경험에서 <b>반복해 쓸 판단을 insight로 추출해 저장</b>합니다.</p>
+  <ul class="pts">
+    <li>새 과업이 오면 <b>FAISS와 kNN으로 가까운 예시를 찾아 최대 6개까지</b> 실행에 제공합니다</li>
+    <li>추출에 GPT-4, 실행에 GPT-3.5를 쓴 <b>WebShop 조건</b>에서 보상은 <b class="g">0.701</b>, ReAct는 <b>0.665</b></li>
+    <li><b class="r">남긴 문제 — 잘못된 insight가 저장됐을 때 무엇을 근거로 고치거나 폐기할지는 이 방식만으로 해결되지 않습니다</b></li>
+  </ul>
+  <aside>출처: Zhao et al., ICLR 2024, arXiv:2308.10144. GPT-4로 insight를 추출하고 GPT-3.5가 실행한 WebShop 조건이며, 잘못된 insight의 갱신·폐기 기준은 제시하지 않습니다.</aside>
+</section>
+
+<!-- 5 Voyager·AWM -->
+<section class="slide" data-part="PART 1">
+  <h2>Voyager — <span class="b">코드 스킬</span> · AWM — <span class="p">workflow</span></h2>
+  <table class="t">
+    <tr><th>연구</th><th>남기는 형태</th><th>결과</th><th>붙은 조건</th></tr>
+    <tr><td><b>Voyager</b></td><td>자연어 메모 대신 <b>실행 가능한 코드 스킬</b> 라이브러리. 새 과업에서 <b>검색·조합</b></td><td>아이템 <b>3.3배</b>, 이동 거리 <b>2.3배</b>, milestone 최대 <b>15.3배</b>, 스킬 검색 top-1 <b>80.2%</b></td><td><b class="r">Minecraft 환경</b>의 결과 — 다른 업무의 재사용 효과를 보장하지 않음</td></tr>
+    <tr><td><b>AWM</b><br><small>Agent Workflow Memory</small></td><td>과거 궤적에서 <b>재사용할 workflow를 유도</b>해 메모리로. 다음 과업에서 후보를 골라 제공</td><td>Mind2Web <b>24.6%</b>, WebArena <b>51.1%</b> 상대 개선. 교차 평가 <b>8.9~14.0점</b> 상승</td><td><b class="r">웹 탐색 환경</b>의 결과 — 웹 밖 일반화는 이 결과만으로 판단하지 않음</td></tr>
+  </table>
+  <div class="hl">🏗️ 커뮤니티에서는 이 흐름을 <b>컴파운드 엔지니어링</b>이라 부르기도 합니다 — 한 번의 실행 결과를 다음 실행의 입력으로 남기고 검색·조합·검토를 거치며 능력을 쌓는다는 뜻. <b class="r">그러나 저장한 내용이 오래되거나 틀렸다면 다음 실행에도 같은 오류를 넘길 수 있습니다</b></div>
+  <aside>출처: Wang et al., arXiv:2305.16291(Minecraft 코드 스킬 검색·조합); Agent Workflow Memory, arXiv:2409.07429(웹 탐색 궤적에서 유도한 workflow를 현재 사이트·과업에 맞춰 사용).</aside>
+</section>
+
+<!-- 6 WikiSkill -->
+<section class="slide" data-part="PART 1">
+  <h2>WikiSkill — <span class="g">세 층을 분리</span>해 관리</h2>
+  <p><b>WikiSkill</b>은 Google Research가 2026년에 발표한, 에이전트 경험을 위키로 축적해 스킬을 진화시키는 연구입니다.</p>
+  <div class="chain">
+    <div class="cell" style="min-width:170px"><small>1</small><b>원문 궤적<br><small>판단의 근거를 확인</small></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:190px;border-color:var(--bl)"><small>2</small><b class="b">위키<br><small>여러 실행에서 얻은 지식 축적</small></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:180px;border-color:var(--gr)"><small>3</small><b class="g">스킬<br><small>실제로 실행할 절차</small></b></div>
+  </div>
+  <ul class="pts">
+    <li>다음 실행에서는 <b>이 세 층을 구분해 제공</b>하고, <b>축적한 지식으로 스킬을 갱신</b>합니다</li>
+    <li>Figure 1 캡션 — WikiSkill이 <b>무스킬 조건과 EvoSkill·SkillOpt보다 일관되게 우위</b>, <b>강한 모델일수록 이점이 더 뚜렷</b>, <b>모델 패밀리 사이 전이</b>도 관찰</li>
+    <li><b class="r">Table 1 수치는 아직 확인하지 않았으므로 여기에 적지 않습니다</b></li>
+  </ul>
+  <aside>출처: Tang et al., arXiv:2608.27454v1. 원문 궤적·위키·실행 스킬을 분리해 다루며, Figure 1 캡션에 따른 경향이고 Table 1 수치는 재확인 전입니다. 확인하지 않은 수치를 적지 않는 것이 이 중단원의 인용 규율입니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">네 가지 저장 형태 — 다른 비용과 위험</h2>
+  <p style="margin-top:11px">원문 · 요약 · insight · 코드 스킬</p><span class="who">⑤ 경험·스킬 축적</span></div>
+  <aside>같은 궤적이라도 형태에 따라 비용과 위험이 달라집니다.</aside>
+</section>
+
+<!-- 8 네 형태 -->
+<section class="slide" data-part="PART 2">
+  <h2>먼저 확인할 <span class="g">질문</span>이 다릅니다</h2>
+  <table class="t">
+    <tr><th>남기는 형태</th><th>다음 실행에서 하는 일</th><th>먼저 확인할 질문</th><th>위험</th></tr>
+    <tr><td><b>원문 궤적</b></td><td>당시 관측과 행동의 근거를 다시 확인</td><td>어느 지점까지 믿을 수 있습니까?</td><td>길다</td></tr>
+    <tr><td><b>요약</b></td><td>긴 기록에서 현재 판단에 필요한 맥락을 압축</td><td>중요한 <b>실패 조건</b>이 빠지지 않았습니까?</td><td><b class="r">누락</b></td></tr>
+    <tr><td><b>insight</b></td><td>여러 실행에서 반복된 판단을 검색해 적용</td><td><b>반례와 갱신 날짜</b>가 있습니까?</td><td><b class="r">오염</b></td></tr>
+    <tr><td><b>코드 스킬</b></td><td>검증한 절차를 실행 가능한 단위로 재사용</td><td><b>입력 조건과 되돌리는 방법</b>이 있습니까?</td><td><b class="r">오래된 절차 반복</b></td></tr>
+  </table>
+  <div class="hl">⚖️ 원문은 <b>검토하기 좋지만 길고</b>, 요약은 <b>빠르지만 누락될 수</b> 있으며, insight는 <b>검색하기 좋지만 오염될 수</b> 있고, 스킬은 <b>바로 실행할 수 있지만 오래된 절차를 그대로 반복</b>할 수 있습니다</div>
+  <aside>이 구분이 실제 도구에서 어떻게 이어지는지 보려면, 저장한 세션을 다시 찾아 현재 판단에 넣는 경로를 먼저 확인해야 합니다.</aside>
+</section>
+
+<!-- 9 Hermes -->
+<section class="slide" data-part="PART 2">
+  <h2>Hermes — <span class="b">재진입 경로</span>를 봅니다</h2>
+  <p><b>Hermes</b>는 NousResearch가 만든 오픈소스 에이전트로, 대화 기록을 검색 가능한 형태로 남겨 다음 실행에서 다시 찾게 합니다.</p>
+  <table class="t">
+    <tr><th>확인 항목</th><th>Hermes에서 보는 재료</th></tr>
+    <tr><td><b>저장소</b></td><td>Nous Research의 <code>hermes-agent</code> 공개 저장소</td></tr>
+    <tr><td><b>라이선스</b></td><td>MIT</td></tr>
+    <tr><td><b>과거 검색</b></td><td><b>FTS5</b>로 과거 세션을 검색</td></tr>
+    <tr><td><b>입구</b></td><td>여러 메시지 채널의 요청을 <b>gateway</b>로 받음</td></tr>
+    <tr><td><b>다음 맥락</b></td><td><b>세션 이력 · memory·user model · 활성 skills</b>를 연결</td></tr>
+    <tr><td><b>확인 과제</b></td><td><b class="r">어떤 기록이 어떤 조건에서 다시 주입되는지</b> 설치본의 설정과 실행 기록으로 확인</td></tr>
+  </table>
+  <div class="hl">🎯 이 카드는 <b class="r">"기록을 오래 보관한다"는 주장보다</b> — <b class="g">과거 세션을 찾아 현재 맥락에 다시 넣는 경로</b>를 확인하게 합니다</div>
+  <aside>출처: NousResearch, hermes-agent README·저장소 메타데이터. FTS5 과거 세션 검색, 멀티채널 gateway, memory·user model·skills 구조와 MIT 라이선스를 확인했으며 성능 우위 근거는 아닙니다. 검색 결과가 현재 과업과 맞는지, 오래된 설정이 다시 실행되지 않는지, 기억과 스킬이 어떤 권한으로 작동하는지는 별도로 점검해야 합니다.</aside>
+</section>
+
+<!-- 10 Claude Code skills -->
+<section class="slide" data-part="PART 2">
+  <h2>Claude Code skills도 <span class="g">같은 기준</span>으로</h2>
+  <p><b>Skill</b>은 <code>SKILL.md</code>를 중심으로 한 <b>지식·절차·템플릿·스크립트 묶음</b>이며, 필요한 내용을 <b>단계적으로 불러오도록</b> 설계할 수 있습니다.</p>
+  <div class="big">스킬 파일을 추가했다는 사실만으로<br><span class="y">경험 축적이 끝난 것은 아닙니다</span></div>
+  <ul class="pts">
+    <li>함께 남겨야 할 것 — <b class="g">어느 경험에서 왔고, 언제 검토했으며, 어떤 과업에 적용할지</b></li>
+  </ul>
+  <aside>출처: Anthropic 공식 문서 "Agent Skills overview". Skill은 SKILL.md 디렉터리의 지식·절차·템플릿·스크립트 묶음이고 Claude Code는 개인 또는 프로젝트 skill 디렉터리를 발견합니다.</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">성공을 쌓기 전에 오염을 시험합니다</h2>
+  <p style="margin-top:11px">경험 기능의 핵심 반론</p><span class="who">⑤ 경험·스킬 축적</span></div>
+  <aside>ExpeL이 남긴 갱신·폐기 문제가 여기서 실험이 됩니다.</aside>
+</section>
+
+<!-- 12 오염 -->
+<section class="slide" data-part="PART 3">
+  <h2>운영 조건이 <span class="r">뒤집힙니다</span></h2>
+  <p><b class="r">그럴듯하지만 틀린 insight 하나가 검색을 통해 여러 과업에 반복 주입될 수 있고, 실행 스킬은 그 판단을 더 빠르게 행동으로 옮길 수 있습니다.</b></p>
+  <div class="big">스킬을 <span class="y">많이 모았는지</span>가 아니라<br><span class="y">틀린 지식을 찾아 고치고 되돌릴 수 있는지</span>가 운영 조건입니다</div>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>같은 과업·모델·예산을 고정</b>합니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">한 조건에는 <b class="g">검증한 insight 또는 스킬</b>을, 다른 조건에는 <b class="r">고의로 틀린 insight 또는 스킬</b>을 넣습니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>출처 기록 · 만료 기한 · 반대 증거 · 되돌리기 정책</b>을 하나씩 바꾸며 <b>성공률 · 토큰 · 오염 전파</b>를 함께 기록합니다</span></div>
+  </div>
+  <aside>출처: 학생 실험 설계, topic-harness-paper-evidence.md §8-6. 고의로 틀린 memory·skill을 주입해 출처 기록·되돌리기·만료 기한·반대 증거 정책을 비교합니다.</aside>
+</section>
+
+<!-- 13 미해결 질문 -->
+<section class="slide" data-part="PART 3">
+  <h2>미해결 질문 — <span class="b">표현만 바꾸면</span> 무엇이 달라집니까</h2>
+  <p>하나의 실행 궤적을 <b>원문 · 요약 · insight · 코드 스킬</b> 네 형태로 각각 준비합니다.</p>
+  <div class="chain">
+    <div class="cell" style="min-width:150px"><small>측정 1</small><b>다음 행동을<br>더 잘 돕는가</b></div>
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>측정 2</small><b class="b">토큰을<br>얼마나 쓰는가</b></div>
+    <div class="cell" style="min-width:150px;border-color:var(--red)"><small>측정 3</small><b class="r">틀린 내용이<br>얼마나 퍼지는가</b></div>
+  </div>
+  <div class="hl">🎯 이 비교는 <b class="r">어떤 표현이 항상 최고인지 선언하려는 실험이 아니라</b> — <b class="g">내 과업에서 재사용성과 검토 가능성의 경계가 어디인지 찾는 실험</b></div>
+  <ul class="pts">
+    <li>그러나 <b class="r">성공한 절차만 쌓으면 왜 실패했는지는 남지 않습니다</b> — <b>실패를 다음 시도의 입력으로 바꾸는 장치</b>가 필요합니다(다음 기능: 반성)</li>
+  </ul>
+  <aside>출처: 학생 실험 설계, topic-harness-paper-evidence.md §8-2. 동일 궤적의 네 형태에서 성공률·토큰·오염 전파를 측정합니다.</aside>
+</section>
+
+<!-- 14 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 로그가 '경험'이 되는 세 조건은?</div>
+    <div class="q a"><b>A1.</b> ① <b>원문에서 근거 확인 가능</b> ② <b>필요할 때 검색 가능</b> ③ <b>다음 행동으로 변환 가능</b>.</div>
+    <div class="q"><b>Q2.</b> ExpeL이 남긴 문제는?</div>
+    <div class="q a"><b>A2.</b> <b>잘못된 insight가 저장됐을 때 무엇을 근거로 고치거나 폐기할지</b>의 기준이 없다. 이것이 이 기능의 핵심 반론이 된다.</div>
+    <div class="q"><b>Q3.</b> WikiSkill의 Table 1 수치를 인용하지 않는 이유는?</div>
+    <div class="q a"><b>A3.</b> <b>아직 확인하지 않았기 때문.</b> Figure 1 캡션에서 확인한 경향만 적고 미확인 수치는 쓰지 않는다.</div>
+    <div class="q"><b>Q4.</b> 경험 기능의 운영 조건은 무엇으로 바뀌나?</div>
+    <div class="q a"><b>A4.</b> <b>얼마나 많이 모았는가 → 틀린 지식을 찾아 고치고 되돌릴 수 있는가.</b></div>
+  </div>
+  <aside>Q3이 이 중단원 전체를 관통하는 인용 규율입니다.</aside>
+</section>
+
+<!-- 15 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>검색 · 적용 · 되돌리기 🧰</h1>
+    <div class="big" style="margin-top:26px">스킬을 많이 모았는지가 아니라<br><span class="y">틀린 지식을 고치고 되돌릴 수 있는지</span>가 운영 조건입니다</div>
+    <p class="sub" style="margin-top:24px">에이전트 하네스 톺아보기 ⑤ — 여기까지</p>
+  </div>
+  <aside>성공한 절차만 쌓으면 왜 실패했는지는 남지 않습니다 — 다음은 실패를 다음 시도의 입력으로 바꾸는 장치, 반성입니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

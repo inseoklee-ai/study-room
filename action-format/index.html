@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>모델의 행동을 실패하기 어렵게 만드는 문법 · 행동 포맷 (에이전트 하네스 ③)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 하네스 톺아보기 ③</span>
+    <h1 style="margin:18px 0">모델의 행동을 실패하기<br>어렵게 만드는 문법</h1>
+    <p class="sub">행동 포맷 — 무엇을 고칠지 알아도 어떻게 적느냐에서 갈립니다</p>
+  </div>
+  <aside>모델이 수정할 내용을 알고 있어도 변경 위치와 형식을 잘못 표현하면 작업은 실패합니다. 행동 포맷은 이 실패를 줄이는 기능입니다.</aside>
+</section>
+
+<!-- 2 문제 -->
+<section class="slide" data-part="표지">
+  <h2>"이 함수를 고쳐 달라"의 <span class="r">빈칸</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>❌ 자유 문장</h3><p><b class="r">대상 경계 · 기존 내용 · 교체 내용</b>을 모델이 다시 추정해야 합니다</p></div>
+    <div class="box"><h3>✅ 구조화된 문법</h3><p><b>찾을 내용과 바꿀 내용을 묶은 편집 블록</b>, 또는 <b>실행 가능한 코드</b> — 다음 행동의 형태를 좁힙니다</p></div>
+  </div>
+  <div class="hl">🎯 행동 포맷은 모델이 <b>바꿀 대상을 찾고, 바꿀 내용과 실행 결과를 서로 확인 가능한 단위로 표현</b>하게 합니다</div>
+  <ul class="pts">
+    <li>Claude Code와 opencode에서도 <b>파일 변경과 명령 실행이 어떤 표시로 남는지</b> 살피는 이유가 여기 있습니다</li>
+    <li>권한과 문맥의 경계 자체는 <b>뒤 절에서 따로</b> 다룹니다</li>
+  </ul>
+  <aside>이 소단원은 '무엇을 할 수 있나'가 아니라 '어떻게 적어야 덜 실패하나'를 봅니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">근거 셋 — 조건을 붙여 읽습니다</h2>
+  <p style="margin-top:11px">SWE-agent · CodeAct · Aider</p><span class="who">③ 행동 포맷</span></div>
+  <aside>모든 수치에 조건이 붙어 있습니다. 조건 없이 옮기면 인용이 아니라 오독입니다.</aside>
+</section>
+
+<!-- 4 SWE-agent -->
+<section class="slide" data-part="PART 1">
+  <h2>SWE-agent — <span class="g">18.0%</span> vs <span class="r">10.3%</span></h2>
+  <p><b>SWE-agent</b>는 프린스턴 연구진이 만든 연구용 코딩 에이전트로, <b>언어 모델을 위한 전용 인터페이스인 ACI</b>가 일반 셸보다 적합할 수 있다는 가설을 검토했습니다.</p>
+  <table class="t">
+    <tr><th>조건</th><th>해결률</th></tr>
+    <tr><td>기준(ACI 포함)</td><td><b class="g">18.0%</b></td></tr>
+    <tr><td>편집 기능을 제거</td><td><b class="r">10.3%</b></td></tr>
+  </table>
+  <div class="hl">⚠️ 이 차이는 <b>같은 벤치마크와 해당 구현의 ablation 조건</b>에서 나온 결과입니다 — <b class="r">모든 모델과 모든 편집 도구에서 같은 크기의 차이가 난다는 의미로 해석해서는 안 됩니다</b></div>
+  <ul class="pts">
+    <li>여기까지 말할 수 있는 것 — <b class="g">인터페이스 설계가 해결률을 바꿀 수 있다</b></li>
+  </ul>
+  <aside>출처: Yang et al., NeurIPS 2024, arXiv:2405.15793. SWE-bench Lite ablation의 해당 구현 조건이며 다른 모델·과업으로 일반화하지 않습니다.</aside>
+</section>
+
+<!-- 5 CodeAct -->
+<section class="slide" data-part="PART 1">
+  <h2>CodeAct — 행동을 <span class="b">코드 한 덩어리</span>로</h2>
+  <p><b>CodeAct</b>는 행동을 JSON 형태의 도구 호출 대신 <b>실행 가능한 Python 코드 한 덩어리</b>로 쓰게 합니다.</p>
+  <div class="grid2">
+    <div class="box"><h3>도구 호출 방식</h3><p>여러 파일의 줄 수를 셀 때 — <b class="r">파일 열기 호출 → 결과 → 줄 세기 호출</b> 식으로 여러 번 왕복</p></div>
+    <div class="box"><h3>코드 방식</h3><p><b class="g">for 루프와 함수 호출이 든 코드 한 덩어리</b>로 쓰고 실행 결과만 받음. 관측이 돌아오면 <b>코드 자체를 고쳐 다시 제출</b>할 수도 있음</p></div>
+  </div>
+  <ul class="pts">
+    <li>가설 — <b>흩어진 도구 호출을 하나의 표현으로 묶으면 모델이 계획을 온전히 드러낼 수 있다</b></li>
+    <li>17개 LLM에서 기존 형식 대비 <b class="g">최대 +20%p</b>를 보고 — 단, <b class="r">지속 세션을 복원하는 기능의 효과까지 측정한 결과는 아닙니다</b></li>
+  </ul>
+  <aside>출처: Wang et al., ICML 2024, arXiv:2402.01030. 실행 Python 코드 action space 조건이며 지속 세션 복원 효과는 측정하지 않았습니다.</aside>
+</section>
+
+<!-- 6 Aider -->
+<section class="slide" data-part="PART 1">
+  <h2>Aider — <span class="g">whole 46%</span> vs <span class="r">diff 30%</span> (GPT-3.5)</h2>
+  <p><b>Aider</b>는 터미널 안에서 파일을 편집하는 오픈소스 도구로, 변경을 자동으로 git 커밋해 줍니다. 두 가지 편집 포맷을 제공합니다.</p>
+  <table class="t">
+    <tr><th>포맷</th><th>모델이 출력하는 것</th></tr>
+    <tr><td><code>whole</code></td><td>파일 <b>전체를 새 내용으로 다시</b> 씀 — <b>바뀌지 않은 줄까지 모두</b> 출력</td></tr>
+    <tr><td><code>diff</code></td><td>바꿀 부분만 <b>search-replace 블록</b>으로 — 바꾸기 전 줄과 바꾼 뒤 줄만 짝으로</td></tr>
+  </table>
+  <ul class="pts">
+    <li>측정 조건 — <b>133개 Exercism Python 과업</b>, 실패하면 실제 개발자가 보는 것과 같은 피드백(<b>테스트 오류의 앞 50줄</b>)을 다시 넣어 재시도, 성공 기준은 <b>전체 테스트 통과</b></li>
+    <li>이 방식은 SWE-agent가 문제와 테스트로 측정하는 길과 같은 방향이지만 <b class="r">과업 난이도와 채점 세부가 달라 두 벤치마크 수치를 나란히 놓지 않습니다</b></li>
+  </ul>
+  <div class="hl">⚠️ Aider 수치는 <b class="r">독립 비교가 아닌 벤더의 자체 벤치마크</b>입니다 — 다른 과업·모델에서도 항상 whole이 낫다는 뜻이 아닙니다</div>
+  <aside>출처: Aider 벤더 자체 벤치마크. 다만 설계는 실제 개발 흐름을 그대로 옮긴 것이어서 주목할 만합니다 — "작성한 코드가 실제로 동작하는가"를 재는 방식.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">두 개의 최소 카드</h2>
+  <p style="margin-top:11px">Aider · SWE-agent</p><span class="who">③ 행동 포맷</span></div>
+  <aside>소단원 ①의 여섯 칸 형식으로 정리합니다.</aside>
+</section>
+
+<!-- 8 Aider 카드 -->
+<section class="slide" data-part="PART 2">
+  <h2>Aider <span class="g">최소 카드</span></h2>
+  <table class="t">
+    <tr><th>칸</th><th>내용</th></tr>
+    <tr><td><b>입구</b></td><td>터미널 대화에서 <b>파일과 요청을 함께</b> 받아 편집 대화를 시작합니다</td></tr>
+    <tr><td><b>상태</b></td><td>대화, 지정 파일, <b>테스트 결과</b>가 다음 응답의 재료로 이어집니다</td></tr>
+    <tr><td><b>대표 행동</b></td><td><code>search</code>와 <code>replace</code>를 한 블록에 써서 <b>기존 문자열과 교체 문자열을 함께</b> 나타냅니다</td></tr>
+    <tr><td><b>권한 경계</b></td><td>파일 변경과 명령 실행의 허용 범위는 <b class="r">설치 버전·설정·실제 실행 기록에서 다시 확인</b>해야 합니다</td></tr>
+    <tr><td><b>1차 근거</b></td><td>공개 문서의 편집 포맷 설명과 자체 벤치마크 — <b class="r">독립 재현 결과는 아닙니다</b></td></tr>
+    <tr><td><b>한계</b></td><td><b class="r">검색 문자열이 정확히 일치하지 않거나 문맥이 오래되면</b> 구조화된 블록도 의도와 다른 변경을 낼 수 있습니다</td></tr>
+  </table>
+  <div class="hl">📌 블록은 <b>변경 의도를 드러낼 뿐</b> — <b class="r">변경의 정확성이나 실행 안전을 보장하지 않습니다.</b> 대상 파일·일치 결과·테스트 결과·승인 표시를 함께 읽어야 합니다</div>
+  <aside>지정한 파일과 요청 → 찾을 내용·현재 문맥 → search/replace 편집 블록 → 변경 제안 → 검토 뒤 반영. 일치 여부와 실제 반영 범위는 변경 이력과 실행 기록으로 확인합니다.</aside>
+</section>
+
+<!-- 9 SWE-agent 카드 -->
+<section class="slide" data-part="PART 2">
+  <h2>SWE-agent <span class="b">최소 카드</span></h2>
+  <table class="t">
+    <tr><th>칸</th><th>내용</th></tr>
+    <tr><td><b>입구</b></td><td><b>이슈 설명과 저장소 환경</b>이 ACI를 거쳐 모델의 작업 요청으로 들어갑니다</td></tr>
+    <tr><td><b>상태</b></td><td>검색, 파일 열람, 편집, <b>실행 관측</b>이 다음 판단에 필요한 형식으로 남습니다</td></tr>
+    <tr><td><b>대표 행동</b></td><td>구조화된 <code>edit</code>와 <b>lint 피드백</b>이 자유 셸 편집보다 <b>좁은 편집 단위</b>를 제공합니다</td></tr>
+    <tr><td><b>권한 경계</b></td><td>논문의 ACI는 <b>성능 실험의 인터페이스</b>이며, <b class="r">실제 환경의 파일·명령 권한 정책을 증명하지 않습니다</b></td></tr>
+    <tr><td><b>1차 근거</b></td><td>NeurIPS 2024 논문이 ACI 구성과 SWE-bench Lite ablation을 공개합니다</td></tr>
+    <tr><td><b>한계</b></td><td>18.0%와 10.3% 비교는 <b>편집 기능을 제거한 해당 조건</b>의 결과이며, <b class="r">모델 세대와 과업이 바뀌면 차이도 달라질 수 있습니다</b></td></tr>
+  </table>
+  <aside>두 카드 모두 '권한 경계'와 '한계' 칸이 비어 있지 않다는 점이 중요합니다 — 소단원 ①의 카드 형식이 여기서 실제로 쓰입니다.</aside>
+</section>
+
+<!-- 10 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">포맷이 항상 결정적인 것은 아닙니다</h2>
+  <p style="margin-top:11px">반대 근거를 함께 둡니다</p><span class="who">③ 행동 포맷</span></div>
+  <aside>이 절이 이 소단원의 균형입니다.</aside>
+</section>
+
+<!-- 11 반대 근거 -->
+<section class="slide" data-part="PART 3">
+  <h2>GPT-4에서는 <span class="r">차이가 거의 없었습니다</span></h2>
+  <p>Aider 자체 벤치마크에서 <b>GPT-4는 <code>whole</code>과 <code>diff</code>의 성능 차이가 거의 없었고, 비용 때문에 <code>diff</code>를 유지</b>했다고 설명합니다.</p>
+  <div class="big">따라서 <span class="y">포맷이 언제나 결과를 결정한다고 말할 수 없습니다</span></div>
+  <ul class="pts">
+    <li>다른 실패 원인이 더 클 수 있는 조건 — <b>모델이 포맷 차이를 충분히 흡수하는 조건</b>, <b>변경 범위가 아주 작은 조건</b>, <b>검색 문자열이 불안정한 조건</b></li>
+  </ul>
+  <aside>수치를 인용할 때 반대 근거를 함께 두는 습관이 이 중단원 전체의 읽기 규칙입니다.</aside>
+</section>
+
+<!-- 12 실험 -->
+<section class="slide" data-part="PART 3">
+  <h2>같은 수정에서 <span class="g">바꿔 볼 변인</span>을 정합니다</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>작은 fixture 하나와 테스트 하나를 고정</b>합니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">같은 수정을 <b>자유 텍스트</b>와 <b><code>search</code>·<code>replace</code> 구조 포맷</b>으로 각각 요청합니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">두 실행에서 <b>대상 파일을 처음 맞힌 횟수 · 변경 뒤 테스트 통과 여부 · 재시도 횟수</b>를 기록합니다</span></div>
+  </div>
+  <div class="hl">🎯 <b>포맷만 바꾼 관찰</b>이 됩니다 — 한 번의 결과로 일반 결론을 내리기보다 <b class="g">모델·과업·포맷이라는 조건을 함께</b> 남깁니다</div>
+  <ul class="pts">
+    <li>행동을 선명하게 만들어도 <b class="r">관측을 끝없이 쌓으면 다음 판단에 필요한 정보가 묻힙니다</b> — 그래서 다음 소단원이 컨텍스트 관리입니다</li>
+  </ul>
+  <aside>소단원 ②의 관찰 로그 형식을 그대로 쓰면 됩니다.</aside>
+</section>
+
+<!-- 13 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 행동 포맷이 줄이는 실패는?</div>
+    <div class="q a"><b>A1.</b> 무엇을 고칠지 알아도 <b>대상 경계·기존 내용·교체 내용을 모델이 다시 추정</b>하다 생기는 실패. 확인 가능한 단위로 표현하게 한다.</div>
+    <div class="q"><b>Q2.</b> SWE-agent의 18.0% vs 10.3%을 어떻게 인용해야 하나?</div>
+    <div class="q a"><b>A2.</b> <b>SWE-bench Lite, 해당 구현의 편집 기능 제거 ablation</b>이라는 조건과 함께. 모든 모델·편집도구로 일반화하지 않는다.</div>
+    <div class="q"><b>Q3.</b> "구조화된 포맷이 항상 낫다"가 틀린 근거는?</div>
+    <div class="q a"><b>A3.</b> 같은 Aider 벤치마크에서 <b>GPT-4는 whole/diff 차이가 거의 없었고 비용 때문에 diff를 유지</b>했다.</div>
+    <div class="q"><b>Q4.</b> 포맷 실험에서 기록할 세 가지는?</div>
+    <div class="q a"><b>A4.</b> <b>대상 파일 첫 시도 적중 · 테스트 통과 여부 · 재시도 횟수.</b> fixture와 테스트는 고정한다.</div>
+  </div>
+  <aside>Q2가 이 중단원의 인용 규율입니다.</aside>
+</section>
+
+<!-- 14 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>대상 · 변경 · 확인 ✏️</h1>
+    <div class="big" style="margin-top:26px">행동의 형태를 좁히면 실패가 줄지만<br><span class="y">포맷이 언제나 결과를 결정하지는 않습니다</span></div>
+    <p class="sub" style="margin-top:24px">에이전트 하네스 톺아보기 ③ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ④는 컨텍스트 관리입니다 — 행동을 선명하게 만들어도 관측이 쌓이면 필요한 정보가 묻힙니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

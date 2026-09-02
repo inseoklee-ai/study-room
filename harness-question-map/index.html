@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>맡길 일을 하네스 기능 질문으로 바꾸기 (에이전트 하네스 ①)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 하네스 톺아보기 ①</span>
+    <h1 style="margin:18px 0">맡길 일을<br>하네스 기능 질문으로 바꾸기</h1>
+    <p class="sub">도구 이름부터 고르면 기능 목록을 비교하게 됩니다</p>
+  </div>
+  <aside>이 중단원은 같은 루프를 감싼 일곱 개의 하네스를 열어서, 무엇이 다른지 구조를 확인합니다. 첫 소단원은 도구 비교가 아니라 '내가 맡길 일이 어디서 막히는지'를 찾는 질문법입니다.</aside>
+</section>
+
+<!-- 2 출발점 -->
+<section class="slide" data-part="표지">
+  <h2>먼저 <span class="g">내가 맡길 일이 어디서 막히는지</span> 찾습니다</h2>
+  <p>지난 시간에 나눈 <b>'내가 할 일 · 검토할 일 · 맡길 일'</b>에서 맡길 일 하나를 고릅니다. 반복되는 오류 원인을 모으는 일을 맡겼다면 —</p>
+  <div class="grid2">
+    <div class="box"><h3>📖 파일을 읽는 일</h3><p>요청을 받은 뒤 읽기만 하는 행동</p></div>
+    <div class="box"><h3>✏️ 변경을 실행하는 일</h3><p><b class="r">같은 위험이 아닙니다</b></p></div>
+  </div>
+  <div class="hl">⚠️ <b>결과 문장만 보면 이 차이가 사라집니다</b> — 그래서 실행 환경을 열어 봐야 합니다</div>
+  <aside>도구 이름부터 고르면 기능 목록을 비교하게 됩니다. 순서를 뒤집는 것이 이 소단원의 요지입니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">하네스란 무엇인가</h2>
+  <p style="margin-top:11px">모델이 일하는 동안 무엇을 연결하나</p><span class="who">① 하네스 기능 질문</span></div>
+  <aside>모델의 답변 능력만으로는 이 환경의 차이를 설명할 수 없습니다.</aside>
+</section>
+
+<!-- 4 하네스 정의 -->
+<section class="slide" data-part="PART 1">
+  <h2>모델을 감싼 <span class="g">실행 환경</span>입니다</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:110px"><small>1</small><b>요청</b></div>
+    <div class="cell" style="min-width:110px"><small>2</small><b>도구</b></div>
+    <div class="cell" style="min-width:110px"><small>3</small><b>기록</b></div>
+    <div class="cell" style="min-width:110px"><small>4</small><b>승인</b></div>
+    <div class="cell" style="min-width:110px"><small>5</small><b>관측</b></div>
+  </div>
+  <p>하네스는 모델이 일을 하는 동안 <b>요청, 도구, 기록, 승인, 관측을 연결하는 실행 환경</b>입니다.</p>
+  <div class="big">같은 모델도 <span class="y">행동을 적는 형식 · 남겨 둘 문맥 · 허용된 권한</span>이 달라지면<br>다른 결과를 냅니다</div>
+  <aside>이 문장이 중단원 전체의 전제입니다. "모델이 좋아서" 또는 "모델이 나빠서"로 설명되지 않는 차이의 정체가 하네스입니다.</aside>
+</section>
+
+<!-- 5 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">맡길 일이 막히는 곳을 일곱 기능으로 봅니다</h2>
+  <p style="margin-top:11px">도구의 등급표가 아니라 병목의 지도</p><span class="who">① 하네스 기능 질문</span></div>
+  <aside>하네스 기능 지도는 도구의 등급표가 아닙니다. 맡길 일이 멈춘 이유를 찾는 지도입니다.</aside>
+</section>
+
+<!-- 6 일곱 기능 -->
+<section class="slide" data-part="PART 2">
+  <h2>일곱 기능이 <span class="g">각각 다루는 문제</span></h2>
+  <table class="t">
+    <tr><th>기능</th><th>다루는 문제</th></tr>
+    <tr><td><b>행동 포맷</b></td><td>모델이 읽고, 고치고, 실행하는 행동을 <b>실패하기 어렵게</b> 적게 한다</td></tr>
+    <tr><td><b>컨텍스트 관리</b></td><td>긴 작업에서 <b>무엇을 남기고 무엇을 줄일지</b> 정한다</td></tr>
+    <tr><td><b>경험과 스킬 축적</b></td><td>한 번 해결한 일을 <b>다음 작업에 다시</b> 쓴다</td></tr>
+    <tr><td><b>반성</b></td><td>실행 결과를 살펴 <b>다음 행동을 고친다</b></td></tr>
+    <tr><td><b>단순성</b></td><td>필요한 구성만 남겨 <b>운영 부담을 줄인다</b></td></tr>
+    <tr><td><b>권한과 보안</b></td><td><b>읽기·수정·실행의 경계</b>와 승인 방식을 정한다</td></tr>
+    <tr><td><b>평가 루프</b></td><td>결과가 맞았는지 <b>어떤 근거로 확인</b>할지 정한다</td></tr>
+  </table>
+  <aside>이 일곱 기능이 소단원 ③(행동 포맷) ④(컨텍스트 관리) ⑤(경험·스킬 축적)로 이어집니다.</aside>
+</section>
+
+<!-- 7 세 질문 -->
+<section class="slide" data-part="PART 2">
+  <h2>세 질문의 <span class="b">순서</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:180px"><small>1</small><b>이 일은<br>어디서 막히는가</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:180px;border-color:var(--bl)"><small>2</small><b class="b">그 병목을 줄일<br>기능은 무엇인가</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:220px;border-color:var(--gr)"><small>3</small><b class="g">그 기능이 작동했다는 기록을<br>어디에서 확인할 수 있는가</b></div>
+  </div>
+  <ul class="pts">
+    <li>1번은 이렇게 차례로 묻습니다 — <b>행동이 애매한가 · 문맥이 넘치는가 · 경험이 재사용되지 않는가 · 승인이 많은가 · 결과를 어떻게 증명할까</b></li>
+  </ul>
+  <div class="hl">🎯 이 세 질문은 <b class="r">제품 설명보다 먼저</b> — <b class="g">맡길 일의 경계</b>를 드러냅니다</div>
+  <aside>3번이 특히 중요합니다. "기능이 있다"가 아니라 "작동한 기록을 어디서 보나"를 묻는 순간 관찰이 시작됩니다.</aside>
+</section>
+
+<!-- 8 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">기능 지도와 비교 카드는 다른 일을 합니다</h2>
+  <p style="margin-top:11px">진단용 제목 vs 관찰 기록 항목</p><span class="who">① 하네스 기능 질문</span></div>
+  <aside>둘을 섞으면 관찰이 흐려집니다.</aside>
+</section>
+
+<!-- 9 두 도구 -->
+<section class="slide" data-part="PART 3">
+  <h2>일곱 기능은 <span class="b">진단</span>, 여섯 칸은 <span class="g">관찰</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>🗺️ 일곱 기능 (기능 지도)</h3><p>맡길 일의 <b>병목을 진단</b>하는 섹션 제목</p></div>
+    <div class="box"><h3>🃏 여섯 칸 (비교 카드)</h3><p>도구 화면과 문서를 <b class="g">같은 방식으로 관찰</b>하기 위한 기록 항목</p></div>
+  </div>
+  <table class="t">
+    <tr><th>카드 칸</th><th>관찰할 내용</th></tr>
+    <tr><td><b>입구</b></td><td>요청이 들어가는 화면, 명령, 연결 지점을 확인합니다</td></tr>
+    <tr><td><b>상태</b></td><td>세션, 대화, 작업 기록이 <b>남는 위치</b>를 확인합니다</td></tr>
+    <tr><td><b>대표 행동</b></td><td>읽기·검색·수정·실행 가운데 <b>화면에서 확인한</b> 행동을 적습니다</td></tr>
+    <tr><td><b>권한 경계</b></td><td>읽기 밖의 행동 전에 <b>승인이나 제한이 보이는지</b> 확인합니다</td></tr>
+    <tr><td><b>1차 근거</b></td><td>실행 기록·설정·공식 문서처럼 <b>나중에 다시 열 수 있는</b> 근거를 연결합니다</td></tr>
+    <tr><td><b>한계</b></td><td>이번 관찰만으로 <b class="r">확인하지 못한 범위</b>를 구분합니다</td></tr>
+  </table>
+  <aside>기능 지도에서 컨텍스트 관리가 중요하다고 판단한 뒤에도, 카드에서는 상태와 대표 행동이 실제로 어떻게 보이는지 확인합니다.</aside>
+</section>
+
+<!-- 10 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 하네스를 한 문장으로?</div>
+    <div class="q a"><b>A1.</b> 모델이 일하는 동안 <b>요청·도구·기록·승인·관측을 연결하는 실행 환경.</b> 같은 모델도 형식·문맥·권한이 달라지면 다른 결과를 낸다.</div>
+    <div class="q"><b>Q2.</b> 도구를 고르기 전에 먼저 물어야 하는 것은?</div>
+    <div class="q a"><b>A2.</b> <b>"내가 맡길 일이 어디서 막히는가."</b> 도구 이름부터 고르면 기능 목록 비교가 된다.</div>
+    <div class="q"><b>Q3.</b> 세 질문의 마지막이 특히 중요한 이유는?</div>
+    <div class="q a"><b>A3.</b> <b>"그 기능이 작동했다는 기록을 어디서 확인하나"</b>를 물어야 제품 설명이 아니라 관찰이 시작되기 때문.</div>
+    <div class="q"><b>Q4.</b> 일곱 기능과 여섯 칸의 차이는?</div>
+    <div class="q a"><b>A4.</b> 일곱 기능은 <b>병목 진단용 섹션 제목</b>, 여섯 칸은 <b>도구를 같은 방식으로 관찰하는 기록 항목</b>.</div>
+  </div>
+  <aside>Q4를 섞으면 "기능이 있다"와 "화면에서 봤다"가 뒤엉킵니다.</aside>
+</section>
+
+<!-- 11 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>병목 · 기능 · 기록 🗺️</h1>
+    <div class="big" style="margin-top:26px">도구 이름이 아니라<br><span class="y">맡길 일이 막히는 곳</span>에서 시작합니다</div>
+    <p class="sub" style="margin-top:24px">에이전트 하네스 톺아보기 ① — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ②에서는 이미 익숙한 도구 화면에서 이 카드의 경계부터 관찰합니다 — 기능 지도가 추측이 아니라 관찰이 되게.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

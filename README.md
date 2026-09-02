@@ -228,6 +228,15 @@
    - ✅ ⑤-8. 스스로 세운 목표를 실험으로 — 프롬프트 엔지니어링 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/rubric-experiments/) · 📊 [PPT](rubric-experiments/rubric-experiments.pptx)
    - ✅ ⑤-9. 내 도메인에서 동작하는 챗봇 제출하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/rag-submit/) · 📊 [PPT](rag-submit/rag-submit.pptx)
 
+### 5. 에이전트 시스템 마스터
+**중단원 ②**
+2. **에이전트 하네스 톺아보기** ✅ 1~5 완료 · 같은 루프를 감싼 일곱 개의 하네스를 열어 구조를 확인합니다
+   - ✅ ②-1. 맡길 일을 하네스 기능 질문으로 바꾸기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/harness-question-map/) · 📊 [PPT](harness-question-map/harness-question-map.pptx)
+   - ✅ ②-2. 화면에서 하네스의 경계 먼저 관찰하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/harness-observation/) · 📊 [PPT](harness-observation/harness-observation.pptx)
+   - ✅ ②-3. 모델의 행동을 실패하기 어렵게 만드는 문법 (행동 포맷) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/action-format/) · 📊 [PPT](action-format/action-format.pptx)
+   - ✅ ②-4. 필요한 것만 남겨 다시 꺼내기 (컨텍스트 관리) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/context-budget/) · 📊 [PPT](context-budget/context-budget.pptx)
+   - ✅ ②-5. 한 번의 성공을 다음 실행의 자산으로 (경험·스킬 축적) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/skill-accumulation/) · 📊 [PPT](skill-accumulation/skill-accumulation.pptx)
+
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
 > ⚠️ **웹 슬라이드는 반드시 라이브 사이트에서 열어야 합니다.** GitHub 저장소 화면(github.com)에서 위 링크를 누르면 슬라이드가 아니라 소스 폴더로 갑니다. 아래 라이브 주소로 접속하세요:
@@ -347,6 +356,11 @@
 > - 대4-챗봇-⑤7 https://inseoklee-ai.github.io/study-room/llm-as-judge/
 > - 대4-챗봇-⑤8 https://inseoklee-ai.github.io/study-room/rubric-experiments/
 > - 대4-챗봇-⑤9 https://inseoklee-ai.github.io/study-room/rag-submit/
+> - 대5-하네스-②1 https://inseoklee-ai.github.io/study-room/harness-question-map/
+> - 대5-하네스-②2 https://inseoklee-ai.github.io/study-room/harness-observation/
+> - 대5-하네스-②3 https://inseoklee-ai.github.io/study-room/action-format/
+> - 대5-하네스-②4 https://inseoklee-ai.github.io/study-room/context-budget/
+> - 대5-하네스-②5 https://inseoklee-ai.github.io/study-room/skill-accumulation/
 > - 대4-① https://inseoklee-ai.github.io/study-room/prompt-engineering-intro/
 > - 대4-② https://inseoklee-ai.github.io/study-room/agent-structure/
 > - 대4-③ https://inseoklee-ai.github.io/study-room/model-inputs/
