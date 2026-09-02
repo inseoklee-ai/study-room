@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>자동화와 워크플로 — 규칙을 정하고 그래프를 잇는다 (자동화와 에이전트 ②)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 자동화와 에이전트 ②</span>
+    <h1 style="margin:18px 0">자동화와 워크플로<br>— 규칙을 정하고 그래프를 잇는다</h1>
+    <p class="sub">자동화는 빈틈을 알아서 메우는 마술이 아닙니다</p>
+  </div>
+  <aside>자동화에 맡길 일을 고를 때는 먼저 규칙을 확인합니다.</aside>
+</section>
+
+<!-- 2 규칙 확인 -->
+<section class="slide" data-part="표지">
+  <h2><span class="g">무조건 · 항상 · 매번</span>을 쓸 수 있는가</h2>
+  <p>일을 설명하면서 이 세 낱말을 쓸 수 있다면 <b class="g">규칙이 비교적 선명합니다.</b> 조건과 결과를 이어 적을 수 있는 일입니다.</p>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">새 문의에 <b>접수 번호를 붙이는</b> 규칙</span></div>
+    <div class="st"><span class="n">2</span><span class="t">매일 아침 <b>전날 매출을 표에 옮기는</b> 규칙</span></div>
+    <div class="st"><span class="n">3</span><span class="t">첨부가 없는 신청서에는 <b>안내를 보내도록</b> 정합니다</span></div>
+  </div>
+  <aside>"무조건/항상/매번"은 규칙성을 가리는 아주 실용적인 리트머스입니다.</aside>
+</section>
+
+<!-- 3 규칙이 아닌 것 -->
+<section class="slide" data-part="표지">
+  <h2>낯선 동료에게 <span class="b">가르쳐 봅니다</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>❌ 사람의 판단이 들어간 말</h3><p>"<b class="r">친절하게 답합니다</b>" · "<b class="r">중요한 메일부터 봅니다</b>"</p></div>
+    <div class="box"><h3>🧪 규칙인지 시험하는 방법</h3><p>동료가 "이 경우에는 어떻게 하나요"라고 물었을 때 <b class="r">"알아서 해주세요"라고 답하게 된다면</b> — 그 부분은 <b>아직 규칙이 아닙니다</b></p></div>
+  </div>
+  <div class="big">자동화는 <span class="y">빈틈을 알아서 메우는 마술</span>이 아닙니다<br><small>빈틈까지 적어 둔 조리법처럼 작동합니다</small></div>
+  <aside>이 비유가 자동화의 기대치를 정확히 맞춰 줍니다.</aside>
+</section>
+
+<!-- 4 그래프 -->
+<section class="slide" data-part="표지">
+  <h2>여러 행동을 연결한 설계도 — <span class="g">그래프</span></h2>
+  <p>업무는 한 번의 행동으로 끝나지 않는 경우가 많습니다. <b>문의를 받고 분류합니다. 답을 고르고 기록합니다. 필요한 경우 담당 부서로 넘기도록 정합니다.</b></p>
+  <div class="chain">
+    <div class="cell" style="min-width:130px"><small>구성 요소</small><b>점<br>(행동)</b></div>
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>구성 요소</small><b class="b">화살표<br>(흐름)</b></div>
+    <div class="cell" style="min-width:130px;border-color:var(--pp)"><small>구성 요소</small><b class="p">분기<br>(조건)</b></div>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>구성 요소</small><b class="g">실행 기록</b></div>
+  </div>
+  <ul class="pts">
+    <li>조건에 따라 길이 갈라지며 — <b class="g">실행 기록도 각 흐름에 남습니다</b></li>
+  </ul>
+  <aside>이 네 요소가 다음 소단원 ③의 n8n 화면에서 노드·연결선·분기·실행 목록으로 그대로 나타납니다.</aside>
+</section>
+
+<!-- 5 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">워크플로의 핵심은 자유로움이 아닙니다</h2>
+  <p style="margin-top:11px">정해 둔 경로 · 분기 · 검토할 수 있는 기록</p><span class="who">② 자동화와 워크플로</span></div>
+  <aside>그래프가 순서를 정하는 워크플로에서는 사람이 경로를 미리 정합니다.</aside>
+</section>
+
+<!-- 6 정의 -->
+<section class="slide" data-part="PART 1">
+  <h2>워크플로의 <span class="b">정의</span></h2>
+  <div class="hl">📖 Anthropic은 워크플로를 <b>"미리 정의된 코드 경로로 LLM과 도구가 조율되는 시스템"</b>으로 정의합니다</div>
+  <ul class="pts">
+    <li>예 — <b>새 문의를 분류합니다. 환불 관련 문의는 담당 부서로 보냅니다. 나머지는 일반 답변 흐름으로 보냅니다</b></li>
+    <li>따라서 워크플로의 핵심은 <b class="r">모델이 자유롭게 움직이는 데 있지 않습니다</b> — <b class="g">정해 둔 경로와 분기, 그리고 검토할 수 있는 기록</b>에 있습니다</li>
+  </ul>
+  <aside>출처: Anthropic, Building effective agents, https://www.anthropic.com/research/building-effective-agents</aside>
+</section>
+
+<!-- 7 세 국면 -->
+<section class="slide" data-part="PART 1">
+  <h2>같은 요약 업무라도 <span class="r">책임의 경계가 다릅니다</span></h2>
+  <table class="t">
+    <tr><th>국면</th><th>다음 행동을 선택하는 것</th></tr>
+    <tr><td>사람이 하나씩 시킴</td><td>사람이 <b>대화에서 다음 요청</b>을 선택합니다</td></tr>
+    <tr><td><b class="b">그래프가 순서를 정함</b></td><td><b class="b">미리 만든 연결 규칙</b>이 다음 행동을 선택합니다</td></tr>
+    <tr><td><b class="p">모델이 다음을 고름</b></td><td>연결된 도구 가운데 <b class="p">필요한 도구를 모델이</b> 선택합니다</td></tr>
+  </table>
+  <div class="big">같은 업무라도<br><span class="y">책임의 경계와 확인할 기록</span>이 달라집니다</div>
+  <aside>소단원 ①의 결론을 비교의 축으로 다시 씁니다.</aside>
+</section>
+
+<!-- 8 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">제품 이름 대신 다섯 가지 질문</h2>
+  <p style="margin-top:11px">통제 · 관측 · 이식성 · 비용 · 데이터 경로</p><span class="who">② 자동화와 워크플로</span></div>
+  <aside>도구 소개 페이지에서는 기능 수가 먼저 보입니다. 그러나 기능 수는 업무의 위험과 무관합니다.</aside>
+</section>
+
+<!-- 9 기능 수 -->
+<section class="slide" data-part="PART 2">
+  <h2>기능 수는 <span class="r">업무의 위험과 무관합니다</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>❌ 연결이 많아도</h3><p><b class="r">입력을 어디서 읽었는지 알 수 없다면</b> 잘못된 요약을 고치기 어렵습니다</p></div>
+    <div class="box"><h3>✅ 기능이 적어도</h3><p><b class="g">읽기 전용 공개 데이터를 받아 검토용 초안을 만드는 일</b>에는 더 안전할 수 있습니다</p></div>
+  </div>
+  <ul class="pts">
+    <li>소개 페이지에서 쉽게 확인되는 것 — <b>연결 가능한 서비스 수, 모델 이름</b></li>
+    <li>정작 확인해야 하는 것 — <b class="g">다음 슬라이드의 다섯 질문</b></li>
+  </ul>
+  <aside>기능 수 → 위험이라는 잘못된 대리 지표를 끊는 슬라이드입니다.</aside>
+</section>
+
+<!-- 10 다섯 질문 -->
+<section class="slide" data-part="PART 2">
+  <h2>비교의 <span class="g">다섯 질문</span></h2>
+  <table class="t">
+    <tr><th>질문</th><th>확인하는 것</th></tr>
+    <tr><td><b>통제</b></td><td>누가 <b>시작 · 중지 · 승인 · 쓰기 권한</b>을 정하는지</td></tr>
+    <tr><td><b>관측</b></td><td><b>입력 · 도구 호출 · 응답 · 실패 지점</b>을 기록으로 되짚을 수 있는지</td></tr>
+    <tr><td><b>이식성</b></td><td><b>프롬프트 · 연결 규칙 · 코드 · 비밀값</b>을 다른 환경으로 옮길 때 무엇을 다시 준비해야 하는지</td></tr>
+    <tr><td><b>비용</b></td><td><b>구독 · 모델 처리량 · 실행 횟수</b>처럼 어떤 단위로 요금이 계산되는지</td></tr>
+    <tr><td><b>데이터 경로</b></td><td><b class="r">입력 · 로그 · 모델 · 결과 · 비밀값</b>이 어느 서비스와 저장 위치를 지나는지</td></tr>
+  </table>
+  <aside>이 다섯 질문이 이 중단원의 나머지 실습 전체를 관통합니다.</aside>
+</section>
+
+<!-- 11 예시 업무 -->
+<section class="slide" data-part="PART 2">
+  <h2>예시 업무를 <span class="b">하나 정합니다</span></h2>
+  <div class="big">매일 아침 공개 데이터에서 정보를 읽고<br><span class="y">세 문장으로 요약을 받습니다</span></div>
+  <ul class="pts">
+    <li>전제 — 공개 데이터는 <b>개인 정보가 없는 공개 API</b>라고 가정합니다</li>
+    <li>같은 업무라도 <b class="g">세 국면에 놓으면 확인할 내용이 달라집니다</b></li>
+  </ul>
+  <aside>이 업무가 다음 두 표의 행을 채웁니다. 실습에서 실제로 만들어 볼 흐름과도 같습니다.</aside>
+</section>
+
+<!-- 12 표 A -->
+<section class="slide" data-part="PART 2">
+  <h2>같은 업무 · 세 국면 ① — <span class="g">통제 · 관측</span></h2>
+  <table class="t">
+    <tr><th>국면</th><th>통제 — 시작·수정·전송의 승인 주체</th><th>관측 — 원문 응답·요약·실패 기록의 위치</th></tr>
+    <tr><td>사람이 하나씩 시킴</td><td>매일 대화에서 요청. 예약과 연결 기능이 있다면 <b>켜고 끄는 권한</b>을 확인</td><td>요약과 별도로 <b class="g">공개 데이터의 원문 응답을 저장하거나 다시 열 수 있는지</b></td></tr>
+    <tr><td><b class="b">그래프가 순서를 정함</b></td><td>정해 둔 시각의 실행과 요약 전송을 <b>수정·중지</b>하는 권한. <b class="r">발송은 별도 승인</b>을 거치게 설정</td><td>각 실행의 <b>요청 · 응답 · 분기 · 오류</b>를 실행 기록에서</td></tr>
+    <tr><td><b class="p">모델이 다음을 고름</b></td><td><b>일정 설정 · 코드 변경 · 파일 저장 · 메시지 발송</b>에 필요한 승인 경로를 <b class="r">각각</b></td><td><b>실행 명령 · 코드 변경 · 표준 출력 · 오류</b>를 사람이 재현할 수 있는지</td></tr>
+  </table>
+  <aside>모델 국면에서 승인 경로를 "각각" 확인해야 한다는 점이 핵심입니다.</aside>
+</section>
+
+<!-- 13 표 B -->
+<section class="slide" data-part="PART 2">
+  <h2>같은 업무 · 세 국면 ② — <span class="p">이식성 · 비용 · 데이터 경로</span></h2>
+  <table class="t">
+    <tr><th>국면</th><th>이식성</th><th>비용</th><th>데이터 경로</th></tr>
+    <tr><td>사람이 하나씩</td><td>대화 지시와 연결 설정을 <b>다른 계정·도구로 옮길 수 있는지</b></td><td>플랜의 사용량 한도와 <b>연결 도구 사용량이 같은 한도인지</b></td><td>공개 데이터·대화 내용·연결 도구 입력이 <b class="r">각각 어느 제공자에게</b></td></tr>
+    <tr><td><b class="b">그래프</b></td><td>내보낸 뒤에도 <b class="r">비밀값을 다시 넣어야 하는지</b>와 <b>버전 차이</b></td><td>하루 한 번의 <b>전체 워크플로 실행이 어떤 단위로</b> 계산되는지</td><td><b>호스팅 위치 · 실행 로그 · 외부 모델 · 공개 API</b> 사이의 이동</td></tr>
+    <tr><td><b class="p">모델</b></td><td>저장소의 코드와 환경 변수 중 <b>다른 컴퓨터에서 다시 준비할 내용</b></td><td><b>계정 사용량 · 모델 처리량 · 실행 환경 비용</b>을 각각</td><td>공개 데이터 요청·로컬 파일·환경 변수·모델 입력·<b>저장소의 연결 경로</b></td></tr>
+  </table>
+  <aside>코드가 저장소에 있어도 실행 환경과 비밀값을 재현하지 못하면 업무 전체를 옮길 수 없습니다.</aside>
+</section>
+
+<!-- 14 표의 쓰임 -->
+<section class="slide" data-part="PART 2">
+  <h2>표는 <span class="r">승자를 가리는 도구가 아닙니다</span></h2>
+  <div class="hl">🎯 <b class="g">확인하지 않은 전제를 드러내는 도구</b>로 사용합니다</div>
+  <ul class="pts">
+    <li>대화 도구·흐름 도구·개발 도구를 비교할 때 <b>제품 이름을 행에 더할 수 있습니다</b></li>
+    <li>다만 공식 문서에서 확인하지 못한 <b>가격 · 연결 수 · 기능 차이</b>는 <b class="r">"미확인"으로 남겨 둡니다</b></li>
+  </ul>
+  <div class="big">코드가 저장소에 있어도<br><span class="y">실행 환경과 비밀값을 재현하지 못하면</span><br><small>업무 전체를 옮길 수 없습니다</small></div>
+  <aside>"미확인"을 빈칸으로 두지 않고 명시하는 습관이 하네스 중단원의 카드 형식과 같습니다.</aside>
+</section>
+
+<!-- 15 과금 단위 -->
+<section class="slide" data-part="PART 2">
+  <h2>이름만으로 <span class="r">판단하지 않습니다</span></h2>
+  <table class="t">
+    <tr><th>과금 단위</th><th>세는 대상</th></tr>
+    <tr><td><b>execution</b></td><td>워크플로 전체가 <b>한 번 실행된 일</b>을 한 건으로</td></tr>
+    <tr><td><b>노드별</b></td><td><b class="r">노드 하나하나</b>에 과금</td></tr>
+  </table>
+  <div class="hl">⚠️ 세는 단위가 다르므로 — <b class="r">과금 표의 숫자만 나란히 두고 비교하지 않습니다</b></div>
+  <ul class="pts">
+    <li>대화 모델과 도구를 연결해 <b>완료에 필요한 도구를 모델이 고르게 하는 노드</b>를 갖춘 도구도 있습니다</li>
+    <li>이것은 <b class="r">통제가 필요 없다는 뜻이 아닙니다</b> — <b class="g">연결한 도구와 실행 기록에서 확인할 요청·응답을 더 분명히</b> 살펴야 한다는 뜻입니다</li>
+  </ul>
+  <aside>다음 소단원 ③에서 그래프형 도구 n8n을 골라 트리거·연결·실행 기록을 화면에서 직접 확인합니다.</aside>
+</section>
+
+<!-- 16 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 어떤 일이 "아직 규칙이 아닌지" 어떻게 시험하나?</div>
+    <div class="q a"><b>A1.</b> 낯선 동료에게 가르친다고 상상해, "이 경우에는 어떻게 하나요"에 <b>"알아서 해주세요"라고 답하게 되면</b> 그 부분은 규칙이 아니다.</div>
+    <div class="q"><b>Q2.</b> 워크플로의 핵심은?</div>
+    <div class="q a"><b>A2.</b> 모델의 자유로움이 아니라 <b>정해 둔 경로와 분기, 검토할 수 있는 기록.</b></div>
+    <div class="q"><b>Q3.</b> 비교의 다섯 질문은?</div>
+    <div class="q a"><b>A3.</b> <b>통제 · 관측 · 이식성 · 비용 · 데이터 경로.</b> 확인 못 한 항목은 "미확인"으로 남긴다.</div>
+  </div>
+  <aside>Q3의 다섯 낱말은 외워 두는 편이 좋습니다. 이후 실습 전체의 관찰 항목입니다.</aside>
+</section>
+
+<!-- 17 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>규칙을 정하고 그래프를 잇습니다 🔗</h1>
+    <div class="big" style="margin-top:26px">기능 수가 아니라<br><span class="y">통제 · 관측 · 이식성 · 비용 · 데이터 경로</span></div>
+    <p class="sub" style="margin-top:24px">자동화와 에이전트 ② — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ③에서 n8n 인스턴스에 접속해 노드와 실행 기록을 직접 관찰합니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

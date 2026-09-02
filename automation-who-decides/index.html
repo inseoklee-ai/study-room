@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>반복하는 일, AI에게 맡기면 안 될까 · 다음 행동을 누가 정하는가 (자동화와 에이전트 ①)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 자동화와 에이전트 ①</span>
+    <h1 style="margin:18px 0">반복하는 일, AI에게<br>맡기면 안 될까</h1>
+    <p class="sub">먼저 정할 것은 AI를 쓸지 말지가 아닙니다</p>
+  </div>
+  <aside>아침에 메일함을 열면 비슷한 문의가 쌓여 있습니다. 이 강의는 도구 이름보다 그 판단의 기준을 살펴봅니다.</aside>
+</section>
+
+<!-- 2 장면 -->
+<section class="slide" data-part="표지">
+  <h2>아침 메일함의 <span class="r">같은 하루</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">배송은 언제 도착하는지, 결제는 왜 실패했는지, 반품은 어디로 보내는지 <b>확인합니다</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t">내용을 읽고 <b>담당 팀에 전달</b>합니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">같은 내용을 <b>표에 다시 옮깁니다</b></span></div>
+    <div class="st"><span class="n">4</span><span class="t">점심이 가까워져도 <b class="r">메일은 줄지 않습니다</b></span></div>
+  </div>
+  <div class="hl">💭 이때 <b>AI가 이 일을 맡아 준다면 좋겠다</b>는 생각이 자연스럽게 듭니다</div>
+  <aside>이 장면에서 출발합니다. 문제는 "맡길 수 있느냐"가 아니라 "무엇을 어디까지 맡기느냐"입니다.</aside>
+</section>
+
+<!-- 3 약속과 예외 -->
+<section class="slide" data-part="표지">
+  <h2>맡긴 일이 <span class="r">예외를 만나면</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>✅ 자동화의 약속</h3><p><b class="g">시간을 돌려주고 실수를 줄인다</b> — 규칙이 분명한 반복은 실제로 잘 맡길 수 있습니다</p></div>
+    <div class="box"><h3>⚠️ 뜻밖의 예외</h3><p><b class="r">잘못 분류된 문의가 여러 팀으로</b> 전달될 수 있습니다. <b class="r">멈춰야 할 작업이 계속 실행</b>될 수도 있습니다</p></div>
+  </div>
+  <div class="big">나중에 <span class="y">결과만 남고</span><br><small>왜 그런 선택이 이어졌는지는 찾기 어려울 수 있습니다</small></div>
+  <aside>세 번째 문장이 이 대단원 전체의 문제의식입니다 — 결과는 남는데 경로가 남지 않는 상태.</aside>
+</section>
+
+<!-- 4 먼저 정할 것 -->
+<section class="slide" data-part="표지">
+  <h2>먼저 정할 것은 <span class="r">AI를 쓸지 말지가 아닙니다</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>①</small><b class="g">무엇을<br>맡길지</b></div>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>②</small><b class="b">어디에서<br>멈추게 할지</b></div>
+    <div class="cell" style="min-width:170px;border-color:var(--pp)"><small>③</small><b class="p">문제가 생기면<br>무엇을 확인할지</b></div>
+  </div>
+  <ul class="pts">
+    <li>이 강의에서 갖추게 되는 것 — <b class="g">반복 업무를 맡길 만한 부분과 사람이 판단해야 할 부분을 구분하는 눈</b></li>
+    <li>이 판단은 한 질문에서 시작합니다 — <b>"다음 행동을 누가 정하는가"</b></li>
+  </ul>
+  <aside>도구 이름을 외우는 강의가 아니라는 점을 여기서 분명히 합니다.</aside>
+</section>
+
+<!-- 5 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">다음 행동을 누가 정하는가</h2>
+  <p style="margin-top:11px">결과가 같아 보여도 살펴볼 곳은 달라집니다</p><span class="who">① 자동화와 에이전트</span></div>
+  <aside>이 질문이 자동화·워크플로·에이전트를 가르는 축입니다.</aside>
+</section>
+
+<!-- 6 코딩 에이전트 장면 -->
+<section class="slide" data-part="PART 1">
+  <h2>화면에는 <span class="r">최종 수정안만</span> 보입니다</h2>
+  <p>opencode, Claude Code, Antigravity에 <b>저장소를 살펴보고 수정안을 만들어 달라</b>고 맡긴 장면을 떠올려 봅니다.</p>
+  <ul class="pts">
+    <li>도구는 파일을 읽고, 명령을 실행하고, 테스트 결과를 확인한 뒤 <b>다음 행동을 고를 수 있습니다</b></li>
+    <li>그러나 <b class="r">어떤 파일을 먼저 열었는지, 어느 명령을 택했는지, 실패 뒤에 왜 다시 시도했는지</b>는 빠르게 지나갑니다</li>
+  </ul>
+  <div class="hl">📌 이 불편함은 <b class="r">도구를 잘못 사용했다는 뜻이 아닙니다</b> — <b>같은 "에이전트"라는 이름 아래에 서로 다른 통제 방식이 있기 때문</b>입니다</div>
+  <aside>도구를 탓하기 전에 통제 방식을 구분하는 것이 이 절의 목표입니다.</aside>
+</section>
+
+<!-- 7 세 방식 -->
+<section class="slide" data-part="PART 1">
+  <h2>선택권이 놓인 <span class="g">세 자리</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px"><small>사람</small><b>단계·도구를<br>직접 지시</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:170px;border-color:var(--bl)"><small>고정 그래프</small><b class="b">정해진 순서와<br>조건에 따라</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:170px;border-color:var(--pp)"><small>모델</small><b class="p">앞선 결과를 읽고<br>도구·경로 선택</b></div>
+  </div>
+  <div class="hl">🎯 화살표는 <b class="r">데이터의 이동이 아니라</b> — <b class="g">다음 행동을 정할 권한이 어디에 있는지</b>를 나타냅니다</div>
+  <ul class="pts">
+    <li>결과가 같아 보여도 — <b>문제가 생겼을 때 살펴볼 곳은 달라집니다</b></li>
+  </ul>
+  <aside>왼쪽에서 오른쪽으로 갈수록 사람이 직접 정하던 다음 행동이 고정 그래프를 거쳐 모델의 판단으로 옮겨갑니다.</aside>
+</section>
+
+<!-- 8 문의 분류 예시 -->
+<section class="slide" data-part="PART 1">
+  <h2>같은 업무 — <span class="b">고객 문의 분류</span></h2>
+  <table class="t">
+    <tr><th>누가 정하는가</th><th>장면</th></tr>
+    <tr><td><b>사람</b></td><td>사람이 메일을 읽고 <b>기준을 적용해</b> 알림을 보냅니다</td></tr>
+    <tr><td><b class="b">고정 그래프</b></td><td><b>수신 → 분류 → 담당 팀 찾기 → 알림 발송</b>을 연결하고 조건을 정해 두었습니다</td></tr>
+    <tr><td><b class="p">모델</b></td><td>내용이 모호한 문의에서 <b>조회 도구를 쓸지, 추가 정보를 요청할지, 후보를 다시 찾을지</b> 모델이 고릅니다</td></tr>
+  </table>
+  <div class="big">세 경우 모두 화면에는<br><span class="y">"담당 팀에 알림을 보냈다"는 결과만</span> 남을 수 있습니다</div>
+  <aside>결과가 같기 때문에 화면만 보고는 세 경우를 구별할 수 없습니다.</aside>
+</section>
+
+<!-- 9 원인 찾는 방식 -->
+<section class="slide" data-part="PART 1">
+  <h2>원인을 찾는 <span class="g">방식이 다릅니다</span></h2>
+  <table class="t">
+    <tr><th>누가 골랐나</th><th>되짚을 것</th></tr>
+    <tr><td>사람</td><td><b>입력과 판단 기준</b>을 되짚습니다</td></tr>
+    <tr><td><b class="b">고정 그래프</b></td><td><b>어느 조건에서 다른 경로로 갔는지</b> 확인합니다</td></tr>
+    <tr><td><b class="p">모델</b></td><td><b class="g">제공한 도구 · 관측한 결과 · 반복 한도 · 승인 규칙</b>을 함께 확인합니다</td></tr>
+  </table>
+  <div class="hl">🚗 선택권이 이동하는 모습은 <b>운전대가 손에서 자동 조향 장치로, 다시 상황을 해석하는 조수에게</b> 넘어가는 모습과 닮았습니다 — <b class="r">목적지는 같아도 브레이크를 확인할 곳은 달라집니다</b></div>
+  <aside>모델이 골랐을 때 확인 대상이 가장 많다는 점에 주목하세요.</aside>
+</section>
+
+<!-- 10 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">국면마다 확인할 질문이 다릅니다</h2>
+  <p style="margin-top:11px">제품 이름이 아니라 확인 지점으로</p><span class="who">① 자동화와 에이전트</span></div>
+  <aside>세 국면 각각에서 무엇을 확인해야 하는지 봅니다.</aside>
+</section>
+
+<!-- 11 세 국면 확인 -->
+<section class="slide" data-part="PART 2">
+  <h2>국면별 <span class="g">확인 질문</span></h2>
+  <table class="t">
+    <tr><th>국면</th><th>다루는 것</th><th>확인할 질문</th></tr>
+    <tr><td>사람이 대화창에서<br>하나씩 요청</td><td>조사·파일·코드·연결 도구</td><td>입력한 내용이 <b>어떤 연결 도구와 외부 서비스에 전달되는지</b>, <b>실행 기록을 어디까지 볼 수 있는지</b></td></tr>
+    <tr><td><b class="b">고정 그래프가<br>순서를 정함</b></td><td>트리거 · 노드 · 분기 · 실행 이력</td><td>그래프 가운데 모델을 넣어도 전체가 곧바로 모델 주도가 되지 않으므로 — <b>모델이 판단하는 범위와 그 앞뒤의 연결, 실행 권한</b>을 나누어</td></tr>
+    <tr><td><b class="p">모델이 다음<br>도구를 고름</b></td><td>저장소 · 터미널 · 테스트</td><td><b>어느 경로가 읽기만 가능한지</b>, <b class="r">변경과 외부 통신은 어디에서 승인하는지</b>, <b>테스트 결과가 다음 선택에 다시 반영되는지</b></td></tr>
+  </table>
+  <aside>제품마다 제공 범위는 다를 수 있지만 확인할 질문은 같습니다.</aside>
+</section>
+
+<!-- 12 섞인다 -->
+<section class="slide" data-part="PART 2">
+  <h2>세 국면은 <span class="r">등을 돌린 제품 목록이 아닙니다</span></h2>
+  <ul class="pts">
+    <li><b class="g">하나의 도구 안에서도 국면마다 선택 주체가 달라질 수 있습니다</b></li>
+    <li>대화창에 <b>연결 기능</b>이 붙을 수 있습니다</li>
+    <li>고정 그래프 한가운데 <b>모델 판단</b>이 들어갈 수도 있습니다</li>
+    <li>코딩 에이전트에도 <b>사람이 승인하는 절차</b>가 함께 있을 수 있습니다</li>
+  </ul>
+  <div class="hl">📌 그래서 "이 제품은 에이전트, 저 제품은 워크플로"라는 분류보다 — <b class="g">이 국면에서 다음 행동을 누가 정하는가</b>를 묻습니다</div>
+  <aside>제품 단위가 아니라 국면 단위로 묻는 습관을 들이는 슬라이드입니다.</aside>
+</section>
+
+<!-- 13 Anthropic 구분 -->
+<section class="slide" data-part="PART 2">
+  <h2>Anthropic의 <span class="b">워크플로 / 에이전트</span> 구분</h2>
+  <div class="grid2">
+    <div class="box"><h3>워크플로</h3><p><b>코드 경로가 미리 정해진</b> 경우</p></div>
+    <div class="box"><h3>에이전트</h3><p><b class="p">모델이 과정과 도구 사용을 동적으로 이끄는</b> 경우</p></div>
+  </div>
+  <table class="t">
+    <tr><th>고정 경로</th><th>동적 선택</th></tr>
+    <tr><td><b class="g">검토와 재현에 유리</b></td><td><b class="g">예외가 많은 업무에 도움</b> — 대신 <b class="r">비용과 오류가 쌓일 가능성도 커집니다</b></td></tr>
+  </table>
+  <div class="hl">⚠️ 이 구분은 <b class="r">어느 쪽이 더 낫다는 뜻이 아닙니다</b> — <b>모델에 선택을 더 맡길수록 도구 권한, 반복 한도, 사람이 멈추는 지점을 더 분명히</b> 정해야 합니다</div>
+  <aside>출처: Anthropic, Building effective agents (https://www.anthropic.com/research/building-effective-agents).</aside>
+</section>
+
+<!-- 14 세 말 -->
+<section class="slide" data-part="PART 2">
+  <h2>이 강의의 <span class="g">세 낱말</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>자동화</b> — <b class="g">규칙이 분명한 반복</b>을 맡깁니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b class="b">워크플로</b> — 여러 단계를 <b class="b">사람이 설계해 연결</b>합니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b class="p">에이전트</b> — 판단이 필요한 곳에서 <b class="p">모델이 다음 행동을 고릅니다</b></span></div>
+  </div>
+  <div class="big">다음 소단원에서<br><span class="y">자동화와 워크플로의 구조</span>를 더 자세히 봅니다</div>
+  <aside>세 낱말이 이 중단원 전체의 목차 역할을 합니다.</aside>
+</section>
+
+<!-- 15 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> AI에 반복 업무를 맡길 때 먼저 정해야 하는 것은?</div>
+    <div class="q a"><b>A1.</b> 쓸지 말지가 아니라 — <b>무엇을 맡기고, 어디에서 멈추게 하며, 문제가 생기면 무엇을 확인할지.</b></div>
+    <div class="q"><b>Q2.</b> 결과가 같은데도 세 국면을 구분해야 하는 이유는?</div>
+    <div class="q a"><b>A2.</b> <b>원인을 찾는 방식이 다르기 때문.</b> 사람이면 판단 기준, 그래프면 조건과 경로, 모델이면 도구·관측·반복 한도·승인 규칙을 본다.</div>
+    <div class="q"><b>Q3.</b> 고정 경로와 동적 선택의 장단은?</div>
+    <div class="q a"><b>A3.</b> 고정 경로는 <b>검토와 재현</b>에 유리하고, 동적 선택은 <b>예외가 많은 업무</b>에 도움이 되지만 <b>비용과 오류가 쌓일 가능성</b>이 커진다.</div>
+  </div>
+  <aside>Q2가 이 소단원의 핵심입니다.</aside>
+</section>
+
+<!-- 16 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>다음 행동을 누가 정하는가 🧭</h1>
+    <div class="big" style="margin-top:26px">목적지는 같아도<br><span class="y">브레이크를 확인할 곳은 달라집니다</span></div>
+    <p class="sub" style="margin-top:24px">자동화와 에이전트 ① — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ②에서 규칙을 정하고 그래프를 잇는 구조, 그리고 도구를 비교하는 다섯 질문을 봅니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

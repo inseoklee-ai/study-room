@@ -38,7 +38,9 @@ const LESSONS = process.argv.slice(2).length
      "harness-question-map","harness-observation","action-format",
      "context-budget","skill-accumulation",
      "reflexion-loop","minimal-loop","permission-boundary",
-     "eval-loop","harness-map","hypothesis-experiment"];
+     "eval-loop","harness-map","hypothesis-experiment",
+     "automation-who-decides","workflow-and-graph","n8n-observation","n8n-cli-agent",
+     "n8n-ai-agent-node","adopt-hold-reject","self-hosting-n8n"];
 
 // ---- palette (deck light theme) ----
 const INK="2A2723", SOFT="6B6357", GR="3F6B5F", GR2="2C4D44", GOLD="C8A15A",

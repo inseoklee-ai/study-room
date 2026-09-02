@@ -229,6 +229,16 @@
    - ✅ ⑤-9. 내 도메인에서 동작하는 챗봇 제출하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/rag-submit/) · 📊 [PPT](rag-submit/rag-submit.pptx)
 
 ### 5. 에이전트 시스템 마스터
+**중단원 ①**
+1. **자동화와 에이전트** ✅ 완결 (7강) · 업무 자동화에서 에이전트가 차지하는 위치를 파악하고 워크플로 툴을 사용합니다
+   - ✅ ①-1. 반복하는 일, AI에게 맡기면 안 될까 (다음 행동을 누가 정하는가) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/automation-who-decides/) · 📊 [PPT](automation-who-decides/automation-who-decides.pptx)
+   - ✅ ①-2. 자동화와 워크플로 — 규칙을 정하고 그래프를 잇는다 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/workflow-and-graph/) · 📊 [PPT](workflow-and-graph/workflow-and-graph.pptx)
+   - ✅ ①-3. 워크플로 도구를 인스턴스에서 관찰한다 (n8n) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/n8n-observation/) · 📊 [PPT](n8n-observation/n8n-observation.pptx)
+   - ✅ ①-4. 코딩 에이전트에게 같은 흐름을 맡긴다 (CLI·MCP) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/n8n-cli-agent/) · 📊 [PPT](n8n-cli-agent/n8n-cli-agent.pptx)
+   - ✅ ①-5. 워크플로에서 에이전트 사용하기 (IF 노드·AI Agent) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/n8n-ai-agent-node/) · 📊 [PPT](n8n-ai-agent-node/n8n-ai-agent-node.pptx)
+   - ✅ ①-6. 판정 — 어느 부분을 어디까지 맡길까 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/adopt-hold-reject/) · 📊 [PPT](adopt-hold-reject/adopt-hold-reject.pptx)
+   - ✅ ①-7. n8n 직접 띄워 보기 — 셀프 호스팅 (선택 심화) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/self-hosting-n8n/) · 📊 [PPT](self-hosting-n8n/self-hosting-n8n.pptx)
+
 **중단원 ②**
 2. **에이전트 하네스 톺아보기** ✅ 완결 (11강) · 같은 루프를 감싼 일곱 개의 하네스를 열어 구조를 확인합니다
    - ✅ ②-1. 맡길 일을 하네스 기능 질문으로 바꾸기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/harness-question-map/) · 📊 [PPT](harness-question-map/harness-question-map.pptx)
@@ -373,6 +383,13 @@
 > - 대5-하네스-②9 https://inseoklee-ai.github.io/study-room/eval-loop/
 > - 대5-하네스-②10 https://inseoklee-ai.github.io/study-room/harness-map/
 > - 대5-하네스-②11 https://inseoklee-ai.github.io/study-room/hypothesis-experiment/
+> - 대5-자동화-①1 https://inseoklee-ai.github.io/study-room/automation-who-decides/
+> - 대5-자동화-①2 https://inseoklee-ai.github.io/study-room/workflow-and-graph/
+> - 대5-자동화-①3 https://inseoklee-ai.github.io/study-room/n8n-observation/
+> - 대5-자동화-①4 https://inseoklee-ai.github.io/study-room/n8n-cli-agent/
+> - 대5-자동화-①5 https://inseoklee-ai.github.io/study-room/n8n-ai-agent-node/
+> - 대5-자동화-①6 https://inseoklee-ai.github.io/study-room/adopt-hold-reject/
+> - 대5-자동화-①7 https://inseoklee-ai.github.io/study-room/self-hosting-n8n/
 > - 대4-① https://inseoklee-ai.github.io/study-room/prompt-engineering-intro/
 > - 대4-② https://inseoklee-ai.github.io/study-room/agent-structure/
 > - 대4-③ https://inseoklee-ai.github.io/study-room/model-inputs/

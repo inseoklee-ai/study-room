@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>n8n 직접 띄워 보기 — 셀프 호스팅의 선택지 (자동화와 에이전트 ⑦)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 자동화와 에이전트 ⑦ (선택 심화)</span>
+    <h1 style="margin:18px 0">n8n 직접 띄워 보기<br>— 셀프 호스팅의 선택지</h1>
+    <p class="sub">내 노트북에서 화면이 뜨는 순간, 운영 책임도 함께 옮겨옵니다</p>
+  </div>
+  <aside>여기까지가 필수 판정입니다. 판정한 워크플로를 직접 운영할 필요가 있는 학생이 이 선택 심화로 넘어옵니다.</aside>
+</section>
+
+<!-- 2 셀프 호스팅 -->
+<section class="slide" data-part="표지">
+  <h2>운영 주체가 <span class="g">누구인가</span></h2>
+  <table class="t">
+    <tr><th>환경</th><th>인스턴스를 운영하는 주체</th></tr>
+    <tr><td>n8n Cloud</td><td><b>n8n</b>이 인스턴스를 운영</td></tr>
+    <tr><td>수업 인스턴스</td><td><b>수업 운영 환경</b>이 관리</td></tr>
+    <tr><td><b class="g">셀프 호스팅</b></td><td><b class="g">실행 환경 · 데이터 보관 · 업데이트 · 장애 대응을 내가 관리</b></td></tr>
+  </table>
+  <ul class="pts">
+    <li>n8n은 <b>Sustainable Use 라이선스</b>를 따르는 <b>fair-code</b> 소프트웨어이므로 이 방식으로 실행합니다</li>
+  </ul>
+  <aside>셀프 호스팅은 다른 회사가 운영하는 환경 대신 내가 관리하는 컴퓨터나 서버에서 n8n을 실행합니다.</aside>
+</section>
+
+<!-- 3 옮겨오는 책임 -->
+<section class="slide" data-part="표지">
+  <h2>접속 주소만 달라지는 것이 <span class="r">아닙니다</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px"><small>어디에 남나</small><b>워크플로 정의</b></div>
+    <div class="cell" style="min-width:130px;border-color:var(--bl)"><small>어디에 남나</small><b class="b">실행 기록</b></div>
+    <div class="cell" style="min-width:150px;border-color:var(--red)"><small>어디에 남나</small><b class="r">연결에 쓰는 비밀값</b></div>
+  </div>
+  <ul class="pts">
+    <li><b class="g">백업과 삭제, 접근 권한 회수도 내가 설계하고 확인</b>합니다</li>
+    <li><b class="r">데이터가 내 컴퓨터에 있다고 해서 안전하다고 판단하지 않습니다</b> — <b>그 컴퓨터에 누가 접근하는지, 백업이 있는지, 비밀값이 어디에 저장되는지</b>를 따로 점검합니다</li>
+  </ul>
+  <aside>하네스 중단원 ⑧의 "세션 격리 ≠ 컨테이너 격리"와 같은 종류의 착각을 경계하는 슬라이드입니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">가장 짧은 경로부터</h2>
+  <p style="margin-top:11px">127.0.0.1:5678</p><span class="who">⑦ 셀프 호스팅</span></div>
+  <aside>혼자 살펴보는 로컬 실행에는 도메인과 HTTPS를 먼저 사용하지 않습니다.</aside>
+</section>
+
+<!-- 5 로컬 실행 -->
+<section class="slide" data-part="PART 1">
+  <h2>로컬 실행 — <span class="g">공개 범위를 넓히지 않습니다</span></h2>
+  <div class="big">도메인 없이 내 컴퓨터에서 실행하고<br><span class="y">127.0.0.1:5678</span>로 접속합니다</div>
+  <table class="t">
+    <tr><th>구분</th><th>뜻과 쓰임</th></tr>
+    <tr><td><code>127.0.0.1</code></td><td><b>현재 사용 중인 컴퓨터</b>를 가리킵니다</td></tr>
+    <tr><td><code>5678</code></td><td>기본 포트로 <b>n8n 화면에 연결</b>됩니다</td></tr>
+    <tr><td>도메인 · HTTPS</td><td><b>다른 사람이 인터넷을 통해 접속하도록 공개할 때</b> — 주소와 통신 암호화, 접근 경계를 관리합니다</td></tr>
+  </table>
+  <div class="hl">⚠️ 로컬 실행은 공개 범위를 넓히지 않는 대신 — <b class="r">노트북을 끄면 n8n도 중지됩니다</b></div>
+  <aside>혼자 관찰할 때는 도메인과 HTTPS가 오히려 관리 대상만 늘립니다.</aside>
+</section>
+
+<!-- 6 Docker -->
+<section class="slide" data-part="PART 1">
+  <h2>Docker — <span class="b">독립된 상자</span>에 함께 담아</h2>
+  <ul class="pts">
+    <li>Docker는 앱과 실행에 필요한 환경을 <b>컨테이너라는 독립된 상자</b>에 함께 담아 실행합니다</li>
+    <li>n8n 이미지를 내려받아 컨테이너로 띄우면 — <b class="g">운영체제마다 필요한 프로그램을 따로 맞추는 수고를 줄입니다</b></li>
+    <li>같은 이미지를 사용하면 <b class="g">내 컴퓨터와 서버에서도 비슷한 조건으로 실행</b>합니다</li>
+  </ul>
+  <div class="hl">📌 그래서 Docker는 <b>셀프 호스팅을 시작할 때 널리 사용</b>됩니다</div>
+  <aside>이식성(소단원 ②의 다섯 질문 중 하나)을 실제로 확보하는 방법이 이미지 고정입니다.</aside>
+</section>
+
+<!-- 7 컨테이너 vs 볼륨 -->
+<section class="slide" data-part="PART 1">
+  <h2>깊이 보기 — <span class="g">컨테이너</span>와 <span class="p">볼륨</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>📦 컨테이너</h3><p>실행 중인 <b>n8n 프로그램과 실행 환경</b>을 포함합니다. <b class="r">지우고 새로 만들면 그 안의 임시 파일도 함께 삭제</b>됩니다</p></div>
+    <div class="box"><h3>💾 볼륨</h3><p>컨테이너 <b>바깥</b>에 데이터를 남겨 두는 저장 공간. n8n 데이터를 연결하면 <b class="g">이미지를 바꾸거나 컨테이너를 다시 띄운 뒤에도 워크플로와 설정을 이어서</b> 씁니다</p></div>
+  </div>
+  <div class="hl">⚠️ 볼륨의 <b>실제 저장 장치와 백업 방법</b>은 Docker 설정과 운영체제에 따라 다르므로 <b class="r">직접 확인</b>합니다</div>
+  <aside>"볼륨을 붙였다"와 "백업이 있다"는 서로 다른 사실입니다.</aside>
+</section>
+
+<!-- 8 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">규모가 아니라 운영 책임으로 고릅니다</h2>
+  <p style="margin-top:11px">SQLite · PostgreSQL · Redis · Kubernetes</p><span class="who">⑦ 셀프 호스팅</span></div>
+  <aside>더 큰 구성을 더 나은 구성으로 판단하지 않습니다.</aside>
+</section>
+
+<!-- 9 DB -->
+<section class="slide" data-part="PART 2">
+  <h2>데이터를 <span class="b">어디에 저장</span>하나</h2>
+  <table class="t">
+    <tr><th>선택</th><th>저장 방식</th><th>알맞은 환경</th></tr>
+    <tr><td><b>SQLite</b> (기본)</td><td>내 컴퓨터의 <b>한 파일</b>에 저장</td><td><b class="g">혼자 관찰하거나 가볍게 실습</b>하는 환경에서 간단하게</td></tr>
+    <tr><td><b>PostgreSQL</b></td><td><b>별도로 실행하는 데이터베이스 프로세스</b>에 저장</td><td><b class="g">여러 사람이 지속적으로 사용</b>하거나 <b>백업과 복구를 운영</b>해야 하는 환경에서 권장</td></tr>
+  </table>
+  <aside>기본값(SQLite)이 나쁜 선택이 아니라, 환경에 맞는 선택입니다.</aside>
+</section>
+
+<!-- 10 queue mode -->
+<section class="slide" data-part="PART 2">
+  <h2>실행이 겹치면 — <span class="p">queue mode</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>기본 구성</h3><p><b>단일 실행 프로세스</b>가 들어온 작업을 모두 처리합니다</p></div>
+    <div class="box"><h3>queue mode</h3><p><b class="p">Redis가 작업 대기열을 관리</b>하고 <b>여러 실행 프로세스가 작업을 나누어</b> 처리합니다</p></div>
+  </div>
+  <div class="hl">⚖️ 처리량은 증가하지만 — <b class="r">Redis와 실행 프로세스 상태, 실패한 작업 기록까지 확인할 대상도 증가</b>합니다</div>
+  <aside>성능을 얻는 대신 관측 대상이 늘어난다는 교환을 명시합니다.</aside>
+</section>
+
+<!-- 11 Kubernetes -->
+<section class="slide" data-part="PART 2">
+  <h2>Kubernetes — <span class="r">개인 로컬에는 쓰지 않습니다</span></h2>
+  <ul class="pts">
+    <li>Kubernetes(k8s)는 <b>컨테이너를 여러 서버에 배치하고, 중지된 컨테이너를 다시 실행하며, 트래픽에 따라 수를 조절</b>합니다</li>
+    <li>n8n은 <b>Kubernetes용 Helm 차트 배포</b>를 지원합니다</li>
+    <li><b class="r">개인이 로컬에서 살펴보는 환경에는 관리 대상이 너무 많으므로 사용하지 않습니다</b></li>
+    <li><b class="g">여러 서버에서 지속적인 서비스를 운영하는 환경</b>에서는 — 컨테이너 상태를 매번 직접 관리하지 않기 위해 사용합니다</li>
+  </ul>
+  <aside>미니멀 소단원(하네스 ⑦)의 논리와 같습니다 — 더 많은 장치가 항상 더 좋은 것은 아닙니다.</aside>
+</section>
+
+<!-- 12 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">에이전트에 맡기고, 다시 읽어 확인합니다</h2>
+  <p style="margin-top:11px">제안된 설정은 그대로 믿지 않습니다</p><span class="who">⑦ 셀프 호스팅</span></div>
+  <aside>처음 이 구성을 만날 때는 코딩 에이전트에 목적과 조건을 함께 전달합니다.</aside>
+</section>
+
+<!-- 13 요청과 검증 -->
+<section class="slide" data-part="PART 3">
+  <h2>요청문과 <span class="g">검증</span></h2>
+  <pre>로컬에서 n8n을 Docker로 띄워 줘.
+포트는 5678로 열고, 데이터는 볼륨에 남겨 줘.
+실행 뒤에 확인할 주소와 생성된 파일·볼륨도 설명해 줘.</pre>
+  <div class="hl">🔍 <b class="r">제안된 설정은 그대로 믿지 않고</b> — <b class="g">사용한 이미지, 포트, 볼륨을 다시 읽어 확인</b>합니다</div>
+  <ul class="pts">
+    <li>요청문에 <b>목적과 조건을 함께</b> 넣는 것이 요령입니다 — 소단원 ④의 요청문 패턴과 같습니다</li>
+  </ul>
+  <aside>"실행 뒤에 확인할 주소와 생성된 파일·볼륨도 설명해 줘"가 검증을 요청문에 심는 부분입니다.</aside>
+</section>
+
+<!-- 14 실행 후 확인 -->
+<section class="slide" data-part="PART 3">
+  <h2>실행 뒤 <span class="b">확인 목록</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">브라우저에서 <code>127.0.0.1:5678</code>을 열어 <b>화면이 보이는지</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t">Docker의 실행 목록에서 <b>n8n 컨테이너가 계속 동작하는지</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t">화면이 열리지 않으면 <b class="g">포트 충돌 · 컨테이너 중지 · 이미지 내려받기 실패</b>처럼 <b>관찰할 수 있는 신호부터</b></span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b class="r">비밀번호나 API 키가 요청문·터미널 기록·공유 화면에 남지 않았는지</b></span></div>
+  </div>
+  <aside>4번을 습관으로 만들어야 합니다. 실습 화면을 캡처해 공유할 때 가장 자주 새는 지점입니다.</aside>
+</section>
+
+<!-- 15 구성 표 -->
+<section class="slide" data-part="PART 3">
+  <h2>상황별 <span class="g">구성과 책임</span></h2>
+  <table class="t">
+    <tr><th>상황</th><th>검토할 구성</th><th>함께 확인할 운영 책임</th></tr>
+    <tr><td>혼자 관찰</td><td>로컬 실행 + <b>SQLite</b></td><td>컴퓨터와 <b>데이터 파일의 보관·백업</b></td></tr>
+    <tr><td>소규모 팀</td><td>Docker + <b>PostgreSQL</b></td><td><b>접근 권한 · 데이터베이스 백업 · 업데이트</b></td></tr>
+    <tr><td>실행이 많이 겹침</td><td>Docker + PostgreSQL + <b class="p">Redis queue mode</b></td><td><b>대기열 · 실행자 상태 · 실패 작업의 기록</b></td></tr>
+    <tr><td>여러 서버를 운영</td><td><b>Kubernetes</b> 배포</td><td><b>배포 상태 · 장애 복구 · 권한과 비용</b></td></tr>
+  </table>
+  <aside>오른쪽 열이 왼쪽 열보다 중요합니다 — 구성을 고르는 근거가 그쪽에 있습니다.</aside>
+</section>
+
+<!-- 16 정답표 아님 -->
+<section class="slide" data-part="PART 3">
+  <h2>표를 <span class="r">정답표로 쓰지 않습니다</span></h2>
+  <div class="big">더 큰 구성을 <span class="y">더 나은 구성으로 판단하지 않습니다</span></div>
+  <ul class="pts">
+    <li>기준은 하나 — <b class="g">내 워크플로가 중지됐을 때 누가 확인하고 복구할 수 있는지</b>에 맞춰 구성합니다</li>
+    <li>셀프 호스팅에서는 n8n을 내 환경에서 실행하며 — <b>데이터와 실행 기록을 어디에 두고 어떤 책임을 맡을지</b> 결정합니다</li>
+  </ul>
+  <aside>이 기준 한 줄이 이 소단원 전체의 결론입니다.</aside>
+</section>
+
+<!-- 17 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 셀프 호스팅에서 옮겨오는 것은 접속 주소뿐인가?</div>
+    <div class="q a"><b>A1.</b> 아니다. <b>워크플로 정의 · 실행 기록 · 비밀값</b>이 어디에 남는지, 그리고 <b>백업 · 삭제 · 접근 권한 회수</b>까지 내가 설계하고 확인한다.</div>
+    <div class="q"><b>Q2.</b> 컨테이너와 볼륨의 차이는?</div>
+    <div class="q a"><b>A2.</b> 컨테이너는 <b>실행 중인 프로그램과 환경</b>으로 지우면 임시 파일도 사라진다. 볼륨은 <b>바깥에 데이터를 남기는 저장 공간</b>으로 컨테이너를 다시 띄워도 워크플로와 설정이 남는다.</div>
+    <div class="q"><b>Q3.</b> 구성을 고르는 기준은?</div>
+    <div class="q a"><b>A3.</b> 규모가 아니라 <b>운영 책임</b> — 내 워크플로가 중지됐을 때 <b>누가 확인하고 복구할 수 있는지.</b></div>
+  </div>
+  <aside>Q1의 "데이터가 내 컴퓨터에 있으니 안전하다"는 착각이 가장 흔합니다.</aside>
+</section>
+
+<!-- 18 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>운영 책임도 함께 옮겨옵니다 🏠</h1>
+    <div class="big" style="margin-top:26px">데이터가 내 컴퓨터에 있다는 사실과<br><span class="y">안전하다는 판단</span>은 다릅니다</div>
+    <p class="sub" style="margin-top:24px">자동화와 에이전트 ⑦ — 여기까지 (중단원 ① 완결)</p>
+  </div>
+  <aside>①에서 던진 "다음 행동을 누가 정하는가"라는 질문이, ⑦에서 "그 실행과 기록을 누가 책임지는가"로 이어졌습니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
