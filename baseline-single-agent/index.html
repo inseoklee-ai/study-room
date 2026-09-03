@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>단일 에이전트로 기준선 세우기 (멀티에이전트 ④)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 멀티에이전트 ④</span>
+    <h1 style="margin:18px 0">단일 에이전트로<br>기준선 세우기</h1>
+    <p class="sub">같은 고장 난 장치를 세 작업대로 옮기되, 다음 행동을 정하는 주체만 바꿉니다</p>
+  </div>
+  <aside>앞 절의 관측을 우리 조건에서 확인하려면, 먼저 나누지 않은 실행을 비교의 기준으로 남겨야 합니다.</aside>
+</section>
+
+<!-- 2 세 실행 -->
+<section class="slide" data-part="표지">
+  <h2>바꾸는 것은 <span class="g">하나뿐</span>입니다</h2>
+  <table class="t">
+    <tr><th>실행</th><th>다음 행동을 정하는 주체</th></tr>
+    <tr><td><b>기준선 실행(A)</b></td><td><b>한 에이전트</b></td></tr>
+    <tr><td><b class="b">워크플로 실행(B)</b></td><td><b class="b">코드</b></td></tr>
+    <tr><td><b class="p">오케스트레이션 실행(C)</b></td><td><b class="p">리드</b></td></tr>
+  </table>
+  <div class="hl">🔒 세 실행에 <b class="g">공통으로 고정</b>하는 것 — <b>문제 · 모델 별칭 · 저장소 준비 방식 · 채점 방식</b></div>
+  <aside>고정과 조작을 분리하는 것이 이 실험 설계의 핵심입니다.</aside>
+</section>
+
+<!-- 3 대상 문제 -->
+<section class="slide" data-part="표지">
+  <h2>대상 — <span class="b">벤치마크 문제 다섯 건</span></h2>
+  <table class="t">
+    <tr><th>출처</th><th>인스턴스</th><th>평가 방식</th></tr>
+    <tr><td><b>SWE-bench</b> SymPy 3건</td><td><code>sympy__sympy-24909</code> · <code>-24213</code> · <code>-24152</code></td><td><b class="r">공식 SWE-bench 도커 평가가 아닌 경량 평가</b> — 저장소 타르볼을 고정한 뒤 수정 복사본에 <b>테스트 패치를 적용</b>하고 대상 테스트를 실행. 파이썬 <b>3.11</b></td></tr>
+    <tr><td><b>Terminal-Bench</b> 2건</td><td><code>log-summary</code> · <code>bank-trans-filter</code></td><td>문제 폴더 안의 <b>pytest로 곧바로</b> 채점</td></tr>
+  </table>
+  <ul class="pts">
+    <li>SymPy 인스턴스에는 <b>확인할 테스트가 한두 개</b> 있습니다</li>
+  </ul>
+  <aside>경량 평가라는 점이 소단원 ⑩에서 결론의 범위를 정할 때 밝혀야 할 한계입니다.</aside>
+</section>
+
+<!-- 4 내려받기 -->
+<section class="slide" data-part="표지">
+  <h2>문제 다섯 건, <span class="g">한 곳에서</span></h2>
+  <pre>git clone https://github.com/SunCreation/d035-agent-lab.git</pre>
+  <table class="t">
+    <tr><th>폴더</th><th>들어 있는 파일</th></tr>
+    <tr><td>SymPy 문제</td><td>에이전트에게 그대로 전달할 원문 이슈 <code>problem.md</code> · 확인용 테스트를 더하는 <code>test_patch.diff</code> · 기준 커밋과 확인 테스트 경로를 적은 <code>info.json</code></td></tr>
+    <tr><td>Terminal-Bench 문제</td><td>과업 지시문 <code>task.yaml</code> · 입력 데이터 · 채점용 테스트 <code>tests/test_outputs.py</code></td></tr>
+  </table>
+  <div class="hl">📌 <b class="r">정답 패치와 참조 솔루션은 저장소에 없습니다</b> — <b class="g">무엇을 맞혔는지는 오직 테스트 실행으로만</b> 확인합니다</div>
+  <aside>내려받은 저장소의 tasks/ 폴더에 문제별 폴더가 들어 있습니다.</aside>
+</section>
+
+<!-- 5 다섯 문제 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">다섯 문제가 무엇인가</h2>
+  <p style="margin-top:11px">한 줄씩 먼저 봅니다</p><span class="who">④ 기준선</span></div>
+  <aside>Terminal-Bench 두 문제는 도커 없이 문제 폴더 안에서 바로 실행할 수 있습니다.</aside>
+</section>
+
+<!-- 6 문제 목록 -->
+<section class="slide" data-part="PART 1">
+  <h2>다섯 문제 <span class="g">한 줄 요약</span></h2>
+  <table class="t">
+    <tr><th>문제</th><th>내용</th></tr>
+    <tr><td><b>sympy-24909</b></td><td>접두사에 단위를 곱하면 결과가 <code>1</code>이 되어 <b class="r">단위가 사라집니다.</b> <code>milli * W</code>를 곱하면 정상이라면 <b>밀리와트</b>가 남아야 합니다</td></tr>
+    <tr><td><b>sympy-24213</b></td><td>가속도에 시간을 곱한 값에 속도를 더하면, <b>같은 차원인데도</b> 서로 다르다는 <code>ValueError</code>가 납니다. 차원은 <b>길이·시간·속도처럼 물리량의 종류</b>를 나타내는 정보입니다</td></tr>
+    <tr><td><b>sympy-24152</b></td><td>텐서곱은 <b>두 연산 대상을 짝지어 결합하는 연산</b>입니다. 인수에 덧셈이 섞였을 때 <code>expand(tensorproduct=True)</code>가 <b class="r">두번째 인수까지 전개하지 못합니다</b></td></tr>
+    <tr><td><b>log-summary</b></td><td>서로 다른 서비스의 로그 파일에서 <b>ERROR·WARNING·INFO</b>가 들어간 줄 수를 세어 <code>summary.csv</code>로</td></tr>
+    <tr><td><b>bank-trans-filter</b></td><td>회사명과 계좌번호에 <b>오타가 섞인</b> 거래 내역에서 특정 회사 관련 거래만 골라 <b>날짜순</b>으로 정리한 <code>output.json</code>으로</td></tr>
+  </table>
+  <aside>SymPy 세 문제는 info.json에 적힌 기준 커밋으로 저장소를 받아 온 뒤 그 위에서 실행합니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">왜 Claude Agent SDK인가</h2>
+  <p style="margin-top:11px">네 가지 방법을 견줍니다</p><span class="who">④ 기준선</span></div>
+  <aside>같은 문제를 자동으로 고치는 방법은 하나가 아닙니다.</aside>
+</section>
+
+<!-- 8 방법 비교 -->
+<section class="slide" data-part="PART 2">
+  <h2>네 방법의 <span class="r">대가</span></h2>
+  <table class="t">
+    <tr><th>방법</th><th>대가</th></tr>
+    <tr><td>대화형 CLI를 셸 스크립트에서 여러 번 호출<br>(Claude Code CLI · opencode)</td><td>시작은 쉽지만 <b class="r">사람의 조작과 셸 환경이 끼어들어 조건을 고정하고 다시 재현하기 어렵습니다</b></td></tr>
+    <tr><td>Messages API 직접 호출</td><td><b class="r">도구 실행기·권한 승인·기록 형식을 모두 코드로</b> 만들어야 하므로 — 실험 설계보다 <b class="r">실행 기반을 만드는 데 시간</b>이 듭니다</td></tr>
+    <tr><td>범용 프레임워크 (LangGraph 등)</td><td><b class="r">추상화 문법을 익혀야 하고</b>, 오늘 비교하려는 <b class="r">다음 행동의 결정 주체가 프레임워크 안에 가려집니다</b></td></tr>
+    <tr><td><b class="g">Claude Agent SDK</b></td><td>Claude Code의 <b>도구 실행 · 권한 · 세션 JSONL 기록 · 서브에이전트 정의 · 구조화 출력</b>을 파이썬 코드에서 제공</td></tr>
+  </table>
+  <aside>오늘은 세 실행에서 다음 행동을 정하는 주체만 바꾸고 모델·도구·기록 형식은 같게 두어야 공정합니다.</aside>
+</section>
+
+<!-- 9 세 실행의 코드 대응 -->
+<section class="slide" data-part="PART 2">
+  <h2>차이가 <span class="g">조율 주체로만</span> 남습니다</h2>
+  <table class="t">
+    <tr><th>실행</th><th>코드 구조</th></tr>
+    <tr><td><b>A</b></td><td><code>query()</code> <b>한 번</b>으로 시작</td></tr>
+    <tr><td><b class="b">B</b></td><td>코드가 파일을 나누어 <b class="b">병렬 <code>query()</code></b>를 호출한 뒤 결과를 합침</td></tr>
+    <tr><td><b class="p">C</b></td><td><code>options.agents</code>로 워커를 정의하고 <b class="p">리드가 위임 여부를 정함</b></td></tr>
+  </table>
+  <div class="hl">📌 매 실행의 <code>result.json</code>과 세션 JSONL은 <b class="g">같은 형식으로</b> 남고, 판정기 <code>judge.py</code>는 <b>그 파일을 그대로 읽습니다</b></div>
+  <aside>기록 형식이 같아야 판정기가 하나로 유지됩니다.</aside>
+</section>
+
+<!-- 10 환경 -->
+<section class="slide" data-part="PART 2">
+  <h2>전용 <span class="b">가상 환경</span>을 만듭니다</h2>
+  <pre>cd ~/sweb-lab
+uv venv .venv
+uv pip install --python .venv/bin/python claude-agent-sdk==0.2.151</pre>
+  <ul class="pts">
+    <li>시스템 파이썬에 설치하지 않는 이유 — <b class="r">PEP 668 환경에서 전역 설치가 막힐 수 있고</b>, <b class="g">실행 환경을 분리</b>해야 하기 때문입니다</li>
+  </ul>
+  <div class="hl">🛠️ 아래 기준선 실행 코드를 보여 주며 <b>코딩 에이전트에게 비슷한 실험 스크립트와 준비 코드를 만들어 달라</b>고 부탁합니다. <b class="g">인스턴스 준비와 결과 채점까지 똑같이 만들 필요는 없습니다</b> — <b>한 문제를 한 에이전트가 처리하고 결과 파일을 남기는 실험 구조가 같으면</b> 됩니다</div>
+  <aside>자기 폴더에 이 실험을 위한 파이썬 스크립트를 만듭니다.</aside>
+</section>
+
+<!-- 11 코드 -->
+<section class="slide" data-part="PART 2">
+  <h2>실행 도우미와 <span class="g">기준선 실행(A)</span></h2>
+  <pre>async def _run_once(prompt, options):
+    """(마지막 ResultMessage, 오류문) 반환.
+    max_turns 소진은 SDK가 ResultError로 던지지만 실험에서는
+    '턴 소진'이라는 관측 결과일 뿐이라 예외로 죽지 않고
+    남은 상태를 그대로 채점한다."""
+    last = None
+    try:
+        async for m in query(prompt=prompt, options=options):
+            if type(m).__name__ == "ResultMessage":
+                last = m
+    except Exception as e:
+        return last, f"{type(e).__name__}:{str(e)[:200]}"
+    return last, None
+
+if arm == "A":
+    msg, err = await asyncio.wait_for(_run_once(
+        f"Fix this bug:\n\n{problem}",
+        ClaudeAgentOptions(cwd=str(repo), model=MODEL, max_turns=25,
+                           system_prompt=SYS_A,
+                           permission_mode="bypassPermissions")), 1500)</pre>
+  <div class="hl">⚠️ 읽기 전용 도구 제한 <code>allowed_tools=["Read","Grep","Glob"]</code>은 <b class="r">기준선 실행(A)이 아니라</b> — <b class="g">워크플로 실행(B)의 원인 탐색 호출에만</b> 적용됩니다</div>
+  <aside>턴 소진을 예외로 죽이지 않고 관측으로 다루는 것이 이 도우미의 설계 의도입니다. 기준선 실행(A)은 최대 25턴입니다.</aside>
+</section>
+
+<!-- 12 common.py -->
+<section class="slide" data-part="PART 2">
+  <h2>시험 환경부터 <span class="r">검증</span>합니다</h2>
+  <pre>.venv/bin/python common.py</pre>
+  <ul class="pts">
+    <li><code>common.py</code>는 저장소 타르볼을 펼쳐 <b>pristine 복사본</b>을 만들고, 채점용 <code>venv311</code>에 <b>pytest와 mpmath</b>를 준비합니다</li>
+    <li>이어서 <b class="g">골드 패치를 적용한 검증</b>을 실행합니다 — 세 건 모두 <b>정답 패치 전에는 <code>1 failed</code>가 재현</b>되었고 <b>정답 패치 후에는 통과가 확인</b>된 인스턴스입니다</li>
+  </ul>
+  <div class="hl">🎯 <b class="r">이 확인이 없으면 에이전트의 수정이 아니라 시험 환경의 문제를 성공이나 실패로 읽을 수 있습니다</b></div>
+  <aside>실험 전에 계측기를 교정하는 단계입니다.</aside>
+</section>
+
+<!-- 13 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">실행하고 기록을 읽습니다</h2>
+  <p style="margin-top:11px">바이브 코딩으로 따라하기</p><span class="who">④ 기준선</span></div>
+  <aside>명령 경로나 파일 이름을 정확히 외울 필요는 없습니다.</aside>
+</section>
+
+<!-- 14 위임 -->
+<section class="slide" data-part="PART 3">
+  <h2>위임하되 <span class="r">요약으로 받지 않습니다</span></h2>
+  <pre>내가 만든 실험 스크립트를 살펴보고 실행을 도와줘.
+먼저 준비가 되었는지 확인한 뒤, 기준선 실행(A)으로
+SymPy 문제 하나를 실행해 줘. 끝나면 결과 파일에서
+성공 여부, 비용, 대화 횟수, 걸린 시간을 찾아 정리하고,
+실행한 명령과 결과 파일 경로도 보여 줘.</pre>
+  <div class="hl">⚠️ <b class="r">에이전트의 요약을 결과로 받아들이기보다</b> — <b class="g">실제 명령과 결과 파일을 함께 확인</b>해야 합니다. 위임한 뒤에는 <b>명령이 정확히 실행됐는지</b>와 <b>지정한 결과 파일이 실제로 생겼는지</b>를 확인합니다</div>
+  <aside>소단원 ④~⑥의 모든 바이브 코딩 지시에 같은 원칙이 적용됩니다.</aside>
+</section>
+
+<!-- 15 실행 -->
+<section class="slide" data-part="PART 3">
+  <h2>한 인스턴스만 <span class="g">먼저</span> 실행합니다</h2>
+  <pre>.venv/bin/python arms.py A sympy__sympy-24909</pre>
+  <table class="t">
+    <tr><th>필드</th><th>뜻</th></tr>
+    <tr><td><code>resolved</code> · <code>invalid</code></td><td><b>테스트 채점 결과</b></td></tr>
+    <tr><td><code>cost_usd</code> · <code>num_turns</code> · <code>wall_s</code></td><td><b>실행에서 남은 관측값</b></td></tr>
+    <tr><td><code>final_text</code></td><td>에이전트의 마지막 응답</td></tr>
+    <tr><td><code>changes.diff</code></td><td><b class="g">수정 내용</b></td></tr>
+  </table>
+  <pre>cat runs/A-sympy__sympy-24909/result.json
+cat runs/A-sympy__sympy-24909/changes.diff</pre>
+  <aside>두번째 인수는 인스턴스 식별자입니다. 모델은 haiku이고 최대 턴은 25입니다.</aside>
+</section>
+
+<!-- 16 25턴 소진 -->
+<section class="slide" data-part="PART 3">
+  <h2><code>resolved: false</code>를 <span class="r">결론으로 닫지 않습니다</span></h2>
+  <p>턴을 모두 썼다는 기록을 보면 <b class="r">"단일 에이전트로는 안 된다"</b>고 바로 생각하기 쉽습니다. <b class="g">하지만 이 한 번의 실행만으로 그렇게 결론 내리지 않습니다.</b></p>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">먼저 <b><code>changes.diff</code>와 실행 기록</b>을 엽니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">에이전트가 주어진 턴 동안 <b class="g">무엇을 찾았고 무엇을 고쳤는지</b> 확인합니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">그래야 <b class="g">왜 끝내지 못했는지</b>와 <b class="g">기준선 실행(A)의 한계</b>를 구분해 볼 수 있습니다</span></div>
+  </div>
+  <div class="big">턴 소진은 단순 오류가 아니라<br><span class="y">문제를 어디까지 탐색했고 어느 지점에서 멈췄는지 읽을 기록</span>입니다</div>
+  <aside>한 실행에서 haiku가 25턴을 모두 소진한 관측이 있었습니다.</aside>
+</section>
+
+<!-- 17 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 세 실행에서 고정하는 것과 바꾸는 것은?</div>
+    <div class="q a"><b>A1.</b> 고정 — <b>문제·모델 별칭·저장소 준비·채점 방식.</b> 바꾸는 것 — <b>다음 행동을 정하는 주체</b>뿐.</div>
+    <div class="q"><b>Q2.</b> <code>common.py</code>의 골드 패치 검증이 왜 필요한가?</div>
+    <div class="q a"><b>A2.</b> 이 확인이 없으면 <b>에이전트의 수정이 아니라 시험 환경의 문제</b>를 성공이나 실패로 읽을 수 있기 때문.</div>
+    <div class="q"><b>Q3.</b> 25턴 소진을 어떻게 읽나?</div>
+    <div class="q a"><b>A3.</b> 단순 오류가 아니라 — <b>어디까지 탐색했고 어느 지점에서 멈췄는지 읽을 기록.</b> <code>changes.diff</code>와 전사를 함께 본다.</div>
+  </div>
+  <aside>Q2는 실험 설계에서 가장 자주 빠지는 단계입니다.</aside>
+</section>
+
+<!-- 18 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>나누지 않은 실행을 남깁니다 📏</h1>
+    <div class="big" style="margin-top:26px">기준선이 없으면<br><span class="y">나눈 결과가 좋아졌는지</span> 말할 수 없습니다</div>
+    <p class="sub" style="margin-top:24px">멀티에이전트 ④ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑤에서 탐색과 수정을 코드로 분리합니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

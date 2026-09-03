@@ -40,7 +40,10 @@ const LESSONS = process.argv.slice(2).length
      "reflexion-loop","minimal-loop","permission-boundary",
      "eval-loop","harness-map","hypothesis-experiment",
      "automation-who-decides","workflow-and-graph","n8n-observation","n8n-cli-agent",
-     "n8n-ai-agent-node","adopt-hold-reject","self-hosting-n8n"];
+     "n8n-ai-agent-node","adopt-hold-reject","self-hosting-n8n",
+     "multiagent-tradeoff","four-structures","reading-agent-numbers",
+     "baseline-single-agent","workflow-split","lead-orchestration",
+     "observe-and-judge","compare-arms","multiagent-ecosystem","adopt-reduce-retire"];
 
 // ---- palette (deck light theme) ----
 const INK="2A2723", SOFT="6B6357", GR="3F6B5F", GR2="2C4D44", GOLD="C8A15A",

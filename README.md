@@ -253,6 +253,19 @@
    - ✅ ②-10. 일곱 하네스를 기능 지도 위에 놓기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/harness-map/) · 📊 [PPT](harness-map/harness-map.pptx)
    - ✅ ②-11. 논문 가설을 내 개선 실험으로 바꾸기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/hypothesis-experiment/) · 📊 [PPT](hypothesis-experiment/hypothesis-experiment.pptx)
 
+**중단원 ③**
+3. **멀티에이전트는 어떻게 적용할까?** ✅ 완결 (10강) · 멀티에이전트에 대한 실험을 하는 방법을 배웁니다
+   - ✅ ③-1. 멀티 에이전트와 나눔의 득실 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/multiagent-tradeoff/) · 📊 [PPT](multiagent-tradeoff/multiagent-tradeoff.pptx)
+   - ✅ ③-2. 네 가지 구조와 맞는 과업 (A2A 깊이 보기) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/four-structures/) · 📊 [PPT](four-structures/four-structures.pptx)
+   - ✅ ③-3. 성과 숫자 읽기와 적용 조건 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/reading-agent-numbers/) · 📊 [PPT](reading-agent-numbers/reading-agent-numbers.pptx)
+   - ✅ ③-4. 단일 에이전트로 기준선 세우기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/baseline-single-agent/) · 📊 [PPT](baseline-single-agent/baseline-single-agent.pptx)
+   - ✅ ③-5. 코드가 정하는 흐름 — 워크플로로 나누기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/workflow-split/) · 📊 [PPT](workflow-split/workflow-split.pptx)
+   - ✅ ③-6. 모델이 정하는 흐름 — 리드가 나누기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/lead-orchestration/) · 📊 [PPT](lead-orchestration/lead-orchestration.pptx)
+   - ✅ ③-7. 실행 기록을 관측하고 한 흐름으로 읽기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/observe-and-judge/) · 📊 [PPT](observe-and-judge/observe-and-judge.pptx)
+   - ✅ ③-8. 단일과 멀티 비교 판정하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/compare-arms/) · 📊 [PPT](compare-arms/compare-arms.pptx)
+   - ✅ ③-9. 실험을 둘러싼 생태계 — 문제로 도구 고르기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/multiagent-ecosystem/) · 📊 [PPT](multiagent-ecosystem/multiagent-ecosystem.pptx)
+   - ✅ ③-10. 채택·축소·폐기 판정과 과제 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/adopt-reduce-retire/) · 📊 [PPT](adopt-reduce-retire/adopt-reduce-retire.pptx)
+
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
 > ⚠️ **웹 슬라이드는 반드시 라이브 사이트에서 열어야 합니다.** GitHub 저장소 화면(github.com)에서 위 링크를 누르면 슬라이드가 아니라 소스 폴더로 갑니다. 아래 라이브 주소로 접속하세요:
@@ -390,6 +403,16 @@
 > - 대5-자동화-①5 https://inseoklee-ai.github.io/study-room/n8n-ai-agent-node/
 > - 대5-자동화-①6 https://inseoklee-ai.github.io/study-room/adopt-hold-reject/
 > - 대5-자동화-①7 https://inseoklee-ai.github.io/study-room/self-hosting-n8n/
+> - 대5-멀티-③1 https://inseoklee-ai.github.io/study-room/multiagent-tradeoff/
+> - 대5-멀티-③2 https://inseoklee-ai.github.io/study-room/four-structures/
+> - 대5-멀티-③3 https://inseoklee-ai.github.io/study-room/reading-agent-numbers/
+> - 대5-멀티-③4 https://inseoklee-ai.github.io/study-room/baseline-single-agent/
+> - 대5-멀티-③5 https://inseoklee-ai.github.io/study-room/workflow-split/
+> - 대5-멀티-③6 https://inseoklee-ai.github.io/study-room/lead-orchestration/
+> - 대5-멀티-③7 https://inseoklee-ai.github.io/study-room/observe-and-judge/
+> - 대5-멀티-③8 https://inseoklee-ai.github.io/study-room/compare-arms/
+> - 대5-멀티-③9 https://inseoklee-ai.github.io/study-room/multiagent-ecosystem/
+> - 대5-멀티-③10 https://inseoklee-ai.github.io/study-room/adopt-reduce-retire/
 > - 대4-① https://inseoklee-ai.github.io/study-room/prompt-engineering-intro/
 > - 대4-② https://inseoklee-ai.github.io/study-room/agent-structure/
 > - 대4-③ https://inseoklee-ai.github.io/study-room/model-inputs/

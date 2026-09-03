@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>성과 숫자 읽기와 적용 조건 (멀티에이전트 ③)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 멀티에이전트 ③</span>
+    <h1 style="margin:18px 0">성과 숫자 읽기와<br>적용 조건</h1>
+    <p class="sub">보고서의 숫자를 오늘 결과의 예고로 읽지 않습니다</p>
+  </div>
+  <aside>보고서의 관측은 오늘 실행에서 무엇을 확인할지 정하는 단서로만 쓰고, 결과는 실행이 끝난 뒤 생성된 파일의 필드로 읽습니다.</aside>
+</section>
+
+<!-- 2 필드로 읽기 -->
+<section class="slide" data-part="표지">
+  <h2>숫자를 <span class="g">실행 파일의 필드</span>로 바꿔 읽습니다</h2>
+  <p>예를 들어 <b>연구 시간을 줄였다</b>는 관측은 <b>병렬로 나눌 수 있는 복잡한 조사</b>에서 나온 것입니다. <b class="r">SymPy 버그 하나를 고치는 실행에서 같은 일이 일어난다고 보장하지 않습니다.</b></p>
+  <div class="chain">
+    <div class="cell" style="min-width:170px;border-color:var(--red)"><small>보고서의 숫자</small><b class="r">오늘 결과의<br>예고 ✗</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:200px;border-color:var(--gr)"><small>쓰는 방식</small><b class="g">무엇을 확인할지<br>정하는 단서</b></div>
+  </div>
+  <ul class="pts">
+    <li>결과는 <b class="g">실행이 끝난 뒤 생성된 파일의 필드</b>로 읽습니다 — 감상이나 주장이 아니라 <b>필드 이름</b></li>
+  </ul>
+  <aside>이 소단원의 표 마지막 열은 모두 필드 이름을 가리킵니다.</aside>
+</section>
+
+<!-- 3 턴 -->
+<section class="slide" data-part="표지">
+  <h2>턴과 <span class="b">턴 소진</span></h2>
+  <div class="hl">📖 <b>턴</b> — 모델이 <b>도구 결과를 받아 다음 행동을 정하는 한 사이클</b></div>
+  <p>기준선 실행(A)의 첫 실행에서 haiku는 SymPy 버그를 조사하고 수정하려 했습니다. 그러나 <b class="r">25번째 사이클까지 마친 뒤에도 종료하지 못했습니다.</b></p>
+  <table class="t">
+    <tr><th>기록</th><th>보여 주는 것</th></tr>
+    <tr><td><code>result.json</code>의 <code>num_turns</code></td><td>실행이 <b>몇 사이클까지 탐색했는지</b></td></tr>
+    <tr><td>세션 JSONL의 <code>tool_use</code></td><td>그 사이에 <b>어떤 도구를 몇 번 호출했는지</b></td></tr>
+  </table>
+  <div class="big">두 값을 함께 보면<br><span class="y">탐색이 길어진 것인지, 같은 도구 호출을 되풀이한 것인지</span> 구분됩니다</div>
+  <aside>이 사건을 단순히 "실패"라고 닫으면 무엇을 하다 멈췄는지 알 수 없습니다. 통과한 실행과 통과하지 못한 실행 모두의 이 필드가 비교표에 남습니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">다섯 관측을 조건과 함께 해체합니다</h2>
+  <p style="margin-top:11px">각각 오늘 어떤 필드로 확인하는가</p><span class="who">③ 숫자 읽기</span></div>
+  <aside>모든 관측에 측정 조건이 붙어 있습니다.</aside>
+</section>
+
+<!-- 5 90.2% -->
+<section class="slide" data-part="PART 1">
+  <h2>① <span class="g">90.2%</span> 성능 차이</h2>
+  <table class="t">
+    <tr><th>항목</th><th>내용</th></tr>
+    <tr><td>측정</td><td><b>내부 research eval</b>에서 측정</td></tr>
+    <tr><td>구성</td><td><b>Opus 4 리드 + Sonnet 4 서브에이전트</b> vs <b>단일 Opus 4</b></td></tr>
+    <tr><td>미확인</td><td><b class="r">보고서에 평가 방식이 밝혀져 있지 않습니다</b></td></tr>
+    <tr><td><b class="g">오늘 확인할 필드</b></td><td><code>resolved</code> — 각 실행이 <b>정답 커밋의 테스트를 통과했는지</b>. A·B·C 모두 같은 필드</td></tr>
+  </table>
+  <div class="hl">⚠️ 이 수치를 <b class="r">오늘 haiku 구성의 성능 우위로 옮길 수 없습니다.</b> <code>resolved</code>가 <b class="g">먼저여야</b> — 비용이나 시간이 좋은 <b class="r">실패 실행을 성공처럼 읽지 않습니다</b></div>
+  <aside>읽는 순서가 정해져 있다는 점이 중요합니다.</aside>
+</section>
+
+<!-- 6 90% 시간 -->
+<section class="slide" data-part="PART 1">
+  <h2>② 연구 시간 <span class="g">최대 90% 감소</span></h2>
+  <ul class="pts">
+    <li>조건 — 리드가 <b>3~5개 서브에이전트를 병렬로</b> 만들었고, <b>각 서브에이전트도 3개 이상 도구를 병렬로</b> 썼습니다</li>
+    <li><b class="r">이 두 변경이 함께 있을 때의 시간</b>입니다</li>
+    <li><b class="r">탐색과 수정을 나눈 B나 리드가 조율하는 C가 같은 시간을 줄인다는 보장은 없습니다</b></li>
+  </ul>
+  <div class="hl">✅ 오늘 확인할 필드 — <code>result.json</code>의 <code>wall_s</code>. <b class="g">같은 SymPy 인스턴스와 모델 조건에서 측정한 시간</b>을 나란히 봅니다</div>
+  <aside>"병렬 서브에이전트"와 "병렬 도구 호출"이 동시에 바뀐 결과라는 점이 이 수치의 조건입니다.</aside>
+</section>
+
+<!-- 7 15배 -->
+<section class="slide" data-part="PART 1">
+  <h2>③ 토큰 <span class="r">약 15배 / 약 4배</span></h2>
+  <table class="t">
+    <tr><th>비교</th><th>배수</th><th>기준</th></tr>
+    <tr><td>멀티 에이전트</td><td><b class="r">약 15배</b></td><td><b>채팅</b></td></tr>
+    <tr><td>에이전트</td><td><b class="r">약 4배</b></td><td><b>채팅</b></td></tr>
+  </table>
+  <div class="hl">⚠️ 두 값 모두 <b>채팅을 기준</b>으로 합니다 — <b class="r">단일 에이전트와 멀티 에이전트의 직접 비용 비교가 아닙니다.</b> 따라서 <b class="r">약 15배를 A 대비 C의 비용으로 읽지 않습니다</b></div>
+  <ul class="pts">
+    <li>오늘 확인할 필드 — <code>cost_usd</code>. <b class="g">같은 <code>resolved</code> 결과끼리만 비용을 견줍니다</b></li>
+  </ul>
+  <aside>기준선이 무엇인지 확인하지 않고 배수를 옮기는 것이 가장 흔한 오독입니다.</aside>
+</section>
+
+<!-- 8 80% 분산 -->
+<section class="slide" data-part="PART 1">
+  <h2>④ 분산의 <span class="p">80% / 95%</span> 설명</h2>
+  <table class="t">
+    <tr><th>요인</th><th>분산 설명 비중</th></tr>
+    <tr><td>토큰 사용량 <b>하나</b></td><td><b class="p">80%</b></td></tr>
+    <tr><td>토큰 + 도구 호출 수 + 모델 선택 <b>세 요인</b></td><td><b class="p">95%</b></td></tr>
+  </table>
+  <div class="hl">⚠️ 이는 <b>BrowseComp 평가의 여러 실행에서 나타난 분산의 설명 비중</b>입니다 — <b class="r">SymPy 버그 한 건의 품질 점수가 아닙니다</b></div>
+  <ul class="pts">
+    <li>오늘 확인할 필드 — <code>num_turns</code>와 세션 JSONL <code>tool_use</code> 레코드 <b>합계</b>를 함께</li>
+    <li>기준선 실행(A)이 25턴을 모두 써도 종료하지 못한 경우처럼 — <b class="g">탐색이 길어진 것인지 같은 도구를 되풀이한 것인지 가르는 근거</b></li>
+  </ul>
+  <aside>분산 설명력은 "무엇을 함께 기록해야 하는가"를 알려 주는 단서로 씁니다.</aside>
+</section>
+
+<!-- 9 40% -->
+<section class="slide" data-part="PART 1">
+  <h2>⑤ 도구 설명 개선 후 <span class="g">40% 감소</span></h2>
+  <ul class="pts">
+    <li>여기서 바뀐 것은 <b>도구 설명</b>입니다</li>
+    <li><b class="r">빠른 실행이 더 싼 실행이나 더 높은 정답률을 뜻하지는 않습니다</b></li>
+  </ul>
+  <div class="hl">🎯 그래서 오늘의 <code>wall_s</code>는 <b class="g"><code>cost_usd</code>, <code>resolved</code>, 그리고 같은 인스턴스·모델·실행 조건</b>과 <b class="r">떨어뜨려 읽지 않습니다</b> — 이 조건까지 남겨야 A의 단일 실행, B의 탐색·수정 워크플로, C의 리드 조율 구성을 <b>공정하게</b> 비교할 수 있습니다</div>
+  <aside>다섯 관측 모두 "무엇이 바뀌었는가"를 함께 읽어야 합니다.</aside>
+</section>
+
+<!-- 10 읽는 순서 -->
+<section class="slide" data-part="PART 1">
+  <h2><code>results-table.md</code>를 <span class="g">읽는 순서</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b class="g"><code>resolved</code></b>로 정답 커밋의 테스트를 통과했는지 봅니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">그 결과에 든 <b><code>wall_s</code>와 <code>cost_usd</code></b>를 봅니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b><code>num_turns</code>와 <code>tool_use</code> 합계</b>를 보며 — 빠르거나 비쌌던 이유가 <b class="r">탐색 부족인지 반복 호출인지</b> 확인합니다</span></div>
+  </div>
+  <div class="big">값 하나가 좋아도<br><span class="y">나머지 기록을 덮지 않습니다</span></div>
+  <div class="hl">📌 범례 — 성능은 <code>resolved</code>, 걸린 시간은 <code>wall_s</code>, 비용은 <code>cost_usd</code>. <b class="r"><code>resolved</code>가 같아도 시간이 다를 수 있고, 시간이 짧아도 비용이 낮다는 뜻은 아닙니다</b></div>
+  <aside>시간 개선과 토큰 비용은 서로 다른 조건에서 나온 보고서 수치입니다 — 같은 결론으로 묶지 않습니다.</aside>
+</section>
+
+<!-- 11 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">점수는 판정의 출발점입니다</h2>
+  <p style="margin-top:11px">두 층으로 나뉜 채점</p><span class="who">③ 숫자 읽기</span></div>
+  <aside>LLM judge는 언어 모델이 정해진 기준에 따라 실행 기록을 평가하는 방식입니다.</aside>
+</section>
+
+<!-- 12 루브릭 대응 -->
+<section class="slide" data-part="PART 2">
+  <h2>Anthropic 루브릭을 <span class="b">버그 수정에 맞춰</span> 좁힙니다</h2>
+  <p>Anthropic 보고의 루브릭은 <b>사실 정확성 · 인용 정확성 · 완결성 · 출처 품질 · 도구 효율성</b>을 봅니다. 오늘의 버그 수정에서는 이 다섯 물음이 <b class="r">결과 문장의 그럴듯함이 아니라</b> — <b class="g">수정에 이른 행동 기록을 읽는 물음</b>이 됩니다.</p>
+  <table class="t">
+    <tr><th>층</th><th>방식</th><th>남는 필드</th></tr>
+    <tr><td><b>1층 (결정론적)</b></td><td>정답 커밋의 테스트를 적용해 실행</td><td><code>resolved</code> (통과 여부) · <code>invalid</code> (테스트 파일을 건드렸는지)</td></tr>
+    <tr><td><b>2층 (LLM judge)</b></td><td>세션 JSONL 전사를 읽어 판정</td><td><code>근거_추적</code> · <code>편집_최소성</code> · <code>검증_성실성</code> 각각 <b>0·1·2</b></td></tr>
+  </table>
+  <div class="hl">⚠️ 1층에서는 <b class="r">설명이 좋아도 테스트가 통과했다는 판정을 대신할 수 없습니다</b></div>
+  <aside>근거_추적은 파일을 읽은 뒤 편집했는지, 편집_최소성은 무관한 변경을 넓히지 않았는지, 검증_성실성은 수정 뒤 확인을 했는지를 봅니다.</aside>
+</section>
+
+<!-- 13 스키마 -->
+<section class="slide" data-part="PART 2">
+  <h2>judge는 <span class="r">자유 서술을 부탁하지 않습니다</span></h2>
+  <p><code>output_format</code>의 <code>json_schema</code>가 <b>세 점수 · MAST 계열 실패 분류 · <code>evidence_quote</code></b>를 출력 구조로 요구합니다.</p>
+  <ul class="pts">
+    <li><code>evidence_quote</code>에는 <b class="g">판정 근거가 된 전사 구절</b>이 들어가야 합니다</li>
+    <li><b class="r">인용이 없으면 스키마가 결과를 허용하지 않으므로</b> — <b class="r">"검증을 했다"는 말만으로 점수를 얻을 수 없습니다</b></li>
+    <li>실패 분류 예 — <code>턴_소진</code> · <code>무근거_편집</code> · <code>과잉_편집</code> · <code>검증_생략</code></li>
+  </ul>
+  <div class="hl">📌 기준선 실행(A)이 <b>25턴을 모두 쓴 기록</b>도 이렇게 <b class="g">실패 과정을 분류하는 근거</b>가 됩니다</div>
+  <aside>구조화 출력이 "추측으로 점수 매기기"를 막는 장치입니다.</aside>
+</section>
+
+<!-- 14 판정 모델 분리 -->
+<section class="slide" data-part="PART 2">
+  <h2>판정 모델은 <span class="g">실험 모델과 다르게</span> 둡니다</h2>
+  <div class="big">같은 모델이 자기 행동을 채점하면<br><span class="y">자기 설명에 끌릴 수 있기 때문입니다</span></div>
+  <ul class="pts">
+    <li>실험 모델은 <b>haiku</b>, 판정 모델은 <b class="g">다른 모델</b></li>
+    <li>비교표에 함께 모으는 것 — <code>resolved</code> · <code>invalid</code> · <code>cost_usd</code> · <code>num_turns</code> · <code>wall_s</code> · <b>세 점수</b> · <b>실패 분류</b></li>
+    <li>1층 <code>resolved</code>와 2층 세 점수를 <b class="g">함께 봐야</b> — <b>통과했지만 근거가 약한 실행</b>과 <b>통과하지 못했지만 어디에서 막혔는지 남긴 실행</b>을 구별할 수 있습니다</li>
+  </ul>
+  <aside>다음 소단원부터 세 SymPy 인스턴스를 세 가지 실행으로 처리하고, 이 두 층의 기록이 채워진 results-table.md에서 같은 조건의 행을 비교합니다.</aside>
+</section>
+
+<!-- 15 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 보고서 숫자를 어떻게 쓰나?</div>
+    <div class="q a"><b>A1.</b> 오늘 결과의 예고가 아니라 — <b>무엇을 확인할지 정하는 단서.</b> 결과는 실행이 만든 <b>파일의 필드</b>로 읽는다.</div>
+    <div class="q"><b>Q2.</b> 결과표를 읽는 순서는?</div>
+    <div class="q a"><b>A2.</b> <code>resolved</code> → <code>wall_s</code>·<code>cost_usd</code> → <code>num_turns</code>·<code>tool_use</code> 합계. <b>값 하나가 나머지 기록을 덮지 않는다.</b></div>
+    <div class="q"><b>Q3.</b> <code>evidence_quote</code>를 필수로 둔 까닭은?</div>
+    <div class="q a"><b>A3.</b> <b>추측으로 점수를 매기지 않기 위해서.</b> 인용이 없으면 스키마가 결과를 허용하지 않는다.</div>
+  </div>
+  <aside>Q2의 순서를 어기면 "싸고 빠른 실패"를 성공으로 읽게 됩니다.</aside>
+</section>
+
+<!-- 16 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>숫자는 측정 기준부터 나눕니다 📐</h1>
+    <div class="big" style="margin-top:26px">테스트는 <span class="y">수정의 결과</span>를<br>판정 기록은 <span class="y">그 결과에 이르는 행동의 근거</span>를 읽습니다</div>
+    <p class="sub" style="margin-top:24px">멀티에이전트 ③ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ④에서 나누지 않은 실행을 비교의 기준선으로 남깁니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>네 가지 구조와 맞는 과업 · A2A (멀티에이전트 ②)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 멀티에이전트 ②</span>
+    <h1 style="margin:18px 0">네 가지 구조와<br>맞는 과업</h1>
+    <p class="sub">핵심은 인원수가 아니라 연결된 책임입니다</p>
+  </div>
+  <aside>멀티 에이전트는 여러 에이전트가 참여한다는 뜻일 뿐입니다.</aside>
+</section>
+
+<!-- 2 빠지는 것 -->
+<section class="slide" data-part="표지">
+  <h2>"여러 명"이라는 말이 <span class="r">말해 주지 않는 것</span></h2>
+  <ul class="pts">
+    <li>멀티 에이전트는 <b class="r">누가 일을 나누고 누가 다음 행동을 정하는지</b>를 말해 주지 않습니다</li>
+    <li>같은 수의 워커도 <b>연결 방식에 따라</b> — <b class="r">중복 조사 · 대기 · 잘못된 인계</b>처럼 다른 실패를 만듭니다</li>
+  </ul>
+  <div class="hl">🎯 구조를 고를 때 먼저 확인할 두 가지 — <b class="g">결과가 어디로 모이는지</b>와 <b class="g">틀린 결과를 누가 되돌리는지</b></div>
+  <aside>작업 보드의 카드를 역할별로 나누어 맡는 모습은 핵심이 인원수가 아니라 연결된 책임임을 보여 줍니다.</aside>
+</section>
+
+<!-- 3 허브형과 직접형 -->
+<section class="slide" data-part="표지">
+  <h2>소통 경로 — <span class="b">허브형</span>과 <span class="p">직접형</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>🔵 허브형</h3><p><b>모든 소통이 리드를 경유</b>합니다. <b class="b">오케스트레이터-워커</b>와 <b class="b">팬아웃·합성</b>이 여기 속하며, 리드가 일을 나누고 결과를 받거나 합성합니다</p></div>
+    <div class="box"><h3>🟣 직접형</h3><p>에이전트끼리 <b>결과와 제어권을 바로 주고받습니다.</b> <b class="p">비평-수정</b>과 <b class="p">인계</b>가 여기 속하며, 비평자는 초안 작성자에게 의견을 돌려주고 앞 담당은 다음 담당에게 맥락을 넘깁니다</p></div>
+  </div>
+  <ul class="pts">
+    <li>도식에서 <b>파란 화살표는 제어권 또는 위임의 방향</b>, <b>회색 화살표는 탐색 결과나 검토 결과가 모이는 방향</b>입니다</li>
+  </ul>
+  <aside>두 경로가 책임과 제어권을 어떻게 다르게 움직이는지가 네 구조의 차이입니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">허브형 두 구조</h2>
+  <p style="margin-top:11px">오케스트레이터-워커 · 팬아웃·합성</p><span class="who">② 네 가지 구조</span></div>
+  <aside>모든 소통이 리드를 지나는 구조입니다.</aside>
+</section>
+
+<!-- 5 오케스트레이터-워커 -->
+<section class="slide" data-part="PART 1">
+  <h2>오케스트레이터-워커 — <span class="b">리드가 나누고 합칩니다</span></h2>
+  <p>리드는 <b>전략을 세우고 과업을 위임</b>합니다. 워커는 <b>병렬로 탐색</b>하고, 리드는 결과를 받아 <b>합성</b>합니다. Anthropic은 이 구조를 <b>orchestrator-worker</b>라고 부릅니다.</p>
+  <ul class="pts">
+    <li>맞는 과업 — <b class="g">독립된 조사 질문이 여럿인 열린 과업</b></li>
+    <li>위험은 <b class="r">모호한 위임</b>입니다 — 워커가 <b class="r">같은 범위를 찾거나</b>, <b class="r">결과만 전달하고 근거를 남기지 않을</b> 수 있습니다</li>
+    <li>의존성이 큰 과업에서 워커를 <b>동기 실행</b>하면 — <b class="r">가장 늦게 끝나는 워커 때문에 전체가 기다립니다</b></li>
+  </ul>
+  <div class="hl">✅ 위험을 낮추는 방법 — <b class="g">목표 · 출력 포맷 · 도구·출처 지침 · 과업 경계</b>를 먼저 적습니다</div>
+  <aside>소단원 ⑥의 오케스트레이션 실행(C)이 이 구조입니다.</aside>
+</section>
+
+<!-- 6 팬아웃 -->
+<section class="slide" data-part="PART 1">
+  <h2>팬아웃·합성 — <span class="b">독립 결과를 모아 비교</span></h2>
+  <p><b>같은 출발점</b>에서 여러 워커가 <b>독립적으로 조사</b>한 뒤 리드가 결과를 비교해 합칩니다. 팬아웃은 <b>일을 여러 갈래로 펼친다</b>는 뜻입니다.</p>
+  <ul class="pts">
+    <li>맞는 과업 — <b class="g">자료 수집과 관점 비교</b>처럼 <b>중간 결과를 기다리지 않고 시작할 수 있는</b> 과업</li>
+    <li>주요 위험은 <b class="r">독립성만 믿고 결과를 그대로 이어 붙이는 일</b>입니다 — 서로 다른 결과가 <b class="r">같은 근거를 반복하거나 중요한 관점 하나를 빠뜨릴</b> 수 있습니다</li>
+  </ul>
+  <div class="hl">🔍 리드가 확인할 것 — <b class="r">결과의 수보다</b> <b class="g">근거가 얼마나 겹치는지, 어떤 관점이 비어 있는지</b></div>
+  <aside>소단원 ①의 "분리는 결과 수가 아니라 증거의 독립성을 만든다"가 여기서 실무 지침이 됩니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">직접형 두 구조</h2>
+  <p style="margin-top:11px">비평-수정 · 인계</p><span class="who">② 네 가지 구조</span></div>
+  <aside>에이전트끼리 결과와 제어권을 바로 주고받는 구조입니다.</aside>
+</section>
+
+<!-- 8 비평-수정 -->
+<section class="slide" data-part="PART 2">
+  <h2>비평-수정 — <span class="p">비평을 되돌립니다</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:110px"><small>1</small><b>초안</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--red)"><small>2</small><b class="r">비평이 문제를 찾아<br>작성자에게 돌려줌</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:110px;border-color:var(--gr)"><small>3</small><b class="g">수정</b></div>
+  </div>
+  <ul class="pts">
+    <li>맞는 과업 — <b class="g">반례 점검이나 설계안 검토</b>처럼 <b>한 결과의 약점을 찾아야 하는</b> 과업</li>
+    <li>비평은 <b class="r">새 답을 많이 만드는 역할이 아니라</b> — <b class="g">초안의 근거, 누락, 과도한 일반화를 점검</b>하는 역할</li>
+    <li>주요 위험은 <b class="r">비평과 수정이 끝없이 반복되는 일</b>입니다. <b>확인할 항목과 되돌릴 횟수</b>를 정하지 않으면 결론을 늦출 수 있습니다</li>
+  </ul>
+  <div class="hl">⚠️ <b class="r">비평 결과가 초안보다 항상 더 정확하다고 해석해서도 안 됩니다</b></div>
+  <aside>하네스 중단원 ⑥(반성)의 "틀린 교훈" 문제와 같은 구조의 위험입니다.</aside>
+</section>
+
+<!-- 9 인계 -->
+<section class="slide" data-part="PART 2">
+  <h2>인계 — <span class="p">제어권을 넘깁니다</span></h2>
+  <p>한 담당이 <b>다음 담당에게 제어권을 넘깁니다.</b> 문의의 성격에 따라 <b>다른 전문 역할로 대화를 이어 가야 하는</b> 과업에 맞습니다.</p>
+  <ul class="pts">
+    <li>다음 담당은 <b class="g">이미 확인한 사실</b>과 <b class="g">아직 답하지 못한 질문</b>을 받아야 합니다</li>
+    <li>주요 위험은 <b class="r">잘못된 인계와 반복 인계</b>입니다 — 인계 기준이 흐리면 <b class="r">같은 설명을 다시 묻게</b> 됩니다</li>
+    <li><b class="g">어떤 조건에서 넘기고 어떤 조건에서 앞 담당에게 되돌릴지 기록</b>해야 합니다</li>
+  </ul>
+  <aside>고객 지원처럼 역할 전환이 잦은 흐름에서 자주 쓰이는 구조입니다.</aside>
+</section>
+
+<!-- 10 매칭표 -->
+<section class="slide" data-part="PART 2">
+  <h2>패턴-과업 <span class="g">매칭표</span></h2>
+  <table class="t">
+    <tr><th>패턴</th><th>소통 경로와 구조</th><th>맞는 과업</th><th>주요 위험</th></tr>
+    <tr><td>오케스트레이터-워커</td><td><b class="b">허브형</b>: 리드가 전략·위임·합성</td><td>독립 조사가 여럿인 열린 과업</td><td><b class="r">중복 조사와 대기 병목</b></td></tr>
+    <tr><td>팬아웃·합성</td><td><b class="b">허브형</b>: 독립 워커 결과를 리드가 비교</td><td>자료 수집과 관점 비교</td><td><b class="r">근거 반복과 누락</b></td></tr>
+    <tr><td>비평-수정</td><td><b class="p">직접형</b>: 작성자와 비평자가 의견을 주고받음</td><td>반례 점검과 설계안 검토</td><td><b class="r">끝없는 되돌림</b></td></tr>
+    <tr><td>인계</td><td><b class="p">직접형</b>: 앞 담당이 다음 담당에게 제어권</td><td>역할 전환이 필요한 대화</td><td><b class="r">잘못된 인계와 반복</b></td></tr>
+  </table>
+  <aside>네 구조 모두 한 실행 환경 안의 에이전트들이었습니다.</aside>
+</section>
+
+<!-- 11 실습 구성 -->
+<section class="slide" data-part="PART 2">
+  <h2>오늘 실습의 <span class="g">구성</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>1명</small><b class="b">리드</b></div>
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>2명</small><b class="g">병렬 워커</b></div>
+    <div class="cell" style="min-width:120px;border-color:var(--red)"><small>1명</small><b class="r">비평</b></div>
+  </div>
+  <ul class="pts">
+    <li><b>리드가 두 워커의 결과를 합성</b>한 뒤 <b>비평이 결과를 검토</b>합니다</li>
+    <li>다음 소단원부터 이 구조로 <b class="g">같은 과업을 비교 실험</b>합니다</li>
+  </ul>
+  <aside>실습에서 실제로 만들 구성입니다.</aside>
+</section>
+
+<!-- 12 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">깊이 보기 — 소유자가 다른 에이전트끼리, A2A</h2>
+  <p style="margin-top:11px">오늘 실습에서는 만들지 않는 개념 지도</p><span class="who">② 네 가지 구조</span></div>
+  <aside>오늘 실습에서는 A2A나 Agent Card를 직접 만들지 않습니다. 외부 에이전트 연동을 검토할 때 찾아볼 개념 지도입니다.</aside>
+</section>
+
+<!-- 13 A2A 필요 -->
+<section class="slide" data-part="PART 3">
+  <h2>같은 환경 안과 <span class="r">밖</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>🏠 같은 실행 환경 안</h3><p>환경이 <b>누가 어떤 도구를 쓸 수 있는지, 결과를 어디에 남길지 이미 알고</b> 있었기에 — <b class="g">내부 호출과 정해진 메시지 포맷만으로</b> 협업</p></div>
+    <div class="box"><h3>🌐 소유자·프레임워크가 다른 외부</h3><p><b class="r">어느 주소로 요청하는지, 상대가 어떤 일을 받을 수 있는지, 일이 끝났는지, 결과물은 어디 있는지</b>가 합의되지 않으면 — <b class="r">"검토를 맡긴다"는 문장만으로는 연결할 수 없습니다</b></p></div>
+  </div>
+  <div class="hl">📖 <b>A2A</b>(Agent2Agent Protocol) — 서로 다른 프레임워크나 공급자가 만든 에이전트 애플리케이션 사이의 <b>통신과 상호운용</b>을 목표로 하는 공개 프로토콜. <b>Google이 2025년 4월 발표</b>, 공식 문서는 <b>Linux Foundation 산하 컨소시엄으로 이관</b>되어 TSC가 유지</div>
+  <aside>서로 다른 기관이 같은 표준 서식으로 요청과 확인을 주고받듯, 통신 규격은 참여자 모두가 알아보는 서식을 정하는 일입니다.</aside>
+</section>
+
+<!-- 14 세 층 -->
+<section class="slide" data-part="PART 3">
+  <h2>약속의 <span class="b">세 층</span></h2>
+  <table class="t">
+    <tr><th>층</th><th>내용</th></tr>
+    <tr><td><b>발견</b></td><td>상대 에이전트가 <b>Agent Card</b>라는 JSON 문서로 <b>이름·접근 URL·인증 방식·수행 가능 기능</b>을 선언. <b class="r">카드는 이력서에 가깝고, 실제 권한과 품질 검증은 별도로</b></td></tr>
+    <tr><td><b>작업</b></td><td>의뢰하는 쪽이 <b>task</b>를 보내고 <b>requested(submitted)·working·완료·실패</b> 상태를 추적. <b class="g">오래 걸리는 일은 한 번의 응답으로 끝나지 않으므로 상태 조회가 연결의 일부</b></td></tr>
+    <tr><td><b>결과물</b></td><td>답변 문장 대신 <b>파일과 구조화 데이터를 담는 artifact</b>로 반환 — <b class="g">"완료"라는 상태와 "무엇이 만들어졌는가"를 구분하는 장치</b></td></tr>
+  </table>
+  <aside>흐름: 카드 확인 → task 전송 → submitted·working·input-required 상태 갱신 → artifact 반환 → 의뢰자가 검증하고 다음 작업 결정.</aside>
+</section>
+
+<!-- 15 Agent Card -->
+<section class="slide" data-part="PART 3">
+  <h2>Agent Card <span class="g">초안</span></h2>
+  <pre>{"name":"curriculum-review-agent",
+ "description":"교안 초안의 사실 인용과 표현 위험을 검토한다",
+ "url":"https://example.org/a2a",
+ "skills":[{"id":"citation-review","name":"인용 검토",
+            "description":"출처와 주장 연결을 점검한다"}]}</pre>
+  <div class="hl">📌 이 한 줄은 <b class="r">구현 완료 선언이 아니라 기능 선언의 초안</b>입니다 — 기능마다 <b class="g">입력 범위 · 반환 artifact · 사람이 승인해야 할 지점 · 허용하지 않는 권한</b>을 덧붙이면 <b>"연결할 수 있는 agent"와 "맡겨도 되는 agent"를 구분하는 설계</b>가 시작됩니다</div>
+  <aside>위 endpoint는 도달하지 않는 자리표시자 값입니다. 실제 배포에서는 환경에 맞게 바꿉니다.</aside>
+</section>
+
+<!-- 16 SDK 관계 -->
+<section class="slide" data-part="PART 3">
+  <h2>우리 실습과의 <span class="b">관계</span></h2>
+  <ul class="pts">
+    <li><code>claude-agent-sdk</code> 0.2.151에서 <code>options.agents</code>의 <code>AgentDefinition</code>은 <b>리드가 워커에 프롬프트·도구·모델을 맡기는 정의</b>입니다. 워커는 <b>자신의 결과를 리드에게 돌려주고 끝</b>납니다</li>
+    <li>이 SDK 버전에서 <b class="r">서브에이전트끼리 직접 소통하는 방법은 공개 인터페이스로 제공되지 않습니다</b> — 오늘 실습의 모든 소통은 <b class="b">리드를 경유하는 허브형</b></li>
+    <li>스트림 기록에는 <b>같은 세션의 백그라운드 서브에이전트가 보낸 메시지를 구분하는 정보</b>가 남습니다. Claude Code 에이전트 팀 실험 기능과 이어지는 흔적이지만 — <b class="r">직접 메시지를 보내는 공개 호출은 이 버전에 없고 안정적인 기능도 아닙니다</b></li>
+  </ul>
+  <div class="hl">🎯 도입 판단은 <b class="r">"A2A를 지원하는가"가 아니라</b> — <b class="g">"우리 과업에 독립된 외부 에이전트가 실제로 있는가"</b>에서 시작합니다</div>
+  <aside>같은 하네스 안의 짧은 서브에이전트 호출이라면 기존 실행 구조가 더 단순할 수 있습니다. 반대로 부서·공급자가 다르고 각자 내부 구현을 감춘 채 반복적으로 과업을 주고받아야 한다면 카드·task·artifact가 설계의 언어가 됩니다. 출처: Google Developers Blog, 「Announcing the Agent2Agent Protocol (A2A)」(2025-04), A2A Project 공식 문서.</aside>
+</section>
+
+<!-- 17 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 구조를 고를 때 먼저 확인할 두 가지는?</div>
+    <div class="q a"><b>A1.</b> <b>결과가 어디로 모이는지</b>와 <b>틀린 결과를 누가 되돌리는지.</b></div>
+    <div class="q"><b>Q2.</b> 팬아웃·합성에서 리드가 볼 것은?</div>
+    <div class="q a"><b>A2.</b> 결과의 수가 아니라 — <b>근거가 얼마나 겹치는지, 어떤 관점이 비어 있는지.</b></div>
+    <div class="q"><b>Q3.</b> Agent Card는 무엇을 보장하나?</div>
+    <div class="q a"><b>A3.</b> <b>아무것도 보장하지 않는다.</b> 이력서에 가까운 기능 선언이며 <b>실제 권한과 품질 검증은 별도.</b></div>
+  </div>
+  <aside>Q3은 이 강의 전체를 관통하는 "문서가 곧 증거는 아니다"라는 원칙입니다.</aside>
+</section>
+
+<!-- 18 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>인원수가 아니라 연결된 책임 🔗</h1>
+    <div class="big" style="margin-top:26px">허브형은 리드를 경유하고<br>직접형은 서로 주고받습니다<br><span class="y">실패의 모습이 각각 다릅니다</span></div>
+    <p class="sub" style="margin-top:24px">멀티에이전트 ② — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ③에서 보고서의 성과 숫자를 실행 파일의 필드로 바꿔 읽는 법을 배웁니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

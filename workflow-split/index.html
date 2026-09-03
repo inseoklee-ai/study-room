@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>코드가 정하는 흐름 — 워크플로로 나누기 (멀티에이전트 ⑤)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 멀티에이전트 ⑤</span>
+    <h1 style="margin:18px 0">코드가 정하는 흐름<br>— 워크플로로 나누기</h1>
+    <p class="sub">구조조사팀의 보고서를 받아 시공팀이 보수에 들어갑니다</p>
+  </div>
+  <aside>기준선 실행(A)의 기록에서 탐색과 수정이 한 세션에 함께 남았다면, 이제 그 두 행동을 분리하되 문제와 검증 조건은 그대로 둡니다.</aside>
+</section>
+
+<!-- 2 비유와 구성 -->
+<section class="slide" data-part="표지">
+  <h2>순서와 인계 내용을 <span class="g">파이썬 코드가</span> 고정합니다</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:180px;border-color:var(--gr)"><small>locator · 12턴</small><b class="g">읽기와 검색만<br>구조화된 보고</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:170px;border-color:var(--bl)"><small>fixer · 18턴</small><b class="b">새 세션에서<br>수정</b></div>
+  </div>
+  <ul class="pts">
+    <li><code>locator</code>는 <b class="g">읽기와 검색만</b> 하며 <b>파일 경로 · 함수나 클래스 이름 · 진단</b>을 구조화된 보고로 남깁니다</li>
+    <li>그 보고를 받은 <code>fixer</code>가 <b>새 세션에서</b> 수정합니다</li>
+    <li><b class="g">어느 단계가 먼저 실행되고 다음에 무엇을 받을지는 파이썬 코드가 정합니다</b></li>
+  </ul>
+  <aside>건물 보수 현장을 떠올려 봅니다. 구조조사팀이 먼저 균열을 살피고 보고서를 넘기면, 시공팀은 그 보고서를 바탕으로 보수에 들어갑니다.</aside>
+</section>
+
+<!-- 3 비교 대상 -->
+<section class="slide" data-part="표지">
+  <h2>이 분리는 <span class="r">역할 이름을 늘리는 일이 아닙니다</span></h2>
+  <div class="hl">🔍 비교 대상 세 가지 — <b class="g">탐색 결과가 <code>locate_report</code>로 다음 단계에 전달되는지</b> · <b class="g">탐색 담당이 파일을 고치지 않는지</b> · <b class="g">수정 담당이 그 근거를 이용하는지</b></div>
+  <ul class="pts">
+    <li><code>arms.py</code>의 워크플로 실행(B)은 <b>locator에 12턴, fixer에 18턴</b>을 줍니다</li>
+  </ul>
+  <aside>"두 역할로 나눴다"는 사실이 아니라 "인계가 실제로 일어났는가"가 관찰 대상입니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">보고서가 다음 프롬프트로 건너갑니다</h2>
+  <p style="margin-top:11px">두 호출이 대화를 공유하지 않습니다</p><span class="who">⑤ 코드가 정하는 흐름</span></div>
+  <aside>arms.py에서 워크플로 실행(B)을 수행하는 핵심 호출 부분입니다.</aside>
+</section>
+
+<!-- 5 코드 -->
+<section class="slide" data-part="PART 1">
+  <h2>핵심 <span class="g">호출 부분</span></h2>
+  <pre>loc, err_loc = await asyncio.wait_for(_run_once(
+    f"Bug report:\n\n{problem}\n\nLocate the likely cause.",
+    ClaudeAgentOptions(cwd=str(repo), model=MODEL, max_turns=12,
+                       system_prompt=SYS_B_LOCATE,
+                       permission_mode="bypassPermissions",
+                       allowed_tools=["Read","Grep","Glob"])), 900)
+
+locate_report = (getattr(loc, "result", "") or "").strip()
+extra["locate_report"] = locate_report[:2000]
+
+msg, err = await asyncio.wait_for(_run_once(
+    f"Bug report:\n\n{problem}\n\n"
+    f"Locator report from a previous agent:\n{locate_report}\n\n"
+    "Apply the minimal fix.",
+    ClaudeAgentOptions(cwd=str(repo), model=MODEL, max_turns=18,
+                       system_prompt=SYS_B_FIX,
+                       permission_mode="bypassPermissions")), 1200)</pre>
+  <aside>allowed_tools에 Read·Grep·Glob만 주어 locator가 파일을 고칠 수 없게 합니다.</aside>
+</section>
+
+<!-- 6 인계 방식 -->
+<section class="slide" data-part="PART 1">
+  <h2>대화가 아니라 <span class="b">변수</span>가 건너갑니다</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">첫 호출의 <code>loc</code>에서 <b>보고서를 꺼내 변수에 저장</b>합니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">두번째 호출은 <b class="g">그 변수의 내용을 프롬프트로</b> 받습니다</span></div>
+  </div>
+  <div class="big">두 세션이 <span class="y">같은 대화를 공유하는 것이 아니라</span><br><small>코드가 정한 보고서만 다음 단계로 건너갑니다</small></div>
+  <div class="hl">📌 그래서 <code>extra["locate_report"]</code>에 남은 <b class="g">2,000자까지의 보고 내용</b>이 인계가 실제로 일어났는지 확인하는 기록이 됩니다</div>
+  <aside>소단원 ①에서 말한 "분리된 컨텍스트"가 코드 수준에서는 이렇게 구현됩니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">실행하고 A와 나란히 엽니다</h2>
+  <p style="margin-top:11px">짧고 긴 것만으로 판단하지 않습니다</p><span class="who">⑤ 코드가 정하는 흐름</span></div>
+  <aside>실행 시간이 짧거나 길다는 사실만으로 좋고 나쁨을 판단하지 않습니다.</aside>
+</section>
+
+<!-- 8 실행 -->
+<section class="slide" data-part="PART 2">
+  <h2>실행과 <span class="g">파일 열기</span></h2>
+  <pre>.venv/bin/python arms.py B sympy__sympy-24909
+
+cat runs/B-sympy__sympy-24909/result.json
+cat runs/B-sympy__sympy-24909/changes.diff</pre>
+  <ul class="pts">
+    <li>볼 것 — <b class="g">locator의 진단이 수정 위치와 이어지는지</b>, <b class="g">수정 뒤 검증을 시도했는지</b>, <b class="g">실패했다면 어느 단계의 기록이 끊겼는지</b></li>
+  </ul>
+  <aside>워크플로 실행(B)의 결과 파일을 기준선 실행(A)의 파일과 나란히 엽니다.</aside>
+</section>
+
+<!-- 9 예산 주의 -->
+<section class="slide" data-part="PART 2">
+  <h2>턴 예산이 <span class="r">같지 않습니다</span></h2>
+  <table class="t">
+    <tr><th>실행</th><th>턴 예산</th></tr>
+    <tr><td>기준선 실행(A)</td><td>최대 <b>25턴</b> (한 세션)</td></tr>
+    <tr><td><b class="b">워크플로 실행(B)</b></td><td>locator <b>12턴</b> + fixer <b>18턴</b> (두 호출)</td></tr>
+  </table>
+  <div class="hl">⚠️ 워크플로 실행(B)의 숫자는 <b>두 호출의 기록이 합쳐진 값</b>입니다 — <b class="r">A의 25턴과 B의 12+18턴을 같은 예산이라고 읽으면 안 됩니다</b></div>
+  <ul class="pts">
+    <li>여기서 비교할 수 있는 것 — <b class="g">흐름을 나눴을 때 남는 근거와 실패의 모습</b></li>
+    <li><b class="r">예산이 다른 실행의 숫자 하나만으로 우열을 정할 수 없습니다</b></li>
+  </ul>
+  <aside>같은 인스턴스에서 A와 B의 resolved·invalid·num_turns·wall_s·cost_usd를 읽되, 이 한계를 함께 적습니다.</aside>
+</section>
+
+<!-- 10 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> locator와 fixer는 무엇을 공유하나?</div>
+    <div class="q a"><b>A1.</b> <b>대화를 공유하지 않는다.</b> 코드가 변수에 담은 <code>locate_report</code>만 다음 프롬프트로 건너간다.</div>
+    <div class="q"><b>Q2.</b> B에서 관찰할 세 가지는?</div>
+    <div class="q a"><b>A2.</b> 보고가 <b>다음 단계로 전달됐는지</b>, 탐색 담당이 <b>파일을 고치지 않았는지</b>, 수정 담당이 <b>그 근거를 이용했는지.</b></div>
+    <div class="q"><b>Q3.</b> A와 B의 턴 수를 나란히 비교할 수 있나?</div>
+    <div class="q a"><b>A3.</b> 없다. A는 <b>25턴 한 세션</b>, B는 <b>12+18턴 두 호출</b>로 예산이 다르다. 비교할 수 있는 것은 <b>남는 근거와 실패의 모습.</b></div>
+  </div>
+  <aside>Q3이 이 실험 전체에서 가장 조심할 지점입니다.</aside>
+</section>
+
+<!-- 11 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>코드가 순서를 정합니다 🧱</h1>
+    <div class="big" style="margin-top:26px">역할을 나눈 사실이 아니라<br><span class="y">인계가 실제로 일어났는지</span>를 봅니다</div>
+    <p class="sub" style="margin-top:24px">멀티에이전트 ⑤ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑥에서 같은 locator를 리드가 부를지 스스로 정하게 합니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

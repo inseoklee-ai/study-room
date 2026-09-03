@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>멀티 에이전트와 나눔의 득실 (멀티에이전트 ①)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 멀티에이전트 ①</span>
+    <h1 style="margin:18px 0">멀티 에이전트와<br>나눔의 득실</h1>
+    <p class="sub">나누는 것은 능력을 더하는 일이 아니라 컨텍스트와 책임을 다시 배치하는 일입니다</p>
+  </div>
+  <aside>한 에이전트에게 조사 과업 하나를 통째로 맡긴 장면에서 출발합니다.</aside>
+</section>
+
+<!-- 2 밀리는 컨텍스트 -->
+<section class="slide" data-part="표지">
+  <h2>처음 질문이 <span class="r">아래로 밀립니다</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">에이전트는 지시를 받고 검색하고, 찾은 자료와 중간 판단을 <b>대화 창에 차곡차곡 쌓습니다</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t">어느 순간 <b class="r">처음에 받은 질문은 아래로 밀리고</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b class="r">한참 전에 확인해 둔 근거도 다시 찾기 어려워집니다</b></span></div>
+  </div>
+  <div class="hl">💭 이 지점에서 저절로 나오는 생각 — <b class="g">"나누면 어떨까"</b></div>
+  <aside>컨텍스트는 다음 행동을 고를 때 함께 읽는 지시, 대화, 파일, 도구 결과입니다.</aside>
+</section>
+
+<!-- 3 리드와 워커 -->
+<section class="slide" data-part="표지">
+  <h2>리드와 <span class="b">워커</span></h2>
+  <p>창을 여러 개로 나누면 그만큼 <b class="g">처음의 질문과 확인된 근거를 오래 보존</b>할 수 있습니다. 멀티 에이전트는 이 분업을 <b>실행 구조로 구현</b>합니다.</p>
+  <div class="chain">
+    <div class="cell" style="min-width:200px;border-color:var(--bl)"><small>리드</small><b class="b">과업을 나누고<br>결과를 합치는 에이전트</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:180px;border-color:var(--gr)"><small>워커</small><b class="g">나뉜 몫을<br>수행하는 에이전트</b></div>
+  </div>
+  <ul class="pts">
+    <li>하나의 과업을 여러 에이전트에게 나누어 맡기고, <b>각자의 결과를 합쳐 하나로 완성</b>합니다</li>
+  </ul>
+  <aside>이 강의의 실습에서 이 구성을 직접 만들어 실행해 봅니다.</aside>
+</section>
+
+<!-- 4 Anthropic 사례 -->
+<section class="slide" data-part="표지">
+  <h2>실제로 택한 곳 — <span class="p">200,000토큰</span>의 벽</h2>
+  <div class="big">LeadResearcher의 컨텍스트가 <span class="y">200,000토큰을 넘으면 잘릴 수 있어</span><br><small>시작할 때 연구 계획을 Memory에 저장한다고 밝혔습니다</small></div>
+  <ul class="pts">
+    <li>컨텍스트가 <b>한계에 이르기 전에</b> 연구 계획을 <b class="g">별도 메모리에 보존</b>하는 방식</li>
+  </ul>
+  <div class="hl">📌 수를 늘린다는 것의 구체적 행동 — <b>리드가 워커의 역할을 파일로 미리 정의</b>해 두고, <b>한 번의 위임으로 여러 워커를 동시에</b> 띄웁니다. 각 워커는 자기 창에서 자기 몫만 다루고, <b class="g">리드는 돌아온 결과를 합칩니다</b></div>
+  <aside>출처: Anthropic Research 시스템 보고.</aside>
+</section>
+
+<!-- 5 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">기대와 회의는 어디서 오는가</h2>
+  <p style="margin-top:11px">두 목소리를 나란히 둡니다</p><span class="who">① 나눔의 득실</span></div>
+  <aside>어느 쪽이 옳은지는 남의 발표를 듣는 것만으로는 정해지지 않습니다.</aside>
+</section>
+
+<!-- 6 기대 -->
+<section class="slide" data-part="PART 1">
+  <h2>기대 쪽 — <span class="g">숫자가 성능을 밀어 올린다</span></h2>
+  <table class="t">
+    <tr><th>근거</th><th>내용</th></tr>
+    <tr><td>커뮤니티</td><td>"에이전트 수를 늘리면 늘릴수록 결과가 좋아진다"는 이야기가 오랫동안 돌아다녔습니다</td></tr>
+    <tr><td><b>More Agents Is All You Need</b><br>(arXiv 2402.05120)</td><td>같은 질문에 여러 에이전트의 답을 뽑아 <b>다수로 결정하는 간단한 방법</b>만으로 — <b class="g">수를 늘릴수록 성능이 오르는 경향</b></td></tr>
+    <tr><td><b>Anthropic 연구 시스템 보고</b></td><td>멀티 에이전트 연구 시스템이 단일 에이전트보다 <b class="g">연구 성능 90.2% 높음</b>, 복잡한 질의의 <b class="g">연구 시간 최대 90% 감소</b></td></tr>
+  </table>
+  <aside>업체들의 성과 발표도 확신에 힘을 보탭니다. 이 수치들의 조건은 소단원 ③에서 하나씩 해체합니다.</aside>
+</section>
+
+<!-- 7 회의 -->
+<section class="slide" data-part="PART 1">
+  <h2>회의 쪽 — <span class="r">숫자가 비용과 혼란만 올린다</span></h2>
+  <table class="t">
+    <tr><th>근거</th><th>내용</th></tr>
+    <tr><td><b>Cognition 블로그</b></td><td>협업하는 여러 에이전트가 <b class="r">취약한 시스템만 만든다</b>며 — <b class="r">에이전트 사이에 문맥이 충분히 공유되지 않는다</b>고 지적하고 <b>단일 흐름을 권장</b></td></tr>
+    <tr><td><b>해커뉴스 토론</b></td><td>검색 에이전트 <b>여섯 개</b>를 띄운 서비스가 질문 하나에 <b class="r">약 2달러</b>를 태웠다는 보고 · 간단한 질문 하나에 <b class="r">3달러와 3분</b>이 걸렸다는 사례 · <b class="r">"에이전트 열기는 이제 가라앉았다"</b>는 반응</td></tr>
+  </table>
+  <aside>현장에서는 정반대의 경험도 이어집니다.</aside>
+</section>
+
+<!-- 8 대비와 결론 -->
+<section class="slide" data-part="PART 1">
+  <h2>어느 쪽이 옳은지는 <span class="g">직접 실행해야</span> 정해집니다</h2>
+  <div class="grid2">
+    <div class="box"><h3>나누면 생길 수 있는 일</h3><p><b class="r">같은 자료를 여러 워커가 다시 찾을 수</b> 있고, <b class="r">맡기지 않은 질문은 누구도 확인하지 않을 수</b> 있으며, <b class="r">한 워커의 잘못된 판단이 합성 결과에 그대로</b> 들어갈 수도 있습니다</p></div>
+    <div class="box"><h3>그래서 무엇을 하나</h3><p><b class="g">수를 늘린 뒤 실제로 무엇이 일어나는지 직접 실행하고 기록</b>해야 판정할 수 있습니다</p></div>
+  </div>
+  <div class="big">에이전트를 나누는 것은 능력을 더하는 일이 아니라<br><span class="y">컨텍스트와 책임을 다시 배치하는 일</span>입니다</div>
+  <aside>이 강의는 이 판정을 직접 수행해 보는 시간입니다.</aside>
+</section>
+
+<!-- 9 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">나누면 생기는 세 이점</h2>
+  <p style="margin-top:11px">병렬 탐색 · 관심사 분리 · 전문화</p><span class="who">① 나눔의 득실</span></div>
+  <aside>세 이점의 공통 뿌리는 하나의 긴 컨텍스트를 독립적인 증거 묶음으로 나누는 일입니다.</aside>
+</section>
+
+<!-- 10 세 이점 -->
+<section class="slide" data-part="PART 2">
+  <h2>세 이점과 <span class="r">각각의 조건</span></h2>
+  <table class="t">
+    <tr><th>이점</th><th>내용</th><th>붙는 조건</th></tr>
+    <tr><td><b class="g">병렬 탐색</b></td><td>각 워커가 <b>분리된 컨텍스트</b>에서 다른 질문을 동시에 살핀 뒤 <b>필요한 결과만 간추려</b> 리드에게</td><td>리드는 모든 탐색 기록을 처음부터 다시 읽지 않고도 <b>비교할 재료</b>를 받습니다</td></tr>
+    <tr><td><b class="b">관심사 분리</b></td><td>워커마다 <b>도구·프롬프트·탐색 과정을 분리</b>해 — 앞선 검색 결과에 끌려 판단을 바꾸는 <b>경로 의존성</b>을 줄입니다</td><td>다만 리드는 <b class="r">각 결과의 근거와 빠진 범위를 다시 확인</b>해야 합니다</td></tr>
+    <tr><td><b class="p">전문화</b></td><td>워커마다 <b>자료 찾기 · 반례 찾기 · 인용 위치 확인</b>처럼 한 책임을</td><td><b class="g">질문과 반환 포맷이 선명할수록</b> 이점이 커집니다. 리드는 <b>목표·출력 포맷·도구·출처 지침·과업 경계</b>를 함께 전달</td></tr>
+  </table>
+  <div class="hl">🎯 분리는 <b class="r">결과 수가 아니라</b> <b class="g">증거의 독립성</b>을 만듭니다 — 하나의 긴 컨텍스트를 <b>증거 묶음 A(주장·직접 근거)</b>와 <b>증거 묶음 B(제약·반례)</b>로 나누고, 리드가 <b>대조와 합성</b>을 합니다</div>
+  <aside>세 번째 열이 이 표의 핵심입니다 — 이점마다 붙는 조건이 있습니다.</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">나누면 커지는 실패</h2>
+  <p style="margin-top:11px">중복·누락 · 오류 전파 · 비용 · 의존성</p><span class="who">① 나눔의 득실</span></div>
+  <aside>이점과 실패를 같은 무게로 봅니다.</aside>
+</section>
+
+<!-- 12 중복과 누락 -->
+<section class="slide" data-part="PART 3">
+  <h2>중복과 누락은 <span class="r">함께 생깁니다</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>🔁 중복</h3><p>두 워커가 <b>같은 질문을 조사</b>하면 <b class="r">비용만 늘고</b></p></div>
+    <div class="box"><h3>🕳️ 누락</h3><p><b class="r">경계 밖 질문은 비게 됩니다</b></p></div>
+  </div>
+  <ul class="pts">
+    <li>둘의 원인은 하나 — <b class="r">역할 경계가 흐릴 때</b></li>
+    <li>오류도 <b>결과 요약을 거치며 더 그럴듯한 결론으로</b> 퍼질 수 있습니다</li>
+    <li>그래서 <b class="g">반환물마다 근거와 불확실성을 남겨야</b> 합성 뒤에도 다시 확인할 수 있습니다</li>
+  </ul>
+  <aside>요약이 오류를 지우지 않고 오히려 다듬어 준다는 점이 무섭습니다.</aside>
+</section>
+
+<!-- 13 비용과 의존성 -->
+<section class="slide" data-part="PART 3">
+  <h2>비용은 <span class="r">별도로 읽어야</span> 합니다</h2>
+  <div class="big">멀티에이전트 시스템은 <span class="y">채팅 대비 약 15배</span>의 토큰을 사용했습니다</div>
+  <div class="hl">⚠️ <b class="r">이것을 "단일 에이전트 대비 비용"이라고 해석하면 안 됩니다</b> — 기준이 채팅입니다. <b class="g">과업의 가치가 그 비용을 감당할 만큼 큰지</b>도 함께 판단해야 합니다</div>
+  <ul class="pts">
+    <li><b>의존성이 큰 과업</b>도 나눔에 맞지 않습니다 — 리드가 워커를 <b>동기 실행</b>하면 <b class="r">한 워커가 늦을 때 전체가 기다립니다</b></li>
+    <li>언어 모델은 <b class="r">아직 실시간 조율과 위임에 능숙하지 않습니다</b></li>
+    <li>서로의 중간 결과가 있어야 다음 질문을 정할 수 있다면 — <b class="g">한 흐름으로 처리하는 편이 낫습니다</b></li>
+  </ul>
+  <aside>출처: Anthropic 연구 시스템 보고.</aside>
+</section>
+
+<!-- 14 판정표 -->
+<section class="slide" data-part="PART 3">
+  <h2>나눌 조건과 <span class="r">나누지 않을 조건</span></h2>
+  <table class="t">
+    <tr><th>판정 항목</th><th>나눌 조건</th><th>나누지 않을 조건</th></tr>
+    <tr><td>질문의 독립성</td><td>서로의 중간 결과 없이 시작합니다</td><td>앞 결과가 다음 질문을 정합니다</td></tr>
+    <tr><td>컨텍스트</td><td>자료가 섞이면 처음 기준이 밀립니다</td><td>한 흐름에서 함께 비교해야 합니다</td></tr>
+    <tr><td>책임 경계</td><td>워커별 목표와 반환 포맷을 정합니다</td><td>누가 무엇을 확인할지 갈리지 않습니다</td></tr>
+    <tr><td>합성 검토</td><td>근거와 불확실성을 대조할 시간이 있습니다</td><td>합성 비용이 조사 이득보다 큽니다</td></tr>
+    <tr><td>대기 위험</td><td>한 결과가 늦어도 다른 탐색이 진행됩니다</td><td>하나가 늦으면 전체 판단이 멈춥니다</td></tr>
+    <tr><td>비용 가치</td><td>추가 토큰 비용을 감당할 이유가 있습니다</td><td>짧은 확인만으로 충분합니다</td></tr>
+  </table>
+  <aside>각 행은 기대가 아니라 확인할 조건입니다.</aside>
+</section>
+
+<!-- 15 표 해석 -->
+<section class="slide" data-part="PART 3">
+  <h2>표를 <span class="r">에이전트 수의 우열로</span> 읽지 않습니다</h2>
+  <div class="hl">🎯 판정의 핵심 두 물음 — <b class="g">이 과업에서 분리가 확인 가능성을 높이는지</b>, <b class="g">조정 비용을 넘는지</b></div>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>독립적으로 탐색할 수 있는가</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>결과를 독립 기준으로 검증할 수 있는가</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b class="r">하나라도 아니오</b> → <b>단일 연속 컨텍스트 기본</b> / <b class="g">둘 다 예</b> → <b>병렬 탐색 후보</b></span></div>
+    <div class="st"><span class="n">4</span><span class="t">조건이 바뀌면 <b class="g">재판정</b> — 과업과 평가셋은 고정</span></div>
+  </div>
+  <div class="big"><span class="y">나누지 않기로 한 판단</span>도<br><small>비교 실험의 중요한 결과가 됩니다</small></div>
+  <aside>판정 기준은 구조 이름이 아니라 과업의 조건입니다.</aside>
+</section>
+
+<!-- 16 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 에이전트를 나누는 일의 본질은?</div>
+    <div class="q a"><b>A1.</b> 능력을 더하는 일이 아니라 — <b>컨텍스트와 책임을 다시 배치하는 일.</b></div>
+    <div class="q"><b>Q2.</b> "약 15배"를 잘못 읽는 방식은?</div>
+    <div class="q a"><b>A2.</b> <b>단일 에이전트 대비 비용</b>으로 읽는 것. 기준은 <b>채팅</b>이다.</div>
+    <div class="q"><b>Q3.</b> 나누지 않는 편이 나은 조건은?</div>
+    <div class="q a"><b>A3.</b> <b>앞 결과가 다음 질문을 정할 때</b>, 한 흐름에서 함께 비교해야 할 때, 합성 비용이 조사 이득보다 클 때, <b>하나가 늦으면 전체가 멈출 때</b>, 짧은 확인만으로 충분할 때.</div>
+  </div>
+  <aside>Q1이 이 소단원 전체의 한 줄 요약입니다.</aside>
+</section>
+
+<!-- 17 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>나눔은 재배치입니다 🧩</h1>
+    <div class="big" style="margin-top:26px">기대하는 쪽은 숫자가 성능을 올린다 말하고<br>회의하는 쪽은 숫자가 비용만 올린다 말합니다<br><span class="y">판정은 직접 실행한 기록에서</span></div>
+    <p class="sub" style="margin-top:24px">멀티에이전트 ① — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ②에서 "여러 명"이라는 말만으로 빠지는 것 — 네 가지 연결 구조를 봅니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

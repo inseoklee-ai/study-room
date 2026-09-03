@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>실험을 둘러싼 생태계 — 문제로 도구 고르기 (멀티에이전트 ⑨)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 멀티에이전트 ⑨</span>
+    <h1 style="margin:18px 0">실험을 둘러싼<br>생태계</h1>
+    <p class="sub">이름이 아니라 문제로 도구를 고릅니다</p>
+  </div>
+  <aside>세 실행의 결과표를 덮고 나면 네 가지 어려움이 남습니다.</aside>
+</section>
+
+<!-- 2 네 문제 -->
+<section class="slide" data-part="표지">
+  <h2>남은 <span class="r">네 문제</span></h2>
+  <table class="t">
+    <tr><th>문제</th><th>이 실험에서 어떻게 나타났나</th></tr>
+    <tr><td><b class="r">컨텍스트가 끊긴다</b></td><td>워커의 결과는 <b>리드에게만</b> 돌아오고, 워커가 둘이면 <b class="r">서로 무엇을 찾았는지 알 길이 없습니다.</b> Cognition이 지적한 문제가 바로 여기서</td></tr>
+    <tr><td><b class="r">재현이 안 된다</b></td><td>리드가 <b>매 턴 다음 행동을 정하는 실행</b>은 같은 명령을 다시 돌려도 <b class="r">같은 경로를 밟지 않습니다</b></td></tr>
+    <tr><td><b class="r">모델을 나눌 수 없다</b></td><td><code>arms.py</code>는 세 실행의 모델을 모두 <b><code>haiku</code></b>로 고정했습니다. <b>경로를 찾는 워커와 수정 방침을 정하는 리드가 같은 모델을 써야 할 이유는 없지만</b>, 오늘은 나눌 자리가 없었습니다</td></tr>
+    <tr><td><b class="r">상태가 안 보인다</b></td><td>어느 실행이 어디서 멈췄는지는 <b class="r">실행이 끝난 뒤</b> <code>judge.py</code>가 세션 전사를 찾아 읽어야 알 수 있었습니다</td></tr>
+  </table>
+  <aside>이 넷은 이 실험만의 사정이 아니라 멀티 에이전트가 실전에서 늘 부딪히는 문제입니다.</aside>
+</section>
+
+<!-- 3 격자 -->
+<section class="slide" data-part="표지">
+  <h2>도구가 <span class="g">바꾸는 층</span>이 다릅니다</h2>
+  <table class="t">
+    <tr><th>문제</th><th>도구</th><th>바꾸는 층</th></tr>
+    <tr><td>컨텍스트가 끊긴다</td><td><b>Agent Teams</b></td><td>다음 행동을 <b class="b">팀원들이</b> 정함</td></tr>
+    <tr><td>재현이 안 된다</td><td><b>Workflows</b></td><td>다음 행동을 <b class="b">스크립트가</b> 정함</td></tr>
+    <tr><td>모델을 나눌 수 없다</td><td><b>oh-my-claudecode</b></td><td><b class="p">어느 모델이</b> 그 행동을 하는가</td></tr>
+    <tr><td>상태가 안 보인다</td><td><b>herdr</b></td><td><b class="g">그 행동을 어디서 지켜보는가</b></td></tr>
+  </table>
+  <div class="hl">🎯 <b class="r">조율이나 모델 층이 바뀌면 기준선을 다시 세우고</b> — <b class="g">관측 층은 오늘 실험 위에 그대로 얹습니다</b></div>
+  <aside>어느 도구가 어느 문제를 푸는지 알면 이름이 아니라 문제로 도구를 고를 수 있습니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">컨텍스트가 끊기는 문제와 Agent Teams</h2>
+  <p style="margin-top:11px">팀원끼리 직접 메시지</p><span class="who">⑨ 생태계</span></div>
+  <aside>Claude Code Agent Teams는 첫 문제를 겨냥한 실험적 기능입니다.</aside>
+</section>
+
+<!-- 5 Agent Teams -->
+<section class="slide" data-part="PART 1">
+  <h2>서브에이전트와 <span class="b">팀원</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>서브에이전트</h3><p>결과를 <b>리드에게 돌려주고 끝</b>납니다</p></div>
+    <div class="box"><h3>팀원(teammate)</h3><p><b class="b">각자 컨텍스트 창을 가진 독립 세션</b>으로서 <b class="g">서로에게 직접 메시지를 보내고</b>, <b>공유 작업 목록에서 다음 일을 스스로 가져갑니다.</b> 두 팀원이 같은 작업을 동시에 가져가지 않도록 <b>파일 잠금</b>이 막아 줍니다</p></div>
+  </div>
+  <ul class="pts">
+    <li>공식 문서의 사례 — 원인이 불분명한 버그를 두고 <b class="g">팀원 다섯이 각자 다른 가설을 맡아 서로 반박</b>하게 하는 조사. <b>한 에이전트가 첫 가설에 묶이는 일을 팀원 사이의 반박으로 푸는 발상</b></li>
+    <li>켜는 법 — <code>settings.json</code>의 <code>env</code>에 <code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS</code>를 <code>"1"</code>로</li>
+  </ul>
+  <aside>첫 가설에 묶이는 문제는 소단원 ①의 '경로 의존성'과 같은 문제입니다.</aside>
+</section>
+
+<!-- 6 Agent Teams 대가 -->
+<section class="slide" data-part="PART 1">
+  <h2>대가는 <span class="r">셋</span>입니다</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">팀원 하나가 곧 <b>Claude 세션 하나</b>라서 <b class="r">토큰이 팀원 수에 비례해 늘어납니다</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b class="r">한 세션에 팀은 하나</b>이며 <b class="r">팀원이 다시 팀을 만들 수 없습니다</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b class="r">대화형 세션에서만 팀원이 만들어집니다</b> — <code>arms.py</code>처럼 SDK로 돌리는 실행에서는 켜 두어도 <b>서브에이전트로 돌아가므로</b> 오늘 실험에 바로 끼울 수 없습니다</span></div>
+  </div>
+  <div class="hl">📌 바뀌는 조건은 <b class="b">다음 행동을 정하는 주체</b>입니다 — 리드 하나가 아니라 팀원들이 함께 정하므로, <b class="r">오케스트레이션 실행(C)과 나란히 놓으려면 같은 문제로 기준선을 다시 세워야</b> 합니다</div>
+  <aside>실험적 기능이라는 점, 그리고 SDK 실행에 끼울 수 없다는 점을 함께 기억합니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">오늘의 locator를 CLI 서브에이전트로</h2>
+  <p style="margin-top:11px">역할을 파일로 적어 두면 팀원도 이 정의를 씁니다</p><span class="who">⑨ 생태계</span></div>
+  <aside>오늘 locator는 arms.py 안에서 파이썬 코드가 정의했습니다. 같은 역할을 터미널의 코딩 에이전트에는 파일 하나로 정의할 수 있습니다.</aside>
+</section>
+
+<!-- 8 Claude Code 서브에이전트 -->
+<section class="slide" data-part="PART 2">
+  <h2>Claude Code — <code>.claude/agents/</code></h2>
+  <pre>---
+name: locator
+description: 버그 보고를 받아 원인이 있는 파일 경로·함수 이름·진단을
+  구조화된 보고로 남긴다. 파일을 고치지 않는다.
+tools: Read, Grep, Glob
+model: haiku
+maxTurns: 12
+---
+
+당신은 읽기 전용 탐색 담당입니다. 저장소를 읽고 검색만 하며,
+결과는 파일 경로 · 함수 또는 클래스 이름 · 한 문단 진단의
+세 항목으로 보고합니다.</pre>
+  <ul class="pts">
+    <li><b>프로젝트 폴더</b>에 두면 저장소와 함께 버전 관리되어 <b class="g">팀이 같은 정의</b>를 쓰고, <code>~/.claude/agents/</code>에 두면 <b>내 모든 프로젝트</b>에서</li>
+    <li><code>name</code>과 <code>description</code>은 <b>필수</b>, <code>tools</code>로 도구 제한, <code>model</code>·<code>maxTurns</code>로 모델과 턴 예산. <b>머리 아래 본문이 시스템 프롬프트</b></li>
+    <li>Claude는 요청과 <code>description</code>을 견주어 <b>맡길지 스스로 정하고</b>, 반드시 맡기려면 <code>@agent-locator</code>라고 부릅니다</li>
+  </ul>
+  <aside>파일을 저장하면 몇 초 안에 반영되지만, agents 폴더를 처음 만들었을 때는 세션을 다시 시작해야 합니다. tools에 Read·Grep·Glob만 적으면 오늘 arms.py의 읽기 전용 제한과 같은 뜻입니다.</aside>
+</section>
+
+<!-- 9 OpenCode -->
+<section class="slide" data-part="PART 2">
+  <h2>OpenCode — <code>.opencode/agents/</code></h2>
+  <pre>---
+description: 버그 보고를 받아 원인이 있는 파일 경로·함수 이름·진단을
+  구조화된 보고로 남긴다. 파일을 고치지 않는다.
+mode: subagent
+model: anthropic/claude-haiku-4-5
+permission:
+  edit: deny
+  bash: deny
+---
+당신은 읽기 전용 탐색 담당입니다. 저장소를 읽고 검색만 하며,
+결과는 파일 경로 · 함수 또는 클래스 이름 · 한 문단 진단의
+세 항목으로 보고합니다.</pre>
+  <ul class="pts">
+    <li><b>파일 이름이 에이전트 이름</b>이 됩니다 — <code>locator.md</code>로 저장하면 <code>@locator</code>로 부릅니다</li>
+    <li><code>mode</code>가 <code>primary</code>면 <b>Tab 키로 바꿔 가며 직접 대화하는 주 에이전트</b>, <code>subagent</code>면 <b>주 에이전트가 부르거나 사용자가 <code>@이름</code>으로 부르는 보조</b></li>
+    <li>도구 제한은 <code>permission</code>으로 선언. <code>model</code>은 <b><code>공급자/모델 ID</code></b> 꼴</li>
+  </ul>
+  <aside>opencode agent create를 실행하면 질문에 답하는 식으로 이 파일을 만들어 줍니다. OpenCode에는 읽기 전용 탐색용 explore 서브에이전트가 이미 들어 있어, 보고 포맷을 정해 줄 필요가 없다면 그것을 그대로 불러도 됩니다.</aside>
+</section>
+
+<!-- 10 두 CLI 비교 -->
+<section class="slide" data-part="PART 2">
+  <h2>담는 정보는 <span class="g">같습니다</span></h2>
+  <div class="big">이름 · 무엇을 맡기는지 · 어떤 도구를 허용하는지 · 어느 모델을 쓰는지<br><small>오늘 <code>arms.py</code>가 파이썬 인자로 정한 것이 파일의 필드로 옮겨 간 셈입니다</small></div>
+  <div class="hl">⚠️ 다른 점은 <b class="r">기록</b>입니다 — CLI의 서브에이전트 호출은 <b class="r"><code>result.json</code>과 <code>changes.diff</code>를 남기지 않으므로</b>, 이 정의로 비교 실험을 하려면 <b class="g">실행 뒤 비용과 턴 수와 수정 범위를 스스로 기록</b>해야 합니다</div>
+  <aside>편의를 얻는 대신 관측을 잃는 교환입니다.</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">나머지 세 도구</h2>
+  <p style="margin-top:11px">Workflows · oh-my-claudecode · herdr</p><span class="who">⑨ 생태계</span></div>
+  <aside>각각 재현·모델 배분·관측을 겨냥합니다.</aside>
+</section>
+
+<!-- 12 Workflows -->
+<section class="slide" data-part="PART 3">
+  <h2>Workflows — <span class="b">계획을 스크립트로</span></h2>
+  <p>오늘 <code>arms.py</code>에서 locator 다음 fixer를 부르는 순서는 <b>사람이 파이썬으로</b> 적었습니다. Workflows는 <b class="b">그 파이썬을 Claude가 자바스크립트로 쓰게 하고</b>, 런타임이 그 스크립트를 <b>백그라운드에서</b> 돌립니다.</p>
+  <ul class="pts">
+    <li>반복과 분기는 스크립트에 적히고 <b>중간 결과는 스크립트 변수에 머물며</b> — Claude의 컨텍스트에는 <b class="g">최종 결과만</b> 들어옵니다</li>
+    <li>공식 문서는 서브에이전트·스킬·팀·워크플로를 <b class="g">"다음에 실행할 것을 누가 정하는가"</b>로 나눕니다 — <b>A·B·C를 가른 물음도 이것</b>이었습니다. <b>워크플로 실행(B)을 수십 개 에이전트 규모로 키운 것</b>이 이 제품입니다</li>
+  </ul>
+  <div class="hl">📌 바뀌는 조건도 <b class="b">다음 행동을 정하는 주체</b>입니다 — <b class="g">B와 같은 층이므로 B의 파이썬을 이 스크립트로 옮겨 같은 문제를 돌리면 B와 바로 견줄 수 있습니다</b></div>
+  <aside>같은 층의 도구는 기준선을 다시 세우지 않고도 견줄 수 있습니다.</aside>
+</section>
+
+<!-- 13 Workflows 재현 -->
+<section class="slide" data-part="PART 3">
+  <h2>재현 장치와 <span class="r">대가</span></h2>
+  <table class="t">
+    <tr><th>장치</th><th>내용</th></tr>
+    <tr><td>기록</td><td>실행마다 <b>스크립트와 각 에이전트의 결과</b>가 세션 디렉터리에 남습니다</td></tr>
+    <tr><td>재실행</td><td>같은 세션에서 다시 띄우면 <b class="g">이미 끝난 에이전트는 저장된 결과를 돌려주고</b>, <b>프롬프트가 달라진 에이전트부터</b> 다시 실행</td></tr>
+    <tr><td>제약</td><td>스크립트 안에서 <b>현재 시각이나 난수</b>를 쓰면 <b class="r">오류</b> — <b class="g">다시 돌렸을 때 같은 호출이 같은 순서로 반복되게</b> 하려는 것</td></tr>
+  </table>
+  <div class="hl">⚠️ 대가는 <b class="r">실행 중에 사람이 끼어들 수 없다는 점</b>입니다 — 단계 사이에 승인이 필요하면 <b>워크플로를 단계마다 따로 나눠야</b> 합니다. 한 실행이 <b>에이전트 25개나 150만 토큰</b>을 넘으면 경고가 뜨지만 <b class="r">알림일 뿐 실행을 멈추지는 않습니다</b></div>
+  <aside>오늘 러너가 result.json이 있는 실행을 건너뛴 것과 같은 발상을 런타임이 강제하는 셈입니다.</aside>
+</section>
+
+<!-- 14 oh-my-claudecode -->
+<section class="slide" data-part="PART 3">
+  <h2>oh-my-claudecode — <span class="p">역할별 모델 배분</span></h2>
+  <p>워커가 늘수록 비용이 따라 늘지만 <b class="g">워커마다 필요한 능력은 다릅니다.</b> oh-my-claudecode는 Claude Code 위에서 돌아가는 커뮤니티 오케스트레이션 프레임워크(GitHub 스타 <b>38,000+</b>)로, 겨냥하는 지점이 <b class="p">역할별 모델 배분</b>입니다.</p>
+  <table class="t">
+    <tr><th>용도</th><th>기본 배분</th></tr>
+    <tr><td>단순 조회</td><td><b>Haiku</b></td></tr>
+    <tr><td>표준 구현</td><td><b>Sonnet</b></td></tr>
+    <tr><td>설계와 깊은 분석</td><td><b>Opus</b></td></tr>
+  </table>
+  <ul class="pts">
+    <li>그 위에 <b>에이전트마다 어느 모델을 붙일지 적어 두는 표</b>가 따로 있습니다</li>
+    <li>실행 모드 <code>ralph</code>는 <b class="g">검증이 통과할 때까지 수정을 반복</b>합니다 — 오늘 <code>judge.py</code>가 <b>검증 성실성 점수로 물었던 것을 도구가 강제하는 장치</b></li>
+  </ul>
+  <aside>Anthropic의 멀티 에이전트 시스템은 채팅의 약 15배 토큰을 썼습니다(Anthropic 연구 시스템 보고).</aside>
+</section>
+
+<!-- 15 oh-my 대가 -->
+<section class="slide" data-part="PART 3">
+  <h2>대가는 <span class="r">비교가 어려워지는 것</span></h2>
+  <ul class="pts">
+    <li>프레임워크가 <b>자체 에이전트 정의와 프롬프트를 끼워 넣기</b> 때문에 — <b class="r">결과 차이가 모델 배분에서 왔는지 프레임워크의 프롬프트에서 왔는지 가르기 어렵습니다</b></li>
+    <li><b class="r">판이 빠르게 바뀌는 커뮤니티 프로젝트라 문서와 실제 동작이 다를 수 있습니다</b></li>
+  </ul>
+  <div class="hl">📌 바뀌는 조건은 <b class="p">모델</b>입니다 — <b class="g">오늘 고정한 조건 표에 "역할별 모델" 열을 추가하고, 그 열이 같은 실행끼리만 비용을 견줘야</b> 합니다</div>
+  <aside>원인 분리가 어려워지는 것이 프레임워크 도입의 대표적 비용입니다.</aside>
+</section>
+
+<!-- 16 herdr -->
+<section class="slide" data-part="PART 3">
+  <h2>herdr — <span class="g">상태 표시와 백그라운드 보존</span></h2>
+  <p>에이전트가 셋을 넘어가면 <b class="r">어느 창이 일하고 있고 어느 창이 승인을 기다리며 멈춰 있는지 눈으로 좇기 어렵고</b>, <b class="r">노트북 터미널을 닫으면 돌아가던 작업이 함께 사라집니다.</b></p>
+  <ul class="pts">
+    <li><b>백그라운드 서버가 에이전트 CLI의 터미널을 소유</b>하기 때문에 — <b class="g">터미널을 닫거나 컴퓨터를 다시 켜도 작업이 이어지고</b>, 다른 터미널이나 원격 접속으로 다시 붙을 수 있습니다</li>
+    <li>각 창에 <b class="g">작업 중(working) · 대기(blocked) · 유휴(idle)</b> 세 상태가 표시되어 <b>멈춘 에이전트를 바로 찾습니다</b></li>
+    <li>Claude Code뿐 아니라 <b>다른 회사의 코딩 에이전트 CLI 20여 종</b>을 같은 화면에. 한 에이전트가 <b>다른 에이전트의 창을 띄운 뒤 그쪽이 입력을 기다리며 멈출 때까지 기다리는 동작</b>도 지원</li>
+  </ul>
+  <div class="hl">⚠️ herdr가 푸는 것은 <b>관측과 보존</b>이고 <b class="r">결과 판정은 하지 않습니다</b> — <b class="r">창이 유휴로 바뀌었다는 표시는 실행이 끝났다는 뜻일 뿐 테스트가 통과했다는 뜻이 아니므로</b>, <code>result.json</code>과 <code>judge.py</code>의 층은 <b class="g">그대로 필요</b>합니다</div>
+  <aside>이 도구는 비교 조건을 바꾸지 않습니다. 세션 JSONL로 사후에 읽던 실행 상태를 실행 중에 화면으로 보게 해 주는 층이라, 기준선을 다시 세우지 않고 오늘 실험 위에 그대로 얹을 수 있습니다.</aside>
+</section>
+
+<!-- 17 선택표 -->
+<section class="slide" data-part="PART 3">
+  <h2>문제로 도구를 <span class="g">고르는 표</span></h2>
+  <table class="t">
+    <tr><th>남긴 문제</th><th>겨냥한 도구</th><th>남는 것</th></tr>
+    <tr><td>컨텍스트가 끊긴다</td><td>Agent Teams</td><td>토큰이 <b class="r">팀원 수에 비례</b>, <b class="r">대화형 세션 전용</b>, 조율 주체가 바뀌어 <b class="r">기준선을 다시 세움</b></td></tr>
+    <tr><td>재현이 안 된다</td><td>Workflows</td><td><b class="r">실행 중 사람이 끼어들 수 없음</b>, <b class="g">B와 같은 층이라 바로 견줌</b></td></tr>
+    <tr><td>모델을 나눌 수 없다</td><td>oh-my-claudecode</td><td><b class="r">프레임워크 프롬프트가 섞여 원인 분리가 어려움</b>, 고정 조건에 <b>모델 열 추가</b></td></tr>
+    <tr><td>상태가 안 보인다</td><td>herdr</td><td><b class="r">결과 판정은 하지 않음</b>, <b class="g">비교 조건은 그대로</b></td></tr>
+  </table>
+  <aside>네 도구는 서로를 대체하는 경쟁 상대가 아니라 다른 층을 맡습니다.</aside>
+</section>
+
+<!-- 18 결론 -->
+<section class="slide" data-part="PART 3">
+  <h2>바뀌지 않는 것은 <span class="g">비교하는 방법</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>조율 층</small><b class="b">Agent Teams<br>Workflows</b></div>
+    <div class="cell" style="min-width:140px;border-color:var(--pp)"><small>모델 층</small><b class="p">oh-my-<br>claudecode</b></div>
+    <div class="cell" style="min-width:130px;border-color:var(--gr)"><small>관측 층</small><b class="g">herdr</b></div>
+    <div class="cell" style="min-width:150px;border-color:var(--red)"><small>격자 바깥</small><b class="r">A2A<br>(외부 소유자)</b></div>
+  </div>
+  <div class="big">조건을 고정하고, 기록을 남기고, 같은 방식으로 읽는 일은<br><span class="y">도구가 바뀌어도 바뀌지 않습니다</span></div>
+  <ul class="pts">
+    <li>조율이나 모델 층이 바뀌면 <b class="r">기준선을 다시 세워야</b> 하지만 — 이 도구들 가운데 하나를 붙일 때도 <b class="g">채택·축소·폐기를 같은 순서로</b> 판정합니다</li>
+  </ul>
+  <aside>A2A는 이 격자의 바깥에서 소유자가 다른 에이전트를 잇는 층입니다.</aside>
+</section>
+
+<!-- 19 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 네 도구 가운데 기준선을 다시 세우지 않아도 되는 것은?</div>
+    <div class="q a"><b>A1.</b> <b>herdr.</b> 관측 층만 바꾸므로 비교 조건을 건드리지 않는다. Workflows는 <b>B와 같은 층</b>이라 바로 견줄 수 있다.</div>
+    <div class="q"><b>Q2.</b> Agent Teams를 오늘 실험에 바로 끼울 수 없는 이유는?</div>
+    <div class="q a"><b>A2.</b> <b>대화형 세션에서만 팀원이 만들어지고</b>, SDK 실행에서는 켜 두어도 <b>서브에이전트로 돌아간다.</b></div>
+    <div class="q"><b>Q3.</b> CLI 서브에이전트 정의로 비교 실험을 하려면?</div>
+    <div class="q a"><b>A3.</b> CLI 호출은 <code>result.json</code>·<code>changes.diff</code>를 남기지 않으므로 — <b>비용·턴 수·수정 범위를 스스로 기록</b>해야 한다.</div>
+  </div>
+  <aside>Q1이 "어느 층을 바꾸는가"를 이해했는지 묻는 질문입니다.</aside>
+</section>
+
+<!-- 20 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>이름이 아니라 문제로 🧰</h1>
+    <div class="big" style="margin-top:26px">어느 도구가 어느 문제를 푸는지 알면<br><span class="y">그 도구를 붙였을 때 비교 조건 가운데 무엇이 바뀌는지</span>도 미리 압니다</div>
+    <p class="sub" style="margin-top:24px">멀티에이전트 ⑨ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑩에서 채택·축소·폐기 판정문을 쓰고 과제로 제출합니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

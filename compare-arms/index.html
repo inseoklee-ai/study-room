@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>단일과 멀티 비교 판정하기 (멀티에이전트 ⑧)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 멀티에이전트 ⑧</span>
+    <h1 style="margin:18px 0">단일과 멀티<br>비교 판정하기</h1>
+    <p class="sub">고정한 조건과 달라진 조건을 구분한 뒤에만 결론을 말합니다</p>
+  </div>
+  <aside>같은 문제와 같은 모델로 실행했어도, 다음 행동을 정한 주체가 달라지면 기록은 다르게 갈립니다.</aside>
+</section>
+
+<!-- 2 세 표 -->
+<section class="slide" data-part="표지">
+  <h2>세 결과표를 <span class="g">나란히</span> 놓습니다</h2>
+  <pre>cat results-table.md
+cat grading.jsonl</pre>
+  <ul class="pts">
+    <li>비교표에 함께 있는 것 — <b>인스턴스별 테스트 결과 · 비용 · 턴 · 경과 시간 · 세 가지 행동 판정 · 실패 분류</b></li>
+    <li><b class="r">직접 실행한 결과가 표에 반영되므로</b> — <b class="g">다른 실행에서 얻은 수치를 그대로 일반화하지 않습니다</b></li>
+  </ul>
+  <div class="hl">📌 A는 <b>한 에이전트</b>가, B는 <b class="b">파이썬 코드</b>가, C는 <b class="p">리드 모델</b>이 다음 행동을 정합니다 — <b class="g">그 차이가 결과 파일에 어떻게 남았는지부터</b> 읽습니다</div>
+  <aside>기계가 만든 비교표를 마지막에 읽습니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">고정한 조건과 달라진 조건</h2>
+  <p style="margin-top:11px">이 구분이 없으면 차이의 출처를 알 수 없습니다</p><span class="who">⑧ 비교 판정</span></div>
+  <aside>비교의 출발점은 다음 행동을 누가 정했는가입니다.</aside>
+</section>
+
+<!-- 4 고정과 조작 -->
+<section class="slide" data-part="PART 1">
+  <h2>먼저 <span class="g">고정</span>, 다음 <span class="r">표시</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">같은 <b class="g">문제 · 모델 별칭 · 저장소 준비 · 채점 조건</b>이 고정됐는지 확인합니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">그 뒤 세 실행에서 달라진 <b class="r">조율 방식과 턴 예산</b>을 따로 표시합니다</span></div>
+  </div>
+  <div class="hl">⚠️ <b class="r">이 구분이 없으면 표의 차이가 방식에서 왔는지 실행 조건에서 왔는지 알 수 없습니다</b></div>
+  <aside>고정·조작·측정의 분리는 하네스 중단원 ⑪의 실험 설계 원칙과 같습니다.</aside>
+</section>
+
+<!-- 5 근거 연결 -->
+<section class="slide" data-part="PART 1">
+  <h2>차이와 <span class="b">결과 파일의 근거</span>를 연결합니다</h2>
+  <table class="t">
+    <tr><th>실행</th><th>전사와 diff로 확인할 것</th></tr>
+    <tr><td><b class="b">워크플로 실행(B)</b></td><td><b>탐색 보고가 수정으로 이어졌는지</b></td></tr>
+    <tr><td><b class="p">오케스트레이션 실행(C)</b></td><td><b>리드가 locator를 어떻게 활용했는지</b></td></tr>
+    <tr><td><b>기준선 실행(A)</b></td><td><b>25턴을 모두 썼는지</b></td></tr>
+  </table>
+  <div class="hl">🔗 표의 한 행을 읽을 때 연결할 것 — <code>result.json</code>의 <b>해결 여부·비용·턴·시간</b> · <code>changes.diff</code>의 <b>수정 범위</b> · <code>grading.jsonl</code>의 <b>판정 근거</b>를 <b class="g">해당 실행 폴더와</b></div>
+  <aside>표의 한 행은 항상 한 실행 폴더로 되돌아갈 수 있어야 합니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">공정성을 점검하고 범위를 정합니다</h2>
+  <p style="margin-top:11px">턴 예산이 다릅니다</p><span class="who">⑧ 비교 판정</span></div>
+  <aside>공정성도 함께 점검합니다.</aside>
+</section>
+
+<!-- 7 턴 예산 -->
+<section class="slide" data-part="PART 2">
+  <h2>턴 예산 <span class="r">차이</span></h2>
+  <table class="t">
+    <tr><th>실행</th><th>턴 예산</th></tr>
+    <tr><td>기준선 실행(A)</td><td>최대 <b>25턴</b></td></tr>
+    <tr><td><b class="b">워크플로 실행(B)</b></td><td>locator <b>12턴</b> + fixer <b>18턴</b></td></tr>
+    <tr><td><b class="p">오케스트레이션 실행(C)</b></td><td>최대 <b>40턴</b></td></tr>
+  </table>
+  <div class="hl">⚠️ 턴 예산이 다르므로 — <b class="r">해결 여부·비용·시간만 나란히 놓고 "구조의 효과"라고 해석할 수는 없습니다</b></div>
+  <ul class="pts">
+    <li>고정한 조건과 실행마다 달라진 조율 방식을 구분한 뒤 — <b class="g">결과 파일이 직접 보여 주는 범위에서만</b> 결론을 정합니다</li>
+  </ul>
+  <aside>예산 차이를 밝히지 않으면 그 비교는 공정하지 않습니다.</aside>
+</section>
+
+<!-- 8 결론 범위 -->
+<section class="slide" data-part="PART 2">
+  <h2>이 실험의 결론은 <span class="r">한정적입니다</span></h2>
+  <div class="big">세 SymPy 인스턴스와 이 실행 조건에서<br><span class="y">남은 기록이 무엇을 보이는지</span>만 말할 수 있습니다</div>
+  <ul class="pts">
+    <li><b class="r">다른 문제나 다른 예산에서도 같은 결과가 난다고 말하려면</b> — <b class="g">그 조건으로 다시 실행하고 같은 방식으로 기록을 읽어야</b> 합니다</li>
+  </ul>
+  <div class="hl">📌 이 태도가 소단원 ③에서 보고서 숫자를 다룰 때 쓴 규칙과 <b class="g">같습니다</b> — 남의 수치든 내 수치든 <b>조건을 붙여</b> 읽습니다</div>
+  <aside>내 실험 결과에도 남의 보고서와 같은 잣대를 댑니다.</aside>
+</section>
+
+<!-- 9 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 표의 차이를 읽기 전에 무엇을 확인하나?</div>
+    <div class="q a"><b>A1.</b> <b>문제·모델 별칭·저장소 준비·채점 조건이 고정됐는지.</b> 그 뒤 달라진 <b>조율 방식과 턴 예산</b>을 따로 표시한다.</div>
+    <div class="q"><b>Q2.</b> A 25턴, B 12+18턴, C 40턴이 뜻하는 것은?</div>
+    <div class="q a"><b>A2.</b> <b>예산이 다르다</b>는 것. 해결 여부·비용·시간만 나란히 놓고 "구조의 효과"라고 말할 수 없다.</div>
+    <div class="q"><b>Q3.</b> 이 실험으로 말할 수 있는 범위는?</div>
+    <div class="q a"><b>A3.</b> <b>세 SymPy 인스턴스와 이 실행 조건에서 남은 기록이 보이는 것</b>까지. 다른 조건은 다시 실행해야 한다.</div>
+  </div>
+  <aside>Q3을 빼면 루브릭의 세 번째 항목("결론의 적용 조건이 분명한가")을 충족하지 못합니다.</aside>
+</section>
+
+<!-- 10 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>조건을 밝힌 만큼만 말합니다 ⚖️</h1>
+    <div class="big" style="margin-top:26px">표의 한 행은 항상<br><span class="y">한 실행 폴더로 되돌아갈 수 있어야</span> 합니다</div>
+    <p class="sub" style="margin-top:24px">멀티에이전트 ⑧ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑨에서 이 실험이 남긴 네 문제와, 그 문제를 겨냥한 도구들을 봅니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

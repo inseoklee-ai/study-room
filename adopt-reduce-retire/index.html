@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>채택·축소·폐기 판정과 과제 (멀티에이전트 ⑩)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 멀티에이전트 ⑩</span>
+    <h1 style="margin:18px 0">채택·축소·폐기<br>판정과 과제</h1>
+    <p class="sub">익혀야 할 것은 일을 많이 나누는 방법이 아닙니다</p>
+  </div>
+  <aside>기준선 실행(A)·워크플로 실행(B)·오케스트레이션 실행(C)을 끝낸 뒤에는 결과의 좋고 나쁨만 보지 않습니다.</aside>
+</section>
+
+<!-- 2 읽는 범위 -->
+<section class="slide" data-part="표지">
+  <h2>고정한 범위 <span class="g">안에서만</span> 읽습니다</h2>
+  <p>같은 <b>인스턴스 · 모델 별칭 · 저장소 준비 · 채점 조건</b>을 고정한 범위에서 — <b class="g">다음 행동을 정한 방식과 결과가 어떻게 연결됐는지</b> 읽습니다.</p>
+  <div class="hl">⚠️ 턴 예산이 A·B·C에서 다르므로 — <b class="r">이 결과만으로 구조 일반의 우열을 말할 수는 없습니다</b></div>
+  <aside>소단원 ⑧의 결론을 과제의 전제로 옮겨 옵니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">과제의 목표 세 가지</h2>
+  <p style="margin-top:11px">분리 · 근거 · 범위</p><span class="who">⑩ 판정과 과제</span></div>
+  <aside>세 목표가 그대로 루브릭 세 항목과 대응합니다.</aside>
+</section>
+
+<!-- 4 목표 -->
+<section class="slide" data-part="PART 1">
+  <h2>세 <span class="g">목표</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>비교할 조건을 분리합니다</b> — <b class="g">고정할 조건 · 바꿀 조율 방식 · 측정할 값</b>을 <b class="r">실행 전에</b> 구분합니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>결과 파일에서 근거를 읽습니다</b> — <code>result.json</code>의 실행 결과와 <code>grading.jsonl</code>의 판정 근거, <code>results-table.md</code>의 비교 행을 <b class="g">연결해</b> 읽습니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>결론의 범위를 정합니다</b> — 이 실험 조건에서 <b class="g">채택·축소·폐기 가운데 하나</b>를 고르고, <b class="g">다시 확인할 조건</b>을 밝힙니다</span></div>
+  </div>
+  <aside>1번의 "실행 전에"가 핵심입니다. 결과를 본 뒤 기준을 정하면 어떤 결과든 지지로 읽힙니다.</aside>
+</section>
+
+<!-- 5 루브릭 -->
+<section class="slide" data-part="PART 1">
+  <h2>평가 <span class="b">루브릭</span> — 제출물에서 확인될 때 충족</h2>
+  <table class="t">
+    <tr><th>항목</th><th>확인되는 것</th></tr>
+    <tr><td><b>① 고정·조작·측정이 분리</b></td><td>같은 <b>인스턴스·모델·저장소 준비·채점 조건</b>과 <b>A·B·C의 조율 방식</b>을 구분했고 — <b class="g">해결 여부·비용·턴·경과 시간·행동 판정</b>을 측정값으로 제시</td></tr>
+    <tr><td><b>② 결과 파일의 근거가 연결</b></td><td><code>result.json</code> · <code>grading.jsonl</code> · <code>results-table.md</code>에서 확인한 <b>행 또는 인용</b>을 판정문과 연결했고 — <b class="g"><code>evidence_quote</code>는 원래 전사로 다시 확인</b></td></tr>
+    <tr><td><b>③ 결론의 적용 조건이 분명</b></td><td><b class="r">턴 예산 차이</b>와 <b class="r">경량 평가</b>라는 한계를 밝히고 — <b class="g">이 조건에서만</b> 채택·축소·폐기 결론을 말했음</td></tr>
+  </table>
+  <aside>세 항목 모두 "결과가 좋았는가"가 아니라 "설계와 근거가 정직한가"를 봅니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">결과표를 읽고 판정합니다</h2>
+  <p style="margin-top:11px">숫자를 그대로 믿지 않습니다</p><span class="who">⑩ 판정과 과제</span></div>
+  <aside>results-table.md에는 미리 실어 둔 실측값이 들어 있습니다.</aside>
+</section>
+
+<!-- 7 거슬러 확인 -->
+<section class="slide" data-part="PART 2">
+  <h2>표의 각 행을 <span class="g">거슬러</span> 확인합니다</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:170px;border-color:var(--gr)"><small>표의 한 행</small><b class="g"><code>results-table.md</code></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>거슬러</small><b class="b"><code>result.json</code></b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:150px;border-color:var(--pp)"><small>거슬러</small><b class="p"><code>grading.jsonl</code></b></div>
+  </div>
+  <ul class="pts">
+    <li><b class="r">숫자를 그대로 믿지 않고</b> 표의 각 행을 <b class="g">원래 파일로 거슬러</b> 확인합니다</li>
+    <li>직접 실행한 결과가 있다면 <b>나란히 놓고 비교</b>합니다</li>
+  </ul>
+  <aside>미리 실어 둔 실측값도 검증 대상입니다.</aside>
+</section>
+
+<!-- 8 판정문 -->
+<section class="slide" data-part="PART 2">
+  <h2>판정문은 <span class="b">한 문장</span>으로</h2>
+  <pre>이 조건에서는 [채택·축소·폐기]합니다.
+[결과 파일의 근거]가 있고,
+[비용·시간·턴 또는 판정 기록]이라는 한계가 있기 때문입니다.</pre>
+  <ul class="pts">
+    <li><b class="g">재실행한다면 고정할 조건과 바꿀 조건을 함께</b> 적습니다</li>
+  </ul>
+  <div class="hl">📌 이 양식은 <b>대단원 5 중단원 ①의 도입·보류·거절 판정문</b>과 같은 구조입니다 — <b class="g">확인한 사실 · 한계 · 재검토 조건</b>을 한 문서에 둡니다</div>
+  <aside>결론만 적는 문서가 아니라 근거와 한계를 함께 남기는 문서입니다.</aside>
+</section>
+
+<!-- 9 세 결론 -->
+<section class="slide" data-part="PART 2">
+  <h2>채택 · 축소 · <span class="r">폐기</span></h2>
+  <table class="t">
+    <tr><th>판정</th><th>이 실험에서 뜻하는 것</th></tr>
+    <tr><td><b class="g">채택</b></td><td>이 조건에서 <b>분리가 확인 가능성을 높이고 조정 비용을 넘었다</b>는 근거가 결과 파일에 있음</td></tr>
+    <tr><td><b class="b">축소</b></td><td>일부만 나누거나 <b>워커 수·턴 예산을 줄여</b> 다시 볼 이유가 있음</td></tr>
+    <tr><td><b class="r">폐기</b></td><td>이 조건에서는 <b class="r">나누지 않는 편이 낫다</b> — 소단원 ①대로 <b class="g">나누지 않기로 한 판단도 비교 실험의 중요한 결과</b></td></tr>
+  </table>
+  <aside>세 결론 모두 "이 조건에서는"이라는 시점 표시가 붙습니다.</aside>
+</section>
+
+<!-- 10 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 과제의 세 목표는?</div>
+    <div class="q a"><b>A1.</b> <b>비교할 조건 분리(실행 전) · 결과 파일에서 근거 읽기 · 결론의 범위 정하기.</b></div>
+    <div class="q"><b>Q2.</b> 루브릭 ③을 충족하려면 무엇을 밝혀야 하나?</div>
+    <div class="q a"><b>A2.</b> <b>턴 예산 차이</b>와 <b>경량 평가</b>라는 한계. 그리고 <b>이 조건에서만</b> 결론을 말했다는 점.</div>
+    <div class="q"><b>Q3.</b> 이 중단원에서 익혀야 할 것은?</div>
+    <div class="q a"><b>A3.</b> 일을 많이 나누는 방법이 아니라 — <b>멀티 에이전트 구성에서 얻은 이득과 치른 비용을, 같은 조건에서 남은 기록으로 판정하는 방법.</b></div>
+  </div>
+  <aside>Q3이 이 중단원 전체의 한 줄 요약입니다.</aside>
+</section>
+
+<!-- 11 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>얻은 이득과 치른 비용 🧾</h1>
+    <div class="big" style="margin-top:26px">많이 나누는 방법이 아니라<br><span class="y">같은 조건에서 남은 기록으로 판정하는 방법</span></div>
+    <p class="sub" style="margin-top:24px">멀티에이전트 ⑩ — 여기까지 (중단원 ③ 완결)</p>
+  </div>
+  <aside>①에서 "나누면 어떨까"로 시작한 질문이, ⑩에서 조건을 밝힌 판정문으로 돌아왔습니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
