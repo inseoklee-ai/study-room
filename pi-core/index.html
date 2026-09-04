@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pi — 내 에이전트 툴의 뼈대 (OpenClaw ⑥)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · OpenClaw ⑥</span>
+    <h1 style="margin:18px 0">pi<br>— 내 에이전트 툴의 뼈대</h1>
+    <p class="sub">에이전트 툴은 마법 상자가 아니라 조립할 수 있는 층위입니다</p>
+  </div>
+  <aside>pi는 터미널에서 쓰는 작은 코딩 에이전트 CLI입니다.</aside>
+</section>
+
+<!-- 2 왜 pi인가 -->
+<section class="slide" data-part="표지">
+  <h2>여기서 pi를 소개하는 <span class="g">까닭</span></h2>
+  <div class="big">pi를 기반으로<br><span class="y">내 필요에 맞춘 에이전트 툴을 만들 수 있기 때문</span>입니다</div>
+  <ul class="pts">
+    <li>pi는 모델과 도구를 연결해 코딩 작업을 돕는 기능을 담고 — <b class="g">스크립트로 확장할 자리를 열어</b> 둡니다. 그래서 <b>화면 뒤에서 어떤 부분을 바꾸고 어떤 부분을 덧붙일지 읽을 수</b> 있습니다</li>
+    <li><b class="g">완성된 서비스를 그대로 쓰는 데서 멈추지 않고</b>, 필요한 입구와 기능을 <b>코어 위에 얹는 선택</b>도 가능합니다</li>
+  </ul>
+  <div class="hl">📌 이 선택은 <b class="g">이미 일어난 일</b>입니다 — 한 때 OpenClaw는 pi를 에이전트 엔진으로 채택했습니다. <b>WhatsApp 메시지 입구를 pi 엔진에 연결하는 작은 도구</b>에서 출발해 지금에 이르렀습니다</div>
+  <aside>코어를 골라 그 위에 도구를 키우는 일이 실제로 작동했다는 뜻입니다.</aside>
+</section>
+
+<!-- 3 작은 코어 -->
+<section class="slide" data-part="표지">
+  <h2>작은 코어는 <span class="r">적은 기능이라는 뜻만은 아닙니다</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px"><small>나누어 볼 것</small><b>도구</b></div>
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>나누어 볼 것</small><b class="b">모델</b></div>
+    <div class="cell" style="min-width:120px;border-color:var(--pp)"><small>나누어 볼 것</small><b class="p">기록</b></div>
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>나누어 볼 것</small><b class="g">확장</b></div>
+  </div>
+  <ul class="pts">
+    <li><b class="g">이 넷을 어디에 둘지 나누어 볼 수 있다</b>는 뜻입니다</li>
+    <li>먼저 <b>코어가 맡은 일을 읽고</b>, <b class="g">바깥에 더할 일을 고르면</b> 됩니다</li>
+  </ul>
+  <aside>"기능이 몇 개인가"보다 "어느 층에 있는가"를 묻는 관점입니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">pi 안을 들여다봅니다</h2>
+  <p style="margin-top:11px">화면 · 모델 · 세션 · 도구</p><span class="who">⑥ pi 뼈대</span></div>
+  <aside>pi의 기본 화면은 터미널 TUI입니다.</aside>
+</section>
+
+<!-- 5 모델 세 갈래 -->
+<section class="slide" data-part="PART 1">
+  <h2>모델에 연결하는 <span class="g">세 갈래</span></h2>
+  <table class="t">
+    <tr><th>길</th><th>내용</th></tr>
+    <tr><td><b>OAuth</b></td><td>Claude <b>Pro 또는 Max 구독</b>으로 — 로그인 권한을 맡기는 방식</td></tr>
+    <tr><td><b>API 키</b></td><td>키를 등록해 <b>제공자에 연결</b></td></tr>
+    <tr><td><b class="g">로컬 Ollama</b></td><td>모델을 등록해 <b class="g">컴퓨터 안의 모델</b>을 고름</td></tr>
+  </table>
+  <div class="hl">📌 OpenClaw에서 살핀 두 인증 경로와 비교하면 — <b class="g">pi에는 로컬 모델 경로가 하나 더</b> 있습니다. <b>같은 에이전트 화면이라도 모델을 만나는 방식은 도구마다 다르게 설계</b>됩니다</div>
+  <aside>기본 화면은 터미널 TUI(터미널 안에서 움직이는 화면)입니다. 여기에서 모델과 대화하고 코딩 도구를 호출하는 흐름이 이어집니다.</aside>
+</section>
+
+<!-- 6 세션 -->
+<section class="slide" data-part="PART 1">
+  <h2>세션은 <span class="b">JSONL</span>로 남습니다</h2>
+  <ul class="pts">
+    <li>대화는 화면에서 사라져도 <b class="g">세션 기록으로 남을 수</b> 있습니다. 기본 위치는 <code>~/.pi/agent/sessions/</code></li>
+    <li><b>작업 경로마다 JSONL 파일</b>이 쌓입니다 — <b>JSONL</b>은 한 줄마다 JSON 객체 하나를 넣는 기록 형식</li>
+    <li>첫 줄에는 <b>세션 ID · 시각 · 작업 폴더 경로</b>가, 이후 줄에는 <b>대화와 도구 호출 결과</b>가 이어집니다</li>
+  </ul>
+  <div class="hl">🎯 그래서 <b class="g">화면의 답변과 실제 호출을 따로 볼 수</b> 있습니다 — 소단원 ③의 <code>toolCall</code>/<code>toolResult</code> 구분과 같은 이야기</div>
+  <ul class="pts">
+    <li>도구도 처음부터 모두 열어 둘 필요는 없습니다 — <code>--tools</code> 옵션으로 <b class="g">허용할 도구 목록</b>을 정합니다. <b>읽기만 맡길 때와 파일을 바꾸게 할 때의 경계가 여기에서</b> 갈립니다</li>
+  </ul>
+  <aside>도구 목록이 곧 권한이라는 원칙이 pi에서도 --tools로 나타납니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">게이트웨이를 얹어 도구가 자랍니다</h2>
+  <p style="margin-top:11px">Warelay → 지금의 OpenClaw</p><span class="who">⑥ pi 뼈대</span></div>
+  <aside>그 계보를 보여 주는 사례가 Warelay입니다.</aside>
+</section>
+
+<!-- 8 계보 -->
+<section class="slide" data-part="PART 2">
+  <h2>코어 위에 <span class="g">입구를 더한</span> 계보</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px"><small>코어</small><b>pi<br>(에이전트)</b></div>
+    <span class="ar">+</span>
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>입구</small><b class="b">WhatsApp<br>게이트웨이</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:140px;border-color:var(--gr)"><small>다른 도구</small><b class="g">Warelay<br>Clawdbot</b></div>
+  </div>
+  <ul class="pts">
+    <li>Clawdbot은 npm 패키지 설명에서 <b>"Pi RPC agent" 위에 만든 WhatsApp 게이트웨이</b>로 소개됐습니다</li>
+    <li>초기 버전은 <b>pi를 프로그램 안에 넣어(임베디드)</b> 에이전트 엔진으로 썼습니다. 이후 <b class="g">자체 코어를 갖추면서 pi 의존을 걷어냈고</b>, 지금은 <b>내장 런타임</b>이 그 자리를 맡습니다</li>
+    <li>현재 OpenClaw의 내장 런타임 이름은 <code>openclaw</code>입니다</li>
+  </ul>
+  <div class="hl">📌 이름이 바뀌어도 — <b class="g">코어 위에 채널과 기능을 조립한다는 생각은 이어갑니다</b></div>
+  <aside>출처: docs.start/lore. pi는 대화 화면만이 아니라, 다른 프로그램이 표준입출력으로 요청과 결과를 주고받는 워커가 될 수도 있습니다.</aside>
+</section>
+
+<!-- 9 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">없는 것도 설계입니다</h2>
+  <p style="margin-top:11px">빈자리는 부족한 목록으로 끝나지 않습니다</p><span class="who">⑥ pi 뼈대</span></div>
+  <aside>pi에 없는 세 가지를 봅니다.</aside>
+</section>
+
+<!-- 10 빈자리 -->
+<section class="slide" data-part="PART 3">
+  <h2>없는 것과 <span class="g">어디에 둘 것인가</span></h2>
+  <table class="t">
+    <tr><th>pi에 없는 것</th><th>어디에서 맡을 수 있는가</th></tr>
+    <tr><td>내장 <b>MCP 클라이언트</b></td><td><b class="g">확장으로 더할 수</b> 있음</td></tr>
+    <tr><td>내장 <b>서브에이전트</b></td><td>여러 pi를 함께 다루는 방식을 <b class="g">확장이나 별도 구성으로 설계</b></td></tr>
+    <tr><td>내장 <b>스케줄러</b></td><td><b class="g">운영체제의 예약 기능</b>이나 별도 확장</td></tr>
+  </table>
+  <div class="hl">🎯 이 빈자리는 <b class="r">부족한 목록으로만 끝나지 않습니다</b> — <b class="g">무엇을 코어에 두고 무엇을 확장으로 둘지 고르는 경계</b>가 됩니다</div>
+  <ul class="pts">
+    <li>OpenClaw에서는 <b>채널 연결·권한 모드·자동화 예약</b>을 하나의 도구에서 보았습니다. pi는 그 기능들을 <b class="r">기본으로 모두 품지 않는 대신</b> — <b class="g">필요한 부분을 바깥에서 조립할 여지</b>를 남깁니다</li>
+    <li><b class="g">기능이 있는지뿐 아니라 어느 층에 놓였는지도 살펴야</b> 합니다</li>
+  </ul>
+  <aside>중단원 ②(하네스)의 미니멀 절과 같은 논리입니다.</aside>
+</section>
+
+<!-- 11 같은 질문 -->
+<section class="slide" data-part="PART 3">
+  <h2>같은 질문을 <span class="b">다시 씁니다</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>어디에서 메시지를 받을지</b> (게이트웨이·채널)</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>무엇을 할 수 있게 둘지</b> (도구 목록)</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b class="g">어느 행동에 승인을 둘지</b> (권한)</span></div>
+    <div class="st"><span class="n">4</span><span class="t">여기에 <b>모델을 고르는 길</b>과 <b>세션이 남는 위치</b>도 더합니다</span></div>
+  </div>
+  <div class="big">에이전트 툴은 마법 상자가 아니라<br><span class="y">조립할 수 있는 층위</span>입니다</div>
+  <aside>작은 코어 위에 무엇을 얹을지 결정할 때, 편리함과 경계를 함께 설계하게 됩니다.</aside>
+</section>
+
+<!-- 12 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> pi가 OpenClaw와 다른 모델 연결 경로는?</div>
+    <div class="q a"><b>A1.</b> <b>로컬 Ollama 모델</b> 경로. OpenClaw의 두 경로(API 키·<code>claude-cli</code>)에 하나가 더 있다.</div>
+    <div class="q"><b>Q2.</b> pi에 없는 세 가지와 그 뜻은?</div>
+    <div class="q a"><b>A2.</b> <b>MCP 클라이언트 · 서브에이전트 · 스케줄러.</b> 부족함이 아니라 <b>코어와 확장의 경계</b>를 정한 설계.</div>
+    <div class="q"><b>Q3.</b> pi의 계보가 보여 주는 것은?</div>
+    <div class="q a"><b>A3.</b> <b>코어를 골라 그 위에 입구와 기능을 얹으면 다른 도구가 된다</b>는 것. Warelay·Clawdbot이 그렇게 만들어졌고, 이후 자체 코어로 pi 의존을 걷어냈다.</div>
+  </div>
+  <aside>Q2가 이 소단원의 관점입니다.</aside>
+</section>
+
+<!-- 13 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>없는 것도 설계입니다 🧱</h1>
+    <div class="big" style="margin-top:26px">기능이 있는지뿐 아니라<br><span class="y">어느 층에 놓였는지</span>도 살핍니다</div>
+    <p class="sub" style="margin-top:24px">OpenClaw ⑥ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑦에서 한 Gateway에 여러 역할을 두는 구성을 읽습니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

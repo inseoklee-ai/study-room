@@ -266,6 +266,19 @@
    - ✅ ③-9. 실험을 둘러싼 생태계 — 문제로 도구 고르기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/multiagent-ecosystem/) · 📊 [PPT](multiagent-ecosystem/multiagent-ecosystem.pptx)
    - ✅ ③-10. 채택·축소·폐기 판정과 과제 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/adopt-reduce-retire/) · 📊 [PPT](adopt-reduce-retire/adopt-reduce-retire.pptx)
 
+**중단원 ④**
+4. **Openclaw를 사용해보자!** ✅ 완결 (10강) · OpenClaw가 어떻게 만들어졌고 어떻게 사용하는지 알아봅니다
+   - ✅ ④-1. OpenClaw는 무엇이고 어디서 왔나 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/openclaw-origin/) · 📊 [PPT](openclaw-origin/openclaw-origin.pptx)
+   - ✅ ④-2. OpenClaw 나도 써보자 (설치와 온보딩) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/openclaw-install/) · 📊 [PPT](openclaw-install/openclaw-install.pptx)
+   - ✅ ④-3. 세션 기록 읽기 — 말한 것과 한 것 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/openclaw-session-log/) · 📊 [PPT](openclaw-session-log/openclaw-session-log.pptx)
+   - ✅ ④-4. 텔레그램으로 부리기 (채널과 페어링) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/telegram-channel/) · 📊 [PPT](telegram-channel/telegram-channel.pptx)
+   - ✅ ④-5. 보안 — OpenClaw가 지키는 것들 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/openclaw-security/) · 📊 [PPT](openclaw-security/openclaw-security.pptx)
+   - ✅ ④-6. pi — 내 에이전트 툴의 뼈대 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/pi-core/) · 📊 [PPT](pi-core/pi-core.pptx)
+   - ✅ ④-7. 멀티에이전트 — 한 Gateway에 여러 역할 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/openclaw-multiagent/) · 📊 [PPT](openclaw-multiagent/openclaw-multiagent.pptx)
+   - ✅ ④-8. 모니터링 — 사용량과 상태 보기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/openclaw-monitoring/) · 📊 [PPT](openclaw-monitoring/openclaw-monitoring.pptx)
+   - ✅ ④-9. 자동화 — 반복되는 일을 예약하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/openclaw-automations/) · 📊 [PPT](openclaw-automations/openclaw-automations.pptx)
+   - ✅ ④-10. 확장 — 손끝 늘리기, 기능 투어 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/openclaw-extensions/) · 📊 [PPT](openclaw-extensions/openclaw-extensions.pptx)
+
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
 > ⚠️ **웹 슬라이드는 반드시 라이브 사이트에서 열어야 합니다.** GitHub 저장소 화면(github.com)에서 위 링크를 누르면 슬라이드가 아니라 소스 폴더로 갑니다. 아래 라이브 주소로 접속하세요:
@@ -413,6 +426,16 @@
 > - 대5-멀티-③8 https://inseoklee-ai.github.io/study-room/compare-arms/
 > - 대5-멀티-③9 https://inseoklee-ai.github.io/study-room/multiagent-ecosystem/
 > - 대5-멀티-③10 https://inseoklee-ai.github.io/study-room/adopt-reduce-retire/
+> - 대5-오픈클로-④1 https://inseoklee-ai.github.io/study-room/openclaw-origin/
+> - 대5-오픈클로-④2 https://inseoklee-ai.github.io/study-room/openclaw-install/
+> - 대5-오픈클로-④3 https://inseoklee-ai.github.io/study-room/openclaw-session-log/
+> - 대5-오픈클로-④4 https://inseoklee-ai.github.io/study-room/telegram-channel/
+> - 대5-오픈클로-④5 https://inseoklee-ai.github.io/study-room/openclaw-security/
+> - 대5-오픈클로-④6 https://inseoklee-ai.github.io/study-room/pi-core/
+> - 대5-오픈클로-④7 https://inseoklee-ai.github.io/study-room/openclaw-multiagent/
+> - 대5-오픈클로-④8 https://inseoklee-ai.github.io/study-room/openclaw-monitoring/
+> - 대5-오픈클로-④9 https://inseoklee-ai.github.io/study-room/openclaw-automations/
+> - 대5-오픈클로-④10 https://inseoklee-ai.github.io/study-room/openclaw-extensions/
 > - 대4-① https://inseoklee-ai.github.io/study-room/prompt-engineering-intro/
 > - 대4-② https://inseoklee-ai.github.io/study-room/agent-structure/
 > - 대4-③ https://inseoklee-ai.github.io/study-room/model-inputs/

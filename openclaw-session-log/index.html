@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>세션 기록 읽기 — 말한 것과 한 것 (OpenClaw ③)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · OpenClaw ③</span>
+    <h1 style="margin:18px 0">세션 기록 읽기</h1>
+    <p class="sub">말한 것과 한 것은 서로 다른 줄로 저장됩니다</p>
+  </div>
+  <aside>WebChat에서 주고받은 직접 메시지는 기본적으로 하나의 이어지는 대화인 메인 세션으로 들어갑니다.</aside>
+</section>
+
+<!-- 2 메인 세션 -->
+<section class="slide" data-part="표지">
+  <h2>메인 <span class="g">세션</span></h2>
+  <ul class="pts">
+    <li>WebChat의 직접 메시지는 기본적으로 <b>하나의 이어지는 대화</b>인 <b class="g">main session</b>으로 들어갑니다</li>
+    <li>이 대화의 표준 키는 <code>agent:&lt;agentId&gt;:main</code>이며, 웹 앱에서는 <b>Home 화면</b>으로 엽니다</li>
+  </ul>
+  <div class="hl">🎯 대화의 연속성은 <b class="r">화면만이 아니라</b> — <b class="g">설정·세션·워크스페이스에 남는 정보와 함께</b> 읽습니다</div>
+  <aside>화면의 연속성과 저장된 연속성은 다른 것입니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">세 가지를 구분합니다</h2>
+  <p style="margin-top:11px">설정 파일 · 세션 기록 · 워크스페이스</p><span class="who">③ 세션 기록</span></div>
+  <aside>같은 파일이 아니며 각자 역할이 다릅니다.</aside>
+</section>
+
+<!-- 4 경로 표 -->
+<section class="slide" data-part="PART 1">
+  <h2>어디에 <span class="g">무엇이</span> 남는가</h2>
+  <table class="t">
+    <tr><th>경로</th><th>내용</th></tr>
+    <tr><td><code>~/.openclaw/</code></td><td><b>설정 · 자격 증명 · 세션</b>을 보관하는 위치</td></tr>
+    <tr><td><code>~/.openclaw/openclaw.json</code></td><td><b>기본 설정 파일</b></td></tr>
+    <tr><td><code>~/.openclaw/agents/&lt;agentId&gt;/agent/<br>openclaw-agent.sqlite</code></td><td>에이전트별 기록 — <b class="g">세션 행 · 대화 기록 · 에이전트별 실행 상태</b></td></tr>
+    <tr><td><code>~/.openclaw/agents/&lt;agentId&gt;/sessions/</code></td><td><b>이전 형식의 이전 입력</b>과 보관·지원용 자료</td></tr>
+  </table>
+  <aside>agentId가 경로에 들어가는 점이 소단원 ⑦의 멀티에이전트 격리와 직접 이어집니다.</aside>
+</section>
+
+<!-- 5 워크스페이스 -->
+<section class="slide" data-part="PART 1">
+  <h2>워크스페이스는 <span class="b">분리</span>합니다</h2>
+  <ul class="pts">
+    <li>기본 워크스페이스는 <code>~/.openclaw/workspace</code> — <b class="g">파일 도구가 상대 경로를 해석하는 기본 작업 폴더</b></li>
+    <li><code>MEMORY.md</code>에는 <b>오래 남길 사실과 결정</b>이, <code>memory/</code> 폴더에는 <b>날짜별 메모</b>가 놓입니다</li>
+    <li>실제 파일 이름 예 — <code>memory/2026-09-04-제목.md</code>처럼 <b>날짜에 제목이 붙은</b> 이름</li>
+  </ul>
+  <div class="big">설정 파일 · 세션 기록 · 워크스페이스는<br><span class="y">같은 파일이 아니며 각자 역할이 다릅니다</span></div>
+  <aside>이 셋을 섞어 보면 "어디를 봐야 하는가"에서 헤맵니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">WebChat 뒤의 변화를 관찰합니다</h2>
+  <p style="margin-top:11px">이름과 수정 시각을 비교합니다</p><span class="who">③ 세션 기록</span></div>
+  <aside>개인 대화와 자격 증명은 복사하거나 공유하지 않습니다.</aside>
+</section>
+
+<!-- 7 관찰 절차 -->
+<section class="slide" data-part="PART 2">
+  <h2>같은 위치를 <span class="g">두 번</span> 봅니다</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">터미널에서 <code>~/.openclaw/</code> 아래를 열고 <b>설정 파일과 에이전트별 디렉터리 이름</b>을 먼저 찾습니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">WebChat의 Home에서 <b>짧은 대화를 한 번 더</b> 보냅니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">같은 위치에서 <b class="g">세션 저장소와 워크스페이스의 파일 이름·수정 시각을 다시 비교</b>합니다</span></div>
+  </div>
+  <pre>openclaw memory status</pre>
+  <div class="hl">📌 워크스페이스 메모의 <b>색인 상태</b>는 이 명령으로 살핍니다</div>
+  <aside>전후 비교가 관찰의 기본 형태입니다.</aside>
+</section>
+
+<!-- 8 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">말보다 실행 기록을 먼저 봅니다</h2>
+  <p style="margin-top:11px">"말한 것"과 "한 것"은 다른 줄입니다</p><span class="who">③ 세션 기록</span></div>
+  <aside>대화 화면의 답변은 작업이 끝났다는 인상을 줄 수 있습니다.</aside>
+</section>
+
+<!-- 9 세 줄 -->
+<section class="slide" data-part="PART 3">
+  <h2>세션 기록의 <span class="g">한 줄</span></h2>
+  <table class="t">
+    <tr><th>줄</th><th>담기는 것</th></tr>
+    <tr><td><b>assistant</b> (모델이 낸 줄)</td><td><b><code>text</code></b> — 말한 문장 · <b><code>toolCall</code></b> — <b class="r">하겠다고 요청한</b> 도구 호출</td></tr>
+    <tr><td><b class="g">toolResult</b> (실행 결과 줄)</td><td><b><code>content</code> · <code>details</code></b> — <b class="g">실제로 일어난 것</b></td></tr>
+  </table>
+  <ul class="pts">
+    <li>요청과 결과는 각자 붙은 번호 <b><code>toolCallId</code></b>로 짝지어집니다</li>
+  </ul>
+  <div class="big">완료 여부를 묻는다면<br><span class="y">문장이 아니라 결과 줄</span>을 보아야 합니다</div>
+  <aside>toolCall은 "하겠다"이고 toolResult는 "했다"입니다. 이 구분이 이 절의 핵심입니다.</aside>
+</section>
+
+<!-- 10 세 기록 나란히 -->
+<section class="slide" data-part="PART 3">
+  <h2>세 기록을 <span class="b">나란히</span> 놓습니다</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px"><small>①</small><b>Home의<br>이어지는 대화</b></div>
+    <div class="cell" style="min-width:160px;border-color:var(--bl)"><small>②</small><b class="b">에이전트별<br>SQLite 기록</b></div>
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>③</small><b class="g">워크스페이스<br>메모</b></div>
+  </div>
+  <ul class="pts">
+    <li><b class="r">실제 도구 호출과 파일 변경은</b> 세션 저장소와 워크스페이스의 기록을 <b class="g">함께 보아야 읽힙니다</b></li>
+    <li><b class="g">어느 대화가 어떤 흔적을 남겼는지</b> 확인합니다</li>
+    <li><b class="r">답변 문장만으로 완료를 판단하지 않고</b> — <b class="g">기록의 경로와 변화도 함께 근거로</b> 삼습니다</li>
+  </ul>
+  <aside>중단원 ③(멀티에이전트)에서 result.json·changes.diff·전사를 함께 읽은 것과 같은 규율입니다.</aside>
+</section>
+
+<!-- 11 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 메인 세션의 표준 키는?</div>
+    <div class="q a"><b>A1.</b> <code>agent:&lt;agentId&gt;:main</code>. 웹 앱에서는 <b>Home 화면</b>으로 연다.</div>
+    <div class="q"><b>Q2.</b> "완료했다"를 확인하려면 어느 줄을 보나?</div>
+    <div class="q a"><b>A2.</b> assistant 줄의 <code>text</code>나 <code>toolCall</code>이 아니라 — <b><code>toolResult</code> 줄의 <code>content</code>·<code>details</code>.</b> <code>toolCallId</code>로 요청과 짝짓는다.</div>
+    <div class="q"><b>Q3.</b> 설정 파일·세션 기록·워크스페이스의 관계는?</div>
+    <div class="q a"><b>A3.</b> <b>같은 파일이 아니며 각자 역할이 다르다.</b> 설정은 <code>openclaw.json</code>, 세션은 에이전트별 SQLite, 워크스페이스는 파일 도구의 기본 작업 폴더.</div>
+  </div>
+  <aside>Q2가 이 소단원의 결론입니다.</aside>
+</section>
+
+<!-- 12 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>말한 것과 한 것 📝</h1>
+    <div class="big" style="margin-top:26px"><span class="y">toolCall은 "하겠다"</span>이고<br><span class="y">toolResult는 "했다"</span>입니다</div>
+    <p class="sub" style="margin-top:24px">OpenClaw ③ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ④에서 텔레그램을 채널로 붙여 폰에서 메시지를 보냅니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

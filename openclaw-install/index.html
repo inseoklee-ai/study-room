@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenClaw 나도 써보자 — 설치와 온보딩 (OpenClaw ②)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · OpenClaw ②</span>
+    <h1 style="margin:18px 0">OpenClaw<br>나도 써보자</h1>
+    <p class="sub">설치 → 온보딩 → 진단 → WebChat 첫 문장</p>
+  </div>
+  <aside>OpenClaw는 한 덩어리 명령이 아니라 여러 부품으로 이루어져 있습니다. 그중 첫 번째가 게이트웨이입니다.</aside>
+</section>
+
+<!-- 2 게이트웨이 -->
+<section class="slide" data-part="표지">
+  <h2>게이트웨이는 <span class="g">오래 유지되는 실행 과정</span>입니다</h2>
+  <ul class="pts">
+    <li>게이트웨이는 <b>채널 연결을 오래 유지하는 실행 과정</b>입니다</li>
+    <li>기본적으로 내 컴퓨터의 <code>127.0.0.1:18789</code>에서 연결을 받습니다 — <b class="g"><code>127.0.0.1</code>은 이 컴퓨터 안에서만 접속한다는 뜻</b></li>
+  </ul>
+  <div class="hl">🎯 오늘의 목표 — 연습용 환경에 설치하고, <b>onboard(온보딩)</b>로 첫 설정을 마친 뒤 <b>WebChat에서 한 문장</b>을 보냅니다. <b class="g">설치 결과는 버전·진단·응답 화면에 남습니다</b></div>
+  <aside>온보딩은 처음 실행에 필요한 선택을 대화형으로 받는 과정입니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">시작 위치와 버전을 먼저</h2>
+  <p style="margin-top:11px">격리는 폴더 이름만으로 완성되지 않습니다</p><span class="who">② 설치</span></div>
+  <aside>이 실습은 오늘 처음 만드는 연습 폴더에서만 진행합니다.</aside>
+</section>
+
+<!-- 4 연습 폴더 -->
+<section class="slide" data-part="PART 1">
+  <h2>연습 폴더에서만 <span class="r">진행합니다</span></h2>
+  <pre>mkdir -p ~/openclaw-lab &amp;&amp; cd ~/openclaw-lab
+pwd
+node --version</pre>
+  <ul class="pts">
+    <li><b class="r">실제 업무 저장소, 홈 디렉터리의 설정 폴더, 개인 파일이 있는 위치에서는 진행하지 않습니다</b></li>
+    <li><code>-p</code>는 <b>이미 있어도 오류를 내지 않는</b> 옵션입니다</li>
+    <li>공식 설치 문서가 요구하는 Node — <b><code>22.22.3+</code> · <code>24.15+</code> · <code>25.9+</code></b>, <b class="g">Node 26 권장</b></li>
+    <li>범위에 맞지 않으면 <b class="r">Node를 억지로 바꾸지 말고</b> 실패 경로로 이동합니다</li>
+  </ul>
+  <aside>화면의 버전과 수업 자료에 적힌 권장 버전을 대조합니다.</aside>
+</section>
+
+<!-- 5 격리의 한계 -->
+<section class="slide" data-part="PART 1">
+  <h2>격리는 <span class="r">폴더 이름만으로 완성되지 않습니다</span></h2>
+  <div class="big">실습 폴더 안에서 설치해도<br>설정과 상태를 <span class="y">홈 폴더의 ~/.openclaw/ 아래에</span> 모으고<br><small>자격 증명도 이곳에 저장합니다</small></div>
+  <ul class="pts">
+    <li>그래서 <b class="g">수업용 계정·수업용 키만</b> 사용합니다</li>
+    <li>온보딩 화면에서 <b class="r">실제 업무 계정이나 비밀값을 요구하면 입력을 멈춥니다</b></li>
+    <li>설치 뒤 <b class="g">이 폴더에 어떤 파일이 생겼는지 직접 열어</b> 확인합니다</li>
+  </ul>
+  <aside>이 점을 모르면 "실습 폴더에서 했으니 안전하다"고 잘못 판단합니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">설치와 온보딩을 한 번씩</h2>
+  <p style="margin-top:11px">노트북 환경이 섞인 수업에서는 npm 경로</p><span class="who">② 설치</span></div>
+  <aside>공식 README는 macOS·Linux·WSL2에는 install.sh, Windows에는 install.ps1을 안내합니다. npm은 운영 체제와 관계없이 같은 명령으로 설치할 수 있습니다.</aside>
+</section>
+
+<!-- 7 설치 -->
+<section class="slide" data-part="PART 2">
+  <h2>npm으로 <span class="g">설치</span>합니다</h2>
+  <pre>npm install -g openclaw@latest --allow-scripts=openclaw
+openclaw --version</pre>
+  <ul class="pts">
+    <li><code>--allow-scripts=openclaw</code>는 npm의 <b>lifecycle script 허용 옵션</b>입니다</li>
+    <li><code>latest</code>는 <b>설치 시점의 최신 버전</b>을 받아 오므로 — <b class="r">화면에 보이는 숫자는 설치한 날짜에 따라 다를 수 있습니다</b></li>
+  </ul>
+  <pre>openclaw onboard --install-daemon</pre>
+  <div class="hl">📌 <b>데몬</b>은 터미널 창을 계속 열어 두지 않아도 <b class="g">백그라운드에서 실행되는 관리 서비스</b>입니다. 이 옵션은 <b>대화형 설정과 데몬 설치를 함께</b> 수행 — macOS에서는 <b>LaunchAgent</b>, Linux/WSL2에서는 <b>systemd 사용자 서비스</b>로</div>
+  <aside>설치할 버전을 지정할 수도 있습니다.</aside>
+</section>
+
+<!-- 8 인증 경로 -->
+<section class="slide" data-part="PART 2">
+  <h2>두 <span class="b">인증 경로</span>의 차이</h2>
+  <table class="t">
+    <tr><th>경로</th><th>동작</th><th>과금</th></tr>
+    <tr><td><code>ANTHROPIC_API_KEY</code></td><td><b class="g">OpenClaw가 직접 키를 들고 호출</b></td><td><b class="r">종량 과금</b></td></tr>
+    <tr><td><code>claude-cli</code></td><td>같은 호스트에서 로그인한 Claude Code를 재사용 — <b>내부적으로 Claude CLI를 실행</b>해 로그인해 둔 세션을 대신 사용</td><td><b>구독에서 차감</b>되지만 <b class="r">실제 호출은 CLI를 거칩니다</b></td></tr>
+  </table>
+  <div class="hl">⚠️ <b class="r">코딩 에이전트 구독 계정을 연결해도 Claude가 구독으로 완벽하게 동작하는 것은 아닙니다.</b> 그리고 <b class="r">API 키 값을 메모나 화면 캡처에 남기지 않습니다</b></div>
+  <ul class="pts">
+    <li>온보딩 화면에서는 <b class="g">수업용 인증 경로만</b> 고릅니다</li>
+  </ul>
+  <aside>이 두 경로의 차이가 소단원 ⑧ 사용량 화면에서 "돈"과 "남은 양"의 차이로 다시 나타납니다.</aside>
+</section>
+
+<!-- 9 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">실행 상태를 세 곳에서 확인</h2>
+  <p style="margin-top:11px">마지막 줄만 보고 성공으로 판단하지 않습니다</p><span class="who">② 설치</span></div>
+  <aside>온보딩을 마쳤다고 바로 채널을 연결하지 않습니다.</aside>
+</section>
+
+<!-- 10 진단 -->
+<section class="slide" data-part="PART 3">
+  <h2>진단은 <span class="g">화면 그대로</span> 읽습니다</h2>
+  <pre>openclaw doctor
+openclaw gateway status</pre>
+  <ul class="pts">
+    <li><code>doctor</code>는 <b>구성 진단 명령</b>입니다. 경고와 오류가 있으면 <b class="r">마지막 줄만 보고 성공으로 판단하지 않습니다</b></li>
+    <li><b class="g">통과한 항목과 남은 항목을 화면 그대로 읽는 것이 진단의 목적</b>입니다</li>
+    <li><code>gateway status</code>에서는 <b>게이트웨이의 실행 상태</b>를 봅니다</li>
+    <li><b class="r">둘 중 하나라도 실패하면 그 시점에서 멈춥니다</b></li>
+  </ul>
+  <aside>"OK"라는 마지막 줄이 모든 항목의 통과를 뜻하지 않습니다.</aside>
+</section>
+
+<!-- 11 WebChat -->
+<section class="slide" data-part="PART 3">
+  <h2>WebChat에서 <span class="g">첫 문장</span></h2>
+  <p><b>WebChat</b>은 OpenClaw가 <b>자체적으로 제공하는 대화 화면</b>입니다. 실행 중인 게이트웨이가 이 화면을 <code>http://127.0.0.1:18789</code>에서 내어 놓고, 브라우저가 게이트웨이와 <b>WebSocket</b> 연결을 유지한 채 이력과 메시지를 주고받습니다.</p>
+  <pre>openclaw dashboard</pre>
+  <ul class="pts">
+    <li><b class="r">화면은 저절로 열리지 않습니다</b> — 이 명령이 기본 브라우저에서 그 주소를 엽니다</li>
+    <li><b class="r">게이트웨이가 멈춰 있으면 화면이 열려도 새 메시지를 보낼 수 없습니다</b></li>
+  </ul>
+  <pre>이 메시지를 받았다면 `연결 확인`이라고만 답해 주세요.</pre>
+  <div class="hl">⚠️ <b class="r">주소를 추측해 입력하거나 외부 네트워크에 포트를 열지 않습니다</b> — 기본 주소의 외부 접속은 공식 문서에서 권장하지 않으며 <b>원격 접속에는 별도의 승인 절차</b>가 필요합니다</div>
+  <aside>WebSocket은 브라우저와 서버가 연결을 끊지 않고 메시지를 계속 주고받는 통신 방식입니다.</aside>
+</section>
+
+<!-- 12 Tailscale -->
+<section class="slide" data-part="PART 3">
+  <h2>원격 접속의 길 — <span class="p">Tailscale</span></h2>
+  <p><b>Tailscale</b>은 내 기기들을 하나로 묶어 <b>사설망처럼 쓰게 해 주는 도구</b>입니다.</p>
+  <table class="t">
+    <tr><th>기능</th><th>하는 일</th></tr>
+    <tr><td><b>Serve</b></td><td>게이트웨이를 <code>127.0.0.1</code>에 둔 채 <b class="g">사설망 안에서만 쓰는 HTTPS 주소</b>를 붙임</td></tr>
+    <tr><td><b>Funnel</b></td><td><b class="r">공개 주소</b>를 만들 수도 있음</td></tr>
+  </table>
+  <div class="hl">📌 텔레그램 연결과는 <b class="r">다른 길</b>입니다 — 텔레그램은 <b>에이전트가 메시지를 받을 새 창구</b>를 여는 것이고, 이쪽은 <b class="g">이미 떠 있는 WebChat 화면을 다른 기기에서도 쓰게</b> 하는 길입니다</div>
+  <aside>출처: docs.openclaw.ai/gateway/tailscale</aside>
+</section>
+
+<!-- 13 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">생긴 상태를 열고, 끝나면 멈춥니다</h2>
+  <p style="margin-top:11px">화면에 표시된 경로만 따라갑니다</p><span class="who">② 설치</span></div>
+  <aside>설치와 온보딩 뒤에는 상태가 남습니다.</aside>
+</section>
+
+<!-- 14 상태 확인 -->
+<section class="slide" data-part="PART 4">
+  <h2>남은 <span class="g">흔적</span>을 엽니다</h2>
+  <pre>ls -la ~/.openclaw</pre>
+  <ul class="pts">
+    <li>온보딩 완료 화면, <code>doctor</code> 출력, <code>gateway status</code> 출력에서 <b>이 경로가 표시되는지</b> 확인하고 직접 엽니다</li>
+    <li>폴더 이름과 보이는 <b>파일·하위 폴더 이름</b>이 설치가 남긴 흔적입니다</li>
+    <li>파일 내용에 <b class="r">토큰, 키, 개인 대화가 보이면 내용을 복사하거나 공유하지 않습니다</b></li>
+  </ul>
+  <div class="hl">⚠️ <b class="g">화면에 표시된 경로만 따라갑니다</b> — <b class="r">화면에 없는 경로를 검색하거나 추측으로 만들어 열지 않습니다</b></div>
+  <aside>추측 탐색은 관측이 아니라 소음을 만듭니다.</aside>
+</section>
+
+<!-- 15 증거 -->
+<section class="slide" data-part="PART 4">
+  <h2>설치가 끝났다는 <span class="g">네 증거</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px"><small>1</small><b><code>--version</code></b></div>
+    <div class="cell" style="min-width:140px;border-color:var(--bl)"><small>2</small><b class="b">온보딩<br>완료 화면</b></div>
+    <div class="cell" style="min-width:150px;border-color:var(--pp)"><small>3</small><b class="p"><code>gateway<br>status</code></b></div>
+    <div class="cell" style="min-width:140px;border-color:var(--gr)"><small>4</small><b class="g">WebChat<br>첫 응답</b></div>
+  </div>
+  <ul class="pts">
+    <li>설치·온보딩·진단이 실패했다면 <b><code>openclaw --version</code>으로 설치 여부부터</b> 다시 확인합니다</li>
+    <li>WebChat에서 응답을 받지 못했다면 <b class="g">게이트웨이 상태와 오류 문구를 함께</b> 봅니다</li>
+  </ul>
+  <aside>각 결과에서 화면에 나타난 버전, 상태, 응답이 설치가 끝났다는 증거입니다.</aside>
+</section>
+
+<!-- 16 멈추기 -->
+<section class="slide" data-part="PART 4">
+  <h2>수업이 끝날 때 <span class="r">멈추는 법</span></h2>
+  <pre>openclaw daemon stop
+openclaw gateway status
+openclaw config file</pre>
+  <ul class="pts">
+    <li>게이트웨이를 <b>터미널에서 직접 실행</b>했다면 그 터미널에서 <b>Ctrl-C</b></li>
+    <li>이어서 <code>gateway status</code>로 <b class="g">멈췄는지 확인</b>합니다</li>
+    <li><b class="r">프로그램을 멈춰도 상태 디렉터리와 설정 파일은 지우지 않는 한 남습니다.</b> 기본 설정 파일은 <code>~/.openclaw/openclaw.json</code></li>
+  </ul>
+  <div class="hl">🔐 마무리에서는 프로그램을 끄고 — <b class="g">수업용 토큰과 인증 경로의 보관 위치와 접근 가능 범위를 다시 살핍니다</b></div>
+  <aside>끄는 것과 지우는 것은 다른 일입니다.</aside>
+</section>
+
+<!-- 17 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 연습 폴더를 만들어도 격리가 완성되지 않는 이유는?</div>
+    <div class="q a"><b>A1.</b> 설정·상태·자격 증명이 <b>홈 폴더의 <code>~/.openclaw/</code></b>에 모이기 때문. 그래서 <b>수업용 계정·키만</b> 쓴다.</div>
+    <div class="q"><b>Q2.</b> 두 인증 경로의 차이는?</div>
+    <div class="q a"><b>A2.</b> API 키는 <b>OpenClaw가 직접 키를 들고 호출(종량)</b>, <code>claude-cli</code>는 <b>로그인해 둔 Claude Code 세션을 CLI로 대신 사용(구독 차감)</b>.</div>
+    <div class="q"><b>Q3.</b> <code>doctor</code>를 읽는 법은?</div>
+    <div class="q a"><b>A3.</b> 마지막 줄만 보지 않고 <b>통과한 항목과 남은 항목을 화면 그대로</b> 읽는다. 하나라도 실패하면 <b>그 시점에서 멈춘다.</b></div>
+  </div>
+  <aside>Q1이 이 절의 안전 규율입니다.</aside>
+</section>
+
+<!-- 18 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>127.0.0.1에서 시작합니다 🔌</h1>
+    <div class="big" style="margin-top:26px">버전 · 온보딩 화면 · 게이트웨이 상태 · 첫 응답<br><span class="y">네 곳에 남은 것이 설치의 증거</span></div>
+    <p class="sub" style="margin-top:24px">OpenClaw ② — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ③에서 그 대화가 어디에 어떻게 남는지 읽습니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

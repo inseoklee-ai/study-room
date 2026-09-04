@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>텔레그램으로 부리기 — 채널과 페어링 (OpenClaw ④)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · OpenClaw ④</span>
+    <h1 style="margin:18px 0">텔레그램으로 부리기</h1>
+    <p class="sub">입구는 열려 있지만 문은 잠긴 상태 — 페어링 승인이 열쇠입니다</p>
+  </div>
+  <aside>채널은 메시지 서비스와 Gateway를 잇는 연결입니다. Telegram을 채널로 붙이면 폰에서 보낸 메시지가 Gateway에 도착합니다.</aside>
+</section>
+
+<!-- 2 토큰 주의 -->
+<section class="slide" data-part="표지">
+  <h2>봇 토큰은 <span class="r">비밀값</span>입니다</h2>
+  <div class="hl">🔐 봇 토큰은 <b>봇을 대신해 Telegram에 접속하는 비밀값</b>입니다 — <b class="r">채팅창, 화면 공유, 메모에는 토큰을 적지 않습니다</b></div>
+  <ul class="pts">
+    <li>이 절에서 할 일 — <b class="g">수업용 봇을 만들고, 첫 메시지를 보낸 계정을 승인</b>합니다</li>
+  </ul>
+  <aside>출처: docs/channels/telegram</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">BotFather로 봇을 만듭니다</h2>
+  <p style="margin-top:11px">사용자가 AI 봇을 손쉽게 만들게 해 주는 기능</p><span class="who">④ 텔레그램</span></div>
+  <aside>Telegram에서는 BotFather라는 서비스가 제공되고 있습니다.</aside>
+</section>
+
+<!-- 4 봇 만들기 -->
+<section class="slide" data-part="PART 1">
+  <h2>봇 <span class="g">만들기</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">Telegram에서 <code>@BotFather</code>를 찾아 접속합니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">대화창에 <code>/newbot</code>을 보냅니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">화면 안내에 따라 <b>표시 이름</b>과 <b><code>bot</code>으로 끝나는 봇 이름</b>을 입력합니다</span></div>
+    <div class="st"><span class="n">4</span><span class="t">발급 화면의 토큰을 복사해 <b class="g">안전한 비밀 보관 위치</b>에 둡니다</span></div>
+  </div>
+  <div class="hl">⚠️ <b class="r">토큰이 대화에 남았다면</b> — BotFather에서 <b class="g">새 토큰을 발급하고 이전 토큰은 쓰지 않습니다</b></div>
+  <aside>출처: docs/channels/telegram</aside>
+</section>
+
+<!-- 5 Gateway 연결 -->
+<section class="slide" data-part="PART 1">
+  <h2>Gateway에 <span class="b">토큰을 연결</span>합니다</h2>
+  <pre>openclaw config set channels.telegram.botToken "여기에_봇_토큰"
+openclaw gateway</pre>
+  <ul class="pts">
+    <li>큰따옴표 안을 <b>방금 보관한 토큰</b>으로 바꿉니다</li>
+    <li>Telegram은 <b class="r"><code>channels login</code> 명령으로 연결하지 않고</b> — <b class="g">설정에 토큰을 넣은 뒤 Gateway를 시작</b>합니다</li>
+    <li>Gateway가 <b>이미 실행 중이면</b> 수업 환경의 재시작 방법으로 다시 시작합니다</li>
+    <li>폰에서 <b>새 봇 대화창을 열어 짧은 인사말 하나</b>를 보냅니다</li>
+  </ul>
+  <aside>채널마다 연결 방식이 다르다는 점(login vs config set)이 실무 함정입니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">누가 말 걸었는지 구분합니다</h2>
+  <p style="margin-top:11px">페어링 — 입구의 신원 확인</p><span class="who">④ 텔레그램</span></div>
+  <aside>채널은 열려 있어도 바로 누구나 대화하는 곳은 아닙니다.</aside>
+</section>
+
+<!-- 7 페어링 -->
+<section class="slide" data-part="PART 2">
+  <h2>입구는 열려 있지만 <span class="r">문은 잠겨</span> 있습니다</h2>
+  <p>Telegram의 기본 DM 정책인 <b>페어링(pairing)</b>은 <b class="g">첫 메시지를 보낸 계정을 승인 대기 목록에 올리고, 승인된 계정만 봇과 대화하게</b> 하는 규칙입니다.</p>
+  <pre>openclaw pairing list telegram
+openclaw pairing approve telegram &lt;코드&gt;</pre>
+  <table class="t">
+    <tr><th>규칙</th><th>내용</th></tr>
+    <tr><td>만료</td><td><b class="r">승인 전 대기 중인 코드만</b> 1시간 뒤 만료</td></tr>
+    <tr><td>승인 후</td><td>한 번 승인하면 <b class="g">이후에는 코드 없이 대화가 이어집니다</b></td></tr>
+    <tr><td>재발급</td><td><b>승인이 안 된 채 시간이 지난 경우에만</b> 새 코드를 받아 다시 승인</td></tr>
+    <tr><td>미승인 계정</td><td><b class="r">봇이 답하지 않습니다</b></td></tr>
+  </table>
+  <div class="hl">📌 <b class="r">Telegram 계정을 사람 이름으로 추측하지 말고</b> — <b class="g">승인 목록의 계정으로</b> 구분합니다</div>
+  <aside>페어링 승인이 열쇠입니다. 출처: docs/channels/telegram</aside>
+</section>
+
+<!-- 8 정책 -->
+<section class="slide" data-part="PART 2">
+  <h2>세 가지 <span class="g">입구 정책</span></h2>
+  <table class="t">
+    <tr><th>정책</th><th>내용</th><th>맞는 경우</th></tr>
+    <tr><td><b>pairing</b> (기본 DM 정책)</td><td>첫 메시지를 대기 목록에 올리고 <b>승인된 계정만</b></td><td>일반적인 개인 봇</td></tr>
+    <tr><td><b class="g">allowlist</b></td><td><b>numeric Telegram ID를 허용 목록에</b> 넣어 입구를 제한</td><td><b class="g">소유 계정 하나만 쓰는 봇</b></td></tr>
+    <tr><td><b class="r">open</b></td><td><b class="r">모든 계정을 받음</b></td><td><b class="r">제한된 도구만 둔 공개 봇에만</b></td></tr>
+  </table>
+  <aside>정책 이름보다 "누가 말할 수 있는가"를 먼저 정하는 순서가 중요합니다.</aside>
+</section>
+
+<!-- 9 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">다른 입구에도 같은 문을 둡니다</h2>
+  <p style="margin-top:11px">Discord · Slack</p><span class="who">④ 텔레그램</span></div>
+  <aside>오늘은 Telegram만 연결합니다. Discord와 Slack도 같은 순서로 열 수 있습니다.</aside>
+</section>
+
+<!-- 10 Discord -->
+<section class="slide" data-part="PART 3">
+  <h2>Discord — <span class="b">개발자 포털</span>에서</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">개발자 포털에서 <b>애플리케이션</b>을 만든 뒤 <b>Bot</b> 탭에서 봇을 만듭니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">같은 탭의 <b>Reset Token</b>으로 토큰을 발급합니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>Privileged Gateway Intents</b>에서 <b class="g">Message Content Intent</b>를 켭니다</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>OAuth2 URL Generator</b>에서 <code>bot</code>과 <code>applications.commands</code> 범위를 골라 서버에 초대</span></div>
+    <div class="st"><span class="n">5</span><span class="t"><b class="g">토큰은 환경 변수로 둔</b> 설정 파일을 등록한 뒤 Gateway를 시작</span></div>
+  </div>
+  <pre>openclaw config patch --file ./discord.patch.json5</pre>
+  <aside>출처: docs/channels/discord</aside>
+</section>
+
+<!-- 11 Slack -->
+<section class="slide" data-part="PART 3">
+  <h2>Slack — <span class="p">manifest</span>에서</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><code>Create New App</code>에서 <b>From a manifest</b>를 골라 <b>워크스페이스와 manifest JSON</b>을 넣어 앱을 만듭니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>App-Level Token</b>에 <code>connections:write</code>를 더해 발급합니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>Install to Workspace</b>에서 <b>Bot User OAuth Token</b>을 받습니다</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b class="g">두 토큰</b>은 설정 파일로 등록합니다</span></div>
+  </div>
+  <pre>openclaw config patch --file ./slack.socket.patch.json5</pre>
+  <div class="hl">📌 기본 전송 방식인 <b>Socket Mode</b>는 <b class="g">공개 Gateway 주소가 필요 없습니다</b></div>
+  <aside>출처: docs/channels/slack. 채널이 열렸습니다. 이제 무엇을 허용하고 무엇을 막을지 봅니다.</aside>
+</section>
+
+<!-- 12 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> Telegram 연결이 다른 채널과 다른 점은?</div>
+    <div class="q a"><b>A1.</b> <code>channels login</code>이 아니라 — <b>설정에 토큰을 넣은 뒤 Gateway를 시작</b>한다.</div>
+    <div class="q"><b>Q2.</b> 페어링 코드는 언제 만료되나?</div>
+    <div class="q a"><b>A2.</b> <b>승인 전 대기 중인 코드만</b> 1시간 뒤. 한 번 승인하면 이후에는 코드 없이 대화가 이어진다.</div>
+    <div class="q"><b>Q3.</b> <code>open</code> 정책은 어디에 맞나?</div>
+    <div class="q a"><b>A3.</b> <b>제한된 도구만 둔 공개 봇</b>에만. 소유 계정 하나만 쓸 때는 <code>allowlist</code>로 numeric ID를 제한한다.</div>
+  </div>
+  <aside>Q1은 문서를 안 읽고 유추하면 반드시 틀리는 지점입니다.</aside>
+</section>
+
+<!-- 13 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>입구를 열고 문을 둡니다 📲</h1>
+    <div class="big" style="margin-top:26px">채널을 붙이는 일과<br><span class="y">누가 말할 수 있게 하는 일</span>은 다릅니다</div>
+    <p class="sub" style="margin-top:24px">OpenClaw ④ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑤에서 파일·명령·채널·외부 입력의 경계를 각각 정합니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

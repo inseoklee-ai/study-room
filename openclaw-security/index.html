@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>보안 — OpenClaw가 지키는 것들 (OpenClaw ⑤)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · OpenClaw ⑤</span>
+    <h1 style="margin:18px 0">보안<br>— OpenClaw가 지키는 것들</h1>
+    <p class="sub">보안은 하나의 잠금장치가 아닙니다</p>
+  </div>
+  <aside>에이전트를 집에 들이면 편리함만 늘어나는 것이 아닙니다.</aside>
+</section>
+
+<!-- 2 세 갈래 -->
+<section class="slide" data-part="표지">
+  <h2>따로 정해야 하는 <span class="r">세 가지</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px"><small>①</small><b>파일과 명령의<br>범위</b></div>
+    <div class="cell" style="min-width:170px;border-color:var(--bl)"><small>②</small><b class="b">채널에서 말할 수<br>있는 계정</b></div>
+    <div class="cell" style="min-width:190px;border-color:var(--red)"><small>③</small><b class="r">외부 내용을 실행으로<br>옮기는 승인 절차</b></div>
+  </div>
+  <ul class="pts">
+    <li>파일을 읽고 명령을 실행하며 채널 메시지를 받는 만큼 — <b class="g">어디까지 행동해도 되는지 경계를 정해야</b> 합니다</li>
+  </ul>
+  <div class="big">보안은 <span class="y">하나의 잠금장치가 아니라</span><br><small>파일과 명령, 채널 입구, 외부 입력을 각각 다루는 일</small></div>
+  <aside>이 세 갈래가 이 소단원의 목차입니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">파일과 명령의 범위</h2>
+  <p style="margin-top:11px">도구 목록이 곧 권한입니다</p><span class="who">⑤ 보안</span></div>
+  <aside>세션의 sessionRoot는 파일 접근을 판단하는 작업 폴더 경계입니다.</aside>
+</section>
+
+<!-- 4 권한 모드 개념 -->
+<section class="slide" data-part="PART 1">
+  <h2>권한 모드가 <span class="g">정하는 것</span></h2>
+  <ul class="pts">
+    <li>세션의 <code>sessionRoot</code>는 <b>파일 접근을 판단하는 작업 폴더 경계</b>입니다</li>
+    <li><b>권한 모드(permission mode)</b>는 그 <b class="g">경계 안팎에서 파일을 읽고 쓰는 범위</b>와 <b class="g">명령 실행을 누가 검토하는지</b> 정합니다</li>
+  </ul>
+  <div class="hl">🎯 <b class="g">도구 목록이 곧 권한</b>이라는 말은 — <b>에이전트가 할 수 있는 행동이 보이는 도구에 한정된다</b>는 뜻입니다</div>
+  <aside>출처: docs/gateway/permission-modes</aside>
+</section>
+
+<!-- 5 네 모드 -->
+<section class="slide" data-part="PART 1">
+  <h2>네 <span class="b">모드</span></h2>
+  <table class="t">
+    <tr><th>모드</th><th>파일 읽기</th><th>파일 쓰기</th><th>명령 실행</th></tr>
+    <tr><td><code>read-only</code></td><td>작업 폴더 안</td><td><b class="r">도구가 아예 없음</b></td><td><b class="r">거부</b></td></tr>
+    <tr><td><code>guarded</code></td><td>작업 폴더 안</td><td>작업 폴더 안</td><td>허용 목록 밖이면 <b class="g">사람이 승인</b></td></tr>
+    <tr><td><code>workspace</code></td><td>작업 폴더 안</td><td>작업 폴더 안</td><td>허용 목록 밖이면 <b>모델 검토 뒤 필요 시 사람</b></td></tr>
+    <tr><td><b class="r"><code>full</code></b></td><td><b class="r">제한 없음</b></td><td><b class="r">제한 없음</b></td><td><b class="r">승인 절차 없음</b></td></tr>
+  </table>
+  <ul class="pts">
+    <li><code>full</code>은 <b class="r">관리자 권한이 필요</b>합니다</li>
+  </ul>
+  <aside>작성창의 권한 메뉴에서 작업에 맞는 접근 범위를 고릅니다. 출처: docs/gateway/permission-modes</aside>
+</section>
+
+<!-- 6 고르는 법 -->
+<section class="slide" data-part="PART 1">
+  <h2>어디에서 <span class="g">시작</span>하나</h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">자료를 읽어 <b>요약하는 과업</b>이라면 <b class="g"><code>read-only</code></b>에서 시작합니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>파일을 고칠 때만</b> <code>guarded</code>를 검토합니다</span></div>
+  </div>
+  <div class="big">더 넓은 권한은 편해 보여도<br><span class="y">잘못된 요청이 들어왔을 때 닿는 범위도</span> 함께 넓힙니다</div>
+  <aside>기본값을 좁게 두고 필요할 때 넓히는 순서입니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">채널 입구에서 계정을 구분합니다</h2>
+  <p style="margin-top:11px">앞 절 페어링 승인의 이유</p><span class="who">⑤ 보안</span></div>
+  <aside>페어링은 승인 대기 계정을 확인한 뒤 대화를 허용하는 입구의 신원 확인입니다.</aside>
+</section>
+
+<!-- 8 채널 경계 -->
+<section class="slide" data-part="PART 2">
+  <h2>입구를 <span class="g">더 좁게</span></h2>
+  <ul class="pts">
+    <li>앞 절에서 Telegram 첫 메시지에 페어링 승인을 한 까닭 — <b class="g">봇에게 말을 거는 계정을 구분하기 위해서</b></li>
+    <li>소유 계정 하나만 쓰는 봇이라면 <b>numeric Telegram ID를 허용 목록에 넣어</b> 입구를 더 좁게 제한할 수 있습니다</li>
+    <li><code>open</code> 정책은 <b class="r">공개 봇에만 맞고, 그 경우에도 도구를 강하게 제한</b>해야 합니다</li>
+  </ul>
+  <div class="hl">⚠️ 그룹 대화에서는 <b>누가 메시지를 보냈는지 따로 제한</b>할 수 있으며 — <b class="r">직접 메시지의 페어링 승인이 그룹 발신자 허용 목록으로 자동 확대되지는 않습니다</b></div>
+  <aside>출처: docs/channels/telegram. 승인의 범위가 자동으로 넓어지지 않는다는 점이 핵심입니다.</aside>
+</section>
+
+<!-- 9 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">읽은 내용과 실행 요청을 분리합니다</h2>
+  <p style="margin-top:11px">프롬프트 인젝션</p><span class="who">⑤ 보안</span></div>
+  <aside>웹 문서, 이메일, 채팅 메시지에는 사람에게 명령처럼 보이는 문장이 섞일 수 있습니다.</aside>
+</section>
+
+<!-- 10 인젝션 -->
+<section class="slide" data-part="PART 3">
+  <h2>읽어 온 문서는 <span class="r">실행 허가가 아닙니다</span></h2>
+  <div class="hl">📖 <b>프롬프트 인젝션</b> — 외부 내용에 섞인 문장이 <b class="r">에이전트의 원래 과업보다 앞서 행동하게 유도</b>하는 일</div>
+  <div class="big">읽어 온 문서는 <span class="y">판단 재료일 뿐</span><br><small>실행 허가가 아닙니다</small></div>
+  <ul class="pts">
+    <li><b class="g">외부 내용을 읽는 역할에는 읽기 전용 도구</b>를 두고 — 명령 실행이나 파일 변경이 필요한 과업은 <b class="g">별도 승인 뒤에</b> 진행합니다</li>
+    <li>OpenClaw 보안 문서의 안내 — <b class="g">신뢰하기 어려운 내용을 요약하는 읽기 전용 에이전트를 따로 두고</b>, <b>검색·웹 읽기·브라우저 도구는 필요한 경우에만</b> 켜기</li>
+  </ul>
+  <aside>출처: docs/gateway/security/index.md</aside>
+</section>
+
+<!-- 11 음성 -->
+<section class="slide" data-part="PART 3">
+  <h2>음성 환경에서도 <span class="b">다시 확인</span>합니다</h2>
+  <ul class="pts">
+    <li>파일을 바꾸거나 외부로 보내는 행동을 <b>시작하기 전에</b> — <b class="g">요청 내용을 말로 다시 읽고, 승인 의사를 발화로 받는 규칙</b>을 둡니다</li>
+  </ul>
+  <div class="big">말한 요청과 실제 실행은<br><span class="y">다른 권한</span>이라는 원칙을 유지합니다</div>
+  <aside>소단원 ⑩의 Talk mode에서 같은 원칙이 다시 나옵니다.</aside>
+</section>
+
+<!-- 12 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">공개된 사건 기록을 읽어 봅니다</h2>
+  <p style="margin-top:11px">경계를 정하는 규칙은 사건 위에서 자랐습니다</p><span class="who">⑤ 보안</span></div>
+  <aside>OpenClaw 저장소에는 고친 취약점을 스스로 공개하는 보안 권고가 모여 있습니다.</aside>
+</section>
+
+<!-- 13 세 사건 -->
+<section class="slide" data-part="PART 4">
+  <h2>세 <span class="r">보안 권고</span></h2>
+  <table class="t">
+    <tr><th>권고</th><th>내용</th><th>보여 주는 것</th></tr>
+    <tr><td><code>GHSA-xr4f-mjxj-w6w5</code></td><td>소유자가 아닌 <b>승인된 채팅 발신자</b>가 승인 코드를 만들어 만료 전에 사용하면 <b class="r">관리자 권한 기기를 등록</b>할 수 있었음</td><td><b class="g">대화를 허용받은 계정과 기기를 소유한 계정은 다른 경계</b>인데 한쪽 약점이 다른 쪽 권한으로 넘어감</td></tr>
+    <tr><td><code>GHSA-v2ww-5rh7-2h5v</code></td><td><b>허용한 명령 이름만 검사하고 인자는 검사하지 않아서</b> — 낮은 신뢰 발신자가 <b class="r">허용되지 않은 인자로 파일·네트워크·명령 실행을 유도</b></td><td><b class="g">명령 이름 제한과 인자 제한은 다른 일</b></td></tr>
+    <tr><td><code>GHSA-grc3-2j34-p6gm</code></td><td><b>모델이 지정한 주소로 요청이 흐를 때</b> — <b class="r">게이트웨이의 열쇠가 함께 전달될 수 있었음</b></td><td><b class="g">읽어 온 외부 내용이 실행 권한에 닿는 길</b>과 같은 맥락</td></tr>
+  </table>
+  <aside>세 사건 모두 "경계 하나가 다른 경계로 넘어가는" 형태입니다.</aside>
+</section>
+
+<!-- 14 사건과 사고 -->
+<section class="slide" data-part="PART 4">
+  <h2>권고와 <span class="r">사고 보도</span>를 구분합니다</h2>
+  <div class="grid2">
+    <div class="box"><h3>✅ 이것은</h3><p><b class="g">고쳤음을 스스로 공개한 취약점 권고</b></p></div>
+    <div class="box"><h3>❌ 이것이 아닙니다</h3><p><b class="r">개별 사용자가 피해를 입었다는 사고 보도</b></p></div>
+  </div>
+  <ul class="pts">
+    <li><b class="g">실무 판단은 이 둘을 구분하는 데서 시작</b>합니다</li>
+    <li>사건이 공개된 뒤 <b>안정판에는 고쳐 들어왔습니다</b> — <b class="g">최신 버전을 유지하는 일이 첫 방어선</b></li>
+  </ul>
+  <div class="hl">📌 한 줄 정리 — <b class="g">파일과 명령의 범위, 채널에서 말할 수 있는 계정, 외부 내용을 실행으로 옮기는 승인 절차를 따로 정합니다</b></div>
+  <aside>경계를 정했습니다. 이제 사람을 늘리는 대신 역할을 늘려 봅니다.</aside>
+</section>
+
+<!-- 15 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 요약 과업은 어느 모드에서 시작하나?</div>
+    <div class="q a"><b>A1.</b> <code>read-only</code>. 파일 쓰기 도구가 <b>아예 없고</b> 명령 실행은 <b>거부</b>된다. 파일을 고칠 때만 <code>guarded</code>를 검토한다.</div>
+    <div class="q"><b>Q2.</b> DM 페어링 승인이 그룹 대화까지 확대되나?</div>
+    <div class="q a"><b>A2.</b> <b>아니다.</b> 그룹 발신자 허용 목록은 <b>따로 제한</b>해야 한다.</div>
+    <div class="q"><b>Q3.</b> 명령 허용 목록 우회 권고가 보여 준 것은?</div>
+    <div class="q a"><b>A3.</b> <b>명령 이름을 제한하는 일과 인자를 제한하는 일은 다른 일</b>이라는 점.</div>
+  </div>
+  <aside>Q3은 허용 목록을 만들 때 반드시 기억해야 하는 교훈입니다.</aside>
+</section>
+
+<!-- 16 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>경계를 따로 정합니다 🔐</h1>
+    <div class="big" style="margin-top:26px">읽어 온 문서는 판단 재료일 뿐<br><span class="y">실행 허가가 아닙니다</span></div>
+    <p class="sub" style="margin-top:24px">OpenClaw ⑤ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑥에서 이 도구의 뼈대가 된 작은 코어 pi를 봅니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

@@ -43,7 +43,10 @@ const LESSONS = process.argv.slice(2).length
      "n8n-ai-agent-node","adopt-hold-reject","self-hosting-n8n",
      "multiagent-tradeoff","four-structures","reading-agent-numbers",
      "baseline-single-agent","workflow-split","lead-orchestration",
-     "observe-and-judge","compare-arms","multiagent-ecosystem","adopt-reduce-retire"];
+     "observe-and-judge","compare-arms","multiagent-ecosystem","adopt-reduce-retire",
+     "openclaw-origin","openclaw-install","openclaw-session-log","telegram-channel",
+     "openclaw-security","pi-core","openclaw-multiagent","openclaw-monitoring",
+     "openclaw-automations","openclaw-extensions"];
 
 // ---- palette (deck light theme) ----
 const INK="2A2723", SOFT="6B6357", GR="3F6B5F", GR2="2C4D44", GOLD="C8A15A",
