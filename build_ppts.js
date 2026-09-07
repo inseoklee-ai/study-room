@@ -46,7 +46,12 @@ const LESSONS = process.argv.slice(2).length
      "observe-and-judge","compare-arms","multiagent-ecosystem","adopt-reduce-retire",
      "openclaw-origin","openclaw-install","openclaw-session-log","telegram-channel",
      "openclaw-security","pi-core","openclaw-multiagent","openclaw-monitoring",
-     "openclaw-automations","openclaw-extensions"];
+     "openclaw-automations","openclaw-extensions",
+     "tool-connection-basics","mcp-structure","build-weekly-mcp","host-first-call",
+     "tool-context-burden","claude-tool-search","opencode-code-mode",
+     "skill-domain-knowledge","first-team-report","save-as-skill",
+     "reuse-skill-new-week","colab-mcp","google-oauth-sheets",
+     "extend-own-task","wikiskill-research"];
 
 // ---- palette (deck light theme) ----
 const INK="2A2723", SOFT="6B6357", GR="3F6B5F", GR2="2C4D44", GOLD="C8A15A",

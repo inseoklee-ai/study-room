@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>많은 도구와 문맥 부담 (도구 연결 ⑤)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 도구 연결 ⑤</span>
+    <h1 style="margin:18px 0">많은 도구와 문맥 부담</h1>
+    <p class="sub">두 단어를 주고받았는데 13만 토큰 — 무엇이 그 숫자를 만들었나</p>
+  </div>
+  <aside>업무 기록을 읽는 통로가 생겼습니다. 이제 달력, 문서, 메일도 붙이고 싶어집니다.</aside>
+</section>
+
+<!-- 2 화면 -->
+<section class="slide" data-part="표지">
+  <h2>짧은 대화와 <span class="r">큰 사용량</span></h2>
+  <div class="big">사용자는 <span class="y">ping</span>, AI는 <span class="y">pong</span><br><small>그런데 오른쪽 숫자는 Context 138,233 tokens · 69% used</small></div>
+  <ul class="pts">
+    <li>직접 확인할 수 있는 것은 — <b class="g">짧은 대화와 큰 문맥 사용량, 여러 MCP 연결이 함께 보인다</b>는 사실</li>
+    <li><b class="r">138,233토큰이 전부 MCP 도구 설명이라는 뜻은 아닙니다</b> — 호스트의 기본 지시, 프로젝트 규칙, 도구 안내 등 <b>말풍선 바깥에서 제공되는 정보</b>가 있을 수 있습니다</li>
+    <li><b class="g">어느 항목이 얼마나 차지했는지는 입력의 구성 내역을 더 확인해야</b> 합니다</li>
+  </ul>
+  <aside>OpenCode 1.14.50 환경의 제공 캡처입니다. 오른쪽에 달력·문서·스프레드시트 등 여러 서버의 연결 상태가 표시되어 있습니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">대화창 밖에서 함께 읽는 정보</h2>
+  <p style="margin-top:11px">문맥 · 토큰 · 문맥 창</p><span class="who">⑤ 문맥 부담</span></div>
+  <aside>문맥(context)은 모델이 이번 응답을 만들 때 참고하도록 제공받는 정보입니다.</aside>
+</section>
+
+<!-- 4 입력 구성 -->
+<section class="slide" data-part="PART 1">
+  <h2>모델 입력에 <span class="g">들어갈 수 있는 것</span></h2>
+  <table class="t">
+    <tr><th>내용</th><th>이번 실습의 예</th><th>늘어나는 계기</th></tr>
+    <tr><td>시스템·프로젝트 지시</td><td>에이전트의 작업 방식, 프로젝트 규칙</td><td>지침이나 설정 추가</td></tr>
+    <tr><td>요청·대화 이력</td><td>첫 주 기록 요청, 이전 질문과 답변</td><td>대화를 이어 감</td></tr>
+    <tr><td>도구 정의</td><td><code>get_weekly_records</code>의 이름·설명·입력 규칙</td><td>도구 추가 또는 상세 정의 로드</td></tr>
+    <tr><td>실행 결과</td><td>조회된 주차 정보와 업무 기록 목록</td><td>더 많은 자료를 가져옴</td></tr>
+    <tr><td>읽은 자료</td><td>팀 보고 기준, 필요한 프로젝트 파일</td><td>새 파일과 참조 자료를 읽음</td></tr>
+  </table>
+  <div class="hl">📌 <b class="r">호스트가 이 모든 것을 항상 원문 그대로 전송하는 것은 아닙니다</b> — <b class="g">필요한 항목을 고르거나, 오래된 내용을 요약하거나, 읽는 시점을 조절</b>할 수 있습니다</div>
+  <aside>학생의 요청은 한 문장이지만, 모델이 적절한 도구를 고르려면 기능이 있다는 사실과 사용법도 알아야 합니다. 호출이 끝난 뒤에는 실제 기록도 읽어야 합니다.</aside>
+</section>
+
+<!-- 5 토큰 -->
+<section class="slide" data-part="PART 1">
+  <h2>토큰과 <span class="b">문맥 창</span></h2>
+  <ul class="pts">
+    <li><b>토큰</b>은 모델이 문자열을 나눈 조각입니다 — <b class="r">단어나 글자와 정확히 일치하지 않고</b>, 한국어·영어·코드 기호가 어떻게 나뉘는지도 <b>모델에 따라 다릅니다</b></li>
+    <li>따라서 <b class="r">"한국어 한 글자는 한 토큰"처럼 바꾸어 계산하기보다</b> — <b class="g">호스트가 표시하는 사용량을 읽는 편이 낫습니다</b></li>
+    <li><b>문맥 창</b>은 모델이 한 번에 다룰 수 있는 정보의 범위 — 화면의 <code>69% used</code>는 <b>해당 환경이 표시한 사용 비율</b></li>
+  </ul>
+  <div class="hl">⚠️ 이 수치가 <b class="r">AI의 지식 중 69%를 썼다거나 계정의 월간 이용량을 69% 사용했다는 뜻은 아닙니다</b></div>
+  <div class="big">보고서를 작성할 때는<br><span class="y">실제 업무 기록과 판단 기준을 충분히 읽을 공간</span>이 필요합니다</div>
+  <aside>그 공간을 아직 사용하지 않을 도구의 상세 설명이 많이 차지한다면, 어떤 정보를 먼저 제공할지 조정할 이유가 생깁니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">도구 정의와 실제 기록의 차이</h2>
+  <p style="margin-top:11px">세 줄은 서로 다른 정보입니다</p><span class="who">⑤ 문맥 부담</span></div>
+  <aside>이름만 읽어도 짐작은 되지만, 어느 주를 어떻게 지정하는지·무엇이 돌아오는지·수정 기능도 있는지는 알기 어렵습니다.</aside>
+</section>
+
+<!-- 7 세 정보 -->
+<section class="slide" data-part="PART 2">
+  <h2>같은 도구, <span class="g">세 가지 정보</span></h2>
+  <table class="t">
+    <tr><th>구분</th><th>내용</th><th>쓰이는 순간</th></tr>
+    <tr><td><b>도구 정의</b></td><td>이름 <code>get_weekly_records</code>, 업무 기록을 읽음, <code>week</code> 문자열 입력</td><td>모델이 <b>기능을 선택하고 입력을 만들 때</b></td></tr>
+    <tr><td><b>호출 입력</b></td><td><code>{"week":"week-one"}</code></td><td><b>실행을 요청할 때</b></td></tr>
+    <tr><td><b class="g">실행 결과</b></td><td>첫 주의 팀 정보·보고 기준일·업무 기록 목록</td><td><b class="g">실제 기록을 받아 내용을 이해할 때</b></td></tr>
+  </table>
+  <ul class="pts">
+    <li><b class="r">도구 정의를 읽었다고 첫 주 업무를 읽은 것은 아닙니다.</b> 반대로 <b class="g">첫 주 기록을 받았다면 그 내용은 더 이상 사용 안내가 아니라 보고서의 원자료</b>입니다</li>
+    <li>MCP에서도 <code>tools/list</code>와 <code>tools/call</code>은 구분됩니다. <b class="g">호스트가 목록을 받아 보관하는 단계와 그 상세 내용을 모델 문맥에 넣는 단계도 구분</b> — <b class="r">MCP가 모든 정의를 매번 한꺼번에 읽히도록 강제하는 것은 아닙니다</b></li>
+  </ul>
+  <div class="hl">🎯 별개의 단계로 보기 — <b>서버 연결 → 도구 정의 발견·로드 → 도구 호출 → 결과 읽기</b>. <b class="g">연결할 기능을 유지하면서 모델이 읽는 상세 설명의 양은 줄일 수 있는 이유</b></div>
+  <aside>스키마는 데이터가 어떤 모양이어야 하는지를 적은 규칙입니다. week: str는 자료형을 설명하고, 실제 Python 함수가 허용 주차인지 실행 중에 검사합니다.</aside>
+</section>
+
+<!-- 8 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">서로 다른 두 가지 부담</h2>
+  <p style="margin-top:11px">실행 전 · 실행 후</p><span class="who">⑤ 문맥 부담</span></div>
+  <aside>아래 숫자는 원리를 설명하기 위한 가상 수치입니다. 캡처를 분석해 얻은 측정값은 아닙니다.</aside>
+</section>
+
+<!-- 9 가상 수치 -->
+<section class="slide" data-part="PART 3">
+  <h2>가상 <span class="g">수치</span>로 보기</h2>
+  <pre>100개 도구 × 정의당 평균 500토큰 = 약 50,000토큰
+
+검색을 위한 안내 1,000토큰 + 두 도구의 정의 1,000토큰
+= 약 2,000토큰</pre>
+  <ul class="pts">
+    <li>실제로 필요한 도구가 두 개라면 <b>나머지 98개의 상세 사용법은 이번 작업에서 사용하지 않을</b> 수 있습니다</li>
+    <li><b class="r">실제로는 설명의 길이, 검색에 쓰는 안내, 발견한 도구 수가 모두 달라집니다.</b> 또 이 숫자에는 <b class="r">대화 이력이나 업무 기록의 실행 결과가 들어 있지 않습니다</b></li>
+  </ul>
+  <div class="hl">⚠️ 다른 상황 — 찾은 도구의 설명은 아주 짧지만 <b class="r">실행하자 1년치 업무 기록이 수천 줄 반환</b>됩니다. <b class="r">상세 정의를 나중에 읽는 기능을 켜더라도 커진 실행 결과 자체가 작아지지는 않습니다</b></div>
+  <aside>지금 필요한 것은 첫 주 기록인데 나머지 자료까지 모두 읽게 된 것입니다.</aside>
+</section>
+
+<!-- 10 두 부담 -->
+<section class="slide" data-part="PART 3">
+  <h2>생기는 <span class="r">위치</span>가 다릅니다</h2>
+  <div class="grid2">
+    <div class="box"><h3>⏳ 실행 전의 부담</h3><p><b>사용하지 않을 도구의 상세 설명이 많음</b> → <b class="g">관련 정의만 필요한 시점에 읽는 방식</b></p></div>
+    <div class="box"><h3>📦 실행 후의 부담</h3><p><b>실제로 가져온 데이터가 너무 많음</b> → <b class="g">조회 기간과 항목을 좁히거나 필요한 결과를 추려 전달</b></p></div>
+  </div>
+  <ul class="pts">
+    <li>우리 서버가 <code>week</code>를 받아 <b>해당 주의 파일만 반환</b>하는 것도 이 구분과 연결됩니다 — <b class="r">현재 서버에 1년치 조회 기능이 있다는 뜻은 아닙니다</b></li>
+    <li>실무 데이터로 확장할 때 <b class="r">"일단 전부 가져오자"</b>보다 <b class="g">"이번 판단에 어떤 범위가 필요한가"</b>를 먼저 정하면 읽어야 할 결과를 줄일 수 있습니다</li>
+  </ul>
+  <div class="hl">📌 <b class="g">문맥 사용량이 줄어드는 것과 전체 작업의 비용·시간이 줄어드는 것도 따로 확인</b>해야 합니다 — 검색 단계가 추가되면 <b>모델을 한 번 더 호출</b>할 수 있고, 재사용할 때는 <b>캐시나 요금 방식</b>이 영향을 줍니다</div>
+  <aside>문맥 사용량은 한 시점에 다루는 정보량이고, 누적 사용 토큰은 여러 요청에서 사용한 양이 더해진 값입니다. 캡처의 시간이나 비용까지 문맥 숫자 하나로 설명하지 않습니다.</aside>
+</section>
+
+<!-- 11 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">필요한 설명을 찾은 뒤 읽기</h2>
+  <p style="margin-top:11px">지연 로딩</p><span class="who">⑤ 문맥 부담</span></div>
+  <aside>지연 로딩(deferred loading)은 사용할 때까지 상세 내용을 불러오는 시점을 미루는 것입니다.</aside>
+</section>
+
+<!-- 12 두 흐름 -->
+<section class="slide" data-part="PART 4">
+  <h2>두 <span class="g">흐름</span></h2>
+  <table class="t">
+    <tr><th>모든 상세 정의를 먼저 제공</th><th>필요한 정의를 찾아 읽음</th></tr>
+    <tr><td>여러 도구의 상세 사용법을 모델에게 제공</td><td><b class="g">도구를 발견하는 데 필요한 안내</b>를 제공</td></tr>
+    <tr><td>요청에 맞는 도구를 선택</td><td>요청에 관련된 도구를 <b>검색·발견</b></td></tr>
+    <tr><td>이미 읽은 사용법으로 호출 입력 작성</td><td><b class="g">필요한 도구의 상세 사용법을 확인</b></td></tr>
+    <tr><td>도구를 호출하고 결과를 읽음</td><td>호출 입력을 작성하고 실행 결과를 읽음</td></tr>
+  </table>
+  <div class="hl">🎯 이 도구 검색은 <b class="g">현재 사용할 수 있도록 연결된 기능 중에서 관련 도구를 찾는 과정</b>입니다 — <b class="r">인터넷에서 새 MCP 서버 저장소를 찾고 설치하는 검색과는 대상이 다릅니다</b></div>
+  <ul class="pts">
+    <li>Anthropic의 Tool Search 설명도 <b>검색 단계가 추가되므로 도구 수가 적을 때와 많을 때의 이점이 다를 수 있다</b>고 설명합니다</li>
+    <li>학생이 관찰할 것 — <b class="g">발견한 기능 · 실제 호출 입력 · 반환된 기록</b>. <b class="r">검색 결과에 이름만 나타난 것을 기록 조회 성공으로 읽지 않습니다</b></li>
+  </ul>
+  <aside>도구는 연결되어 있고, 필요한 기능을 발견하면 그때 사용법을 자세히 읽습니다. 모든 기능을 없애거나 서버를 끄는 방식과는 다릅니다.</aside>
+</section>
+
+<!-- 13 내 환경 -->
+<section class="slide" data-part="PART 4">
+  <h2>내 환경에서 <span class="b">확인할 단서</span></h2>
+  <pre>지금 연결된 MCP 도구가 어떻게 AI에게 알려지는지 확인해 줘.
+실제로 확인한 내용과 추정은 구분해 줘.</pre>
+  <ul class="pts">
+    <li>서로 다른 관찰 — <b>"연결된 도구의 목록을 볼 수 있다"</b>, <b>"이번 작업에서 검색 도구가 호출되었다"</b>, <b>"업무 기록이 반환되었다"</b></li>
+    <li>AI가 <b>정확한 토큰 수를 제시</b>한다면 <b class="g">어디에서 확인한 값인지</b>도 읽어 보세요 — <b class="r">전체 모델 입력이나 서버별 사용량을 보여 주지 않는 환경에서는 직접 확인하기 어렵습니다</b></li>
+    <li><b class="r">검색 호출이 매 요청마다 보여야만 정상인 것은 아닙니다.</b> 도구가 적으면 처음부터 제공될 수도 있고, 한 대화에서 이미 발견한 정의를 다시 쓸 수도 있습니다</li>
+    <li><b class="r">절감 효과를 보려고 필요 없는 서버를 잔뜩 설치할 필요도 없습니다</b></li>
+  </ul>
+  <aside>제공된 화면에서 다수 연결의 상황을 이해하고, 자신의 환경에서는 업무 기록 읽기가 어떤 경로를 거치는지 관찰합니다.</aside>
+</section>
+
+<!-- 14 상황별 -->
+<section class="slide" data-part="PART 4">
+  <h2>같은 "문맥이 크다" <span class="r">뒤의 다른 원인</span></h2>
+  <table class="t">
+    <tr><th>관찰한 상황</th><th>먼저 살펴볼 곳</th></tr>
+    <tr><td>대화를 거의 하지 않았는데 많은 도구 설명이 제공됨</td><td><b>필요한 도구 정의만 불러오는 기능</b></td></tr>
+    <tr><td>한 번의 조회에서 수천 줄의 원자료가 반환됨</td><td><b class="g">조회 범위와 반환할 항목</b></td></tr>
+    <tr><td>같은 대화에서 여러 작업을 오래 이어 감</td><td>남아 있는 대화·파일·결과와 호스트의 문맥 관리</td></tr>
+    <tr><td>도구는 발견했는데 <b class="r">인증 만료 오류</b>가 반환됨</td><td>해당 서비스의 <b class="r">인증 상태</b>와 서버 오류</td></tr>
+    <tr><td>비슷한 이름의 다른 기능을 호출함</td><td>발견한 도구 설명과 <b>실제 호출 입력</b></td></tr>
+  </table>
+  <div class="hl">🎯 기록이 지나치게 많이 반환됐다면 <b class="r">검색 설정부터 바꾸기보다</b> <b class="g">요청한 기간과 반환된 기간이 맞는지</b> 확인하는 편이 원인에 가깝습니다. <b class="r">인증이 만료됐다면 도구 설명을 덜 읽게 해도 접근 권한은 복구되지 않습니다</b></div>
+  <aside>어느 단계에서 문제가 생겼는지에 맞춰 방법을 고르는 것이 도구를 많이 연결한 환경을 다루는 출발점입니다.</aside>
+</section>
+
+<!-- 15 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 두 부담은 어디에서 생기나?</div>
+    <div class="q a"><b>A1.</b> <b>실행 전</b>은 사용하지 않을 도구의 상세 설명, <b>실행 후</b>는 가져온 데이터의 양. 지연 로딩은 앞의 문제만 다룬다.</div>
+    <div class="q"><b>Q2.</b> 이 절의 도구 검색은 무엇을 찾는 것인가?</div>
+    <div class="q a"><b>A2.</b> <b>이미 연결된 기능 중에서</b> 관련 도구를 찾는 것. 인터넷에서 새 서버를 찾아 설치하는 검색이 아니다.</div>
+    <div class="q"><b>Q3.</b> <code>69% used</code>가 뜻하지 않는 것은?</div>
+    <div class="q a"><b>A3.</b> AI 지식의 69%나 <b>계정 월간 이용량의 69%</b>가 아니다. 해당 환경이 표시한 <b>문맥 창 사용 비율</b>이다.</div>
+  </div>
+  <aside>Q1이 이 소단원의 핵심 구분입니다.</aside>
+</section>
+
+<!-- 16 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>어느 단계의 부담인가 ⚖️</h1>
+    <div class="big" style="margin-top:26px">검색 결과에 이름만 나타난 것을<br><span class="y">기록 조회 성공으로 읽지 않습니다</span></div>
+    <p class="sub" style="margin-top:24px">에이전트와 도구 연결 ⑤ — 여기까지</p>
+  </div>
+  <aside>다음 두 절에서 Claude Code의 Tool Search와 OpenCode의 Code Mode를 각각 다룹니다. 목적은 공통이지만 같은 설정이나 같은 실행 방식으로 동작하는 기능은 아닙니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

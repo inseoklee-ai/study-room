@@ -279,6 +279,24 @@
    - ✅ ④-9. 자동화 — 반복되는 일을 예약하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/openclaw-automations/) · 📊 [PPT](openclaw-automations/openclaw-automations.pptx)
    - ✅ ④-10. 확장 — 손끝 늘리기, 기능 투어 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/openclaw-extensions/) · 📊 [PPT](openclaw-extensions/openclaw-extensions.pptx)
 
+**중단원 ⑤**
+5. **에이전트와 도구 연결** ✅ 완결 (15강) · MCP 제작 방법과 Skill 사용 예시를 더 깊이 있게 배웁니다
+   - ✅ ⑤-1. 에이전트와 도구 연결 — 요청에서 답변까지 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/tool-connection-basics/) · 📊 [PPT](tool-connection-basics/tool-connection-basics.pptx)
+   - ✅ ⑤-2. MCP 연결 구조와 메시지의 흐름 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/mcp-structure/) · 📊 [PPT](mcp-structure/mcp-structure.pptx)
+   - ✅ ⑤-3. 업무 기록 MCP 만들기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/build-weekly-mcp/) · 📊 [PPT](build-weekly-mcp/build-weekly-mcp.pptx)
+   - ✅ ⑤-4. 호스트 연결과 첫 도구 호출 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/host-first-call/) · 📊 [PPT](host-first-call/host-first-call.pptx)
+   - ✅ ⑤-5. 많은 도구와 문맥 부담 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/tool-context-burden/) · 📊 [PPT](tool-context-burden/tool-context-burden.pptx)
+   - ✅ ⑤-6. Claude Code의 Tool Search — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/claude-tool-search/) · 📊 [PPT](claude-tool-search/claude-tool-search.pptx)
+   - ✅ ⑤-7. OpenCode의 Code Mode — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/opencode-code-mode/) · 📊 [PPT](opencode-code-mode/opencode-code-mode.pptx)
+   - ✅ ⑤-8. Skill의 역할과 업무 지식 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/skill-domain-knowledge/) · 📊 [PPT](skill-domain-knowledge/skill-domain-knowledge.pptx)
+   - ✅ ⑤-9. 팀 보고서 첫 작성 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/first-team-report/) · 📊 [PPT](first-team-report/first-team-report.pptx)
+   - ✅ ⑤-10. 완성한 업무 방식을 Skill로 남기기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/save-as-skill/) · 📊 [PPT](save-as-skill/save-as-skill.pptx)
+   - ✅ ⑤-11. 새 업무 기록에서 Skill 재사용하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/reuse-skill-new-week/) · 📊 [PPT](reuse-skill-new-week/reuse-skill-new-week.pptx)
+   - ✅ ⑤-12. Colab MCP 연결과 실행 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/colab-mcp/) · 📊 [PPT](colab-mcp/colab-mcp.pptx)
+   - ✅ ⑤-13. Google Workspace 자료를 읽는 인증과 연결 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/google-oauth-sheets/) · 📊 [PPT](google-oauth-sheets/google-oauth-sheets.pptx)
+   - ✅ ⑤-14. 자기 과업에 맞게 확장하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/extend-own-task/) · 📊 [PPT](extend-own-task/extend-own-task.pptx)
+   - ✅ ⑤-15. 실행 경험과 Skill 개선 연구 (WikiSkill) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/wikiskill-research/) · 📊 [PPT](wikiskill-research/wikiskill-research.pptx)
+
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
 > ⚠️ **웹 슬라이드는 반드시 라이브 사이트에서 열어야 합니다.** GitHub 저장소 화면(github.com)에서 위 링크를 누르면 슬라이드가 아니라 소스 폴더로 갑니다. 아래 라이브 주소로 접속하세요:
@@ -436,6 +454,21 @@
 > - 대5-오픈클로-④8 https://inseoklee-ai.github.io/study-room/openclaw-monitoring/
 > - 대5-오픈클로-④9 https://inseoklee-ai.github.io/study-room/openclaw-automations/
 > - 대5-오픈클로-④10 https://inseoklee-ai.github.io/study-room/openclaw-extensions/
+> - 대5-도구연결-⑤1 https://inseoklee-ai.github.io/study-room/tool-connection-basics/
+> - 대5-도구연결-⑤2 https://inseoklee-ai.github.io/study-room/mcp-structure/
+> - 대5-도구연결-⑤3 https://inseoklee-ai.github.io/study-room/build-weekly-mcp/
+> - 대5-도구연결-⑤4 https://inseoklee-ai.github.io/study-room/host-first-call/
+> - 대5-도구연결-⑤5 https://inseoklee-ai.github.io/study-room/tool-context-burden/
+> - 대5-도구연결-⑤6 https://inseoklee-ai.github.io/study-room/claude-tool-search/
+> - 대5-도구연결-⑤7 https://inseoklee-ai.github.io/study-room/opencode-code-mode/
+> - 대5-도구연결-⑤8 https://inseoklee-ai.github.io/study-room/skill-domain-knowledge/
+> - 대5-도구연결-⑤9 https://inseoklee-ai.github.io/study-room/first-team-report/
+> - 대5-도구연결-⑤10 https://inseoklee-ai.github.io/study-room/save-as-skill/
+> - 대5-도구연결-⑤11 https://inseoklee-ai.github.io/study-room/reuse-skill-new-week/
+> - 대5-도구연결-⑤12 https://inseoklee-ai.github.io/study-room/colab-mcp/
+> - 대5-도구연결-⑤13 https://inseoklee-ai.github.io/study-room/google-oauth-sheets/
+> - 대5-도구연결-⑤14 https://inseoklee-ai.github.io/study-room/extend-own-task/
+> - 대5-도구연결-⑤15 https://inseoklee-ai.github.io/study-room/wikiskill-research/
 > - 대4-① https://inseoklee-ai.github.io/study-room/prompt-engineering-intro/
 > - 대4-② https://inseoklee-ai.github.io/study-room/agent-structure/
 > - 대4-③ https://inseoklee-ai.github.io/study-room/model-inputs/

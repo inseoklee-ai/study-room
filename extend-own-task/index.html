@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>자기 과업에 맞게 확장하기 (도구 연결 ⑭)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 도구 연결 ⑭</span>
+    <h1 style="margin:18px 0">자기 과업에 맞게 확장하기</h1>
+    <p class="sub">파일 이름과 직업 이름을 바꾸는 것만으로는 충분하지 않습니다</p>
+  </div>
+  <aside>이제 여러분의 금요일을 떠올려 봅시다.</aside>
+</section>
+
+<!-- 2 왜 부족한가 -->
+<section class="slide" data-part="표지">
+  <h2>양식만 바꾸면 <span class="r">생기는 일</span></h2>
+  <div class="big">강사가 업무 기록 대신 <span class="y">학습자의 답안</span>을 넣었더니<br><small>기존 양식이 답안을 '완료·진행·위험'으로 나누려 합니다</small></div>
+  <ul class="pts">
+    <li>강사가 알고 싶은 것은 <b>학습자가 어떤 생각을 했는지, 어디를 다시 연습하면 좋을지</b>인데 — <b class="r">결과는 업무 진행 보고서의 모양을 유지</b>합니다</li>
+    <li><b class="g">자료가 달라지면, 그 자료에서 읽어야 할 의미와 좋은 결과의 기준도 함께 살펴야</b> 합니다</li>
+  </ul>
+  <aside>이번에는 자신에게 필요한 과업 하나를 골라, 공통 실습에서 무엇을 가져오고 무엇을 바꿀지 직접 결정해 보겠습니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">입력과 결과가 보이는 과업</h2>
+  <p style="margin-top:11px">'내 업무를 자동화한다'는 시작할 곳이 너무 많습니다</p><span class="who">⑭ 자기 과업</span></div>
+  <aside>실제 자료 하나를 펼쳐 두고 "이 자료로 어떤 결과를 받고 싶은가"부터 생각하면 일이 구체적으로 보입니다.</aside>
+</section>
+
+<!-- 4 출발점 -->
+<section class="slide" data-part="PART 1">
+  <h2>출발점으로 삼을 <span class="g">세 예</span></h2>
+  <table class="t">
+    <tr><th>과업</th><th>넣을 자료</th><th>받고 싶은 결과</th><th>업무 기준의 예</th></tr>
+    <tr><td>학습 피드백</td><td>문제, 학습자의 답안, 교사의 평가 기준</td><td>답안의 근거를 짚은 <b>강점·보완점·다음 연습</b></td><td><b class="g">정답이 맞는 것과 풀이에서 이해가 드러나는 것을 구분</b></td></tr>
+    <tr><td>변경 안내문</td><td>변경 기록, 기능 설명, 기존 안내문</td><td>사용자가 이해할 수 있는 안내 초안</td><td><b class="g">내부 작업명을 사용자에게 보이는 변화로 설명</b></td></tr>
+    <tr><td>주간 운영 보고</td><td>업무 기록이나 운영 통계</td><td>확인된 성과와 다음 조치</td><td>완료의 정의, 집계 단위, 보고 대상에 맞는 강조점</td></tr>
+  </table>
+  <div class="hl">📌 표의 기준은 <b>연습을 위한 예</b>입니다. <b class="g">자신의 팀이 사용하는 기준이 있다면 그것을</b> 가져오고, <b class="g">아직 없다면 결과를 읽을 사람의 관점에서 초안을</b> 정해 보세요</div>
+  <ul class="pts">
+    <li>AI와 이야기해도 좋지만 — <b class="r">자료를 보지 않고 추천받은 '멋진 자동화 아이디어'보다</b> <b class="g">자신이 실제로 읽고 판단할 수 있는 자료에서</b> 시작하세요. <b class="g">결과가 적절한지 본인이 확인할 수 있어야 다음 수정도 선택할 수</b> 있습니다</li>
+  </ul>
+  <aside>여기서는 학습 피드백 사례 하나를 함께 설계합니다. 이 사례를 따라가거나 자신이 선택한 과업으로 바꾸면 됩니다.</aside>
+</section>
+
+<!-- 5 학습 피드백 -->
+<section class="slide" data-part="PART 1">
+  <h2>학습 피드백의 <span class="b">작은 설계</span></h2>
+  <pre>문제: 8, 10, 12의 평균을 구하고 계산 방법을 설명하세요.
+학습자의 답안: 10입니다.</pre>
+  <ul class="pts">
+    <li>숫자 10은 맞습니다. 하지만 <b>문제는 계산 방법도 설명하도록 요청</b>했고 답안에는 그 설명이 없습니다</li>
+    <li><b class="r">"평균의 개념을 정확히 이해하고 있군요"라고 하면 답안에서 확인하지 못한 이해까지 추정</b>한 것. 반대로 <b class="r">"평균을 이해하지 못했습니다"도 근거가 부족</b>합니다 — <b class="g">설명을 쓰지 않은 이유는 이 답안만으로 알 수 없기 때문</b></li>
+  </ul>
+  <pre>답안에서 확인되는 성취를 구체적으로 짚습니다. 정답 여부와 풀이 설명을
+구분합니다. 풀이가 없으면 이해 여부를 단정하지 않고, 학습자가 자신의
+계산을 설명할 다음 질문을 제안합니다.</pre>
+  <pre>평균을 10이라고 답한 것은 맞습니다. 다만 답안에 계산 과정이 없어 어떤
+방법으로 구했는지는 아직 확인할 수 없어요. 세 수를 어떻게 사용해 10을
+얻었는지 식이나 문장으로 설명해 볼까요?</pre>
+  <div class="hl">🎯 강사가 재사용하고 싶은 지식은 <b class="r">'이 학생의 정답은 10'이 아니라</b> — <b class="g">정답과 설명을 구분해 피드백하는 기준</b>. <b>앞에서 TASK-102의 분류 결과 대신 완료 조건을 Skill에 남긴 것과 같은 생각</b></div>
+  <aside>이 기준은 강사가 정했다고 가정한 연습용 설정입니다.</aside>
+</section>
+
+<!-- 6 설계 표 -->
+<section class="slide" data-part="PART 1">
+  <h2>작은 <span class="g">설계</span>를 적습니다</h2>
+  <table class="t">
+    <tr><th>설계 항목</th><th>이번 사례의 선택</th></tr>
+    <tr><td>실제 입력</td><td>문제 문장과 학습자 답안 <b>한 건</b></td></tr>
+    <tr><td>원하는 결과</td><td>답안의 근거를 포함한 피드백과 <b>다음 연습 질문</b></td></tr>
+    <tr><td>확인할 기준</td><td>맞는 정답을 인정하고, <b class="g">없는 풀이를 상상하지 않으며</b>, 다음 설명을 유도하는지</td></tr>
+    <tr><td>그대로 쓸 것</td><td><b class="g">참고 문서를 읽고, 결과와 원자료를 대조하고, 새 입력에서 다시 확인하는 작업 방식</b></td></tr>
+    <tr><td>바꿀 것</td><td>주간 기록을 <b>문제·답안</b>으로, 팀 보고 규칙을 <b>피드백 기준</b>으로, 보고서 결과를 <b>피드백 문장</b>으로</td></tr>
+  </table>
+  <div class="hl">📌 <b class="r">완성된 긴 기획서가 필요한 것은 아닙니다</b> — <b class="g">입력 한 건, 원하는 결과, 본인이 확인할 기준, 가져올 부분과 바꿀 부분</b>이 드러나면 AI와 구체적인 작업을 시작할 수 있습니다</div>
+  <aside>여러분의 과업도 이 정도로 적어 봅니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">바꿀 위치를 구분하기</h2>
+  <p style="margin-top:11px">데이터 · 업무 지식 · 실행 기능</p><span class="who">⑭ 자기 과업</span></div>
+  <aside>공통 실습에는 서로 다른 세 종류의 내용이 함께 있었습니다.</aside>
+</section>
+
+<!-- 8 세 종류 -->
+<section class="slide" data-part="PART 2">
+  <h2>세 <span class="g">종류</span></h2>
+  <table class="t">
+    <tr><th>바꾸는 내용</th><th>공통 예제에서 살펴볼 곳</th><th>자기 과업에서의 선택</th></tr>
+    <tr><td><b>데이터</b> — 이번에 처리할 사실</td><td><code>data/week-one.json</code>의 업무 기록</td><td>실제 <b>문제·답안</b>이나 변경 기록. <b class="g">다음 학생의 답안을 받으면 이 부분이 바뀝니다</b></td></tr>
+    <tr><td><b>업무 지식</b> — 해석하고 표현할 기준</td><td><code>team-weekly-report/references/team-rules.md</code></td><td><b>정답과 풀이를 구분하는 기준, 교사가 원하는 말투, 적절한 피드백 예시.</b> 여러 학생에게 반복 적용할 내용이라면 <b class="g">Skill과 참고 자료에</b></td></tr>
+    <tr><td><b>실행 기능</b> — 자료를 읽거나 계산하는 동작</td><td><code>weekly_records_server.py</code>의 <code>get_weekly_records</code></td><td><b class="g">답안이 로컬 파일에 있고 앱이 읽을 수 있다면 새 MCP 서버를 추가할 필요는 없습니다.</b> 다른 서비스에 있고 읽을 수 없다면 <b>가져오는 기능과 연결을 따로</b></td></tr>
+  </table>
+  <div class="hl">⚠️ <b class="r">Skill에 "답안을 읽으세요"라고 쓰는 것만으로 접근 기능이 생기지는 않습니다</b></div>
+  <ul class="pts">
+    <li>이 구분은 문제가 생겼을 때도 도움 — <b class="g">자료는 정확히 읽었는데 '풀이가 없어도 이해했다'고 판단하면 기준과 판단 과정을</b>, <b class="g">엉뚱한 학생의 답안을 읽었다면 입력 선택이나 조회 기능부터</b></li>
+    <li><b class="r">공통 서버의 이름만 바꾸고 문제·답안을 <code>week-one</code>이라 부르면 의미가 어색해집니다</b> — 새로 만들기로 했다면 <b class="g">'어느 주의 기록인가' 대신 '어느 답안인가'</b>가 필요할 수 있습니다. <b class="g">파일 읽기와 입력 검증의 원리는 활용하되 업무 기록용 함수가 새 과업에도 그대로 맞는지 확인</b></li>
+  </ul>
+  <aside>수동 수정에서도 먼저 필요한 기능을 정하고, 그 기능에 해당하는 부분을 바꿉니다.</aside>
+</section>
+
+<!-- 9 AI와 만들기 -->
+<section class="slide" data-part="PART 2">
+  <h2>AI와 <span class="b">필요한 부분</span>만 만들기</h2>
+  <pre>이 예제를 학습 피드백 작업에 맞춰 바꾸고 싶어.
+답안과 평가 기준을 보고, 그대로 쓸 부분과 바꿀 부분부터 같이 정리해 줘.</pre>
+  <ul class="pts">
+    <li><b class="r">함수명과 JSON 구조, 모든 처리 순서를 처음부터 긴 명령에 넣을 필요는 없습니다</b> — <b class="g">AI의 제안을 읽으며 자신의 입력과 결과에 맞는지를 판단하는 일</b>이 중요</li>
+    <li>AI가 <b>"답안을 읽는 MCP부터 새로 만들겠습니다"</b>라고 했다면 — <b class="g">지금 호스트의 파일 읽기로 같은 입력을 가져올 수 있는지</b> 생각. <b class="g">이미 읽을 수 있다면 피드백 기준을 적용한 결과부터 확인</b>할 수 있습니다. 반대로 <b>새 서비스의 자료를 반복해 읽는 것이 핵심이라면</b> 조회 도구를 준비하는 것이 자연스럽습니다</li>
+    <li>Skill을 만든다면 <b class="g"><code>team-weekly-report</code>는 원본으로 남겨 두고 별도의 과업 Skill</b>을(예: <code>learning-feedback</code>) — <b class="r">이름과 설명만 바꾸는 데서 끝내지 말고 제품팀의 완료·위험 규칙이 남아 있지는 않은지</b> 살펴보세요</li>
+    <li>참고 자료도 필요에 따라 — <b class="r">기준이 짧아 본문에 담긴다면 빈 참고 파일을 만들 이유가 없습니다.</b> <b class="r">여러 과목을 지원하려고 자료를 늘리는 일은 실제로 그 과목을 다룰 때</b></li>
+  </ul>
+  <pre>정한 기준으로 피드백을 한번 만들어 줘.
+어떤 답안과 기준을 사용했는지도 알려 줘.</pre>
+  <aside>새 MCP 서버를 실제로 추가했다면 앞의 호스트 연결 절 방법으로 등록하고 도구의 입력과 반환값을 확인합니다. 로컬 파일 읽기로 진행했다면 그 경로를 기록하면 됩니다.</aside>
+</section>
+
+<!-- 10 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">결과의 한 문장에서 원인 찾기</h2>
+  <p style="margin-top:11px">"절대로 틀리지 마세요"를 추가하기 전에</p><span class="who">⑭ 자기 과업</span></div>
+  <aside>AI가 다음과 같이 썼다고 가정해 봅시다 — "평균의 개념을 정확히 이해했고 계산 과정도 잘 설명했어요."</aside>
+</section>
+
+<!-- 11 원인 -->
+<section class="slide" data-part="PART 3">
+  <h2>어느 부분이 <span class="r">근거인가</span></h2>
+  <ul class="pts">
+    <li>정답 10은 있지만 <b class="r">계산 과정은 없습니다</b> — <b class="r">'과정도 잘 설명했다'는 부분은 원자료와 맞지 않습니다</b></li>
+    <li><b class="r">곧바로 Skill에 "절대로 틀리지 마세요"를 추가하기보다</b> <b class="g">사용한 입력과 기준을 확인</b>합니다 — <b>다른 예시 답안을 읽었다면 자료를 고르는 곳을</b>, <b>기준이 전달되지 않았다면 기준 파일의 접근 경로나 안내를</b>, <b>기준도 읽었는데 없는 설명을 덧붙였다면 정답과 설명을 구분하도록 한 기준을 실제로 어떻게 적용했는지</b></li>
+  </ul>
+  <pre>답안에는 계산 과정이 없는데 결과에는 잘 설명했다고 되어 있어.
+어디서 이런 판단이 나왔는지 확인하고 고칠 부분을 제안해 줘.</pre>
+  <div class="hl">🔍 제안을 받은 뒤 <b class="g">원자료나 작업 기록의 어떤 부분이 그 설명을 뒷받침하는지</b> 확인하세요 — <b class="r">"Skill이 짧아서 그렇다"처럼 길이만으로 설명한다면</b> <b class="g">어떤 기준이 빠졌거나 전달되지 않았는지 더 구체적으로</b> 물을 수 있습니다. <b class="g">필요한 것은 실제 문제를 해결하는 수정</b></div>
+  <aside>수정한 뒤에는 같은 답안으로 다시 확인합니다. 처음부터 다음 학생의 답안으로 바꾸면 결과 차이가 수정 때문인지 입력이 달라졌기 때문인지 구분하기 어렵습니다.</aside>
+</section>
+
+<!-- 12 다른 답안 -->
+<section class="slide" data-part="PART 3">
+  <h2>이번에는 <span class="g">풀이가 포함된</span> 답안</h2>
+  <pre>8 + 10 + 12 = 30이고, 수가 세 개이므로 30을 3으로 나누면 평균은 10입니다.</pre>
+  <ul class="pts">
+    <li>이 답안에는 <b class="g">합을 구하고 개수로 나누는 과정이 실제로 드러납니다</b> — 이번에는 <b class="g">그 과정을 근거로 설명의 강점을 짚을 수</b> 있어야 합니다</li>
+    <li>앞의 문제를 고치려고 <b class="r">"항상 풀이가 없다고 말하라"는 식의 규칙을 넣었다면 이 답안에서 문제가 드러납니다</b></li>
+  </ul>
+  <div class="big"><span class="y">고치려는 기준과 특정 입력의 답을 구분하는 것</span>은<br><small>자기 과업에서도 같습니다</small></div>
+  <ul class="pts">
+    <li><b class="g">처음 결과부터 적절했다면 수정할 오류를 억지로 찾을 필요는 없습니다</b> — <b>어떤 문장이 어떤 근거와 맞았는지 기록</b>하고 <b>다른 입력에서도 기준이 유지되는지</b> 확인하면 됩니다</li>
+    <li><b class="r">한 번 잘된 결과는 그 입력에서 확인한 성과</b>입니다. <b class="g">더 다양한 상황에서도 적절한지는 다음 확인의 질문으로</b> 남겨 둡니다</li>
+  </ul>
+  <aside>같은 답안에서 확인을 마쳤다면 이번에는 풀이가 포함된 다른 답안을 넣어 볼 수 있습니다.</aside>
+</section>
+
+<!-- 13 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">자료의 위치와 계산에 맞는 연결</h2>
+  <p style="margin-top:11px">배우는 것과 모든 과업에서 쓰는 것은 다릅니다</p><span class="who">⑭ 자기 과업</span></div>
+  <aside>앞에서 배운 Colab과 Google 연결도 이 과업의 설계에 맞춰 선택합니다.</aside>
+</section>
+
+<!-- 14 선택 -->
+<section class="slide" data-part="PART 4">
+  <h2>상황에 맞는 <span class="g">선택</span></h2>
+  <table class="t">
+    <tr><th>자신의 과업 상황</th><th>앞에서 배운 내용의 활용</th></tr>
+    <tr><td>필요한 자료가 <b>실습 폴더에</b> 있음</td><td>호스트의 <b>파일 읽기와 Skill</b>로 결과를 만들고 근거를 확인</td></tr>
+    <tr><td>자료가 <b>Google Sheets에</b> 모여 있음</td><td><b>인증과 읽기 연결</b>로 자료를 가져온 뒤 기준 적용</td></tr>
+    <tr><td>같은 <b>집계·그래프를 반복</b> 실행</td><td><b>Colab 셀</b>에 계산을 남기고 입력과 실행 결과를 함께 확인</td></tr>
+    <tr><td>별도 시스템의 기능을 <b>여러 AI 앱에서</b></td><td>필요한 기능을 구현하고 <b>MCP로 제공</b>하는 구조 검토</td></tr>
+  </table>
+  <ul class="pts">
+    <li>새 연결을 썼다면 <b class="g">반환된 원자료부터 확인</b> — <b class="r">시트를 읽었다는 메시지만 보고 피드백을 믿기보다 내가 고른 답안이 맞는지</b> 먼저. Colab으로 집계했다면 <b>숫자의 입력 범위와 실행한 셀</b>을 함께</li>
+    <li><b class="g">보고 기준이 바뀌는 문제와 계산할 데이터를 잘못 고르는 문제를 나누어</b> 볼 수 있습니다</li>
+    <li>공통 실습의 <code>weekly-records</code> 호출 기록은 그대로 남겨 둡니다 — <b class="r">자기 과업에 새 서버를 만들어야만 공통 실습이 인정되는 것은 아닙니다.</b> <b class="g">필요한 연결을 선택하고 그 이유를 설명</b>해 보세요</li>
+  </ul>
+  <aside>평균 문제 답안 하나에 피드백을 쓰는 작업이라면 로컬 파일에서 읽어도 충분합니다.</aside>
+</section>
+
+<!-- 15 결과물 -->
+<section class="slide" data-part="PART 4">
+  <h2>다음 사람이 <span class="b">이어 쓸 수 있는</span> 결과물</h2>
+  <table class="t">
+    <tr><th>자료 묶음</th><th>함께 남길 내용</th><th>동료가 확인할 수 있는 것</th></tr>
+    <tr><td>기능 사용 기록</td><td>공통 MCP의 <b>도구 이름·입력·실제 반환값</b>, 추가 연결의 기록</td><td>어떤 기능을 어떤 자료에 사용했는지</td></tr>
+    <tr><td>재사용할 지식</td><td><b>실제 사용하는 Skill 본문과 참고 자료</b>, 그 안의 업무 기준</td><td>어떤 지식이 <b>새 입력에도 적용</b>되는지</td></tr>
+    <tr><td>입력·결과·확인 기록</td><td>선택한 과업의 입력과 결과, <b>기준에 따른 확인</b>, 수정 이유 또는 남은 의문</td><td><b class="g">결과를 어떤 근거로 받아들였고 어디까지 확인했는지</b></td></tr>
+  </table>
+  <pre>이 과업은 문제와 답안을 읽고 교사의 기준에 맞는 피드백을 만듭니다.
+입력은 samples/answer-one.md에 있습니다.
+피드백 기준은 learning-feedback Skill에서 확인할 수 있습니다.
+결과는 results/feedback-one.md, 확인한 근거는 work-notes.md에 있습니다.</pre>
+  <ul class="pts">
+    <li>공통 실습의 세 파일은 <b class="g">별도 파일로 두고 원래 보고서를 덮어쓰지 않습니다</b> — 그래야 <b class="g">배운 부분과 바꾼 부분을 다시 볼 수</b> 있습니다</li>
+    <li><b class="r">Google 연결을 사용했다면 개인 credential과 토큰은 공유 결과물에 포함하지 않습니다</b></li>
+    <li>마지막으로 동료에게 설명 — <b class="g">"이 기능으로 이 자료를 가져왔고, 이 기준을 적용했으며, 결과의 이 문장을 원자료에서 확인했습니다."</b> 수정했다면 <b>왜 바꾸었는지</b>도, 처음부터 맞았다면 <b>받아들인 근거</b>를</li>
+  </ul>
+  <aside>위 경로는 예시이며 실제로 사용한 파일 위치로 적어 주세요. 다른 사람이 요청할 수 있는 짧은 문장과 실행에 필요한 준비도 함께 남기면 좋습니다.</aside>
+</section>
+
+<!-- 16 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 파일 이름만 바꾸면 안 되는 이유는?</div>
+    <div class="q a"><b>A1.</b> <b>자료가 달라지면 읽어야 할 의미와 좋은 결과의 기준도 달라지기</b> 때문. 답안을 '완료·진행·위험'으로 나누게 된다.</div>
+    <div class="q"><b>Q2.</b> 바꿀 위치의 세 종류는?</div>
+    <div class="q a"><b>A2.</b> <b>데이터 · 업무 지식 · 실행 기능.</b> 문제가 생겼을 때 어디를 볼지 정하는 데도 쓰인다.</div>
+    <div class="q"><b>Q3.</b> "평균 개념을 이해했다"는 문장의 문제는?</div>
+    <div class="q a"><b>A3.</b> <b>답안에서 확인하지 못한 이해까지 추정</b>했다. 곧바로 금지 문장을 추가하기보다 <b>입력·기준·적용 과정</b>을 확인한다.</div>
+  </div>
+  <aside>Q2가 확장의 지도입니다.</aside>
+</section>
+
+<!-- 17 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>내 자료, 내 기준 🧩</h1>
+    <div class="big" style="margin-top:26px">자료를 가져오는 기능 · 해석할 업무 지식 · 확인한 근거를<br><span class="y">자신의 과업에 맞게 연결</span>할 수 있습니다</div>
+    <p class="sub" style="margin-top:24px">에이전트와 도구 연결 ⑭ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑮에서 결과를 보고 Skill을 수정한 경험을 연구 사례와 연결합니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

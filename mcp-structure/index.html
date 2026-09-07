@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP 연결 구조와 메시지의 흐름 (도구 연결 ②)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 도구 연결 ②</span>
+    <h1 style="margin:18px 0">MCP 연결 구조와<br>메시지의 흐름</h1>
+    <p class="sub">앱마다 등록 방법은 달라도, 연결 뒤의 발견과 호출에는 공통 규약을</p>
+  </div>
+  <aside>같은 기록을 Claude Code에서도 OpenCode에서도 읽으려는 상황에서 출발합니다.</aside>
+</section>
+
+<!-- 2 경계 나누기 -->
+<section class="slide" data-part="표지">
+  <h2>두 프로그램의 <span class="g">경계</span>를 나눕니다</h2>
+  <div class="grid2">
+    <div class="box"><h3>📂 기록을 읽는 프로그램</h3><p>제공하는 <b>기능과 입력 형식을 공통 방식으로 알려 줍니다.</b> 어느 파일에서 읽을지는 <b class="g">여전히 이 프로그램의 몫</b></p></div>
+    <div class="box"><h3>💬 AI와 대화하는 앱</h3><p>그 <b>공통 방식으로 기능을 발견하고 호출</b>합니다</p></div>
+  </div>
+  <div class="hl">📖 이 연결 약속이 <b>MCP(Model Context Protocol)</b> — <b>프로토콜</b>은 프로그램들이 메시지를 주고받을 때 따르는 규칙입니다. <b class="g">"어떤 기능이 있는지 알려 달라"와 "그중 이 기능을 이 입력으로 실행해 달라"를 서로 이해할 수 있는 형식으로</b></div>
+  <ul class="pts">
+    <li>우리 프로그램 이름은 <code>weekly-records</code>. <b class="r">다만 앱에 서버를 등록하는 설정 화면이나 파일 형식까지 같아지는 것은 아닙니다</b></li>
+  </ul>
+  <aside>앱마다 기록 파일을 읽는 코드를 새로 만들면, 저장 위치가 바뀔 때마다 두 구현을 각각 고쳐야 합니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">연결을 맡는 세 역할</h2>
+  <p style="margin-top:11px">호스트 · 클라이언트 · 서버</p><span class="who">② MCP 구조</span></div>
+  <aside>'서버'라는 말이 나오면 인터넷 어딘가의 큰 컴퓨터를 떠올릴 수 있습니다.</aside>
+</section>
+
+<!-- 4 세 역할 -->
+<section class="slide" data-part="PART 1">
+  <h2>세 <span class="g">역할</span></h2>
+  <table class="t">
+    <tr><th>역할</th><th>구체적인 대상</th><th>학생이 확인할 것</th></tr>
+    <tr><td><b>호스트</b></td><td>Claude Code 또는 OpenCode — <b>대화와 모델 사용을 관리</b>하고 어떤 서버를 연결할지, 도구 실행을 어떻게 허용할지 다룸</td><td>내가 대화하는 앱과 <b>서버 연결 상태</b></td></tr>
+    <tr><td><b>클라이언트</b></td><td>호스트 <b>안</b>에서 각 MCP 서버와 메시지를 주고받는 구성 요소</td><td>어떤 서버에 메시지를 전달하는 연결인지</td></tr>
+    <tr><td><b class="g">서버</b></td><td><code>weekly_records_server.py</code>로 제공하는 <code>weekly-records</code> — <b class="g">요청에 기능이나 자료를 제공하는 프로그램의 역할</b></td><td>어떤 기능이 공개되어 있고 어떤 자료를 반환하는지</td></tr>
+  </table>
+  <div class="hl">📌 <b class="r">학생이 클라이언트 프로그램을 별도로 작성하거나 설치하지 않습니다</b> — 사용하는 앱이 이 역할을 담당합니다. 이번 실습의 서버는 <b class="g">내 컴퓨터에서 실행하는 작은 Python 프로그램</b>입니다</div>
+  <aside>클라이언트와 서버가 같은 컴퓨터에서 실행되어도 이 구분은 그대로입니다 — '어디에서 실행되는가'와 '어떤 역할을 하는가'는 서로 다른 질문입니다.</aside>
+</section>
+
+<!-- 5 경로 -->
+<section class="slide" data-part="PART 1">
+  <h2>사용자의 말이 <span class="b">이동하는 경로</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">사용자가 호스트에 <b>"첫 주 기록을 읽어 줘"</b>라고 말합니다</span></div>
+    <div class="st"><span class="n">2</span><span class="t">모델이 <b>사용할 도구와 입력을 선택해 호출을 요청</b>합니다</span></div>
+    <div class="st"><span class="n">3</span><span class="t">호스트가 <b>필요한 실행 허용을 처리</b>하고, 클라이언트를 통해 서버에 메시지를 전달합니다</span></div>
+    <div class="st"><span class="n">4</span><span class="t">서버의 Python 코드가 <b class="g">기록을 읽어 결과를 돌려주면</b> 호스트가 모델에게 전달해 답변을 이어 갑니다</span></div>
+  </div>
+  <div class="hl">🎯 <b class="g">도구 선택을 요청하는 모델과 파일을 실제로 읽는 서버는 서로 다른 역할</b>입니다</div>
+  <aside>Claude Code와 OpenCode를 함께 켜서 같은 로컬 서버 코드를 등록하면 각 앱이 자기 서버 프로세스를 시작할 수 있습니다 — 같은 소스 파일을 쓴다는 말이 실행 중인 프로그램 하나를 공유한다는 뜻은 아닙니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">도구의 안내와 업무 데이터</h2>
+  <p style="margin-top:11px">모든 업무 기록을 곧바로 보낼 필요는 없습니다</p><span class="who">② MCP 구조</span></div>
+  <aside>우선 무슨 도구가 있으며 어떻게 호출하는지를 알려 줄 수 있습니다.</aside>
+</section>
+
+<!-- 7 안내와 인자 -->
+<section class="slide" data-part="PART 2">
+  <h2>안내와 <span class="g">인자</span></h2>
+  <table class="t">
+    <tr><th>안내 항목</th><th>내용</th></tr>
+    <tr><td>이름</td><td><code>get_weekly_records</code></td></tr>
+    <tr><td>설명</td><td><code>week-one</code> 또는 <code>week-two</code>의 업무 기록을 읽습니다. <b class="r">보고서 작성이나 완료·진행·위험 판정은 하지 않습니다</b></td></tr>
+    <tr><td>필요한 입력</td><td><code>week</code>: 조회할 주차를 나타내는 <b>문자열</b></td></tr>
+    <tr><td>반환할 자료</td><td>주차 · 팀 이름 · 기간 시작일 · 보고 기준일 · 업무 기록 목록</td></tr>
+  </table>
+  <pre>{"week":"week-one"}</pre>
+  <ul class="pts">
+    <li>왼쪽 <code>week</code>는 <b>입력 항목의 이름</b>, 오른쪽 <code>week-one</code>은 <b>이번 호출에서 선택한 값</b>. <code>{ }</code>는 이름과 값을 묶는 <b>객체(object)</b></li>
+    <li>이것은 <b>JSON</b> — 서로 다른 언어로 만든 프로그램도 같은 데이터를 읽도록 텍스트로 표현. Python 딕셔너리와 <b class="r">겉모습은 비슷하지만 완전히 같은 문법은 아닙니다</b> (문자열은 큰따옴표, 값 없음은 <code>None</code> 대신 <code>null</code>)</li>
+  </ul>
+  <aside>인자(argument)는 함수를 실제 호출할 때 넣는 값입니다.</aside>
+</section>
+
+<!-- 8 스키마 -->
+<section class="slide" data-part="PART 2">
+  <h2>입력 <span class="b">스키마</span></h2>
+  <pre>{
+  "type": "object",
+  "properties": {
+    "week": { "type": "string" }
+  },
+  "required": ["week"]
+}</pre>
+  <ul class="pts">
+    <li><code>type: object</code>는 입력 전체가 객체라는 뜻, <code>properties</code> 아래에는 항목의 규칙, <code>required</code>는 <b>반드시 들어가야 하는 항목</b></li>
+    <li><code>{}</code>를 보내면 <code>week</code>가 빠져 있고, <code>{"week": 1}</code>은 항목은 있지만 <b class="r">자료형이 다릅니다</b></li>
+  </ul>
+  <div class="hl">⚠️ <code>"week-three"</code>도 문자열이므로 <b>자료형 규칙만 보면 맞습니다.</b> 하지만 실습 자료에는 첫째·둘째 주만 있습니다 — <b class="g">자료형 검사와 우리 업무에서 허용하는 값 검사는 구분됩니다</b></div>
+  <aside>실제 SDK가 만드는 안내에는 제목 등 다른 정보도 포함될 수 있어 필요한 부분만 발췌했습니다. 두 번째 검사는 다음 절의 Python 함수가 담당합니다.</aside>
+</section>
+
+<!-- 9 안내 vs 데이터 -->
+<section class="slide" data-part="PART 2">
+  <h2>도구를 연결했다고 <span class="r">읽은 것은 아닙니다</span></h2>
+  <div class="grid2">
+    <div class="box"><h3>도구의 안내를 받은 상태</h3><p><code>get_weekly_records</code>라는 <b>기능과 사용법</b>이 있습니다</p></div>
+    <div class="box"><h3>데이터를 받은 상태</h3><p><b class="g"><code>TASK-102</code>의 담당자와 상태</b> 같은 내용이 있습니다</p></div>
+  </div>
+  <div class="big">필요한 주차로 도구를 호출하고 결과를 받아야<br><span class="y">해당 기록을 근거로 말할 수 있습니다</span></div>
+  <aside>이 구분을 놓치면 "연결했으니 알겠지"라고 잘못 기대하게 됩니다.</aside>
+</section>
+
+<!-- 10 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">목록 발견에서 호출까지</h2>
+  <p style="margin-top:11px">tools/list와 tools/call</p><span class="who">② MCP 구조</span></div>
+  <aside>기능의 안내를 가져오는 것과 기능을 실행하는 것은 MCP에서도 별개의 메시지입니다.</aside>
+</section>
+
+<!-- 11 메서드와 도구 이름 -->
+<section class="slide" data-part="PART 3">
+  <h2>메서드 이름과 <span class="g">도구 이름</span></h2>
+  <table class="t">
+    <tr><th>구분</th><th>내용</th></tr>
+    <tr><td><b><code>tools/list</code></b></td><td>서버가 제공하는 <b>도구 목록을 요청</b>하는 MCP <b>메서드</b> 이름</td></tr>
+    <tr><td><b><code>tools/call</code></b></td><td>지정한 도구의 <b>실행을 요청</b>하는 메서드 이름</td></tr>
+    <tr><td><b class="g"><code>get_weekly_records</code></b></td><td><b class="g">우리가 만든 업무 도구의 이름</b></td></tr>
+  </table>
+  <div class="hl">📌 도구가 하나 더 생겨 <code>find_task</code>라는 이름을 붙여도 — <b class="g">호출 메시지의 메서드는 여전히 <code>tools/call</code></b>입니다. 어떤 업무 도구를 부를지는 <b>메시지 안의 도구 이름</b>으로 구분합니다</div>
+  <aside>서버마다 다른 외부 호출 규칙을 전부 새로 배우는 대신, 공통된 틀 안에 해당 서버의 기능을 담는 것입니다.</aside>
+</section>
+
+<!-- 12 한 번의 조회 -->
+<section class="slide" data-part="PART 3">
+  <h2>한 번의 조회가 <span class="b">이어지는 모습</span></h2>
+  <table class="t">
+    <tr><th>단계</th><th>오가는 내용</th><th>그때까지 알게 된 것</th></tr>
+    <tr><td>연결 준비</td><td>사용할 규약과 제공 기능을 확인</td><td>통신할 준비가 되었습니다</td></tr>
+    <tr><td>도구 목록</td><td>클라이언트가 <code>tools/list</code>를 요청하고 서버가 <b>이름·설명·입력 규칙</b>을 반환</td><td>도구의 <b>사용법</b>을 알게 됩니다</td></tr>
+    <tr><td>모델의 선택</td><td>부탁과 안내를 바탕으로 <b>이름과 인자를 정해</b> 호출을 요청</td><td>이번에는 <code>week-one</code>을 조회하려 합니다</td></tr>
+    <tr><td>실행 전달</td><td>클라이언트가 <code>tools/call</code>로 전달</td><td>서버가 실행할 도구와 입력을 받습니다</td></tr>
+    <tr><td>서버 처리</td><td>입력을 검사하고 첫 주의 JSON 파일을 읽음</td><td><b class="g">원본 자료에서 결과를 얻습니다</b></td></tr>
+    <tr><td>결과 활용</td><td>결과가 호스트로 돌아가고 모델이 읽어 답변</td><td><b class="g">실제 기록을 근거로 말할 수 있습니다</b></td></tr>
+  </table>
+  <div class="hl">⚠️ <b class="r">모든 단계가 매 대화마다 처음부터 반복되는 것은 아닙니다</b> — 도구 목록을 호스트가 보관할 수 있고, <b class="r">받은 모든 도구 정의를 모델에게 즉시 보여 주는지도 제품에 따라 다릅니다</b></div>
+  <aside>여기서는 호스트의 도구 발견과 실제 실행 사이에 모델의 선택이 들어간다는 흐름을 잡아 두세요.</aside>
+</section>
+
+<!-- 13 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">JSON-RPC 메시지 읽기</h2>
+  <p style="margin-top:11px">도착 순서 대신 식별자로 짝짓기</p><span class="who">② MCP 구조</span></div>
+  <aside>JSON이 데이터를 적는 형식이라면, JSON-RPC는 그 형식으로 요청과 응답을 주고받는 약속입니다. RPC는 Remote Procedure Call입니다.</aside>
+</section>
+
+<!-- 14 메시지 -->
+<section class="slide" data-part="PART 4">
+  <h2>목록 요청과 <span class="g">호출 메시지</span></h2>
+  <pre>{ "jsonrpc": "2.0", "id": 1, "method": "tools/list" }
+
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "get_weekly_records",
+    "arguments": { "week": "week-one" }
+  }
+}</pre>
+  <ul class="pts">
+    <li><code>jsonrpc</code>의 <code>2.0</code>은 <b>JSON-RPC의 버전</b> — Python SDK의 <code>2.1.1</code>이나 날짜로 적는 MCP 명세 버전과 <b class="r">서로 다릅니다</b></li>
+    <li><code>params</code>는 메서드에 전달하는 입력을 묶습니다. <b class="g">바깥의 <code>tools/call</code>은 '도구 실행'이라는 공통 작업, 안쪽의 <code>get_weekly_records</code>는 '주간 기록 조회'라는 구체적 기능</b></li>
+  </ul>
+  <aside>수업 서버는 MCP Python SDK 2.1.1로 제작하고 실제 stdio 검증에서 2025-11-25로 통신했습니다. 처음의 initialize 요청과 준비 완료 알림은 호스트와 SDK가 담당하므로 학생이 직접 작성할 필요는 없습니다.</aside>
+</section>
+
+<!-- 15 두 id -->
+<section class="slide" data-part="PART 4">
+  <h2>이름이 같은 <span class="r">두 <code>id</code></span></h2>
+  <pre>{
+  "id": "TASK-102",
+  "title": "로그인 안내 문구 개선",
+  "owner": "지우",
+  "status": "개발 완료",
+  "due_date": "2026-09-07",
+  "deployed_at": null,
+  "verification": "미실시",
+  "blocker": null,
+  "note": "코드 작성은 끝났으며 다음 배포를 기다린다."
+}</pre>
+  <table class="t">
+    <tr><th>위치</th><th>목적</th></tr>
+    <tr><td><code>id: "TASK-102"</code></td><td><b>업무의 식별자</b></td></tr>
+    <tr><td><code>id: 2</code> (호출 메시지)</td><td><b>통신 요청의 식별자</b></td></tr>
+  </table>
+  <div class="hl">📌 앱이 첫 주를 <code>id: 2</code>, 둘째 주를 <code>id: 3</code>으로 보냈는데 <b class="r">둘째 주가 먼저 읽혔다면</b> — 먼저 도착했다는 이유로 첫 주의 답장으로 처리하면 <b class="r">잘못된 보고서</b>가 됩니다. <b class="g">도착 순서 대신 식별자로 요청과 응답을 짝짓습니다</b></div>
+  <aside>업무 자료는 result 안의 structuredContent에서 구조를 유지한 객체로 읽을 수 있습니다. JSON-RPC에는 응답을 기대하지 않는 알림도 있으며, 그런 알림은 요청 ID를 붙이지 않습니다.</aside>
+</section>
+
+<!-- 16 PART 5 -->
+<section class="slide" data-part="PART 5">
+  <div class="part"><div class="pno">5</div><h2 style="margin:0">tools · resources · prompts</h2>
+  <p style="margin-top:11px">작업 동사 하나로 정답을 정하지 않습니다</p><span class="who">② MCP 구조</span></div>
+  <aside>MCP 서버가 공개할 수 있는 것은 도구만이 아닙니다.</aside>
+</section>
+
+<!-- 17 세 종류 -->
+<section class="slide" data-part="PART 5">
+  <h2>세 <span class="g">종류</span></h2>
+  <table class="t">
+    <tr><th>종류</th><th>성격</th><th>이 팀 업무의 예</th></tr>
+    <tr><td><b>Tool</b></td><td><b>입력을 받아 실행하는 기능.</b> 검색·계산·조회도 도구가 될 수 있음 — <b class="r">'도구는 수정 작업만 한다'고 이해하면 읽기 전용 MCP의 역할을 놓칩니다</b></td><td>주차를 받아 업무 기록 조회</td></tr>
+    <tr><td><b>Resource</b></td><td><b>식별자(URI)로 가리켜 읽는 자료.</b> <code>team://guide/terms</code>처럼 <b class="r">해당 서버에서 해석하는 식별자</b>도 있어 브라우저에 붙여 넣어 열리는 것은 아님</td><td>팀 용어 안내 자료</td></tr>
+    <tr><td><b>Prompt</b></td><td><b>서버가 제공하는 대화 템플릿.</b> 값이 들어간 <b>대화 메시지 묶음</b>을 호스트가 받아 사용</td><td>주차가 들어간 보고 시작 대화</td></tr>
+  </table>
+  <div class="hl">🎯 <b class="r">"기록을 읽으니까 무조건 resource"처럼 작업 동사 하나로 정답을 정하지 않습니다</b> — <b class="g">앱이 실행할 기능으로 제공할지, 읽을 자료로 제공할지</b>가 설계의 차이입니다. <b>세 종류를 모두 구현해야 MCP 서버가 되는 것은 아닙니다</b></div>
+  <aside>뒤에서 작성할 Agent Skill과 MCP Prompt도 이름만 보고 같은 것으로 생각하지 마세요. MCP Prompt는 서버에서 발견하고 가져오는 대화 템플릿이고, Skill은 과업 수행에 필요한 지식·절차·자료를 묶는 방식이며 MCP 없이도 사용할 수 있습니다.</aside>
+</section>
+
+<!-- 18 PART 6 -->
+<section class="slide" data-part="PART 6">
+  <div class="part"><div class="pno">6</div><h2 style="margin:0">메시지가 오가는 통로</h2>
+  <p style="margin-top:11px">stdio와 Streamable HTTP</p><span class="who">② MCP 구조</span></div>
+  <aside>지금까지는 '무슨 말을 주고받는지'를 읽었습니다. 이제 '어떤 통로로 주고받는지'를 봅니다.</aside>
+</section>
+
+<!-- 19 stdio -->
+<section class="slide" data-part="PART 6">
+  <h2>stdio — 표준 입력과 <span class="g">표준 출력</span></h2>
+  <pre>호스트의 클라이언트 ── 요청 ──▶ 서버의 stdin
+호스트의 클라이언트 ◀─ 응답 ─── 서버의 stdout</pre>
+  <ul class="pts">
+    <li>이번에는 <b class="g">호스트가 서버용 명령을 실행해 로컬 서버 프로세스를 시작</b>합니다 — <b class="r">학생이 별도 창에 서버를 항상 띄워 두고 기다리는 구조로 시작하지 않습니다</b></li>
+    <li>그래서 첫 서버에는 <b>웹 주소가 없어도 됩니다.</b> 호스트는 <b class="g">서버를 시작할 실행 파일과 인자</b>를 알아야 합니다</li>
+  </ul>
+  <div class="hl">⚠️ 익숙한 <code>print()</code>가 문제를 만듭니다 — <b class="r">stdio 서버의 표준 출력은 이미 MCP 메시지용 통로</b>입니다. 일반 문장을 섞으면 받는 쪽이 MCP 메시지로 해석하려다 실패할 수 있습니다</div>
+  <pre>서버가 시작되었습니다!
+{"jsonrpc":"2.0","id":2,"result":{"content":[]}}</pre>
+  <aside>위는 문제가 있는 출력의 설명용 예입니다. 로그는 별도의 표준 오류(stderr)로 보내면 통신 출력과 구분할 수 있습니다 — print("...", file=sys.stderr). 이름에 '오류'가 들어 있어도 정상 시작 같은 진단 정보를 기록할 수 있습니다.</aside>
+</section>
+
+<!-- 20 두 통로 -->
+<section class="slide" data-part="PART 6">
+  <h2>두 <span class="b">통로</span>의 시작점</h2>
+  <table class="t">
+    <tr><th>연결 방식</th><th>호스트가 알아야 하는 시작점</th><th>이해하기</th></tr>
+    <tr><td><b>stdio</b></td><td><b>실행할 프로그램과 인자</b></td><td>내 앱이 내 컴퓨터에서 업무 기록 서버를 시작하고 입출력 연결</td></tr>
+    <tr><td><b>Streamable HTTP</b></td><td><b>MCP 서버의 URL</b> (<code>https://.../mcp</code>)</td><td>실행 중인 팀 서버의 주소로 메시지를 보내 기록 조회</td></tr>
+  </table>
+  <div class="hl">⚠️ 이 차이를 <b class="r">'인터넷 사용 여부'로 외우면 예외가 생깁니다</b> — HTTP 서버도 내 컴퓨터에서 띄울 수 있고, <b class="g">stdio로 연결한 로컬 서버가 내부에서 Google API를 호출할 수도</b> 있습니다</div>
+  <ul class="pts">
+    <li>따로 그려 볼 것 — <b class="g">호스트와 MCP 서버 사이의 통로</b>, 그리고 <b class="g">MCP 서버가 업무 자료에 접근하는 방식</b></li>
+  </ul>
+  <aside>Google 자료가 있다면 '호스트 ↔ 로컬 MCP 서버'는 stdio이고 '로컬 MCP 서버 ↔ Google 서비스'는 인터넷 요청일 수 있습니다. 공통 메시지 형식을 쓴다고 계정 자료를 자동으로 읽을 수 있게 되는 것은 아닙니다.</aside>
+</section>
+
+<!-- 21 원격 -->
+<section class="slide" data-part="PART 6">
+  <h2>내부 구현을 서버에 두고 <span class="p">기능만 제공</span></h2>
+  <table class="t">
+    <tr><th>호스트와 주고받는 것</th><th>제공자 서버에 둘 수 있는 것</th></tr>
+    <tr><td>도구 이름·설명·입력 스키마</td><td>도구를 구현한 <b>소스 코드와 내부 알고리즘</b></td></tr>
+    <tr><td>조회할 주차 같은 호출 인자</td><td><b>원본 데이터베이스</b>와 조회·가공 과정</td></tr>
+    <tr><td>서버가 반환하도록 정한 업무 기록</td><td>응답에 포함하지 않은 <b>다른 팀·다른 기간의 자료</b></td></tr>
+  </table>
+  <div class="hl">⚠️ <b class="r">오른쪽이 자동으로 비공개가 되는 것은 아닙니다.</b> 서버가 원본 자료를 응답에 넣으면 그 자료는 호스트로 전달됩니다. <b class="r">API 키나 접근 토큰도 도구 설명이나 결과에 포함하지 않아야</b> 합니다 — <b class="g">인증과 접근 권한도 별도로 구현</b></div>
+  <ul class="pts">
+    <li>MCP가 더하는 이점은 — <b class="g">여러 호스트가 같은 방식으로 도구를 발견하고 호출할 수 있다는 것</b>. 소스 코드를 배포하지 않는 구조 자체는 <b>일반 원격 API에서도 가능</b>합니다</li>
+    <li>서버를 원격으로 옮겨도 <b class="r">모델마다 다른 호출 표현이나 파서의 차이까지 해결되지는 않습니다</b></li>
+  </ul>
+  <aside>예시 주소 https://reports.example.com/mcp는 설명용이며 접속·등록 대상이 아닙니다. /mcp라는 글자가 필수는 아니고, 제공자가 정한 실제 엔드포인트 URL을 사용합니다.</aside>
+</section>
+
+<!-- 22 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 호스트·클라이언트·서버 중 학생이 직접 만드는 것은?</div>
+    <div class="q a"><b>A1.</b> <b>서버</b>뿐이다. 호스트는 쓰는 앱이고 클라이언트는 그 앱 안의 연결 구성 요소다.</div>
+    <div class="q"><b>Q2.</b> <code>tools/call</code>과 <code>get_weekly_records</code>의 관계는?</div>
+    <div class="q a"><b>A2.</b> 앞은 <b>MCP가 정한 메서드 이름(도구 실행)</b>, 뒤는 <b>우리가 만든 업무 도구의 이름.</b> 도구가 늘어도 메서드는 그대로다.</div>
+    <div class="q"><b>Q3.</b> stdio 서버에서 <code>print()</code>를 조심해야 하는 이유는?</div>
+    <div class="q a"><b>A3.</b> 표준 출력이 <b>이미 MCP 메시지용 통로</b>라서. 진단은 <b>표준 오류</b>로 보내고 실제 반환값은 <code>return</code>으로 돌려준다.</div>
+  </div>
+  <aside>Q3은 다음 절 실습에서 바로 만나게 되는 함정입니다.</aside>
+</section>
+
+<!-- 23 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>공통 규칙 위에 기능을 얹습니다 🔗</h1>
+    <div class="big" style="margin-top:26px">서버를 추가하는 것은<br>모델을 새로 훈련시키는 일이 아니라<br><span class="y">필요할 때 쓸 기능을 연결하는 일</span></div>
+    <p class="sub" style="margin-top:24px">에이전트와 도구 연결 ② — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ③에서 작은 업무 기록 서버를 직접 만듭니다. 코드에서 세 곳을 찾아보세요 — 이름은 어디서 정해지는지, week가 문자열이라는 규칙은 어디에 쓰는지, 실제 자료를 읽는 코드는 어디인지.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

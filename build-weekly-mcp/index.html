@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>업무 기록 MCP 만들기 (도구 연결 ③)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 도구 연결 ③</span>
+    <h1 style="margin:18px 0">업무 기록 MCP 만들기</h1>
+    <p class="sub">도구가 임의로 요약하면 다음 단계에서 필요한 근거가 사라집니다</p>
+  </div>
+  <aside>주 이름을 받으면 해당 주의 기록을 읽어 주는 도구를 만듭니다. 조회 기능의 역할을 작게 잡습니다.</aside>
+</section>
+
+<!-- 2 흐름 -->
+<section class="slide" data-part="표지">
+  <h2>직접 만드는 부분은 <span class="g">가운데</span>입니다</h2>
+  <pre>입력: week-one
+  ↓
+첫째 주 자료 선택 → 파일 읽기 → 기본 모양 확인
+  ↓
+반환: 주차·팀·기준일·업무 기록 전체</pre>
+  <ul class="pts">
+    <li>MCP 메시지를 받아 함수를 실행하고 결과를 보내는 <b>통신 작업은 SDK가 맡습니다</b></li>
+    <li><b>SDK</b>는 특정 기능을 개발할 때 사용하는 도구와 코드의 묶음 — MCP를 처음부터 구현하는 대신 <b class="g">공식 Python SDK에 우리의 조회 함수를 등록</b>합니다</li>
+  </ul>
+  <aside>업무가 완료됐는지, 팀장에게 무엇을 강조할지는 뒤에서 다룹니다.</aside>
+</section>
+
+<!-- 3 폴더 -->
+<section class="slide" data-part="표지">
+  <h2>실습 <span class="b">폴더</span></h2>
+  <pre>mcp-skill-practice/
+  pyproject.toml
+  uv.lock
+  .python-version
+  requirements.txt      # 이전 설치 방식의 호환 참고 자료
+  .venv/                # 환경 준비 때 자동 생성
+  weekly_records_server.py
+  data/
+    week-one.json
+    week-two.json</pre>
+  <div class="hl">📌 <b class="r">코드 파일과 <code>data</code>를 서로 다른 곳으로 옮기지 마세요</b> — 곧 작성할 코드는 <b class="g">자신의 옆에 있는 <code>data</code></b>를 찾습니다</div>
+  <aside>Claude Code나 OpenCode에서 압축을 푼 mcp-skill-practice 폴더를 작업 폴더로 엽니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">먼저 읽어 볼 원자료</h2>
+  <p style="margin-top:11px">차이를 지우지 않고 그대로 가져오기</p><span class="who">③ MCP 만들기</span></div>
+  <aside>자료를 열어 보면 메모 문장 대신 이름과 값이 짝을 이루고 있습니다.</aside>
+</section>
+
+<!-- 5 JSON -->
+<section class="slide" data-part="PART 1">
+  <h2>첫째 주 파일 <span class="g">발췌</span></h2>
+  <pre>{
+  "week": "week-one",
+  "team": "가상 제품팀",
+  "period_start": "2026-08-31",
+  "report_date": "2026-09-04",
+  "records": [
+    {
+      "id": "TASK-102",
+      "title": "로그인 안내 문구 개선",
+      "owner": "지우",
+      "status": "개발 완료",
+      "due_date": "2026-09-07",
+      "deployed_at": null,
+      "verification": "미실시",
+      "blocker": null,
+      "note": "코드 작성은 끝났으며 다음 배포를 기다린다."
+    }
+  ]
+}</pre>
+  <ul class="pts">
+    <li>이름을 <b>키</b>, 연결된 내용을 <b>값</b>이라 부릅니다. <code>records</code>의 값은 대괄호로 묶인 <b>목록</b> — 한 주에 업무가 여러 개이므로 업무 하나씩을 객체로 만들어 넣었습니다</li>
+    <li><code>null</code>은 <b>해당 자리에 값이 없다</b>는 표현. JSON을 Python으로 읽으면 <code>null</code>은 <code>None</code>이 됩니다</li>
+  </ul>
+  <aside>실제 파일의 업무는 네 개이며, 실습 파일을 이 한 항목으로 덮어쓰지 않습니다. 날짜는 가상 자료의 기준일이므로 컴퓨터의 오늘 날짜로 바꾸지 않습니다.</aside>
+</section>
+
+<!-- 6 흥미로운 기록 -->
+<section class="slide" data-part="PART 1">
+  <h2>흥미로운 <span class="r">기록 하나</span></h2>
+  <div class="big"><span class="y">TASK-102의 상태는 '개발 완료'</span>인데<br>배포일은 없고 확인도 '미실시'입니다</div>
+  <ul class="pts">
+    <li>보고서에서 이것을 어떻게 표현할지는 <b>팀의 기준을 알아야</b> 정할 수 있습니다</li>
+    <li>지금 도구가 할 일은 <b class="g">이 차이를 지우지 않고 그대로 가져오는 것</b></li>
+    <li><b class="r">도구가 임의로 '완료 한 건'으로 요약하면 다음 단계에서 필요한 근거가 사라집니다</b></li>
+  </ul>
+  <aside>원본에서 TASK-102를 찾아 상태와 note를 직접 읽어 보세요. 다음 절에서 실제 도구를 호출했을 때 다시 확인할 기준이 됩니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">실습 폴더의 Python 환경</h2>
+  <p style="margin-top:11px">uv · 세 파일 · 가상환경</p><span class="who">③ MCP 만들기</span></div>
+  <aside>첨부 폴더는 이미 uv 프로젝트로 준비되어 있으므로 uv init이나 uv add를 다시 실행할 필요는 없습니다.</aside>
+</section>
+
+<!-- 8 세 파일 -->
+<section class="slide" data-part="PART 2">
+  <h2>세 파일은 <span class="g">다른 질문</span>에 답합니다</h2>
+  <table class="t">
+    <tr><th>파일</th><th>답하는 질문</th><th>담긴 내용</th></tr>
+    <tr><td><code>pyproject.toml</code></td><td>우리 코드에 <b>무엇이 필요한가</b></td><td><code>mcp[cli]==2.1.1</code>은 <b>직접 의존성</b>(<code>cli</code>는 터미널 <code>mcp</code> 명령 포함, <code>==</code>는 버전 고정), <code>requires-python = "&gt;=3.10"</code></td></tr>
+    <tr><td><code>uv.lock</code></td><td>그 조건을 만족하는 패키지를 <b>어떤 버전으로 조합</b>할까</td><td>직접·<b>간접 의존성</b>의 확정 버전. 운영체제·Python에 따라 uv가 <b>맞는 항목을 선택</b> — <b class="r">손으로 수정하지 않습니다</b></td></tr>
+    <tr><td><code>.python-version</code></td><td>이번 실습에서 <b>어떤 Python</b>을 쓸까</td><td><code>3.13</code> — <b class="r"><code>3.13.x</code>의 마지막 숫자까지 고정한 표기는 아닙니다.</b> 필요한 Python이 없으면 자동 내려받을 수 있음</td></tr>
+  </table>
+  <div class="hl">📌 <b>가상환경</b>은 프로젝트마다 설치할 패키지를 분리하는 공간입니다 — <b class="r">별도 컴퓨터를 만드는 것은 아닙니다.</b> uv는 <code>pyproject.toml</code> 옆에 <b><code>.venv</code></b>를 자동으로 만듭니다. <code>[tool.uv]</code>의 <code>package = false</code>는 <b>이번 실습 코드를 설치 가능한 패키지로 빌드하지 않는다</b>는 설정</div>
+  <aside>다른 프로젝트가 MCP SDK 1.x로 작성되어 있어도, 이번 2.1.1을 별도 환경에 두면 각자 맞는 환경에서 실행할 수 있습니다. data와 .venv는 서로 다른 역할의 폴더입니다.</aside>
+</section>
+
+<!-- 9 준비 명령 -->
+<section class="slide" data-part="PART 2">
+  <h2>준비와 <span class="b">확인</span></h2>
+  <pre>uv sync --locked
+uv run --locked python --version
+uv run --locked python -c "import sys; print(sys.executable)"
+uv run --locked python -c "from importlib.metadata import version; print(version('mcp'))"</pre>
+  <ul class="pts">
+    <li><code>uv sync</code>는 <b>잠금 파일을 기준으로 패키지를 가상환경에 맞추는</b> 명령. <code>--locked</code>는 <b class="g">선언과 잠금 파일이 맞는지 확인하되 잠금 파일은 변경하지 않음</b> — 맞지 않으면 <b class="r">오류로 멈춥니다</b></li>
+    <li><code>uv run</code>은 뒤의 명령을 <b>이 프로젝트 환경에서</b> 실행 — <b class="g">별도로 가상환경을 활성화하는 명령을 외우지 않아도 됩니다</b></li>
+    <li><code>--locked</code>는 <b class="r">설치를 금지하거나 인터넷 연결을 없애는 옵션이 아닙니다</b></li>
+    <li>결과 확인 — Python <b><code>3.13.x</code></b>, 실행 경로는 실습 폴더의 <b><code>.venv</code></b> 아래, MCP는 <b><code>2.1.1</code></b></li>
+  </ul>
+  <div class="hl">⚠️ <code>.venv</code>에 설치해 놓고 호스트가 다른 Python을 실행하면 <b class="r">'설치했는데도 mcp를 찾을 수 없다'</b>는 오류가 납니다 — 재설치를 반복하기보다 <b class="g">설치한 프로젝트와 호스트가 실행하는 프로젝트가 같은지</b> 확인합니다</div>
+  <aside>보통 macOS·Linux는 .venv/bin/python, Windows는 .venv\Scripts\python.exe를 가리킵니다. AI에게 준비를 맡길 때도 이 관계를 알고 있으면 무엇을 확인해 달라고 요청할지 판단할 수 있습니다.</aside>
+</section>
+
+<!-- 10 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">코드 따라가기</h2>
+  <p style="margin-top:11px">주차를 파일로 · 입력 검사 · 원본 반환</p><span class="who">③ MCP 만들기</span></div>
+  <aside>AI가 만든 코드가 글자까지 같을 필요는 없습니다. 대신 주차가 어떤 파일을 가리키는지, 없는 주차를 받으면 어떻게 하는지, 원본 기록이 그대로 돌아오는지를 살펴봅니다.</aside>
+</section>
+
+<!-- 11 주차→파일 -->
+<section class="slide" data-part="PART 3">
+  <h2>주차를 <span class="g">파일로</span> 바꾸는 표</h2>
+  <pre>import json
+from pathlib import Path
+from typing import Any
+
+DATA_DIR = Path(__file__).with_name("data")
+WEEK_FILES = {
+    "week-one": "week-one.json",
+    "week-two": "week-two.json",
+}</pre>
+  <ul class="pts">
+    <li><code>WEEK_FILES</code>는 주차와 파일 이름을 연결한 <b>딕셔너리</b> — 도구를 쓰는 쪽은 <b class="g">실제 폴더 구조를 몰라도 <code>week-one</code>이라고 요청</b>하면 됩니다</li>
+    <li>두 주차를 표에 적어 두었으므로 <b class="r">아무 파일 경로나 받는 조회 기능이 되지 않습니다</b> — <code>week-three</code>는 비슷한 이름을 추측해 열지 않고 <b>허용 주차인지 먼저 검사</b></li>
+    <li><code>__file__</code>은 <b>이 Python 파일의 경로</b>, <code>.with_name("data")</code>는 마지막 이름을 <code>data</code>로 바꿉니다</li>
+  </ul>
+  <div class="hl">🎯 이 기준을 쓰는 이유 — <b class="r">호스트가 터미널의 현재 폴더와 다른 곳에서 서버를 실행할 수 있기 때문</b>입니다. <b class="g">코드 파일의 위치를 기준으로 삼으면 시작 위치가 달라도 코드 옆의 자료를 찾습니다</b></div>
+  <aside>json은 JSON을 Python 자료로 읽는 데, Path는 파일 위치를 다루는 데, Any는 반환값의 자료형 설명에 쓰입니다. 세 기능은 Python에 포함되어 있습니다.</aside>
+</section>
+
+<!-- 12 입력 검사 -->
+<section class="slide" data-part="PART 3">
+  <h2>입력을 <span class="b">확인</span>하는 함수</h2>
+  <pre>def load_weekly_records(week: str) -> dict[str, Any]:
+    selected_week = week.strip().lower()
+    if selected_week not in WEEK_FILES:
+        raise ValueError("week는 week-one 또는 week-two를 사용하세요.")</pre>
+  <ul class="pts">
+    <li><code>week: str</code>은 <b>타입 힌트</b>, <code>-&gt; dict[str, Any]</code>는 <b>문자열 키의 딕셔너리를 반환하며 값의 종류는 다양할 수 있다</b>는 설명 (<code>team</code>은 문자열, <code>records</code>는 목록)</li>
+    <li><b class="r">일반 Python 함수에 힌트를 적었다고 모든 호출의 타입을 Python이 자동 검사하는 것은 아닙니다</b></li>
+    <li><code>strip()</code>과 <code>lower()</code>로 <code>" WEEK-ONE "</code>을 <code>"week-one"</code>으로 — 이런 처리를 <b>정규화</b>라 합니다. <b class="r"><code>week-three</code>를 <code>week-one</code>으로 바꾸는 것처럼 내용을 추측하지는 않습니다</b></li>
+    <li>없는 주차면 <code>raise ValueError(...)</code>로 중단 — <b class="g">기록이 없는 상황을 정상적인 빈 보고서처럼 넘기지 않으므로</b> 호출한 쪽이 입력을 확인해 다시 요청할 수 있습니다</li>
+  </ul>
+  <aside>def로 함수를 정의하고 괄호 안의 week로 입력을 받습니다. 콜론 뒤에서 들여쓴 줄들이 함수의 작업입니다.</aside>
+</section>
+
+<!-- 13 파일 읽기 -->
+<section class="slide" data-part="PART 3">
+  <h2>파일을 읽고 <span class="g">원본을 돌려주기</span></h2>
+  <pre>with (DATA_DIR / WEEK_FILES[selected_week]).open(encoding="utf-8") as file:
+    data = json.load(file)
+
+if not isinstance(data, dict) or not isinstance(data.get("records"), list):
+    raise ValueError("주간 데이터는 records 목록이 있는 객체여야 합니다.")
+if data.get("week") != selected_week:
+    raise ValueError("요청한 주차와 데이터의 week가 다릅니다.")
+return data</pre>
+  <ul class="pts">
+    <li><code>DATA_DIR / 파일이름</code>의 <code>/</code>는 <b class="r">숫자를 나누는 연산이 아니라</b> <code>Path</code>에 파일 이름을 <b>이어 붙이는 연산</b></li>
+    <li><code>with ... as file:</code>은 <b>블록을 벗어날 때 파일을 닫도록</b> 처리합니다. <code>json.load(file)</code>은 텍스트를 <b class="g">코드가 키로 값을 찾을 수 있는 자료</b>로 바꿉니다</li>
+    <li><code>or</code>의 앞 조건이 참이면 뒤는 평가하지 않으므로 — <b class="g">딕셔너리가 아닌 자료에 <code>.get()</code>을 호출하지도 않습니다</b></li>
+    <li>파일의 <code>week</code>와 요청한 주차가 같은지도 확인 — <b class="r">파일 이름은 첫째 주인데 내부가 둘째 주 자료라면 보고서가 잘못됩니다</b></li>
+  </ul>
+  <div class="hl">📌 <code>return data</code>는 <code>print(data)</code>와 <b class="r">다릅니다</b> — SDK가 반환 자료를 받아 호스트에 전하려면 <b class="g">함수의 반환값</b>이 필요합니다. <b>원자료의 네 기록은 여기서 요약되거나 분류되지 않습니다</b></div>
+  <aside>지금 검사는 바깥 자료 구조와 주차에 집중합니다. 모든 업무의 날짜 형식이나 기록의 사실 여부까지 확인하는 코드는 아닙니다.</aside>
+</section>
+
+<!-- 14 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">Python 함수를 도구로 공개하기</h2>
+  <p style="margin-top:11px">같은 파일에 있다고 모두 공개되지는 않습니다</p><span class="who">③ MCP 만들기</span></div>
+  <aside>도구로 제공할 함수를 SDK에 등록하는 부분을 봅니다.</aside>
+</section>
+
+<!-- 15 등록 -->
+<section class="slide" data-part="PART 4">
+  <h2><code>@mcp.tool()</code>로 <span class="g">등록</span>합니다</h2>
+  <pre>from mcp.server import MCPServer
+
+mcp = MCPServer("weekly-records")
+
+@mcp.tool()
+def get_weekly_records(week: str) -> dict[str, Any]:
+    """week-one 또는 week-two의 가상 팀 업무 기록을 읽습니다.
+
+    반환값은 주차, 팀 이름, 기간 시작일, 보고 기준일, 업무 기록 목록입니다.
+    파일을 수정하지 않으며 완료·진행·위험 판정이나 보고서 작성은 하지 않습니다.
+    """
+    return load_weekly_records(week)</pre>
+  <ul class="pts">
+    <li><code>weekly-records</code>는 <b>서버 이름</b>, <code>get_weekly_records</code>는 <b>그 서버가 제공하는 도구 이름</b></li>
+    <li><code>@mcp.tool()</code>은 <b>데코레이터</b> 문법 — 바로 아래 함수를 서버의 도구로 등록. <b class="g"><code>load_weekly_records</code>에는 이 표시가 없으므로 외부에 공개되지 않습니다</b></li>
+    <li>삼중 따옴표 문자열은 <b>docstring</b>. SDK는 <b class="g">함수 이름·설명·타입 힌트</b>를 이용해 호스트에 제공할 도구 정의를 만듭니다</li>
+  </ul>
+  <aside>공개 함수는 요청을 받아 실제 파일 읽기를 담당한 함수를 호출합니다. 이렇게 나누면 파일 조회 규칙을 MCP 통신과 별도로 읽고 시험하기 쉽습니다.</aside>
+</section>
+
+<!-- 16 두 검사 -->
+<section class="slide" data-part="PART 4">
+  <h2>모양 검사와 <span class="r">허용 값 검사</span></h2>
+  <pre>MCP에 공개된 get_weekly_records(week)
+                 ↓
+파일 조회 함수 load_weekly_records(week)
+                 ↓
+data/week-one.json → Python 딕셔너리 → MCP 응답</pre>
+  <table class="t">
+    <tr><th>입력</th><th>어디에서 거절되나</th></tr>
+    <tr><td><code>{"week": 1}</code> 또는 <code>week</code> 생략</td><td><b>MCP SDK의 입력 처리</b> (스키마 검사)</td></tr>
+    <tr><td><code>"week-three"</code></td><td>문자열 조건은 맞지만 — <b class="g">함수 안의 <code>WEEK_FILES</code> 검사</b>에서</td></tr>
+  </table>
+  <div class="hl">🎯 <b class="g">입력의 모양 검사와 우리가 정한 허용 값 검사는 서로 다른 역할</b>입니다. 학생이 스키마 JSON을 따로 작성하는 것이 아니라 <b>SDK가 함수 정보를 바탕으로</b> 만듭니다</div>
+  <ul class="pts">
+    <li>도구 설명이 필요한 이유 — <b class="r">모델에게 <code>week</code>라는 문자열만 알려 주면 어떤 값을 써야 할지 부족</b>합니다. <b class="g">AI가 도구를 엉뚱하게 사용한다면 실행 코드뿐 아니라 모델이 읽는 이 안내도 살펴봅니다</b></li>
+  </ul>
+  <aside>MCP Python SDK 2.1.1의 서버 작성 방식은 공식 SDK 예제를 기준으로 합니다.</aside>
+</section>
+
+<!-- 17 확인할 결과 -->
+<section class="slide" data-part="PART 4">
+  <h2>다음 호출에서 <span class="b">확인할 결과</span></h2>
+  <table class="t">
+    <tr><th>입력</th><th>확인할 결과</th><th>관련 코드</th></tr>
+    <tr><td><code>week-one</code></td><td>기준일 2026-09-04, <b>TASK-101~104 네 기록</b>이 원본과 일치</td><td>파일 읽기와 반환</td></tr>
+    <tr><td><code>WEEK-ONE</code></td><td>첫째 주의 <b>같은 자료</b> 반환</td><td>공백 제거와 소문자 변환</td></tr>
+    <tr><td><code>week-three</code></td><td>기록 대신 <b class="r">오류 결과</b></td><td>허용 주차 검사</td></tr>
+    <tr><td>숫자 전달 또는 입력 생략</td><td><b class="r">입력 검증 오류</b></td><td>SDK의 스키마 검사</td></tr>
+  </table>
+  <div class="hl">⚠️ 실패 문구는 호스트와 SDK의 표시 방식에 따라 <b>달라질 수 있습니다</b> — 한국어 문장이 그대로 나오지 않더라도 <b class="g">어떤 입력이 거절됐는지부터 확인</b>하고 필요하면 서버 로그에서 원인을 찾습니다</div>
+  <aside>첨부 자료의 weekly-records-verification.md에는 SDK 클라이언트로 수행한 기존 검증 결과가 있습니다.</aside>
+</section>
+
+<!-- 18 실행 방식 -->
+<section class="slide" data-part="PART 4">
+  <h2>실행 <span class="g">방식</span>도 짚어 둡니다</h2>
+  <ul class="pts">
+    <li>첨부 완성 예제에는 <b class="r">서버를 직접 시작하는 코드가 없으므로</b> <code>uv run --locked python weekly_records_server.py</code>로 실행하면 <b>함수와 서버 객체를 정의한 뒤 끝납니다</b></li>
+    <li>다음 절에서는 <b class="g"><code>mcp run</code>이 이 파일의 서버 객체를 찾아 실행하도록</b> 호스트에 등록합니다 — <b>별도 터미널에서 서버를 계속 켜 놓는 방식이 아닙니다</b></li>
+    <li>AI가 생성한 다른 구현에는 <b>실행 진입점</b>이 들어 있을 수 있습니다 — 그런 파일은 <b>Python으로 직접 실행하는 방식</b>이 맞을 수 있습니다</li>
+  </ul>
+  <div class="hl">📌 <b class="g">"이 서버는 어떻게 시작하는지 코드에서 찾아 설명해 줘"</b> 정도로 짧게 요청해도 좋습니다</div>
+  <aside>stdio 연결에서는 표준 출력이 MCP 메시지 통로입니다. 진단은 표준 오류로 보냅니다. 환경 준비에서 터미널에 Python 경로를 출력한 것은 서버 통신 밖의 독립 명령이므로 목적과 위치가 다릅니다.</aside>
+</section>
+
+<!-- 19 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> <code>Path(__file__).with_name("data")</code>를 쓰는 이유는?</div>
+    <div class="q a"><b>A1.</b> 호스트가 <b>터미널의 현재 폴더와 다른 곳에서 서버를 실행할 수 있기</b> 때문. 코드 파일 위치를 기준으로 삼으면 코드 옆의 자료를 찾는다.</div>
+    <div class="q"><b>Q2.</b> <code>{"week": 1}</code>과 <code>"week-three"</code>는 각각 어디에서 거절되나?</div>
+    <div class="q a"><b>A2.</b> 앞은 <b>SDK의 스키마 검사</b>, 뒤는 <b>함수 안의 <code>WEEK_FILES</code> 검사.</b> 모양 검사와 허용 값 검사는 다른 역할.</div>
+    <div class="q"><b>Q3.</b> <code>load_weekly_records</code>는 왜 공개되지 않나?</div>
+    <div class="q a"><b>A3.</b> <code>@mcp.tool()</code> 표시가 없기 때문. 같은 파일에 있다고 모든 함수가 도구가 되지는 않는다.</div>
+  </div>
+  <aside>Q1은 다음 절 연결 실패의 흔한 원인과 직접 이어집니다.</aside>
+</section>
+
+<!-- 20 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>차이를 지우지 않고 가져옵니다 🗃️</h1>
+    <div class="big" style="margin-top:26px">도구가 임의로 요약하면<br><span class="y">다음 단계에서 필요한 근거가 사라집니다</span></div>
+    <p class="sub" style="margin-top:24px">에이전트와 도구 연결 ③ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ④에서 어떤 프로그램으로 이 파일을 실행할지 호스트에 알려 주고, TASK-102의 기록이 실제 도구 응답으로 돌아오는지 봅니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

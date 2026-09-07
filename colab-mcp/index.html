@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colab MCP 연결과 실행 (도구 연결 ⑫)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 도구 연결 ⑫</span>
+    <h1 style="margin:18px 0">Colab MCP 연결과 실행</h1>
+    <p class="sub">문서에 적힌 코드와 실행 중인 상태를 구분합니다</p>
+  </div>
+  <aside>"앞으로는 학습 시간 같은 기록도 모아서 평균을 보고 싶어요. 어떤 값을 계산했는지 다시 확인할 수 있게 남기면 좋겠어요."</aside>
+</section>
+
+<!-- 2 노트북 -->
+<section class="slide" data-part="표지">
+  <h2>한 문서에 <span class="g">네 가지</span>를 남깁니다</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:120px"><small>①</small><b>입력 데이터</b></div>
+    <div class="cell" style="min-width:120px;border-color:var(--bl)"><small>②</small><b class="b">계산 코드</b></div>
+    <div class="cell" style="min-width:120px;border-color:var(--gr)"><small>③</small><b class="g">실행 결과</b></div>
+    <div class="cell" style="min-width:110px;border-color:var(--pp)"><small>④</small><b class="p">설명</b></div>
+  </div>
+  <ul class="pts">
+    <li>이 일을 할 수 있는 문서가 <b>노트북(notebook)</b>. <b>Colab</b>은 브라우저에서 노트북을 작성하고 Python을 실행하는 환경</li>
+    <li><b>셀(cell)</b>은 한 칸 — <b>코드 셀</b>과 <b>텍스트 셀</b>이 있고, 코드 셀을 실행하면 <b class="g">그 아래에 출력이 나타납니다.</b> 따라서 <b class="g">"어떤 코드를 실행해서 이 숫자가 나왔는가"를 같은 자리에서</b> 읽을 수 있습니다</li>
+    <li>앞의 보고서 Skill은 <b>팀의 판단 기준을 재사용</b>하는 데, Colab은 <b class="g">계산을 실행하고 그 과정을 남기는 데</b> 씁니다 — <b>보고서에 계산이 필요하면 둘을 함께</b></li>
+  </ul>
+  <aside>대화에 답만 남겨 두면 며칠 뒤 같은 계산을 확인하기가 번거롭습니다. 입력값을 찾고, 다시 요청하고, 처음과 같은 방식으로 계산했는지도 맞춰야 합니다.</aside>
+</section>
+
+<!-- 3 런타임 -->
+<section class="slide" data-part="표지">
+  <h2>문서와 <span class="r">실행 중인 상태</span></h2>
+  <ul class="pts">
+    <li><b class="r">브라우저에서 코드를 작성했다고 Python이 실행되고 있는 것은 아닙니다</b> — <b>런타임(runtime)</b>이 필요합니다. 런타임은 <b class="g">Python을 실제로 실행하고, 실행 중 만든 변수와 설치한 라이브러리를 보관</b>하는 환경</li>
+    <li>예 — <code>minutes = [20, 30, 40]</code>이라 적으면 <b>문서에 코드가 저장</b>됩니다. <b class="g">이 셀을 실행해야 런타임 안에 <code>minutes</code>라는 변수가 만들어집니다</b></li>
+    <li><b class="r">런타임이 새로 시작되면 노트북에 코드는 그대로 보여도 변수는 아직 없을 수</b> 있습니다</li>
+  </ul>
+  <div class="big"><span class="y">문서에 적힌 코드</span>와 <span class="y">실행 중인 상태</span>를 구분하는 것이<br><small>노트북 사용의 출발점입니다</small></div>
+  <aside>이 수업에서는 Colab이 제공하는 원격 실행 환경을 사용합니다. 오른쪽 Gemini 패널은 Colab에 포함된 별도의 AI 대화 화면이며, 이번 실습의 요청은 평소 사용하는 Claude Code·OpenCode에 입력합니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">역할을 나누어 봅니다</h2>
+  <p style="margin-top:11px">서버는 내 컴퓨터, 계산은 Colab 런타임</p><span class="who">⑫ Colab MCP</span></div>
+  <aside>요청이 거치는 프로그램을 작업 위치에 따라 나타냅니다.</aside>
+</section>
+
+<!-- 5 층 -->
+<section class="slide" data-part="PART 1">
+  <h2>네 <span class="g">층</span></h2>
+  <pre>내 컴퓨터의 Claude Code 또는 OpenCode
+          ↓ 도구 호출 요청
+내 컴퓨터에서 실행하는 Colab MCP 서버
+          ↓ 연결된 노트북 조작
+Chrome의 Colab 노트북
+          ↓ 코드 셀 실행
+Colab 런타임의 Python</pre>
+  <ul class="pts">
+    <li><b class="g">Colab MCP 서버는 내 컴퓨터에서 실행</b>됩니다. 반면 <b class="g">노트북 셀의 Python 계산은 Colab 런타임에서 실행</b>됩니다</li>
+    <li><b class="r">앞에서 만든 <code>weekly_records_server.py</code>를 Colab 셀에 붙여 넣는 실습이 아닙니다</b> — <b>새 MCP 서버를 로컬 호스트에 등록하고, 그 서버를 통해 브라우저의 노트북을 조작</b>하는 실습</li>
+  </ul>
+  <div class="hl">📌 <b>"셀을 하나 추가해 줘"</b>는 <b class="g">노트북 문서를 바꿉니다.</b> <b>"그 셀을 실행해 줘"</b>는 <b class="g">런타임에 계산을 시킵니다</b> — <b class="r">셀은 생겼는데 결과가 나오지 않았다면 두 동작 중 첫 번째까지만 된 것</b>일 수 있습니다</div>
+  <aside>이 차이를 실제 화면에서 확인하게 됩니다.</aside>
+</section>
+
+<!-- 6 준비 -->
+<section class="slide" data-part="PART 1">
+  <h2>Chrome과 <span class="b">로컬 실행 도구</span></h2>
+  <ul class="pts">
+    <li><b class="g">이 수업에서는 Google Chrome을 권장</b>합니다 — 기존 실습에서 Chrome으로 승인 창과 셀 실행까지 확인했습니다. <b class="r">공식 저장소가 Chrome만 지원한다고 안내하는 것은 아니며</b> 수업에서 확인한 환경을 맞추기 위한 권장</li>
+    <li>내 컴퓨터의 Chrome에서 <b>실습에 사용할 Google 계정으로 로그인.</b> <b class="r">일반 Colab 페이지를 열어 둔 것만으로 MCP 연결이 끝난 것은 아닙니다</b></li>
+    <li>Colab MCP 프로그램은 <b>Python 3.13 이상</b>을 요구합니다 — <b class="r">이것은 내 컴퓨터에서 MCP 서버를 실행하는 Python의 조건이며, Colab 노트북 셀의 Python을 바꾸라는 뜻이 아닙니다</b></li>
+    <li><b><code>uvx</code></b>는 uv에 포함된 명령으로 <b class="g">도구가 필요한 패키지를 별도 환경에 설치하고 실행</b>하게 해 줍니다. 공식 저장소에서 프로그램을 가져오려면 <b>Git</b>도 필요</li>
+  </ul>
+  <div class="hl">📌 앞에서는 <code>uv sync</code>·<code>uv run</code>으로 우리 프로젝트를 다뤘습니다. <b class="g">이번에는 공개된 Colab MCP를 별도 도구로 실행하므로 <code>uvx</code></b> — <b class="r">Colab MCP의 패키지를 업무 기록 프로젝트에 섞어 설치할 필요는 없습니다</b></div>
+  <aside>여러 계정을 쓰고 있다면 이후 저장할 노트북이 어느 계정에 들어갈지도 확인해 두세요.</aside>
+</section>
+
+<!-- 7 등록 -->
+<section class="slide" data-part="PART 1">
+  <h2>서버 <span class="g">등록</span></h2>
+  <pre>claude mcp add --transport stdio --scope project colab-mcp \
+  -- uvx --python 3.13 git+https://github.com/googlecolab/colab-mcp</pre>
+  <pre>// OpenCode V1
+"colab-mcp": {
+  "type": "local",
+  "command": ["uvx","--python","3.13","git+https://github.com/googlecolab/colab-mcp"],
+  "enabled": true,
+  "timeout": 120000
+}
+
+// OpenCode V2 — mcp.servers 아래
+"colab-mcp": {
+  "type": "local",
+  "command": ["uvx","--python","3.13","git+https://github.com/googlecolab/colab-mcp"],
+  "timeout": { "execution": 120000 }
+}</pre>
+  <ul class="pts">
+    <li><code>--python 3.13</code>은 <b class="g">그 로컬 도구를 실행할 Python</b>을 지정 — 없으면 uv가 내려받을 수 있습니다</li>
+    <li>V1의 <code>timeout: 120000</code>은 밀리초이므로 <b>호스트 측 120초</b>. V2의 <code>timeout</code>은 <b>세부 대기 시간을 담는 객체</b>이고 <code>execution</code>은 <b>도구 호출 대기</b>를 지정 — <b class="r">V1의 숫자형과 형태가 다릅니다</b></li>
+    <li><b class="r">브라우저 승인 단계에도 별도의 기다리는 시간이 있으므로 이 숫자를 늘리면 모든 제한 시간이 함께 늘어나는 것은 아닙니다</b></li>
+  </ul>
+  <div class="hl">⚠️ <b class="r">V1과 V2 두 JSON을 함께 추가하지 않고</b> 현재 설치 계열의 설정을 사용합니다. 같은 로컬 프로그램을 실행하지만 <b class="g">호스트가 설정을 읽는 위치가 다릅니다</b></div>
+  <aside>학생이 볼 것은 명령을 얼마나 길게 생성했는지가 아니라 어느 호스트 설정을 바꿨고 서버가 실행될 준비가 됐는지입니다.</aside>
+</section>
+
+<!-- 8 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">브라우저의 MCP 연결 승인</h2>
+  <p style="margin-top:11px">글자는 같지만 연결하는 대상이 다릅니다</p><span class="who">⑫ Colab MCP</span></div>
+  <aside>처음에는 open_colab_browser_connection이라는 연결 도구가 보일 수 있습니다. 이름을 외울 필요는 없습니다.</aside>
+</section>
+
+<!-- 9 두 Connect -->
+<section class="slide" data-part="PART 2">
+  <h2>두 개의 <span class="r">Connect</span></h2>
+  <table class="t">
+    <tr><th>위치</th><th>연결하는 대상</th><th>연결 뒤 확인할 변화</th></tr>
+    <tr><td>Colab 화면 <b>오른쪽 위</b>의 <code>Connect</code></td><td>노트북에서 <b>코드를 실행할 런타임</b></td><td>코드 셀을 <b>실행할 수 있는</b> 상태</td></tr>
+    <tr><td><b>가운데 승인 창</b>의 <code>Connect</code></td><td>현재 노트북과 <b class="g">로컬 Colab MCP 서버</b></td><td>에이전트가 <b class="g">연결된 노트북을 읽고 조작할 수</b> 있는 상태</td></tr>
+  </table>
+  <ul class="pts">
+    <li>승인 창의 제목은 <b>Connect to a local Colab MCP server</b> — <b class="g">자신이 방금 요청한 연결인지 확인</b>하고 누릅니다. 브라우저가 <b>로컬 네트워크 접근 허용</b>을 묻는 경우에도 지금 요청한 로컬 연결인지 확인</li>
+    <li>안내에는 <b>한 로컬 MCP 서버에 한 노트북 세션을 연결</b>한다는 내용이 있습니다 — 여기서 <b>세션</b>은 <b class="g">현재 서버와 이어져 있는 노트북 연결</b>. <b class="r">탭을 여러 개 열었다고 같은 서버가 그 모두를 동시에 조작할 준비가 된 것은 아닙니다</b></li>
+  </ul>
+  <div class="hl">⚠️ <b class="r">MCP 연결을 승인했어도 런타임이 준비되지 않았다면 계산은 아직 실행되지 않을 수</b> 있습니다. 반대로 <b class="r">손으로 코드를 실행할 수 있어도 에이전트가 그 노트북을 조작할 연결은 없을 수</b> 있습니다</div>
+  <aside>다른 선택지인 Cancel이나 Connect separate tabs로 경로를 나눌 필요는 없습니다.</aside>
+</section>
+
+<!-- 10 동적 목록 -->
+<section class="slide" data-part="PART 2">
+  <h2>연결 뒤 달라지는 <span class="g">도구 목록</span></h2>
+  <ul class="pts">
+    <li><b class="g">연결 전후에는 서버가 제공하는 도구 목록 자체가 달라질 수</b> 있습니다 — 연결 전에는 <b>편집할 노트북이 아직 정해지지 않았고</b>, 연결되면 <b>그 노트북의 내용을 읽거나 셀을 추가·실행하는 기능</b>을 쓸 수 있게 됩니다</li>
+    <li>실행 중에 목록이 바뀌는 것을 <b>동적 도구 목록</b>이라 합니다 — 서버가 <b>"도구 목록이 바뀌었다"는 알림</b>을 보내고 <b class="g">호스트가 이를 받아 목록을 갱신해야</b> 새 기능을 쓸 수 있습니다</li>
+    <li>공식 안내는 <b>로컬 클라이언트와 도구 목록 변경 알림 지원</b>을 요구하며 지원 예시에 <b>Claude Code</b>가 포함됩니다. OpenCode에서는 <b class="g">현재 버전에서 연결 후 편집·실행 기능을 쓸 수 있게 되는지</b> 확인</li>
+  </ul>
+  <div class="hl">🔍 Tool Search와 구분 — 여기서는 <b class="g">연결 상태에 따라 서버가 제공하는 기능이 바뀝니다.</b> Tool Search는 <b class="g">제공 가능한 많은 기능 중 지금 필요한 설명을 찾는 방식</b>이었습니다</div>
+  <pre>연결된 노트북 이름과 지금 들어 있는 셀을 확인해 줘.</pre>
+  <aside>답변의 노트북 이름이 Chrome 탭의 이름과 맞는지, 셀 내용도 맞는지 비교합니다. 연결 도구만 계속 사용할 수 있다면 셀 실행을 여러 번 요구하기보다 승인과 도구 목록 갱신부터 살펴봅니다.</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">계산 셀과 42 출력</h2>
+  <p style="margin-top:11px">세 가지를 따로 확인합니다</p><span class="who">⑫ Colab MCP</span></div>
+  <aside>첫 실행은 학생도 바로 결과를 판단할 수 있는 작은 계산으로 시작합니다.</aside>
+</section>
+
+<!-- 12 42 -->
+<section class="slide" data-part="PART 3">
+  <h2>세 가지를 <span class="g">따로</span> 확인</h2>
+  <pre>print(37 + 5)
+
+42</pre>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">요청한 <b>코드가 셀에 생겼는지</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>그 셀이 실행되었는지</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b class="g">셀 아래 출력이 예상값과 맞는지</b></span></div>
+  </div>
+  <ul class="pts">
+    <li>기존 기록에서는 <b><code>add_code_cell</code></b>로 코드를 담은 셀을 추가하고 <b><code>run_code_cell</code></b>로 실행했습니다 — <b class="g">첫 호출은 노트북에 내용을 쓰는 단계, 두 번째는 Python 계산을 요청하는 단계</b></li>
+    <li><b class="r">AI 답변에 "42입니다"만 쓰여 있고 노트북에 변화가 없다면</b> — <b class="r">'Colab에서 계산하기'는 아직 확인하지 못한 것</b></li>
+  </ul>
+  <div class="hl">📌 <b class="g">기존 캡처는 당시 연결에서의 실행 증거</b>입니다 — <b class="r">자신의 환경에서도 실제 호출 결과와 노트북을 맞춰 보아야 현재 연결을 확인</b>할 수 있습니다</div>
+  <aside>2026-09-06 실제 MCP 호출로 이 셀을 추가·실행했고, 새 연결에서도 승인 창의 Connect를 누른 뒤 같은 셀 추가·실행과 42 출력을 다시 확인했습니다. 화면만 보고 추측하기보다 호스트의 도구 호출 기록과 셀의 변화를 함께 읽는 습관을 들이세요.</aside>
+</section>
+
+<!-- 13 평균 -->
+<section class="slide" data-part="PART 3">
+  <h2>입력을 바꾸며 <span class="b">계산 근거</span> 읽기</h2>
+  <pre>minutes = [20, 30, 40]
+average = sum(minutes) / len(minutes)
+print(average)</pre>
+  <ul class="pts">
+    <li>대괄호 안에 여러 값을 담은 자료를 <b>리스트(list)</b>라 합니다. 이번 원소는 <b>한 번 기록한 학습 시간</b>이며 단위는 분</li>
+    <li><code>sum(minutes)</code>는 <b>90</b>, <code>len(minutes)</code>는 <b>3</b>, 나누면 <b>30</b>. Python에서는 결과가 소수로 표시되어 <b><code>30.0</code></b>이 나올 수 있습니다</li>
+    <li>마지막 입력 40을 <b>70으로 바꾸면</b> — 합계 90→120, 기록 수는 여전히 3이므로 평균은 <b class="g">40.0</b>. <b>세 관측값 중 하나가 30분 늘어났으므로 전체 평균은 10분 늘어난 것</b>으로도 설명할 수 있습니다</li>
+    <li><b class="r">이전의 <code>30.0</code>이 그대로라면</b> — <b class="g">값을 바꾼 셀과 계산 셀을 올바른 순서로 실행했는지</b> 살펴봅니다. <b>코드를 고친 상태, 실행한 상태, 새 출력을 보고 있는 상태</b>가 서로 일치하는지</li>
+  </ul>
+  <div class="hl">⚠️ <b class="r">계산 코드가 맞는 것과 숫자의 의미가 맞는 것은 별개</b>입니다 — 이 30분은 <b>기록이 있는 세 번의 평균</b>. <b class="r">기록이 없는 나머지 날도 0분으로 보아 나누면 다른 숫자</b>가 나옵니다. <b class="g">Colab은 선택한 계산을 실행해 주지만 "기록이 없는 날을 어떻게 다룬다"는 기준까지 정해 주지는 않습니다</b></div>
+  <aside>기록이 아예 없는 주라면 빈 리스트의 길이는 0이므로 0으로 나누게 됩니다. 먼저 결정할 것은 예외 처리의 길이가 아니라 자료가 없음을 보고서에서 어떻게 표현할지입니다.</aside>
+</section>
+
+<!-- 14 보관 -->
+<section class="slide" data-part="PART 3">
+  <h2>노트북 <span class="g">보관</span>과 다시 실행</h2>
+  <ul class="pts">
+    <li>실행 결과 화면 상단에는 <code>Cannot save changes</code>와 <code>Copy to Drive</code>가 보입니다 — 열린 <code>scratchpad</code>는 <b>임시 노트북</b>. <b class="r">계산이 성공했다는 사실과 노트북을 내 계정에 보관했다는 사실은 구분</b></li>
+    <li>보관할 결과가 있으면 <code>Copy to Drive</code>로 복사하고 <b>알아볼 수 있는 제목</b>을. <b class="r">"결과는 30"이라고만 적기보다</b> <b class="g">입력의 단위와 평균의 뜻도 텍스트 셀에</b></li>
+    <li>다시 열었을 때도 <b class="g">셀은 위에서부터 실행</b>하는 편이 이해하기 쉽습니다 — 첫 셀에서 <code>minutes</code>를 만들고 두 번째에서 계산했다면 <b class="r">새 런타임에서 두 번째만 실행하면 <code>minutes</code>를 찾지 못할 수</b> 있습니다</li>
+    <li><b class="r">셀 아래에 과거 출력이 보이더라도 지금 런타임에서 방금 계산한 결과와는 구분</b>합니다</li>
+    <li>노트북을 복사해 다른 탭으로 옮겼다면 <b class="g">에이전트가 조작 중인 노트북도 다시 확인</b> — <b class="r">저장·복사가 기존 MCP 세션의 대상을 자동으로 바꿨다고 생각하지 않습니다</b></li>
+  </ul>
+  <aside>연결 중에는 대상 탭과 로컬 MCP 프로세스를 유지하고, 실습을 마칠 때 필요한 결과를 보관한 뒤 연결을 종료합니다.</aside>
+</section>
+
+<!-- 15 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">연결이 멈춘 위치 찾기</h2>
+  <p style="margin-top:11px">마지막으로 확인한 성공이 어디였는지</p><span class="who">⑫ Colab MCP</span></div>
+  <aside>모든 설정을 지우고 처음부터 시작하기 전에 단계를 나누어 봅니다.</aside>
+</section>
+
+<!-- 16 문제 표 -->
+<section class="slide" data-part="PART 4">
+  <h2>멈춘 <span class="r">위치</span>와 다음 확인</h2>
+  <table class="t">
+    <tr><th>관찰한 현상</th><th>멈췄을 위치</th><th>다음 확인</th></tr>
+    <tr><td>서버 등록부터 실패</td><td>실행 환경·호스트 설정</td><td><code>uvx</code>와 Git 실행 가능 여부, Python 요구 사항, 설치 로그</td></tr>
+    <tr><td>Colab 탭은 열렸지만 연결 대기</td><td>브라우저 로그인·<b>로컬 연결 승인</b></td><td><b>같은 컴퓨터의 Chrome인지, 도구가 연 탭인지, 승인 창의 <code>Connect</code>를 눌렀는지</b></td></tr>
+    <tr><td>연결 도구만 계속 사용 가능</td><td>노트북 연결 또는 <b>도구 목록 갱신</b></td><td>연결 성공 결과 → <b>호스트가 바뀐 목록을 읽었는지.</b> 서버 재시작 후에는 <b>새 연결 도구 호출로 만든 탭에서 다시 승인</b></td></tr>
+    <tr><td>셀은 생겼지만 출력이 없음</td><td><b>런타임 준비 또는 Python 실행</b></td><td>오른쪽 위 런타임 상태와 셀 오류. <b>변수가 없다면 앞 셀을 실행</b></td></tr>
+    <tr><td>작업하다 연결이 끊김</td><td>탭·로컬 프로세스·노트북 세션</td><td>대상 탭과 MCP 프로세스 유지 여부. 새로 연결했다면 <b>노트북 제목과 셀을 읽어 올바른 대상인지</b></td></tr>
+  </table>
+  <div class="hl">📌 로그인 화면까지 열렸는데 시간이 지나 실패했다면 — <b class="r">Python 코드를 고칠 단계가 아닙니다.</b> Colab MCP 연결 구현에는 <b><code>UI_CONNECTION_TIMEOUT = 60.0</code></b>이라는 <b class="g">브라우저 연결 대기 제한</b>이 별도로 있어, <b class="r">호스트를 120초로 설정해도 서버 내부의 약 60초 대기가 함께 늘어나지는 않습니다</b></div>
+  <aside>먼저 로그인 상태를 준비한 뒤 다시 연결을 요청합니다. 설정 값을 반복해서 키우기 전에 어느 쪽이 실패를 반환했는지 로그를 읽어 보세요.</aside>
+</section>
+
+<!-- 17 기록과 다음 -->
+<section class="slide" data-part="PART 4">
+  <h2>남길 것과 <span class="g">남기지 않을 것</span></h2>
+  <ul class="pts">
+    <li>연결 도구는 <b>연결용 임시 값을 담은 URL</b>을 만듭니다 — <b class="r">그 전체 주소를 과제·채팅·공개 캡처에 붙이지 않습니다</b></li>
+    <li>결과로 남길 것 — <b class="g">사용한 호스트와 Chrome, 연결 뒤 실제로 호출한 기능 하나, 계산 셀과 출력.</b> <b>노트북에 숫자가 나온 근거를 보여 주는 데 연결용 임시 주소는 필요하지 않습니다</b></li>
+    <li>정리할 때는 <b>"Colab이 연결됐다"에서 한 걸음 더</b> — <b class="g">로컬 MCP 서버가 어느 노트북을 조작했고, Python은 어디에서 실행되었으며, 어떤 입력으로 어떤 결과가 나왔는지</b></li>
+  </ul>
+  <div class="hl">⚠️ <b class="r">Colab MCP 연결을 위해 다음 절의 Google Workspace용 credential JSON을 새로 만들 필요는 없습니다</b> — 여기서는 <b>Colab 로그인과 브라우저의 MCP 연결 승인</b>을 사용했습니다. <b class="r">Colab에 로그인한 상태가 그 앱의 접근 동의까지 대신해 주는 것은 아닙니다</b></div>
+  <aside>다음에는 팀의 원자료가 있을 수 있는 Google 스프레드시트를 프로그램이 읽도록 접근 권한을 준비합니다.</aside>
+</section>
+
+<!-- 18 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> Colab MCP 서버와 Python 계산은 각각 어디에서 실행되나?</div>
+    <div class="q a"><b>A1.</b> 서버는 <b>내 컴퓨터</b>, 셀의 Python 계산은 <b>Colab 런타임.</b></div>
+    <div class="q"><b>Q2.</b> 두 개의 <code>Connect</code>는?</div>
+    <div class="q a"><b>A2.</b> 오른쪽 위는 <b>코드를 실행할 런타임</b>, 가운데 승인 창은 <b>노트북과 로컬 MCP 서버.</b> 하나만 되어 있어도 다른 쪽은 안 될 수 있다.</div>
+    <div class="q"><b>Q3.</b> 셀은 생겼는데 출력이 없다면?</div>
+    <div class="q a"><b>A3.</b> <b>문서를 바꾸는 동작까지만</b> 된 것일 수 있다. 런타임 상태와 셀 오류를 보고, 변수가 없으면 앞 셀을 실행한다.</div>
+  </div>
+  <aside>Q2가 이 소단원의 핵심 구분입니다.</aside>
+</section>
+
+<!-- 19 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>계산을 남깁니다 📓</h1>
+    <div class="big" style="margin-top:26px">코드와 출력을 같은 자리에 두면<br><span class="y">며칠 뒤에도 무엇을 계산했는지</span> 확인할 수 있습니다</div>
+    <p class="sub" style="margin-top:24px">에이전트와 도구 연결 ⑫ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑬에서 Google 공유 표를 프로그램이 읽도록 인증을 준비합니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

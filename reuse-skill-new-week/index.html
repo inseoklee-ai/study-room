@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>새 업무 기록에서 Skill 재사용하기 (도구 연결 ⑪)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 도구 연결 ⑪</span>
+    <h1 style="margin:18px 0">새 업무 기록에서<br>Skill 재사용하기</h1>
+    <p class="sub">재사용할 것은 지난주 답이 아니라 판단 기준입니다</p>
+  </div>
+  <aside>둘째 주 기록에는 낯익은 업무가 하나 있습니다 — TASK-102, 로그인 안내 문구 개선입니다.</aside>
+</section>
+
+<!-- 2 새 대화 -->
+<section class="slide" data-part="표지">
+  <h2>왜 <span class="g">새 대화</span>를 여는가</h2>
+  <ul class="pts">
+    <li>지금까지의 대화에는 <b>직접 설명한 팀 규칙과 완성한 첫 주 보고서</b>가 들어 있습니다 — 이 상태에서 요청하면 <b class="r">Skill을 읽지 않고도 앞 대화의 내용으로 잘 작성할 수</b> 있습니다</li>
+    <li>그러면 <b class="r">결과는 좋더라도 Skill이 준비한 지식을 실제로 사용했는지 알기 어렵습니다</b></li>
+    <li>새 대화는 <b>앞서 주고받은 메시지의 영향을 줄이는 방법</b>입니다 — <b class="r">설치한 Skill이나 프로젝트 파일까지 지우는 기능은 아닙니다</b></li>
+    <li><b class="g">프로젝트 지침에 팀 규칙을 따로 써 두었다면 새 대화에서도 전달될 수</b> 있으므로 — <b>어떤 자료가 함께 제공되는지</b>는 결과를 해석할 때 기억해 둡니다</li>
+  </ul>
+  <pre>둘째 주 업무 기록을 우리 팀 주간 보고서로 정리해 줘.</pre>
+  <div class="hl">📌 이번 요청에는 <b class="r">Skill 이름이나 업무별 정답을 넣지 않았습니다</b> — <b class="g">자료 위치를 안내하는 것과 완료·위험의 판정을 대신해 주는 것은 다른 도움</b>입니다</div>
+  <aside>자료를 찾지 못하면 data/week-two.json을 알려 주세요. MCP 환경이라면 weekly-records에서 둘째 주를 조회할 수 있다고 알려 줄 수 있습니다.</aside>
+</section>
+
+<!-- 3 입력 확인 -->
+<section class="slide" data-part="표지">
+  <h2>사용한 <span class="b">입력</span>을 확인합니다</h2>
+  <ul class="pts">
+    <li>MCP를 썼다면 <code>get_weekly_records</code>의 입력이 <b><code>{"week":"week-two"}</code></b>인지, 파일을 읽었다면 <b><code>data/week-two.json</code></b>인지</li>
+    <li>반환된 자료의 <code>report_date</code>는 <b><code>2026-09-11</code></b> — 보고서는 <b class="g">이 기준일의 현황</b>을 담아야 합니다. <b class="r">실습하는 날의 실제 날짜로 바꾸면 같은 기록도 다른 결과</b>가 됩니다</li>
+    <li>완성 결과는 <b class="r">첫 주 파일을 덮어쓰지 않고</b> <code>second-week-report.md</code>로 — <b class="g">두 보고서가 있으면 같은 업무의 상태가 어떻게 바뀌었는지 나중에 다시 살펴볼 수</b> 있습니다</li>
+  </ul>
+  <aside>앞에서 만든 first-week-report.md와 report-work-notes.md도 그대로 둡니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">결과까지 이어지는 네 가지 확인</h2>
+  <p style="margin-top:11px">한 번에 합격·실패를 결정하지 않습니다</p><span class="who">⑪ Skill 재사용</span></div>
+  <aside>AI의 "Skill을 사용했습니다"라는 설명과 실제 작업 기록을 함께 살펴봅니다.</aside>
+</section>
+
+<!-- 5 네 확인 -->
+<section class="slide" data-part="PART 1">
+  <h2>나눠 보면 <span class="g">막힌 부분</span>을 찾기 쉽습니다</h2>
+  <table class="t">
+    <tr><th>확인할 부분</th><th>실제로 살펴볼 내용</th></tr>
+    <tr><td><b>Skill 선택</b></td><td>실행 기록에서 <code>team-weekly-report</code>가 <b>불러와지거나 적용된 흔적</b>이 있는지</td></tr>
+    <tr><td><b>규칙 접근</b></td><td>Skill 본문과 필요한 <code>references/team-rules.md</code>가 <b>읽히거나 호스트를 통해 제공</b>되었는지</td></tr>
+    <tr><td><b>이번 주 입력</b></td><td><b>둘째 주 기록과 그 안의 보고 기준일</b>을 사용했는지</td></tr>
+    <tr><td><b class="g">보고서 품질</b></td><td>각 업무의 <b>분류와 근거, 누락 정보 처리, 합계</b>가 팀 규칙과 맞는지</td></tr>
+  </table>
+  <ul class="pts">
+    <li>앱마다 Skill을 제공하는 모습이 다릅니다 — <b>파일 읽기나 도구 호출</b>로 보이기도 하고 <b>호스트가 본문을 대화에 제공한 기록</b>으로 나타나기도 합니다. <b class="g">특정 문구 하나를 찾기보다 어떤 내용이 실제로 전달되었는지</b> 확인하고, <b class="r">알 수 없는 부분은 <code>미확인</code>으로</b> 남깁니다</li>
+    <li>본문과 참고 파일을 구분 — 본문이 <b>"팀 규칙은 이 파일을 참고한다"</b>고만 안내한다면 <b class="r">본문을 불러온 것만으로 세부 분류 규칙까지 전달된 것은 아닐 수</b> 있습니다. 반대로 <b class="g">호스트가 이미 제공했다면 별도 파일 읽기 명령이 없어도 이용할 수</b> 있습니다</li>
+    <li><b class="r">파일 읽기 횟수를 세는 것이 목적이 아니라</b> — <b class="g">필요한 지식이 실제 작업에 들어갔는지</b> 확인하는 것</li>
+  </ul>
+  <aside>Skill을 선택하지 않았다면 다른 새 대화에서 "team-weekly-report Skill로 둘째 주 보고서를 작성해 줘"라고 이름을 지정해 봅니다.</aside>
+</section>
+
+<!-- 6 두 결과 -->
+<section class="slide" data-part="PART 1">
+  <h2>두 결과를 <span class="b">나누어</span> 둡니다</h2>
+  <div class="grid2">
+    <div class="box"><h3>이름 지정 시 OK, 자연스러운 요청에서 실패</h3><p><b class="g">Skill의 사용 시점을 설명하는 부분</b>이나 <b>호스트의 인식 상태</b>부터 살펴볼 근거</p></div>
+    <div class="box"><h3>이름 지정해도 규칙과 다름</h3><p><b class="g">선택 이후의 자료 접근과 판단 과정</b>을 살펴봐야 합니다</p></div>
+  </div>
+  <div class="big">두 결과를 나누어 두면<br><span class="y">"Skill이 안 된다"라는 넓은 말 대신</span><br><small>어디를 고쳐야 할지 이야기할 수 있습니다</small></div>
+  <aside>이 구분이 개선의 출발점입니다.</aside>
+</section>
+
+<!-- 7 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">업무 하나씩 근거 읽기</h2>
+  <p style="margin-top:11px">평가는 인상에 점수를 붙이는 일이 아닙니다</p><span class="who">⑪ Skill 재사용</span></div>
+  <aside>평가란 실제 입력과 정해 둔 팀 기준을 결과에 대조하는 일입니다. 직접 판단할 때는 AI의 보고서를 잠시 가려 두면 표현에 끌려가지 않고 생각하기 쉽습니다.</aside>
+</section>
+
+<!-- 8 TASK-102 변화 -->
+<section class="slide" data-part="PART 2">
+  <h2>지난주와 달라진 <span class="g">TASK-102</span></h2>
+  <pre>{
+  "status": "배포 완료",
+  "due_date": "2026-09-07",
+  "deployed_at": "2026-09-07",
+  "verification": "통과",
+  "blocker": null
+}</pre>
+  <ul class="pts">
+    <li>첫 주에는 없었던 <b class="g">배포 날짜와 운영 확인 결과</b>가 들어왔습니다 — 위험 조건을 먼저 살피고 완료 조건을 확인하면 이번에는 <b class="g">완료</b></li>
+    <li>기한 9/7이 기준일 9/11보다 이전이라는 이유만으로 <b class="r">현재 위험으로 분류하지도 않습니다</b> — <b class="g">아직 완료되지 않은 업무가 기한을 넘겼는지를 확인하는 규칙</b>이므로 <b class="r">이미 완료 조건을 충족한 업무에는 그대로 적용할 수 없습니다</b></li>
+  </ul>
+  <div class="hl">🎯 첫 주와 둘째 주의 분류가 달라지는 것이 <b class="r">일관성 부족일까요?</b> <b class="g">새로운 근거에 같은 규칙을 적용했기 때문에 분류가 달라져야 합니다</b> — <b class="g">재사용할 것은 지난주 답이 아니라 판단 기준</b></div>
+  <aside>report-checks.md와 해설은 자신의 판단을 적은 뒤 대조하는 자료로 사용합니다. 보고서를 만드는 AI에게 먼저 정답표로 제공할 필요는 없습니다.</aside>
+</section>
+
+<!-- 9 세 업무 -->
+<section class="slide" data-part="PART 2">
+  <h2>나머지 <span class="b">세 업무</span> — 직접 판정</h2>
+  <table class="t">
+    <tr><th>업무</th><th><code>status</code></th><th><code>due_date</code></th><th><code>deployed_at</code></th><th><code>verification</code></th><th><code>blocker</code></th><th><code>note</code></th></tr>
+    <tr><td>TASK-201</td><td>개발 완료</td><td>2026-09-11</td><td><code>null</code></td><td>미실시</td><td><code>null</code></td><td>개발은 끝났지만 아직 배포하지 않았다</td></tr>
+    <tr><td>TASK-202</td><td>배포 완료</td><td>2026-09-14</td><td>2026-09-10</td><td><b class="r">대기</b></td><td><code>null</code></td><td>배포했으며 운영 환경 확인 결과는 아직 없다</td></tr>
+    <tr><td>TASK-204</td><td>진행 중</td><td>2026-09-09</td><td><code>null</code></td><td>미실시</td><td><code>null</code></td><td><b class="r">지연 원인은 기록되어 있지 않다</b></td></tr>
+  </table>
+  <ul class="pts">
+    <li>세 업무의 보고 기준일은 모두 <b>2026-09-11</b>. <code>null</code>은 기록된 값이 없다는 뜻이며 <b class="r">빠진 사정을 추측해서 채우지는 않습니다</b></li>
+    <li><b class="g">상태 문구만 보지 말고 배포일과 운영 확인, 기한을 함께</b> 살펴봅니다. <b>보고 기준일의 하루가 아직 끝나지 않았다는 약속</b>도 적용</li>
+  </ul>
+  <aside>각 업무에 위험 → 완료 → 진행 순서를 적용해 보세요. 판단을 마치면 TASK-102까지 넣어 건수를 세어 봅니다.</aside>
+</section>
+
+<!-- 10 해설 -->
+<section class="slide" data-part="PART 2">
+  <h2><span class="g">해설</span>과 합계</h2>
+  <table class="t">
+    <tr><th>업무</th><th>범주</th><th>근거와 주의</th></tr>
+    <tr><td>TASK-201</td><td><b>진행</b></td><td>완료로 쓰면 <b class="r">개발 완료와 보고상 완료를 섞은 것</b>. 날짜가 오늘까지라는 이유로 지연이라 쓰면 <b class="r">기한의 경계를 잘못 적용</b>. <b class="g">기한과 기준일이 같으면 아직 지연이 아니고 다른 위험 조건도 없음</b></td></tr>
+    <tr><td>TASK-202</td><td><b class="r">위험</b></td><td>상태에는 '배포 완료'지만 확인 결과는 <b>대기</b> — 이 팀은 <b class="g">배포 후 운영 확인이 통과하지 않은 업무를 위험으로</b>. <b class="r">위험이라고 실제 장애가 발생했다고 단정하는 것은 아니며</b>, <b class="r">기록에 없는 장애나 실패 원인을 만들어 덧붙이지 않습니다</b></td></tr>
+    <tr><td>TASK-204</td><td><b class="r">위험</b></td><td>기준일 기준으로 기한을 넘김. 그런데 <b>지연 원인이 기록되어 있지 않음</b> — <b class="r">"다른 업무가 많아서"처럼 그럴듯한 이야기를 채우면 독자가 확인된 사실로 받아들일 수</b> 있습니다. <b class="g"><code>원인 미기록</code>이라 쓰고 "지연 원인 확인 필요"를</b></td></tr>
+  </table>
+  <div class="big">전체 4건 · 완료 1 · 진행 1 · <span class="y">위험 2</span></div>
+  <div class="hl">⚠️ <b class="r">합계만 맞추고 검토를 끝내지 마세요</b> — <b class="r">TASK-201과 TASK-202의 분류를 서로 뒤바꿔도 건수는 같습니다.</b> <b class="g">업무별 근거와 전체 합계를 함께</b> 확인해야 이런 오류를 찾습니다</div>
+  <aside>확인할 일과 이미 확인한 사실이 구분되어야 다음 사람이 올바르게 행동할 수 있습니다.</aside>
+</section>
+
+<!-- 11 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">비슷한 말, 다른 작업</h2>
+  <p style="margin-top:11px">near-miss 사례</p><span class="who">⑪ Skill 재사용</span></div>
+  <aside>보고서 작성이 잘되면, 이번에는 보고서와 관련 있지만 해야 할 일이 다른 요청을 해 봅니다.</aside>
+</section>
+
+<!-- 12 near-miss -->
+<section class="slide" data-part="PART 3">
+  <h2>가까운 <span class="r">다른 요청</span></h2>
+  <pre>둘째 주 업무 제목만 알려 줘.
+
+팀 보고서 양식을 영어로 번역해 줘.</pre>
+  <ul class="pts">
+    <li>두 요청에는 <b>업무나 보고서라는 익숙한 단어</b>가 들어 있습니다. 하지만 첫 번째는 <b>제목 조회</b>, 두 번째는 <b>번역</b></li>
+    <li><b class="r">제목 네 개를 부탁했는데 완료·진행·위험으로 나눈 보고서 전체를 만들었다면</b> — <b class="r">사용자의 요청보다 작업 범위를 넓힌 것</b></li>
+    <li>이를 <b>가까운 다른 요청</b>, 영어로는 <b>near-miss 사례</b>라 부릅니다 — <b class="g">적절한 요청에서 Skill을 쓰는지만 보면 Skill이 너무 넓게 적용되는 현상을 놓칠 수</b> 있어 함께 살펴봅니다</li>
+    <li>번역 과정에서 <b>팀 용어를 확인하려고 규칙 파일을 읽었다면 그것만으로 실패는 아닙니다</b> — 확인할 것은 <b class="r">"파일을 읽었는가" 자체보다</b> <b class="g">사용자가 요청한 일을 유지했는가</b></li>
+  </ul>
+  <aside>Skill 선택 기록과 최종 작업 범위를 함께 보고 판단합니다.</aside>
+</section>
+
+<!-- 13 개선 -->
+<section class="slide" data-part="PART 3">
+  <h2>관찰에 맞춰 <span class="g">개선</span>하기</h2>
+  <table class="t">
+    <tr><th>관찰한 현상</th><th>먼저 확인할 곳</th><th>가능한 개선</th></tr>
+    <tr><td>Skill을 찾지 못함</td><td>저장 위치, 호스트의 인식, <code>description</code>의 사용 조건</td><td>실제 업무 요청에서 쓰는 표현으로 <b>사용 시점을 명확히</b></td></tr>
+    <tr><td>본문만 보고 팀 규칙을 읽지 못함</td><td>참조 경로와 파일 존재 여부, 본문의 안내</td><td>경로를 바로잡거나 <b>언제 그 규칙을 읽는지</b> 설명</td></tr>
+    <tr><td>첫 주 기록이나 실제 오늘 날짜를 사용</td><td>입력 선택 과정과 기준일 처리</td><td>지정한 주의 기록과 그 안의 <code>report_date</code>를 사용하도록</td></tr>
+    <tr><td>배포 상태만으로 완료 처리</td><td>완료 조건과 위험 조건의 우선순위</td><td>혼동하는 조건을 구분하고 <b>일반화 가능한 사례</b> 추가</td></tr>
+    <tr><td>분류는 맞고 합계가 틀림</td><td>업무의 중복·누락과 집계</td><td>분류한 항목을 기준으로 수를 다시 확인하도록</td></tr>
+    <tr><td>제목 조회를 보고서 작성으로</td><td>Skill의 적용 범위 설명</td><td>보고서 작성과 단순 조회를 구분하도록</td></tr>
+  </table>
+  <div class="hl">📌 <b class="r">규칙 파일의 경로를 잘못 써서 읽지 못한 상황이라면 완료 조건을 더 강하게 반복해도 해결되지 않습니다.</b> <b class="g"><code>TASK-202는 위험이다</code>처럼 이번 정답을 넣기보다 "배포했더라도 운영 확인이 통과하지 않았으면 위험"이라는 재사용 가능한 기준을</b> 분명하게</div>
+  <aside>수정한 뒤에는 같은 둘째 주 입력으로 다시 확인합니다. 입력까지 동시에 바꾸면 결과가 달라진 이유를 구분하기 어렵습니다. 해결되었다면 첫 주 기록도 다시 적용해 이전에 잘 처리하던 사례에 영향을 주지 않았는지 확인하세요.</aside>
+</section>
+
+<!-- 14 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">비교에서 알 수 있는 것</h2>
+  <p style="margin-top:11px">두 주는 입력 자체가 다릅니다</p><span class="who">⑪ Skill 재사용</span></div>
+  <aside>첫 보고서보다 이번 보고서가 더 정확했다는 사실 하나만으로 Skill 때문에 성능이 향상되었다고 결론 내리기는 어렵습니다.</aside>
+</section>
+
+<!-- 15 비교 조건 -->
+<section class="slide" data-part="PART 4">
+  <h2>질문을 <span class="g">구체적으로</span> 나눕니다</h2>
+  <table class="t">
+    <tr><th>알고 싶은 것</th><th>비교할 조건</th></tr>
+    <tr><td>팀 지식을 제공하면 어떤 차이가 생기는지</td><td>같은 기록에 <b>팀 규칙을 제공하지 않은 결과</b>와 <b>제공한 결과</b></td></tr>
+    <tr><td>같은 지식을 Skill로 묶으면 어떤 가치가 있는지</td><td>같은 기록·규칙을 <b>일반 요청으로 전달한 결과</b>와 <b>Skill로 제공한 결과</b></td></tr>
+    <tr><td>Skill 수정이 도움이 되었는지</td><td>같은 입력에 <b>수정 전</b>과 <b>수정 후</b></td></tr>
+  </table>
+  <ul class="pts">
+    <li>두 번째 비교에서는 <b class="g">양쪽이 모두 정확할 수도</b> 있습니다 — 그때도 <b class="g">새 대화마다 무엇을 다시 설명해야 했는지, 자료를 어느 위치에서 유지할 수 있었는지, 다른 사람이 같은 업무를 요청하기 쉬워졌는지</b>는 관찰할 수 있습니다</li>
+    <li><b class="r">Skill의 가치를 보여 주기 위해 일반 요청이 반드시 실패해야 하는 것은 아닙니다</b></li>
+    <li>비교의 출발점으로 남겨 둔 결과를 <b>기준선</b>이라 합니다 — <b class="r">합격해야 하는 점수선을 뜻하지 않습니다</b></li>
+    <li>직접 비교한다면 <b>입력·모델·사용할 수 있는 자료를 가능한 한 같게</b> 두고 대화를 분리. <b class="r">"Skill을 쓰지 않는 조건"이라 이름 붙였더라도 설치된 Skill이 자동 적용되었다면 그 비교는 다시 해석</b>해야 합니다</li>
+  </ul>
+  <aside>공식 Agent Skills 평가 안내도 실제 요청과 입력을 남기고 Skill이 없는 경우 또는 이전 버전과 비교하며 관찰 가능한 근거로 확인하는 방식을 제시합니다. 조건이 분리되지 않았다면 "같은 대화에서 적용 전후를 관찰했다"처럼 실제 범위로 기록하면 됩니다.</aside>
+</section>
+
+<!-- 16 기록 -->
+<section class="slide" data-part="PART 4">
+  <h2>다음 작업에 <span class="b">남길 기록</span></h2>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t"><b>사용한 요청과 입력</b> — 어떤 문장으로 요청했고 어느 주의 자료를 썼는지</span></div>
+    <div class="st"><span class="n">2</span><span class="t"><b>적용된 지식</b> — Skill과 참고 규칙의 사용을 어떤 기록에서 확인했는지, <b class="g">미확인인 부분은 무엇인지</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t"><b>결과의 근거</b> — 어떤 업무를 왜 그렇게 분류했고 합계는 맞았는지</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b>개선과 재확인</b> — 무엇을 바꿨고 같은 입력에서 어떻게 달라졌는지, 또는 <b class="g">수정이 필요 없었던 이유</b></span></div>
+  </div>
+  <div class="hl">📖 사용한 입력과 조건을 남겨 <b>다른 사람이 같은 확인을 다시 해 볼 수</b> 있게 하는 것을 <b>재현</b>이라 합니다 — <b class="r">AI가 매번 글자 하나까지 똑같은 보고서를 써야 한다는 뜻은 아닙니다.</b> <b class="g">표현이 달라도 같은 자료에서 팀 기준에 맞게 판정하고 그 근거를 다시 확인할 수 있으면</b> 이 과업에서 중요한 부분을 재현한 것</div>
+  <aside>더 살펴보고 싶다면 별도 연습용 복사본에서 운영 확인 상태나 기한 하나를 바꾸고 예상 분류를 먼저 적어 볼 수 있습니다. 원본 자료는 유지하고 바꾼 조건을 기록해 두세요.</aside>
+</section>
+
+<!-- 17 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> TASK-102의 분류가 주마다 달라지는 것은 일관성 부족인가?</div>
+    <div class="q a"><b>A1.</b> 아니다. <b>새로운 근거에 같은 규칙을 적용했기 때문에 달라져야 한다.</b> 재사용할 것은 답이 아니라 기준.</div>
+    <div class="q"><b>Q2.</b> near-miss 사례를 확인하는 이유는?</div>
+    <div class="q a"><b>A2.</b> 적절한 요청만 보면 <b>Skill이 너무 넓게 적용되는 현상</b>을 놓칠 수 있어서. 확인할 것은 <b>요청한 일을 유지했는가.</b></div>
+    <div class="q"><b>Q3.</b> 기준선이란?</div>
+    <div class="q a"><b>A3.</b> <b>비교의 출발점으로 남겨 둔 결과.</b> 합격 점수선이 아니며, 수정 전 결과를 기준선으로 두면 무엇이 나아지고 무엇이 그대로인지 읽을 수 있다.</div>
+  </div>
+  <aside>Q1이 이 소단원의 핵심입니다.</aside>
+</section>
+
+<!-- 18 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>같은 기준, 새 기록 🔁</h1>
+    <div class="big" style="margin-top:26px">보고서 한 장뿐 아니라<br><span class="y">새 기록을 팀 기준으로 읽는 Skill과 확인한 기록</span>이 남았습니다</div>
+    <p class="sub" style="margin-top:24px">에이전트와 도구 연결 ⑪ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑫에서 계산을 실행 가능한 셀로 남기는 Colab 연결을 봅니다. 네 업무 분류에 Colab이 꼭 필요한 것은 아니지만, 기록이 많아져 집계나 그래프를 반복해야 할 때 쓸 방법입니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

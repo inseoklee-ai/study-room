@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>호스트 연결과 첫 도구 호출 (도구 연결 ④)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 도구 연결 ④</span>
+    <h1 style="margin:18px 0">호스트 연결과<br>첫 도구 호출</h1>
+    <p class="sub">파일을 저장했다는 사실만으로 새 MCP 서버에 연결되지는 않습니다</p>
+  </div>
+  <aside>여기서 필요한 일이 서버 등록입니다.</aside>
+</section>
+
+<!-- 2 등록 -->
+<section class="slide" data-part="표지">
+  <h2>서버 <span class="g">등록</span>이란</h2>
+  <div class="hl">📝 호스트에 알려 주는 것 — <b class="g">"이 서버의 이름은 <code>weekly-records</code>이고, 이 프로그램을 이 인자와 함께 실행하면 연결할 수 있다"</b></div>
+  <pre>학생: 첫 주 업무 기록을 읽어 줘.
+  ↓
+모델: 제공받은 도구 설명을 바탕으로 get_weekly_records 호출을 요청
+  ↓
+호스트: 연결한 서버에 {"week": "week-one"} 전달
+  ↓
+업무 기록 서버: data/week-one.json을 읽어 반환
+  ↓
+호스트: 도구 결과를 모델에 전달
+  ↓
+모델: 반환된 기록을 바탕으로 답변</pre>
+  <ul class="pts">
+    <li>호스트는 그 설정으로 서버를 시작하고 <b>도구의 이름·설명·입력 형식을 확인</b>합니다 — <b class="g">앞 절의 Python 함수가 대화에서 사용할 수 있는 도구가 되는 순간</b></li>
+  </ul>
+  <aside>Claude Code와 OpenCode 중 현재 사용하는 앱 하나로 진행하면 됩니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">설정이 가리키는 위치</h2>
+  <p style="margin-top:11px">실행 프로그램과 프로젝트의 위치</p><span class="who">④ 호스트 연결</span></div>
+  <aside>AI에게 설정을 맡기기 전에, AI가 바꿀 내용에서 무엇을 읽어야 할지 알아봅니다.</aside>
+</section>
+
+<!-- 4 경로 -->
+<section class="slide" data-part="PART 1">
+  <h2>절대 경로와 <span class="r">상대 경로</span></h2>
+  <ul class="pts">
+    <li>이번에는 호스트가 <code>uv</code>를 실행하고, uv가 프로젝트의 가상환경 안에서 <b><code>mcp run weekly_records_server.py --transport stdio</code></b>를 실행하게 합니다</li>
+    <li><b class="g">데이터 위치는 서버 소스가 알고 있으므로</b> — <b class="r">호스트 설정에 JSON 파일마다 항목을 만들 필요는 없습니다</b></li>
+    <li><b>절대 경로</b>는 맨 위 폴더부터의 위치, <b>상대 경로</b>는 어떤 폴더를 출발점으로 삼은 위치</li>
+    <li><code>weekly_records_server.py</code>만 쓰면 프로그램은 <b class="r">자신의 현재 작업 폴더</b>에서 찾습니다 — <b class="r">호스트를 어디서 실행했는지에 따라 출발점이 달라지므로</b> <b class="g"><code>uv --directory</code>에 실습 폴더의 절대 경로를 지정</b></li>
+    <li><code>--directory</code>는 uv가 명령을 실행할 <b>작업 폴더</b>를 바꿉니다 — 그곳의 <code>pyproject.toml</code>을 기준으로 프로젝트를 찾고, 뒤의 상대 경로도 그 폴더에서 읽습니다</li>
+  </ul>
+  <div class="hl">📌 <b class="g">호스트 설정은 소스 파일까지 정확히 가리키고, 소스 파일은 자기 곁의 데이터를 찾는 구조</b>입니다. <b>터미널에서 가상환경을 활성화할 필요는 없습니다</b> — 활성화는 <b class="r">이미 실행 중인 다른 앱의 환경까지 바꾸지 않기</b> 때문</div>
+  <aside>--locked는 uv.lock을 임의로 갱신하지 않게 하며, 잠금 파일이 없거나 선언과 맞지 않아 갱신이 필요하면 오류로 멈춥니다.</aside>
+</section>
+
+<!-- 5 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">AI에게 연결 요청하기</h2>
+  <p style="margin-top:11px">내가 준비한 폴더를 가리켜야 합니다</p><span class="who">④ 호스트 연결</span></div>
+  <aside>실습 폴더를 연 Claude Code 또는 OpenCode에서 요청합니다.</aside>
+</section>
+
+<!-- 6 요청과 확인 -->
+<section class="slide" data-part="PART 2">
+  <h2>요청과 <span class="g">확인할 것</span></h2>
+  <pre>이 폴더의 업무 기록 서버를 uv로 실행하도록
+지금 쓰는 앱에 MCP로 연결해 줘. 바꾼 설정도 설명해 줘.</pre>
+  <ul class="pts">
+    <li>살펴볼 것 — <b><code>weekly-records</code>라는 이름</b>, 실행 프로그램 <b><code>uv</code></b>, <code>--directory</code> 뒤의 <b class="g">실습 폴더 위치</b>와 서버 파일 이름</li>
+    <li><b class="r">예시 작성자의 폴더가 아니라 내가 준비한 폴더</b>를 가리켜야 합니다. 기존 MCP 연결이 있다면 <b>그 항목을 유지하면서 추가</b>되었는지도 확인</li>
+    <li>완성 예제는 <b><code>mcp run</code></b>이 읽어 실행하도록 만들었습니다 — <b class="r">그대로 쓰면서 <code>python weekly_records_server.py</code>만 등록했다면 실행 방식을 다시 확인</b>해 달라고 요청하세요</li>
+  </ul>
+  <div class="hl">🔎 OpenCode는 <b>V1과 V2의 설정 구조가 다릅니다</b> — <b class="g">"내 OpenCode 버전을 확인하고, 그 버전에 맞게 연결해 줘"</b>. V1은 <code>mcp</code> 바로 아래, V2는 <code>mcp.servers</code> 아래에 등록합니다</div>
+  <aside>파일 이름만 보고 어느 명령이 맞는지 결정하기보다 실제 소스가 어떻게 서버를 시작하는지 확인합니다.</aside>
+</section>
+
+<!-- 7 등록 명령 -->
+<section class="slide" data-part="PART 2">
+  <h2>Claude Code <span class="b">등록 명령</span></h2>
+  <pre>cd "/Users/student/Projects/mcp-skill-practice"
+claude mcp add --transport stdio --scope project weekly-records \
+  -- uv --directory "/Users/student/Projects/mcp-skill-practice" \
+     run --locked mcp run weekly_records_server.py --transport stdio</pre>
+  <table class="t">
+    <tr><th>부분</th><th>역할</th></tr>
+    <tr><td><code>claude mcp add ... weekly-records</code></td><td>서버를 등록. <code>--scope project</code>는 <b>현재 프로젝트의 <code>.mcp.json</code></b>에 저장하는 범위</td></tr>
+    <tr><td>가운데의 <code>--</code></td><td><b>등록 옵션</b>과 <b>실제로 실행할 서버 명령</b>을 구분</td></tr>
+    <tr><td><code>uv</code>부터 마지막 <code>stdio</code>까지</td><td>호스트가 시작할 명령. 첫 <code>run --locked</code>는 프로젝트 환경에서 실행, 이어지는 <code>mcp run</code>이 소스를 읽음</td></tr>
+  </table>
+  <div class="hl">📌 <code>--transport stdio</code>가 <b>두 번 보이는 것은 오타가 아닙니다</b> — <b class="g">앞은 호스트가 사용할 연결 방식, 뒤는 서버의 실행 방식</b></div>
+  <aside>Windows PowerShell에서도 같은 uv 명령을 쓰고 경로만 Windows 형식으로 적습니다. 경로 안에 공백이 있어도 한 값으로 전달되도록 따옴표를 유지합니다.</aside>
+</section>
+
+<!-- 8 OpenCode -->
+<section class="slide" data-part="PART 2">
+  <h2>OpenCode의 <span class="p"><code>command</code> 배열</span></h2>
+  <pre>"weekly-records": {
+  "type": "local",
+  "command": [
+    "uv", "--directory",
+    "/Users/student/Projects/mcp-skill-practice",
+    "run", "--locked", "mcp", "run",
+    "weekly_records_server.py", "--transport", "stdio"
+  ],
+  "enabled": true
+}</pre>
+  <ul class="pts">
+    <li><code>type: "local"</code>은 <b>내 컴퓨터의 프로그램을 실행하는 연결</b>. <code>command</code>는 실행 파일과 각 인자를 나눈 <b>배열</b>로, <b class="r">공백으로 이어 붙인 하나의 문자열로 바꾸지 않습니다</b></li>
+    <li>Windows 경로는 JSON에서 역슬래시 하나를 <b><code>\\</code></b>로 적습니다 — <b class="r">PowerShell 명령의 경로를 그대로 복사하면 이 차이 때문에 오류</b></li>
+    <li><b>V1</b>은 <code>enabled: true</code>로 활성화. <b>V2</b>는 <code>mcp.servers</code> 아래에 두고 <code>disabled</code>가 <code>true</code>일 때만 끕니다 — <b class="r">V1의 <code>enabled</code>는 넣지 않습니다</b></li>
+    <li>V2에서는 <b><code>codemode</code>의 기본값이 <code>true</code></b>입니다. 지금은 기본값을 유지합니다</li>
+  </ul>
+  <div class="hl">⚠️ 터미널에서는 <code>uv</code>가 실행되는데 앱에서는 못 찾을 수 있습니다 — <b>PATH</b>는 실행 파일을 찾을 폴더 목록이며 <b class="r">앱과 터미널이 서로 다른 목록을 쓸 수</b> 있습니다. <b class="g"><code>command -v uv</code> / <code>(Get-Command uv).Source</code></b>로 확인한 절대 경로를 넣습니다</div>
+  <aside>기존 설정 파일이 있다면 전체를 덮어쓰지 말고 해당 항목만 합칩니다. 같은 이름의 키를 두 번 만들지 않습니다.</aside>
+</section>
+
+<!-- 9 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">연결 상태에서 실제 호출로</h2>
+  <p style="margin-top:11px">호출 기록에서 세 가지를 찾습니다</p><span class="who">④ 호스트 연결</span></div>
+  <aside>이 방식에서는 호스트가 서버 프로세스를 관리하므로 별도 터미널에서 서버를 켜 둘 필요가 없습니다.</aside>
+</section>
+
+<!-- 10 세 가지 -->
+<section class="slide" data-part="PART 3">
+  <h2>호출 기록에서 <span class="g">찾을 세 가지</span></h2>
+  <pre>연결한 MCP로 첫 주 업무 기록을 읽어 줘.</pre>
+  <table class="t">
+    <tr><th>확인할 부분</th><th>찾을 내용</th></tr>
+    <tr><td>호출한 도구</td><td><code>get_weekly_records</code>가 포함된 이름 — <b>호스트가 서버 이름을 앞에 붙여 표시</b>할 수 있습니다</td></tr>
+    <tr><td>보낸 입력</td><td><code>week</code>의 값이 <b><code>week-one</code></b>인 입력</td></tr>
+    <tr><td>받은 결과</td><td>첫 주의 날짜와 <b>네 개 업무 기록</b></td></tr>
+  </table>
+  <div class="hl">🎯 자연어의 '첫 주'가 도구 입력 <code>week-one</code>으로 바뀌었습니다 — <b class="g">서버 함수의 설명에 지원하는 값이 있었기 때문</b>에 모델이 그 값을 선택할 수 있습니다</div>
+  <ul class="pts">
+    <li>AI가 <b>파일 읽기 도구로 <code>week-one.json</code>을 직접 읽었다면</b> 내용은 맞을 수 있지만 — <b class="r">확인하려던 MCP 경로는 아직 관찰하지 못한 것</b>입니다. <b class="g">"이번에는 weekly-records MCP 도구를 사용해서 읽어 줘"</b></li>
+  </ul>
+  <aside>호출 기록(trace)은 어느 도구에 어떤 값을 보냈고 무엇을 받았는지 남긴 기록입니다. 연결한 서버가 같은 데이터를 읽을 수 있다는 사실과 모델이 이번 대화에서 그 도구를 선택했다는 사실을 구분하세요.</aside>
+</section>
+
+<!-- 11 원본 대조 -->
+<section class="slide" data-part="PART 3">
+  <h2>원본과 <span class="b">반환값 대조</span></h2>
+  <pre>{
+  "week": "week-one",
+  "report_date": "2026-09-04",
+  "records": [
+    {
+      "id": "TASK-102",
+      "title": "로그인 안내 문구 개선",
+      "owner": "지우",
+      "status": "개발 완료",
+      "deployed_at": null,
+      "verification": "미실시"
+    }
+  ]
+}</pre>
+  <ul class="pts">
+    <li>실제 전체 결과에서는 <code>records</code>에 <b>TASK-101부터 TASK-104까지 네 건</b>이 있어야 합니다</li>
+    <li><code>TASK-102</code>의 <code>status</code>는 '개발 완료'인데 <code>deployed_at</code>은 <code>null</code> — <b class="r">AI 답변에 새로운 배포 날짜가 생겼다면 원본이 준 것인지, 문장을 만드는 과정에서 생긴 것인지 구분</b>해야 합니다</li>
+    <li><code>TASK-103</code>의 <code>owner</code>도 <code>null</code> — <b class="g">누가 담당하는지 기록에 없는 상태 그대로 반환되는지</b> 살펴보세요</li>
+  </ul>
+  <div class="hl">📌 지금의 도구는 <b>기록을 읽어 전달하는 역할</b>입니다 — <b class="r">빈 값을 추정해 채우거나 보고서에서 '완료'로 분류할 기준을 정하는 일은 하지 않습니다</b></div>
+  <aside>이는 화면 캡처가 아니라 실습 원본에서 확인할 값의 발췌입니다. 실습 자료의 SDK 검증에서는 week-one과 week-two를 호출해 원본과 반환값이 일치함을 확인했습니다.</aside>
+</section>
+
+<!-- 12 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">오류가 알려 주는 연결 단계</h2>
+  <p style="margin-top:11px">마지막으로 성공한 단계 다음을 봅니다</p><span class="who">④ 호스트 연결</span></div>
+  <aside>정상 결과를 받았다면 지원하지 않는 주도 요청해 봅시다.</aside>
+</section>
+
+<!-- 13 week-three -->
+<section class="slide" data-part="PART 4">
+  <h2><code>week-three</code>의 <span class="r">거절</span>은 실패가 아닙니다</h2>
+  <div class="grid2">
+    <div class="box"><h3>✅ 관찰한 것</h3><p><b class="g">요청이 도구에 도달했고, 함수가 입력을 확인한 뒤 거절</b>했습니다 — 앞 절의 허용 주차 검사가 작동한 셈</p></div>
+    <div class="box"><h3>🤔 다른 경우</h3><p>모델이 도구 설명을 읽고 <b>호출 전에</b> "지원하지 않는 주입니다"라고 답할 수도 있습니다 — 그 경우엔 <b>모델의 사전 판단</b>을 관찰한 것</p></div>
+  </div>
+  <div class="hl">📝 <b class="g">호출 기록에 <code>week-three</code> 입력과 오류 반환이 함께 있을 때</b> 서버의 거절을 관찰했다고 기록합니다. <b class="r">한국어 오류 문장이 완전히 같을 필요는 없습니다</b></div>
+  <aside>이것은 서버가 실행되지 않는 상황과 다릅니다.</aside>
+</section>
+
+<!-- 14 문제 표 -->
+<section class="slide" data-part="PART 4">
+  <h2>먼저 볼 <span class="g">곳</span></h2>
+  <table class="t">
+    <tr><th>관찰한 상황</th><th>먼저 볼 곳</th><th>이해할 내용</th></tr>
+    <tr><td>목록에 서버가 없음</td><td>설정을 저장한 프로젝트와 현재 연 폴더</td><td>프로젝트 설정은 <b>해당 프로젝트에서</b> 읽습니다</td></tr>
+    <tr><td>서버가 시작되지 않음</td><td>호스트가 <code>uv</code>를 찾는지, <code>uv sync --locked</code> 결과</td><td>앱의 실행 파일 검색 경로와 환경 준비 상태</td></tr>
+    <tr><td>잠금 파일 관련 오류</td><td><code>pyproject.toml</code>과 <code>uv.lock</code>이 함께 있는지</td><td><b class="r"><code>--locked</code>는 잠금 파일을 새로 만들거나 고쳐서 진행하지 않습니다</b></td></tr>
+    <tr><td>소스나 데이터를 못 찾음</td><td><code>--directory</code>의 절대 경로와 그 안의 서버 파일·<code>data</code></td><td>작업 폴더를 지정하면 <b>상대 경로의 출발점도</b> 정해집니다</td></tr>
+    <tr><td>연결은 되지만 MCP 호출이 없음</td><td>모델이 선택한 도구와 호출 기록</td><td><b>파일 직접 읽기</b> 등 다른 행동을 골랐을 수 있습니다</td></tr>
+    <tr><td>소스를 고쳐도 이전 동작이 계속됨</td><td>실행 중인 서버의 재시작 여부</td><td><b class="r">디스크 파일을 저장해도 실행 중인 프로세스가 새 소스를 다시 읽어야</b> 합니다</td></tr>
+  </table>
+  <div class="hl">📌 <b class="r">오류가 길어 보여도 설정을 전부 지울 필요는 없습니다</b> — <b class="g">"이 오류를 보고, 어느 단계에서 막혔는지부터 설명해 줘"</b></div>
+  <aside>AI가 패키지 문제라고 하면 uv가 선택한 프로젝트와 환경을, 데이터 문제라고 하면 원본 폴더를 확인합니다. 수정 뒤에는 같은 입력으로 다시 호출해 결과가 어떻게 달라졌는지 봅니다.</aside>
+</section>
+
+<!-- 15 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> <code>--transport stdio</code>가 두 번 나오는 이유는?</div>
+    <div class="q a"><b>A1.</b> 앞은 <b>호스트가 사용할 연결 방식</b>, 뒤는 <b>서버의 실행 방식.</b> 오타가 아니다.</div>
+    <div class="q"><b>Q2.</b> AI가 <code>week-one.json</code>을 직접 읽어 정답을 말했다면?</div>
+    <div class="q a"><b>A2.</b> 내용은 맞을 수 있지만 <b>MCP 경로는 관찰하지 못한 것.</b> 도구를 사용해 다시 읽도록 방향을 보충한다.</div>
+    <div class="q"><b>Q3.</b> 소스를 고쳤는데 이전 동작이 계속되면?</div>
+    <div class="q a"><b>A3.</b> <b>실행 중인 서버 프로세스가 새 소스를 다시 읽어야</b> 한다. 재연결하거나 같은 프로젝트에서 앱을 다시 시작한다.</div>
+  </div>
+  <aside>Q2의 구분이 없으면 "연결이 잘 됐다"고 잘못 결론냅니다.</aside>
+</section>
+
+<!-- 16 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>통로가 준비되었습니다 🚪</h1>
+    <div class="big" style="margin-top:26px">첫 주 기록이 원본 그대로 돌아왔다면<br><span class="y">업무 데이터를 가져오는 통로</span>가 준비된 것</div>
+    <p class="sub" style="margin-top:24px">에이전트와 도구 연결 ④ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑤에서 대화는 짧은데 도구를 많이 연결하자 문맥이 커지는 상황을 살펴봅니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

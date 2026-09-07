@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Google Workspace 자료를 읽는 인증과 연결 (도구 연결 ⑬)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 도구 연결 ⑬</span>
+    <h1 style="margin:18px 0">Google Workspace 자료를<br>읽는 인증과 연결</h1>
+    <p class="sub">브라우저에 로그인한 사실이 새 프로그램으로 자동 전달되지는 않습니다</p>
+  </div>
+  <aside>금요일마다 동료가 업데이트한 Google Sheets를 내려받아 복사한다면, 복사한 뒤 바뀐 기록은 보고서에 반영되지 않습니다.</aside>
+</section>
+
+<!-- 2 흐름 -->
+<section class="slide" data-part="표지">
+  <h2>프로그램이 알려야 하는 <span class="g">세 가지</span></h2>
+  <pre>로컬 프로그램 → Google 로그인·동의 화면 → 학생의 계정 선택·동의
+             ← 인증 결과를 받아 토큰 저장 ←
+로컬 프로그램 → 토큰을 첨부해 Sheets API 호출 → 표 데이터 반환</pre>
+  <ul class="pts">
+    <li>프로그램은 <b class="g">어떤 앱이, 어느 사용자의 동의를 받아, 어떤 작업을 하려는지</b> Google에 알려야 합니다</li>
+    <li><b class="g">Google 계정의 비밀번호는 Google 로그인 화면에 입력</b>합니다. 로컬 프로그램은 <b>동의 결과를 바탕으로 API를 요청할 수 있는 토큰</b>을 받습니다</li>
+    <li><b class="r">Skill 문서를 작성하는 것 자체에는 credential이 필요하지 않습니다</b> — <b class="g">그 Skill이 사용하는 MCP·CLI·스크립트가 Google API를 호출할 때</b> 인증이 필요합니다</li>
+  </ul>
+  <div class="hl">📌 이 실습의 순서 — <b>프로젝트와 앱 준비 → 최초 로그인 → 프로그램의 API 읽기 → MCP 등록 → 에이전트의 실제 호출</b>. <b class="r">Colab MCP와는 별개의 인증 경로</b>이며 <b class="r">앞의 노트북 연결 승인이 이 동의를 대신하지는 않습니다</b></div>
+  <aside>화면 메뉴가 작게 보이면 각 캡처를 확대해 확인합니다. 실제 콘솔은 언어와 업데이트 시점에 따라 메뉴 위치가 조금 다를 수 있습니다.</aside>
+</section>
+
+<!-- 3 개념 -->
+<section class="slide" data-part="표지">
+  <h2>Credential과 <span class="b">토큰</span></h2>
+  <table class="t">
+    <tr><th>용어</th><th>뜻</th></tr>
+    <tr><td><b>Credential</b></td><td>앱이나 사용자를 <b>식별·인증</b>하는 데 쓰는 정보 (넓은 말)</td></tr>
+    <tr><td><b>OAuth</b></td><td><b class="g">비밀번호를 도구에 넘기는 대신</b> Google 화면에서 허용할 접근을 선택하는 절차</td></tr>
+    <tr><td>클라이언트 ID</td><td><b>어떤 앱인가</b></td></tr>
+    <tr><td>접근 토큰</td><td><b>동의한 범위에서 API를 호출</b>할 때 사용</td></tr>
+    <tr><td>갱신 토큰</td><td><b>새 접근 토큰을 받는</b> 데 쓰일 수 있는 값</td></tr>
+    <tr><td>Scope(범위)</td><td>'표 읽기', '일정 읽기'처럼 <b class="g">허용할 작업의 범위</b></td></tr>
+  </table>
+  <table class="t">
+    <tr><th>필요한 일</th><th>인증 방식의 출발점</th></tr>
+    <tr><td>내가 로그인해 내 자료를 다루기</td><td><b class="g">사용자 동의를 받는 OAuth 클라이언트</b></td></tr>
+    <tr><td>프로그램 전용 계정에 공유한 자료 다루기</td><td><b>서비스 계정</b>; 접근 범위를 별도로 설정</td></tr>
+    <tr><td>지원되는 공개 데이터 조회</td><td><b>API 키를 지원하는 API인지 먼저 확인</b></td></tr>
+  </table>
+  <div class="hl">⚠️ <b class="r">API 키 하나로 내 Gmail이나 비공개 문서 전체에 접근할 수 있는 것은 아닙니다.</b> 기본 실습은 <b class="g">내 컴퓨터에서 실행하는 도구 + 내 계정의 OAuth 동의</b>로 진행합니다</div>
+  <aside>서비스 계정도 이름에 '계정'이 들어가지만 사람이 로그인하는 개인 계정과는 다릅니다. 연결 서비스가 이미 'Google로 로그인'을 제공한다면 자체 credential 발급이 불필요할 수도 있으므로 먼저 사용할 MCP의 README를 확인합니다.</aside>
+</section>
+
+<!-- 4 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">프로젝트와 API 준비</h2>
+  <p style="margin-top:11px">개인 Gmail 계정도 이 API를 쓸 수 있습니다</p><span class="who">⑬ Google 인증</span></div>
+  <aside>이번 캡처는 개인 Google 계정, 별도 실습 프로젝트, Google Sheets API, Desktop app, spreadsheets.readonly 조합으로 진행했습니다.</aside>
+</section>
+
+<!-- 5 프로젝트 -->
+<section class="slide" data-part="PART 1">
+  <h2>Cloud <span class="g">프로젝트</span></h2>
+  <ul class="pts">
+    <li>Google Cloud Console 오른쪽 위 계정에서 <b class="g">이번 실습에 사용할 개인 계정인지 먼저 확인</b>. 회사 계정으로 열려 있다면 전환한 뒤 진행</li>
+    <li>Cloud 프로젝트는 <b>API 설정과 앱 인증 정보를 묶어 관리하는 단위</b>입니다 — <b class="r">내 컴퓨터의 실습 폴더나 Drive 폴더와는 다른 곳</b>. <b class="g">실습 폴더에는 Python 파일, Cloud 프로젝트에는 '프로그램이 사용할 Google 기능과 앱 설정'</b>. <b class="r">Google 표 자체를 이 프로젝트로 옮기지는 않습니다</b></li>
+    <li><code>New Project</code>로 만들고 <code>Project name</code>에 <b>목적을 나타내는 이름</b>(예: <code>Workspace OAuth Practice</code>). <b class="r">프로젝트 ID는 전역에서 고유해야 하므로 화면 예제와 달라도 됩니다</b></li>
+    <li>생성 뒤 <b class="g">상단 프로젝트 선택기에 방금 만든 이름이 표시되는지 확인</b> — <b class="r">엉뚱한 프로젝트에서 API를 켠 뒤 다른 프로젝트의 인증 JSON을 받으면 설정은 각각 존재해도 함께 작동하지 않습니다</b></li>
+  </ul>
+  <aside>이름이 아닌 자신의 계정으로 만드는 작업입니다.</aside>
+</section>
+
+<!-- 6 API -->
+<section class="slide" data-part="PART 1">
+  <h2>API <span class="b">사용 설정</span></h2>
+  <ul class="pts">
+    <li>선택한 프로젝트에서 <b>APIs &amp; Services → Library</b>를 열고 <code>Google Sheets API</code>를 찾아 <b>Enable</b></li>
+    <li>이 작업은 <b>'우리 프로그램에서 표 API를 사용할 준비'</b>이고 — <b class="r">어느 사용자의 어느 표를 읽을지는 아직 정하지 않았습니다</b></li>
+  </ul>
+  <table class="t">
+    <tr><th>하려는 작업</th><th>확인할 API</th></tr>
+    <tr><td>표의 셀 읽기</td><td>Google Sheets API</td></tr>
+    <tr><td>문서 본문 읽기</td><td>Google Docs API</td></tr>
+    <tr><td>파일 이름 검색·목록 조회</td><td>Google Drive API</td></tr>
+    <tr><td>메일 읽기</td><td>Gmail API</td></tr>
+    <tr><td>일정 읽기</td><td>Google Calendar API</td></tr>
+  </table>
+  <div class="hl">⚠️ <b class="g">API 사용 설정은 이 프로젝트에서 API를 쓸 준비이며, 내 문서 접근에 대한 사용자 동의와는 별개</b>입니다. Docs/Sheets 도구가 파일을 찾기 위해 <b>Drive API도 사용할 수</b> 있으므로 도구 문서의 요구 사항을 함께 봅니다</div>
+  <aside>서비스 이름에 Workspace가 들어간다고 유료 회사 계정이 필수인 것은 아닙니다.</aside>
+</section>
+
+<!-- 7 동의 화면 -->
+<section class="slide" data-part="PART 1">
+  <h2>동의 화면과 <span class="g">테스트 사용자</span></h2>
+  <ul class="pts">
+    <li><b>Google Auth platform → Branding</b>에서 <b>App name</b>(예: <code>Sheets Practice</code>), <b>지원 이메일</b>(동의 화면을 본 사용자가 문의할 연락처), <b>연락 이메일</b>(앱 설정 관련 안내)</li>
+    <li><b>Audience</b>는 이 앱을 누가 이용할지 — 개인 계정 실습은 <b class="g">External</b>. <b class="r">External은 곧바로 공개 게시한다는 뜻이 아닙니다</b> — <b class="g">Testing 상태로 두고 Test users에 등록한 계정으로 시험</b></li>
+    <li><b>Internal</b>은 Workspace 또는 Cloud Identity <b>조직 내부</b> 대상이며 조건을 충족할 때 사용 — <b class="r">개인 계정 실습에서는 회사용 Internal 안내를 그대로 따라가지 않습니다</b></li>
+    <li><b>Test users</b>에는 <b class="g">나중에 브라우저 로그인에서 선택할 개인 이메일</b>을 추가 — <b class="r">Cloud 프로젝트를 편집할 사람이나 표를 공유받을 사람 목록과는 다릅니다.</b> <b class="r">프로젝트를 편집할 수 있어도 다른 계정으로 로그인하면 테스트 사용자 제한에 걸릴 수</b> 있습니다</li>
+  </ul>
+  <div class="hl">📌 <b class="r">공개 배포를 위해 임의의 홈페이지나 개인정보처리방침 주소를 넣지 않습니다</b> — 이 실습에서는 <b class="g">Testing을 유지한 채</b> 이후 실제 인증과 읽기에 성공했습니다</div>
+  <aside>위쪽에 Branding 미완료 안내가 보이면 Branding에서 누락 정보를 확인합니다. 프로젝트 설정 마지막에는 Google API 사용자 데이터 정책을 읽고 동의하는 단계가 있습니다.</aside>
+</section>
+
+<!-- 8 scope -->
+<section class="slide" data-part="PART 1">
+  <h2>Scope와 <span class="r">파일 공유 권한</span></h2>
+  <pre>SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]</pre>
+  <ul class="pts">
+    <li>끝의 <code>readonly</code>는 <b>읽기 전용</b>. 이 문자열은 <b class="g">Google이 구별하는 권한 식별자</b>이므로 정확한 값을 사용합니다</li>
+    <li><b class="g">Scope와 파일 공유 권한은 서로 다른 조건</b>입니다 — <b class="r">'표 읽기'를 동의했어도 공유받지 않은 다른 사람의 비공개 표까지 읽을 수는 없고</b>, <b class="r">편집 권한이 있는 표라도 읽기 전용 토큰으로 수정 API를 호출할 수는 없습니다</b></li>
+    <li>이어서 봐야 하는 셋 — <b>콘솔 Data Access의 선언, Python의 <code>SCOPES</code>, 실제 로그인 동의 화면.</b> <b class="r">콘솔에서 범위를 저장했다는 사실만으로 프로그램의 요청이나 기존 토큰의 권한이 자동으로 바뀌지는 않습니다</b></li>
+    <li>목록에서 찾기 어렵다면 <b>Manually add scopes</b>에 전체 문자열을 입력하고 <b>Add to table → Update → Save</b></li>
+  </ul>
+  <div class="hl">⚠️ <code>See all your Google Sheets spreadsheets</code>는 <b class="r">접근 가능한 표 전체에 대한 읽기 권한</b>이며 <b class="r">예제 표 하나만 허용하는 범위가 아닙니다</b></div>
+  <aside>표에 내용을 쓰는 기능이 필요해지면 코드의 기능뿐 아니라 요청할 권한도 다시 검토해야 합니다.</aside>
+</section>
+
+<!-- 9 두 파일 -->
+<section class="slide" data-part="PART 1">
+  <h2>이름이 비슷한 <span class="g">두 파일</span></h2>
+  <table class="t">
+    <tr><th>파일</th><th>만들어지는 순간</th><th>역할</th></tr>
+    <tr><td><code>credentials.json</code></td><td>Cloud 콘솔에서 <b>앱 클라이언트를 만들고 다운로드</b></td><td><b class="g">어떤 앱이 로그인을 요청하는지 식별하는 설정</b></td></tr>
+    <tr><td><code>token.json</code></td><td>프로그램 실행 후 <b>사용자가 로그인하고 동의</b></td><td><b class="g">동의한 사용자로 API를 요청하고 인증을 갱신하는 정보</b></td></tr>
+  </table>
+  <ul class="pts">
+    <li><b>Google Auth platform → Clients → Create client → Desktop app</b>을 선택하고 JSON을 다운로드 — <b class="r">Web application을 요구하는 도구라면 그 안내의 redirect URI를 정확히 등록</b>해야 합니다. <b class="r">앱 종류를 추측하지 않습니다</b></li>
+    <li>촬영 당시 콘솔은 <b class="r">창을 닫으면 client secret을 다시 보거나 다운로드할 수 없다</b>고 안내했습니다</li>
+    <li>예제 보관 위치는 <code>~/.config/google-workspace/credentials.json</code>이며 인증 프로그램이 같은 폴더에 <code>token.json</code>을 생성 — <b class="r">둘 다 실습 ZIP이나 Git 저장소에 넣지 않습니다</b></li>
+    <li><b class="r">다운로드한 내용이나 토큰을 에이전트 대화에 붙여 넣지 않습니다</b> — 도구에는 <b class="g">파일을 읽을 경로</b>를 설정하고, 과제에는 <b class="g">'어느 설정 항목에 경로를 지정했는가'만</b> 적습니다</li>
+    <li>저장소 안에 둘 수밖에 없다면 <code>.gitignore</code>로 제외하고 <b>이미 추적되고 있지 않은지</b>도 확인 — <b class="r"><code>.gitignore</code>는 이미 올라간 비밀값을 지워 주지 않습니다</b></li>
+  </ul>
+  <div class="hl">📌 Credential은 <b>인증에 쓰는 정보를 넓게 부르는 말</b>입니다 — <b class="r">모든 도구에서 <code>credentials.json</code>이라는 파일 하나를 의미하는 것은 아닙니다.</b> 다른 위치를 쓰면 <code>CREDENTIALS_PATH</code>(앱 JSON)와 <code>TOKEN_PATH</code>(로그인 결과)로 지정하며 <b class="r">이 두 이름은 첨부 코드의 약속이고 공통 이름은 아닙니다</b></div>
+  <aside>Desktop app을 선택한 이유는 로컬 프로그램이 브라우저 로그인 결과를 돌려받는 실습이기 때문입니다. Web application용 redirect URI 입력란을 찾아 임의로 채우지 않습니다.</aside>
+</section>
+
+<!-- 10 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">최초 로그인과 API 읽기</h2>
+  <p style="margin-top:11px">MCP를 먼저 등록하지 않는 이유</p><span class="who">⑬ Google 인증</span></div>
+  <aside>실습 ZIP에는 GOOGLE_AUTH_README.md, 최초 인증용 google_auth_check.py, 읽기 MCP 서버 google_sheet_reader.py가 있습니다.</aside>
+</section>
+
+<!-- 11 실행 -->
+<section class="slide" data-part="PART 2">
+  <h2>준비와 <span class="g">실행</span></h2>
+  <pre>uv sync --locked --extra google
+uv run --locked --extra google python google_auth_check.py</pre>
+  <ul class="pts">
+    <li><b>Extra(선택 의존성 묶음)</b>는 특정 기능을 쓸 때 기본 의존성에 더할 라이브러리 묶음 — <code>google</code> extra는 <b class="g">기본 MCP 환경에 Google API와 인증용 라이브러리를 추가</b>합니다. <b class="r">새 Google 프로젝트나 가상환경을 만드는 옵션이 아닙니다</b></li>
+    <li><b class="g">실행 명령에도 <code>--extra google</code>을 명시</b>하면 필요한 라이브러리를 실행 전에 확인하고 준비할 수 있습니다</li>
+    <li>첨부 <code>requirements.txt</code>·<code>requirements-google.txt</code>는 <b>기존 방식과의 호환 참고</b>이며 기준은 <code>pyproject.toml</code>과 <code>uv.lock</code></li>
+    <li>이 명령은 인증 JSON을 읽고 <b>기본 브라우저를 엽니다</b> — <b class="g">아직 로그인한 적이 없으므로 지금 이 순간에 사용자 동의를 요청</b>. 계정이 여러 개면 <b>Test users에 등록한 개인 계정</b>을 고릅니다</li>
+    <li>프로그램은 결과를 받기 위해 <b><code>localhost</code></b>에서 잠시 기다립니다 — <b>지금 프로그램을 실행하는 자기 컴퓨터</b>를 가리키며 <b class="g">그 컴퓨터 안에서만 결과를 받고 사용하지 않는 포트를 잠시 엽니다.</b> <b class="r">별도의 로그인 웹사이트를 인터넷에 배포하는 작업은 아닙니다</b></li>
+  </ul>
+  <div class="hl">🎯 로그인 후 이 프로그램이 <b>Google 공식 예제 표를 직접 읽습니다</b> — <b class="g">MCP를 먼저 등록하지 않는 이유</b>: 이 단계의 결과로 <b class="g">Google 인증과 API가 동작하는지 확인</b>할 수 있고, 이후 <b class="g">호스트 연결에 문제가 생겨도 어느 단계까지 성공했는지 구분</b>할 수 있습니다</div>
+  <aside>새 프로젝트를 만드는 uv init은 실행하지 않습니다. 다른 실습의 가상환경이 활성화되어 있다면 현재 폴더의 환경에 맞춘 뒤 진행합니다.</aside>
+</section>
+
+<!-- 12 동의 화면 -->
+<section class="slide" data-part="PART 2">
+  <h2>동의 <span class="b">화면</span>과 반환값</h2>
+  <ul class="pts">
+    <li><b>계정 선택</b> — 콘솔에서 정한 앱 이름과 사용할 계정을 확인</li>
+    <li><b>미검증 안내</b> — 직접 만든 Testing 앱의 안내입니다. <b class="g">앱 이름·개발자·계정을 확인한 이 실습에서는 <code>Continue</code></b>. <b class="r">출처를 모르는 다른 앱의 경고를 무조건 넘기는 절차가 아닙니다</b></li>
+    <li><b>권한 동의</b> — <b class="g">권한 설명이 표 읽기인지 확인한 뒤</b>. <b class="r">콘솔에 범위를 저장했더라도 실제 실행 프로그램이 다른 권한을 요청할 수 있으므로 이 화면을 다시 확인</b></li>
+  </ul>
+  <pre>{
+  "title": "Example Spreadsheet",
+  "sheet": "Class Data",
+  "range": "'Class Data'!A1:C3",
+  "values": [
+    ["Student Name", "Gender", "Class Level"],
+    ["Alexandra", "Female", "4. Senior"],
+    ["Andrew", "Male", "1. Freshman"]
+  ]
+}</pre>
+  <div class="hl">✅ <b>완료 판단</b> — 이번 환경에서는 동의 후 localhost 완료 페이지가 Chrome에서 <code>ERR_BLOCKED_BY_CLIENT</code>로 보였지만 <b class="g">로컬 프로그램은 인증 결과를 받아 위 응답을 출력하고 정상 종료</b>했습니다. <b class="r">이 메시지 하나로 성공·실패를 단정하지 않습니다</b> — <b class="g">먼저 터미널의 종료 상태와 실제 읽기 결과를 확인</b>. <b class="r">token 파일의 내용은 출력하지 않습니다</b></div>
+  <aside>사용자 개인 자료를 읽은 예제가 아닙니다. 표에서 A·B·C는 열 이름, 1·2·3은 행 번호이며 A1:C3은 헤더를 포함합니다.</aside>
+</section>
+
+<!-- 13 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">토큰을 받아 다시 사용하는 코드</h2>
+  <p style="margin-top:11px">두 함수가 읽는 파일이 다릅니다</p><span class="who">⑬ Google 인증</span></div>
+  <aside>핵심 흐름은 인증 파일 경로 확인 → 기존 토큰 읽기 또는 최초 로그인 → 표 읽기입니다.</aside>
+</section>
+
+<!-- 14 인증 코드 -->
+<section class="slide" data-part="PART 3">
+  <h2>최초 로그인과 <span class="g">재사용</span></h2>
+  <pre>creds = (load_token(token_path) if token_path.exists() and not args.reauth
+         else authenticate(credential_path, token_path, ...))</pre>
+  <pre>flow = PrivateURLFlow.from_client_secrets_file(str(credentials_path), SCOPES)
+creds = flow.run_local_server(
+    host="localhost", bind_addr="127.0.0.1", port=0,
+    open_browser=not no_browser,
+    success_message="Authentication complete. You can close this tab.",
+    timeout_seconds=timeout, prompt="consent")
+check_scopes(creds)
+save_private(token_path, creds.to_json())</pre>
+  <ul class="pts">
+    <li><code>from_client_secrets_file()</code>이 <b>앱 설정 JSON</b>과 요청할 <code>SCOPES</code>를 읽습니다 — <b class="r">이 줄에서 로그인이 끝나는 것은 아닙니다.</b> <b class="g"><code>run_local_server()</code>가 브라우저 흐름을 시작하고 그 결과로 <code>creds</code>를 만듭니다</b></li>
+    <li><code>port=0</code>은 <b>사용할 수 있는 포트를 시스템이 고르도록</b>, <code>prompt="consent"</code>는 <b>동의 화면을 요청</b></li>
+    <li><code>save_private()</code>는 <b class="g">임시 파일을 만든 뒤 교체하며 토큰을 다른 사용자에게 공개하지 않도록</b> 저장 — <b class="r">토큰 자체를 보고서나 답변에 출력할 이유는 없습니다</b></li>
+    <li><code>PrivateURLFlow</code>는 <code>InstalledAppFlow</code>의 확장 — <b class="r">표준 OAuth 절차를 새로 구현한 것이 아니라</b> <b class="g">자동으로 브라우저를 열지 않는 실행에서도 로그인 URL을 파일로 전달</b>하도록 보조 동작을 더한 것</li>
+  </ul>
+  <aside>파일이 있다는 사실과 그 인증이 유효하다는 사실은 다르므로 실제 유효성 확인은 load_token() 안에서 계속합니다.</aside>
+</section>
+
+<!-- 15 갱신 -->
+<section class="slide" data-part="PART 3">
+  <h2>갱신과 <span class="b">범위 확인</span></h2>
+  <pre>def load_token(path: Path) -> Credentials:
+    if not path.is_file():
+        raise ValueError("인증 토큰이 없습니다. google_auth_check.py를 먼저 실행하세요.")
+    creds = Credentials.from_authorized_user_file(str(path))
+    check_scopes(creds)
+    if not creds.valid:
+        if not creds.refresh_token:
+            raise ValueError("재인증이 필요합니다. --reauth를 실행하세요.")
+        creds.refresh(Request())
+        check_scopes(creds)
+        save_private(path, creds.to_json())
+    return creds</pre>
+  <ul class="pts">
+    <li><code>from_authorized_user_file()</code>은 <b class="g">사용자 동의 뒤 만들어진 토큰 JSON</b>을 읽습니다 — <b class="r">앞의 <code>from_client_secrets_file()</code>이 읽는 앱 JSON과 대상이 다릅니다</b></li>
+    <li>접근 토큰에는 <b>유효 기간</b>이 있습니다. <b class="g">갱신 토큰이 유효하면 <code>creds.refresh(Request())</code>가 새 접근 토큰을 요청</b>하므로 <b class="g">매번 로그인할 필요가 줄어듭니다.</b> <b class="r">갱신 토큰이 없거나 만료·철회된 경우에는 재로그인</b></li>
+    <li><code>load_token()</code> 자체는 <b class="r">브라우저를 열지 않으므로</b> 실패하면 인증 프로그램에서 재인증</li>
+    <li><code>check_scopes()</code>의 역할 — <b class="r">다른 도구에서 받은 넓은 권한의 토큰을 파일명만 바꿔 가져와 놓고 '읽기 전용 실습'이라고 생각하는 상황</b>을 발견하려고 <b class="g">저장된 범위를 실습 범위와 대조</b>합니다. <b class="g">파일을 읽을 때 <code>scopes</code>를 새 값으로 덮어쓰지 않고 원래 저장된 범위를 확인</b></li>
+  </ul>
+  <aside>이 함수가 처음과 갱신 뒤 모두 check_scopes()를 호출하는 이유입니다.</aside>
+</section>
+
+<!-- 16 읽기 코드 -->
+<section class="slide" data-part="PART 3">
+  <h2>표의 제목과 <span class="g">셀</span>을 읽는 코드</h2>
+  <pre>https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
+                                      └ 문서 ID: /d/ 뒤부터 /edit 앞까지</pre>
+  <pre>if not re.fullmatch(r"[A-Za-z0-9_-]+", spreadsheet_id):
+    raise ValueError("표 URL 전체가 아닌 spreadsheet_id를 입력하세요.")
+service = build("sheets", "v4", credentials=creds, cache_discovery=False)
+metadata = service.spreadsheets().get(
+    spreadsheetId=spreadsheet_id,
+    fields="properties(title),sheets(properties(title))").execute()
+title = metadata.get("sheets", [])[0]["properties"]["title"]
+selected_range = "'" + title.replace("'", "''") + "'!A1:C3"
+result = service.spreadsheets().values().get(
+    spreadsheetId=spreadsheet_id, range=selected_range).execute()</pre>
+  <ul class="pts">
+    <li><code>re.fullmatch()</code>는 <b>입력 전체가 ID에 쓸 수 있는 문자로만</b> 이루어졌는지 — URL을 넣으면 <code>/</code> 때문에 막힙니다. <b class="g">문서가 존재하고 접근 가능한지는 이후 API 응답에서</b> 확인</li>
+    <li><code>build("sheets","v4", ...)</code>의 클라이언트는 <b class="r">앞서 배운 MCP 클라이언트와 별개의</b> <b class="g">Google API 호출용 Python 객체</b></li>
+    <li>첫 <code>get()</code>은 <b>문서 제목과 시트 제목</b>. <code>fields</code>로 필요한 항목만 지정하므로 <b class="g">모든 메타데이터를 가져오지 않아도 됩니다</b> — <b>메타데이터</b>는 셀의 실제 기록이 아니라 <b>자료를 설명하는 정보</b></li>
+    <li>작은따옴표와 <code>replace()</code>는 <b>시트 이름에 공백이나 작은따옴표가 있어도 올바른 범위 문자열</b>이 되도록</li>
+    <li><code>A1:C3</code>은 <b class="g">코드가 정한 조회 범위</b>이며 — <b class="r">동의한 <code>spreadsheets.readonly</code> 권한이 아홉 칸으로 제한되는 것은 아닙니다</b></li>
+    <li>반환 딕셔너리는 <code>title</code>·<code>sheet</code>·<code>range</code>·<code>values</code>. <b><code>values</code>의 안쪽 목록 하나가 한 행</b>이며 <b class="r">뒤쪽의 빈 행·열은 생략될 수 있으므로 항상 같은 크기로 반환된다고 가정하지 않습니다</b></li>
+  </ul>
+  <aside>마지막 finally는 읽기에 성공하거나 실패해도 API 클라이언트를 닫습니다.</aside>
+</section>
+
+<!-- 17 PART 4 -->
+<section class="slide" data-part="PART 4">
+  <div class="part"><div class="pno">4</div><h2 style="margin:0">읽기 함수를 MCP로 공개</h2>
+  <p style="margin-top:11px">호출 도중 첫 로그인을 기다리게 하지 않습니다</p><span class="who">⑬ Google 인증</span></div>
+  <aside>지금까지는 학생이 인증 프로그램을 실행했습니다. 이제 AI가 필요할 때 같은 기능을 요청할 수 있도록 공개합니다.</aside>
+</section>
+
+<!-- 18 MCP 서버 -->
+<section class="slide" data-part="PART 4">
+  <h2>도구 <span class="g">등록</span>과 오류 처리</h2>
+  <pre>@mcp.tool()
+def read_sheet_header(spreadsheet_id: str) -> dict:
+    """지정한 Google 표의 제목과 첫 시트 A1:C3을 읽습니다. 생성·수정하지 않습니다.
+
+    spreadsheet_id는 표 URL의 /d/와 /edit 사이 ID입니다.
+    인증이 안 되어 있으면 터미널에서 google_auth_check.py를 먼저 실행하세요.
+    """
+    try:
+        token = load_token(configured_path("TOKEN_PATH", "token.json"))
+        return read_header(token, spreadsheet_id)
+    except Exception as error:
+        raise ToolError(
+            "Google 읽기 실패. 인증 확인 스크립트와 지정 표의 접근 권한을 확인하세요 "
+            f"({type(error).__name__}).") from None</pre>
+  <ul class="pts">
+    <li><code>@mcp.tool()</code>이 <b class="g">앞서 만든 <code>read_header()</code>를 그대로 이용하되</b> 이름과 입력을 호스트가 발견·호출할 수 있게 등록. <b>함수 설명은 어떤 표를 얼마나 읽는지</b> 알려 주고 <b class="g">URL이 아니라 ID가 필요하다는 안내</b>도 담습니다</li>
+    <li>먼저 <code>TOKEN_PATH</code>에서 토큰을 읽어 전달 — <b class="g">MCP 호출 도중 브라우저에서 첫 로그인을 기다리게 하지 않고 준비된 인증으로 바로 읽는 구조.</b> <b>필요한 재로그인은 인증 프로그램이</b> 맡습니다</li>
+    <li>예외 시 <code>ToolError</code>로 <b class="g">Google API의 긴 응답 원문을 그대로 대화에 흘리는 대신</b> <b>인증 확인 프로그램과 접근 권한을 확인할 단서</b>를 남깁니다</li>
+  </ul>
+  <div class="hl">📌 등록 명령은 <code>uv --directory "/내/실습폴더" run --locked <b>--extra google</b> mcp run google_sheet_reader.py --transport stdio</code> — 세 설정(Claude Code / OpenCode V1 / V2) 모두 <b class="g">실행 명령은 같고 호스트가 설정을 읽는 위치와 켜기·끄기 항목만 다릅니다.</b> <b class="r">이 로컬 MCP 설정에 원격 MCP용 OAuth 항목을 추가하는 단계는 아닙니다</b></div>
+  <aside>위치를 바꿨다면 인증 프로그램에는 CREDENTIALS_PATH와 TOKEN_PATH를, MCP 서버에는 TOKEN_PATH를 지정합니다. Claude Code는 env, OpenCode는 environment에 넣습니다. 인증 파일 내용을 설정에 복사하지 않습니다.</aside>
+</section>
+
+<!-- 19 호출 대조 -->
+<section class="slide" data-part="PART 4">
+  <h2>호스트의 호출과 <span class="b">원본 대조</span></h2>
+  <ul class="pts">
+    <li>연결 목록에 <code>google-sheets-reader</code>가 보이면 <b>서버와 연결</b>된 것. 이어 <b><code>read_sheet_header</code>가 선택되었는지</b>, <b><code>spreadsheet_id</code>에 URL 속 ID가 전달</b>되었는지, <b class="g">반환된 제목과 행이 원본과 같은지</b></li>
+    <li><b class="g">연결 표시 · 실제 도구 호출 · 원본 대조가 각각 다른 관찰</b>입니다</li>
+    <li>공개 예제를 호출했다면 <code>title</code>은 <b>Example Spreadsheet</b>, <code>sheet</code>는 <b>Class Data</b>. <b><code>values</code>의 첫 목록은 헤더</b></li>
+    <li><b class="r">요청에 '처음 세 줄'을 썼다고 헤더 다음 세 명의 데이터가 오는 것은 아닙니다</b> — <b class="g">이 도구는 헤더를 포함한 1–3행을 읽도록 작성</b>했습니다</li>
+    <li><b class="r">읽기 전용 scope라도 접근 가능한 파일이 한 개로 제한된다는 뜻은 아니므로</b> <b class="g">도구가 허용받은 실제 범위를 별도로 확인</b></li>
+  </ul>
+  <div class="hl">📌 표를 읽는 기능을 연결한 것이므로 <b class="r">이 순서만 적었다고 별도의 Skill이 필요한 것은 아닙니다</b> — 앞에서 만든 Skill이 Google 자료를 필요로 한다면 <b class="g">이 MCP를 자료를 읽는 수단으로</b> 사용할 수 있습니다. <b class="r">인증 JSON이나 토큰은 Skill 본문에 넣지 않습니다</b></div>
+  <aside>같은 인증으로 SDK 클라이언트에서 read_sheet_header를 호출해 표 제목·범위·내용을 다시 확인한 기록이 있습니다. 이 기록은 Claude Code·OpenCode 모델의 도구 선택까지 검증한 것은 아닙니다.</aside>
+</section>
+
+<!-- 20 확장과 오류 -->
+<section class="slide" data-part="PART 4">
+  <h2>팀 자료로 <span class="g">확장</span>과 멈춘 단계</h2>
+  <ul class="pts">
+    <li>공개 예제 표는 <b>인증과 읽기 경로를 확인하기 위한 자료</b>입니다 — <b class="r">반환된 학생 명단을 주간 보고서 데이터로 사용하는 것은 아닙니다</b></li>
+    <li>연결하려면 <b><code>week-one</code>·<code>week-two</code>의 기록을 연습용 Google 표에 옮기고 열 이름과 값의 의미를 정하는 단계</b>가 더 필요합니다 — 업무 ID·주차·진행 기록·배포 상태·운영 확인이 각각 어디에. <b class="r">현재의 <code>A1:C3</code>만으로 모든 업무를 가져올 수 있는지 학생이 판단</b></li>
+    <li><b class="g">데이터 위치를 Google 표로 바꿨다고 팀 규칙까지 새로 만들어야 하는 것은 아닙니다.</b> 반대로 <b class="r">데이터 연결 설명만 적은 문서를 억지로 별도 Skill로 만들 필요도 없습니다</b></li>
+  </ul>
+  <table class="t">
+    <tr><th>오류·현상</th><th>확인 순서</th></tr>
+    <tr><td><code>access_denied</code> / 테스트 사용자 제한</td><td>동의 화면에서 취소·거부했는지, <b>로그인 계정과 Test users 등록</b>, 조직 정책</td></tr>
+    <tr><td><code>redirect_uri_mismatch</code></td><td>도구가 요구하는 <b>앱 종류</b>와 등록한 반환 주소</td></tr>
+    <tr><td>API가 꺼져 있다는 오류</td><td><b class="g">credential을 만든 같은 프로젝트</b>에서 API 사용 설정</td></tr>
+    <tr><td><code>insufficient permissions</code></td><td>요청 scope, 실제 동의한 범위, <b>대상 파일 접근 권한</b></td></tr>
+    <tr><td><code>invalid_grant</code> / 재로그인 필요</td><td>도구의 재인증 안내; <b>토큰 만료·철회 가능성</b></td></tr>
+  </table>
+  <div class="hl">⚠️ Sheets·Drive 등의 권한을 요청하는 <b>External 앱이 Testing 상태이면 갱신 토큰은 7일 후 만료</b>됩니다(기본 사용자 정보 범위만 요청한 경우는 예외) — <b class="r">수업 후 재로그인이 필요한 상황을 코드 오류로만 보지 않습니다.</b> <b class="r">권한을 바꿨다면 기존 인증에 새 권한이 자동 반영되는지 가정하지 말고 재인증 안내를 따릅니다</b></div>
+  <aside>로그인은 끝났는데 표를 못 읽었다면 앱 이름부터 다시 만들기보다 '어느 계정이 동의했고 그 계정이 해당 표를 볼 수 있는가'를 먼저 확인하는 편이 원인에 가깝습니다. API 읽기는 되는데 호스트에서만 실패하면 두 프로그램이 같은 TOKEN_PATH와 가상환경을 쓰는지 봅니다. 연결 기록에는 선택한 API·계정 종류·앱 종류·동의 범위·실제 호출 입력과 결과를 남기고 인증 JSON·토큰 원문은 제출하지 않습니다.</aside>
+</section>
+
+<!-- 21 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> <code>credentials.json</code>과 <code>token.json</code>의 차이는?</div>
+    <div class="q a"><b>A1.</b> 앞은 <b>어떤 앱이 로그인을 요청하는지 식별하는 설정</b>(콘솔에서 다운로드), 뒤는 <b>동의한 사용자로 API를 요청하는 정보</b>(로그인 뒤 생성).</div>
+    <div class="q"><b>Q2.</b> scope와 파일 공유 권한의 관계는?</div>
+    <div class="q a"><b>A2.</b> <b>서로 다른 조건.</b> 표 읽기를 동의해도 공유받지 않은 표는 못 읽고, 편집 권한이 있어도 읽기 전용 토큰으로 수정할 수 없다.</div>
+    <div class="q"><b>Q3.</b> MCP를 먼저 등록하지 않는 이유는?</div>
+    <div class="q a"><b>A3.</b> 인증 프로그램의 결과로 <b>Google 인증과 API가 동작하는지 먼저 확인</b>하면, 이후 호스트 연결에 문제가 생겨도 <b>어느 단계까지 성공했는지 구분</b>할 수 있다.</div>
+  </div>
+  <aside>Q3이 이 절의 실습 설계 의도입니다.</aside>
+</section>
+
+<!-- 22 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>동의는 별도의 단계입니다 🔑</h1>
+    <div class="big" style="margin-top:26px">브라우저에 로그인한 사실이<br><span class="y">새로 실행한 프로그램으로 자동 전달되지는</span> 않습니다</div>
+    <p class="sub" style="margin-top:24px">에이전트와 도구 연결 ⑬ — 여기까지</p>
+  </div>
+  <aside>이제 로컬 파일, 계산을 실행할 노트북, 팀의 공유 표라는 서로 다른 위치를 살펴봤습니다. 다음에는 자신의 과업에 필요한 자료와 판단 기준을 고릅니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>
