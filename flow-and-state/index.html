@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>실행 흐름과 상태 설계 (하네스 만들기 ⑤)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 하네스 만들기 ⑤</span>
+    <h1 style="margin:18px 0">실행 흐름과 상태 설계</h1>
+    <p class="sub">기능 목록만으로는 이런 상황의 동작이 정해지지 않습니다</p>
+  </div>
+  <aside>파일이 없으면 어떻게 할까요? 수정하려고 하면 바로 실행해도 될까요? 같은 요청을 계속 반복하면 언제 끝낼까요?</aside>
+</section>
+
+<!-- 2 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">요청을 끝까지 따라가는 흐름</h2>
+  <p style="margin-top:11px">정상 경로 다음에 실패 경로</p><span class="who">⑤ 흐름과 상태</span></div>
+  <aside>"우리가 정한 작업이 끝날 때까지의 흐름을 그려 줘. 도구 실패와 승인 거절 때도 어떻게 되는지 같이 보자."</aside>
+</section>
+
+<!-- 3 두 경로 -->
+<section class="slide" data-part="PART 1">
+  <h2>모델의 <span class="b">요청</span>과 하네스의 <span class="g">실행</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--bl)"><small>모델</small><b class="b">무엇을 실행하고<br>싶은지 표현</b></div>
+    <span class="ar">→</span>
+    <div class="cell" style="min-width:170px;border-color:var(--gr)"><small>하네스</small><b class="g">요청을 검사한 뒤<br>실행</b></div>
+  </div>
+  <ul class="pts">
+    <li><b class="r">파일을 읽었다는 문장만 모델이 답했다고 실제 파일 읽기가 이루어진 것은 아닙니다</b></li>
+    <li>실패 경로 — <b>파일이 없다는 오류를 모델에게 전달하면 다른 파일을 찾아볼 수</b> 있습니다. 반면 <b class="r">인증 오류로 모델 연결 자체가 실패했다면 도구 결과를 더 보내는 것으로 해결되지 않을 수</b> 있습니다</li>
+    <li><b class="g">계속할 수 있는 오류와 작업을 끝내야 할 오류를 구별</b>해야 합니다</li>
+  </ul>
+  <div class="hl">📌 <b class="r">모든 제품에서 반드시 같은 상태 이름이나 함수 구조를 사용해야 한다는 뜻은 아닙니다</b> — 출발점으로 쓸 흐름입니다</div>
+  <aside>아직 완성 코드를 작성하기보다 자기 제품이 어떻게 행동해야 하는지 그림과 문장으로 설명합니다.</aside>
+</section>
+
+<!-- 4 상태 -->
+<section class="slide" data-part="PART 1">
+  <h2>상태가 <span class="g">알려 주는 것</span></h2>
+  <table class="t">
+    <tr><th>상태 예</th><th>뜻</th><th>사용자가 알 수 있어야 할 내용</th></tr>
+    <tr><td>준비</td><td>아직 실행하지 않음</td><td>어떤 작업을 요청할 수 있는지</td></tr>
+    <tr><td>실행 중</td><td>모델 호출 또는 도구 처리가 진행됨</td><td>현재 진행 단계</td></tr>
+    <tr><td><b class="b">승인 대기</b></td><td>사용자 판단 없이는 <b>다음 행동을 하지 않음</b></td><td><b class="g">승인할 구체적인 변경</b></td></tr>
+    <tr><td>완료</td><td>정한 <b>종료 조건</b>을 만족함</td><td>결과와 수행한 작업</td></tr>
+    <tr><td><b class="r">실패·중단</b></td><td>더 진행할 수 없거나 정책상 멈춤</td><td><b class="g">이유와 이미 수행한 범위</b></td></tr>
+  </table>
+  <div class="hl">🎯 <b class="r">각 내부 단계를 모두 별도 화면 상태로 만들 필요는 없습니다</b> — 모델 대기와 도구 실행을 같은 "실행 중"으로 표시하되 기록에서 구별할 수도 있습니다. 중요한 것은 <b class="r">실행이 멈춰 있는데 완료라고 표시하거나, 승인을 기다리면서 이유를 숨기지 않는 것</b></div>
+  <aside>상태는 사용자와 프로그램이 현재 상황을 구별하기 위한 이름입니다. 터미널이라면 짧은 출력으로, 웹이라면 화면의 표시로 드러낼 수 있습니다.</aside>
+</section>
+
+<!-- 5 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">승인과 거절 이후의 동작</h2>
+  <p style="margin-top:11px">승인은 제시한 변경에 대한 허용입니다</p><span class="who">⑤ 흐름과 상태</span></div>
+  <aside>D06에서는 승인할 행동과 보여 줄 정보를 정합니다.</aside>
+</section>
+
+<!-- 6 승인 -->
+<section class="slide" data-part="PART 2">
+  <h2>승인의 <span class="g">범위</span>와 거절 뒤</h2>
+  <ul class="pts">
+    <li>코딩 작업이라면 <b>수정할 파일과 변경 내용을 보여 준 뒤 적용을 승인</b>받는 방식 — 이때 승인은 <b class="r">"앞으로 모든 파일을 바꿔도 된다"는 뜻이 아니라</b> <b class="g">제시한 변경에 대한 허용</b></li>
+    <li>거절했을 때 — <b>작업 전체를 멈출 수도</b> 있고, <b>변경하지 않았다는 결과를 모델에게 전달해 읽기만으로 가능한 답변을 작성</b>하게 할 수도 있습니다</li>
+    <li>어느 쪽이든 <b class="r">같은 변경을 계속 다시 요청하거나 거절된 행동을 다른 도구 이름으로 실행하는 흐름은 허용하지 않아야</b> 합니다</li>
+  </ul>
+  <div class="hl">⚠️ 작업 범위 밖의 경로 접근은 <b class="g">사용자 승인을 묻기 전에 거절</b>하도록 설계할 수 있습니다 — <b class="r">"승인 버튼이 있으니 무엇이든 요청할 수 있다"는 구조</b>와 <b class="g">제품이 허용한 범위 안에서 추가 확인을 받는 구조</b>는 다릅니다</div>
+  <aside>선택한 정책과 이유를 DECISIONS.md의 D05·D06에 남깁니다.</aside>
+</section>
+
+<!-- 7 종료 조건 -->
+<section class="slide" data-part="PART 2">
+  <h2>반복을 <span class="r">끝내는 조건</span></h2>
+  <ul class="pts">
+    <li>모델이 계속 도구를 요청하면 프로그램도 계속 실행할 수 있습니다 — 따라서 <b class="r">종료 조건을 모델의 최종 답변 하나에만 맡기지 않습니다</b></li>
+    <li>정할 것 — <b class="g">반복 횟수와 대기 시간의 상한, 같은 실패가 반복될 때의 처리 방식</b></li>
+    <li>횟수 제한에 도달했다면 <b class="r">"완료"가 아니라</b> <b class="g">"제한에 도달해 중단"</b>이라고 알려야 합니다. <b>이미 읽은 자료나 적용한 변경이 있다면 그 사실도</b> 남깁니다</li>
+    <li><b class="r">제한은 모든 작업이 끝난다는 보장이 아니라</b> <b class="g">끝없이 실행되는 상황을 다루는 장치</b>입니다</li>
+  </ul>
+  <pre>파일을 못 찾으면 모델이 다른 경로를 한 번 확인할 수 있게 하자.
+권한 밖 경로는 실행하지 말고, 반복 제한에 도달하면 이유를 보여 주고 멈추자.</pre>
+  <aside>이는 설계 예시입니다. 자신의 도구와 사용 장면에 맞게 재시도할 오류와 중단할 오류를 정하고 PRD의 R01·R02·R05에 연결합니다.</aside>
+</section>
+
+<!-- 8 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">세션과 작업 구별</h2>
+  <p style="margin-top:11px">새 작업이지만 같은 세션일 수 있습니다</p><span class="who">⑤ 흐름과 상태</span></div>
+  <aside>작업은 사용자의 요청 하나를 처리하는 실행 단위이고, 세션은 이어지는 대화 맥락을 묶는 단위입니다.</aside>
+</section>
+
+<!-- 9 세션 -->
+<section class="slide" data-part="PART 3">
+  <h2>저장 범위와 <span class="g">취소</span></h2>
+  <ul class="pts">
+    <li>안내문을 정리한 뒤 <b>"그중 내일 필요한 것만 골라 줘"</b>라고 후속 요청했다면 — <b class="g">새 작업이지만 같은 세션</b>으로 볼 수 있습니다</li>
+    <li>D07에서 첫 버전의 저장 범위 선택 — <b>실행 중에만 대화를 유지</b>하거나 <b>메시지와 기록을 파일에 저장해 재시작 후 이어가기</b>. 메모리만 사용해도 되지만 <b class="r">종료하면 대화가 사라진다는 한계를 명확히 설명</b>해야 합니다</li>
+    <li><b class="r">대화 저장과 변경 파일의 이전 버전 복원은 별도 기능</b>입니다</li>
+    <li>취소 버튼이나 실행 중 중단 명령은 <b>D09의 선택 확장</b> — 넣지 않는다면 미뤘다고 기록하고, 넣는다면 <b class="g">표시만 바꾸는지 실행 중인 프로세스도 정리하는지</b> 설계</li>
+  </ul>
+  <div class="hl">⚠️ <b class="r">사용자 거절, 반복 상한에 따른 중단, 사용자가 누른 취소를 같은 동작으로 뭉뚱그리지 않습니다</b></div>
+  <aside>세 가지는 원인도 다르고 이후 처리도 다릅니다.</aside>
+</section>
+
+<!-- 10 세 상황 대입 -->
+<section class="slide" data-part="PART 3">
+  <h2>자기 제품의 <span class="b">흐름</span>으로 정리</h2>
+  <div class="chain">
+    <div class="cell" style="min-width:150px;border-color:var(--gr)"><small>①</small><b class="g">정상적인<br>읽기 작업</b></div>
+    <div class="cell" style="min-width:160px;border-color:var(--bl)"><small>②</small><b class="b">파일을 찾지 못한<br>작업</b></div>
+    <div class="cell" style="min-width:170px;border-color:var(--red)"><small>③</small><b class="r">코드 변경을<br>거절한 작업</b></div>
+  </div>
+  <ul class="pts">
+    <li>각 경우의 <b class="g">마지막 상태와 사용자에게 보여 줄 문장</b>을 말할 수 있는지 확인하세요</li>
+    <li>합의한 정책은 PRD와 결정 기록에 남기고, <b>상태와 도구 결과가 주고받는 값은 다음 인터페이스 설계로</b> 연결합니다</li>
+  </ul>
+  <pre>이 세 가지 상황을 우리 흐름에 대입해서 빈틈을 찾아 줘.
+합의한 상태와 종료 조건을 문서에 반영해 줘.</pre>
+  <div class="hl">📌 <b class="r">그림에 화살표가 있다는 것만으로 동작이 구현된 것은 아닙니다</b> — <b class="g">이후 소스코드와 실행 검증에서 같은 흐름이 실제로 지켜지는지 확인할 기준</b>을 만든 것입니다</div>
+  <aside>다음 절에서 각 부분이 어떤 정보를 주고받을지 정합니다.</aside>
+</section>
+
+<!-- 11 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 반복 제한에 도달했을 때의 표시는?</div>
+    <div class="q a"><b>A1.</b> "완료"가 아니라 <b>"제한에 도달해 중단"</b>. 이미 읽은 자료나 적용한 변경도 남긴다.</div>
+    <div class="q"><b>Q2.</b> 승인은 무엇에 대한 허용인가?</div>
+    <div class="q a"><b>A2.</b> <b>제시한 변경 하나에 대한 허용.</b> "앞으로 모든 파일을 바꿔도 된다"는 뜻이 아니다.</div>
+    <div class="q"><b>Q3.</b> 작업과 세션의 차이는?</div>
+    <div class="q a"><b>A3.</b> 작업은 <b>요청 하나를 처리하는 실행 단위</b>, 세션은 <b>이어지는 대화 맥락을 묶는 단위.</b> 후속 요청은 새 작업이지만 같은 세션일 수 있다.</div>
+  </div>
+  <aside>Q1은 "조용한 성공 표시"를 막는 규칙입니다.</aside>
+</section>
+
+<!-- 12 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>멈추는 방식까지 설계합니다 🚦</h1>
+    <div class="big" style="margin-top:26px">거절 · 상한 도달 · 사용자 취소를<br><span class="y">같은 동작으로 뭉뚱그리지 않습니다</span></div>
+    <p class="sub" style="margin-top:24px">나만의 에이전트 하네스 ⑤ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑥에서 흐름의 각 부분이 주고받을 정보 — 인터페이스를 정합니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

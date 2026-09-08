@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>플랫폼과 언어 선택 (하네스 만들기 ③)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 하네스 만들기 ③</span>
+    <h1 style="margin:18px 0">플랫폼과 언어 선택</h1>
+    <p class="sub">화면, 하네스 실행 위치, 모델 실행 위치는 서로 다른 결정입니다</p>
+  </div>
+  <aside>혼자 코드를 점검하는 도구와 동료에게 문서를 정리해 주는 도구는 같은 모델을 써도 필요한 화면이 다를 수 있습니다.</aside>
+</section>
+
+<!-- 2 기본안 -->
+<section class="slide" data-part="표지">
+  <h2>고를 <span class="g">기준</span></h2>
+  <div class="big">내 사용자가 <span class="y">실제로 사용할 수 있고</span><br>내가 AI와 함께 <span class="y">코드를 읽고 검증할 수 있는</span> 조합</div>
+  <ul class="pts">
+    <li><b class="r">모든 조합을 시험할 필요는 없습니다</b></li>
+    <li>특별한 이유가 없다면 <b class="g">내 컴퓨터에서 실행하는 Python CLI</b>를 기본안으로 권합니다 — <b>웹 화면을 만드는 일보다 모델과 도구 사이의 실행 흐름을 먼저 관찰하기 좋기</b> 때문</li>
+    <li><b class="g">이미 익숙한 언어나 분명한 화면 요구가 있다면 그쪽을 선택해도</b> 됩니다</li>
+  </ul>
+  <aside>여기서 정할 것은 플랫폼과 구현 언어입니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">실행 위치와 화면 형태 구분</h2>
+  <p style="margin-top:11px">"웹으로 만든다"만으로는 정해지지 않습니다</p><span class="who">③ 플랫폼과 언어</span></div>
+  <aside>CLI는 터미널에서 글자로 요청하고 결과를 받는 방식, UI는 사용자가 프로그램과 상호작용하는 화면이나 조작 방식입니다.</aside>
+</section>
+
+<!-- 4 세 결정 -->
+<section class="slide" data-part="PART 1">
+  <h2>서로 다른 <span class="g">세 결정</span></h2>
+  <div class="chain">
+    <div class="cell" style="min-width:130px"><small>①</small><b>화면</b></div>
+    <div class="cell" style="min-width:170px;border-color:var(--bl)"><small>②</small><b class="b">하네스 실행 위치</b></div>
+    <div class="cell" style="min-width:160px;border-color:var(--pp)"><small>③</small><b class="p">모델 실행 위치</b></div>
+  </div>
+  <ul class="pts">
+    <li><b>CLI도 UI의 한 종류</b>이며, 버튼과 입력란을 둔 웹 화면도 UI입니다</li>
+    <li><b>로컬 웹 앱</b> — 내 컴퓨터에서 서버 프로그램을 실행하고 <b>같은 컴퓨터의 브라우저로 접속</b>. 여기서 서버는 <b class="g">브라우저의 요청을 받아 작업을 처리하는 프로그램</b>이며 <b class="r">꼭 멀리 있는 컴퓨터를 뜻하지 않습니다</b></li>
+    <li>CLI든 웹이든 <b class="g">실제 파일 읽기와 테스트 실행은 하네스가 동작하는 컴퓨터에서</b> 처리하도록 설계할 수 있습니다 — 반대로 <b class="r">원격 서버에 하네스를 올리면 파일 작업의 기준도 그 서버가 됩니다. 내 노트북의 폴더가 자동으로 서버에 연결되지는 않습니다</b></li>
+    <li><b class="r">하네스가 로컬에서 실행된다고 모델까지 반드시 로컬에서 실행되는 것도 아닙니다</b> — 로컬 하네스가 <b>외부 모델 API</b>를 호출할 수도, <b>로컬 모델 서버</b>를 호출할 수도 있습니다</li>
+  </ul>
+  <aside>모델 연결은 다음 절에서 선택합니다. 지금은 세 가지가 서로 다른 결정이라는 점을 구별하면 됩니다.</aside>
+</section>
+
+<!-- 5 첫 화면 -->
+<section class="slide" data-part="PART 1">
+  <h2>사용자에게 맞는 <span class="b">첫 화면</span></h2>
+  <table class="t">
+    <tr><th>지금의 사용 상황</th><th>권할 첫 선택</th><th>함께 고려할 점</th></tr>
+    <tr><td>내가 자료 정리와 코드 점검에 사용</td><td><b class="g">로컬 CLI</b></td><td>실행 기록과 승인 내용을 터미널에서 읽기 쉽게 구성</td></tr>
+    <tr><td>터미널에 익숙하지 않은 사람이 사용</td><td><b class="b">로컬 웹</b></td><td>입력·진행·결과·승인을 화면에서 구별</td></tr>
+    <tr><td>여러 기기나 여러 사람이 접속</td><td>접속 요구를 <b>먼저 구체화</b></td><td><b class="r">실행 위치, 인증, 사용자별 파일 접근 범위</b>가 추가로 필요</td></tr>
+  </table>
+  <ul class="pts">
+    <li>웹을 고르면 입력 화면뿐 아니라 <b>작업 중 표시, 완료·실패 상태, 승인 버튼과 처리 중 중복 요청</b>도 설계해야 합니다 — <b class="r">화면이 있다는 사실만으로 이런 동작이 갖춰지는 것은 아닙니다</b></li>
+    <li>CLI를 먼저 골라도 <b class="g">핵심 처리와 터미널 입출력을 분리해 두면</b> 나중에 웹 화면을 붙일 여지가 생깁니다 — <b class="r">그렇다고 웹 전환이 자동으로 끝나는 것은 아닙니다</b></li>
+  </ul>
+  <aside>오늘 필요한 화면을 고르고, 미래의 화면은 실제 필요가 생길 때 별도 설계합니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">읽고 고칠 수 있는 구현 언어</h2>
+  <p style="margin-top:11px">언어를 바꾼다고 모델이 더 정확해지지 않습니다</p><span class="who">③ 플랫폼과 언어</span></div>
+  <aside>파일 작업, 모델 요청, 응답 해석, 도구 실행, 기록을 어떤 코드와 개발 환경으로 다룰지 선택하는 것입니다.</aside>
+</section>
+
+<!-- 7 세 언어 -->
+<section class="slide" data-part="PART 2">
+  <h2>세 <span class="g">언어</span>와 붙는 조건</h2>
+  <table class="t">
+    <tr><th>언어</th><th>적합한 경우</th><th>함께 알아 둘 것</th></tr>
+    <tr><td><b class="g">Python</b></td><td>간결한 문법으로 <b>파일 처리와 API 연결 코드를 읽어 가고 싶은</b> 경우의 <b>기본안</b></td><td>이미 학습했다면 <b>아는 자료 구조와 함수로 하네스 흐름을 설명</b>하기 좋음</td></tr>
+    <tr><td><b>TypeScript</b></td><td>JavaScript 경험이 있거나 <b>웹 화면과 서버 코드를 같은 언어 계열</b>로</td><td><b>타입</b>으로 실행 전에 일부 불일치를 발견 — <b class="r">외부 API에서 받은 값이 올바른지는 실행 중에도 검사해야 하며, TypeScript를 쓴다는 이유만으로 잘못된 모델 응답이 차단되지 않습니다</b></td></tr>
+    <tr><td><b>Rust</b></td><td>이미 경험이 있거나 <b>컴파일된 CLI의 구조와 자원 관리</b>를 깊게</td><td><b class="r">소유권 규칙 등 새로 익힐 개념이 늘어날 수</b> 있음 — <b class="g">학습의 중심이 하네스 설계라면 그 규칙까지 함께 배우고 싶은지 판단</b></td></tr>
+  </table>
+  <div class="hl">📌 <b class="r">세 언어를 모두 설치하거나 같은 기능을 세 번 구현할 필요는 없습니다.</b> Python으로도 웹 앱을, TypeScript로도 CLI를 만들 수 있으므로 — <b class="r">"웹이므로 반드시 TypeScript"보다</b> <b class="g">"내가 TypeScript를 알고 있고 화면과 서버를 함께 다루고 싶다"</b>가 더 구체적인 선택 이유입니다</div>
+  <aside>컴파일은 소스코드를 실행 가능한 형태로 변환하는 과정입니다. 화면과 언어를 하나의 고정된 묶음으로 생각하지 않습니다.</aside>
+</section>
+
+<!-- 8 기록 -->
+<section class="slide" data-part="PART 2">
+  <h2>내 선택을 <span class="b">설계 문서에</span> 남기기</h2>
+  <pre>나는 Python을 배웠고, 내 컴퓨터에서 문서 정리와 코드 점검에 쓸 거야.
+CLI와 로컬 웹 중 맞는 구성과 이유를 설명해 줘.
+내가 고른 뒤 PRD와 결정 기록에 남기자. 구현은 아직 하지 마.</pre>
+  <table class="t">
+    <tr><th>항목</th><th>기록 예 (정답이 아닌 예시)</th></tr>
+    <tr><td><b>D02 플랫폼</b></td><td>내 컴퓨터에서 실행하는 <b>CLI</b>. 요청·진행·결과와 <b>파일 변경 승인을 터미널에서</b> 확인</td></tr>
+    <tr><td><b>D03 언어</b></td><td><b>Python</b>. 기존에 배운 함수와 파일 처리 코드를 활용해 <b>실행 흐름을 읽고 검증</b></td></tr>
+    <tr><td><code>DECISIONS.md</code></td><td><b class="g">선택 이유와 받아들이는 불편</b> — "현재 사용자는 터미널에 익숙한 나 자신이다. 이미지나 표를 나란히 보는 화면은 첫 요구에 없으며, 필요해지면 웹 화면을 추가로 설계한다"</td></tr>
+  </table>
+  <div class="hl">⚠️ 문서의 기존 형식을 유지하고 — <b class="r">아직 결정하지 않은 모델 제공자나 권한까지 임의로 확정하지 않습니다</b></div>
+  <aside>AI가 기록한 내용을 읽고 내 상황과 맞는지 확인합니다.</aside>
+</section>
+
+<!-- 9 요구 이탈 -->
+<section class="slide" data-part="PART 2">
+  <h2>요구가 <span class="r">달라졌는지</span> 확인</h2>
+  <ul class="pts">
+    <li><b class="r">로컬 웹을 골랐는데 공개 서버 배포가 구현 계획에 들어가 있거나</b>, <b class="r">Python을 골랐는데 완성된 다른 에이전트 CLI에 모든 작업을 넘기도록 되어 있다면</b> — <b class="g">요구가 달라진 것</b>입니다</li>
+    <li>Claude Code와 OpenCode는 여기서 <b class="g">소스를 함께 만드는 개발 도우미</b>입니다 — <b class="g">우리가 만드는 제품의 모델 요청과 도구 실행 반복은 제품의 소스에서 구현</b>합니다</li>
+  </ul>
+  <div class="big">이번 선택의 결과는 <span class="y">D02와 D03</span>에 남습니다<br><small>아직 모든 설계가 끝난 것은 아니므로 설치와 구현을 서두르지 않습니다</small></div>
+  <aside>다음 절에서는 이 환경에서 처음 제공할 작업 범위와 모델 제공자를 정해, 실제로 무엇을 실행하는 제품인지 구체화합니다.</aside>
+</section>
+
+<!-- 10 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> "웹으로 만든다"가 정해 주지 않는 것은?</div>
+    <div class="q a"><b>A1.</b> <b>프로그램이 어디에서 실행되는지.</b> 로컬 웹 앱도 있고, 원격 서버에 올리면 <b>파일 작업의 기준도 그 서버</b>가 된다.</div>
+    <div class="q"><b>Q2.</b> TypeScript를 쓰면 잘못된 모델 응답이 차단되나?</div>
+    <div class="q a"><b>A2.</b> 아니다. 타입은 실행 전 일부 불일치를 잡을 뿐 — <b>외부 API 값은 실행 중에도 검사</b>해야 한다.</div>
+    <div class="q"><b>Q3.</b> 화면과 언어는 한 묶음인가?</div>
+    <div class="q a"><b>A3.</b> 아니다. Python으로 웹 앱을, TypeScript로 CLI를 만들 수 있다. <b>"내가 아는 언어이고 이런 이유로 필요하다"</b>가 더 구체적인 이유.</div>
+  </div>
+  <aside>Q1이 실행 위치를 흐리게 만드는 대표적 표현입니다.</aside>
+</section>
+
+<!-- 11 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>세 결정을 나눕니다 🖥️</h1>
+    <div class="big" style="margin-top:26px">화면 · 하네스 실행 위치 · 모델 실행 위치<br><span class="y">서로 다른 선택입니다</span></div>
+    <p class="sub" style="margin-top:24px">나만의 에이전트 하네스 ③ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ④에서 기능 범위와 모델 제공자를 정합니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

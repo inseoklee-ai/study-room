@@ -297,6 +297,21 @@
    - ✅ ⑤-14. 자기 과업에 맞게 확장하기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/extend-own-task/) · 📊 [PPT](extend-own-task/extend-own-task.pptx)
    - ✅ ⑤-15. 실행 경험과 Skill 개선 연구 (WikiSkill) — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/wikiskill-research/) · 📊 [PPT](wikiskill-research/wikiskill-research.pptx)
 
+**중단원 ⑥**
+6. **나만의 에이전트 하네스 만들기** ✅ 완결 (12강) · PRD 설계부터 구현, 로컬 10문항 평가와 제출까지 직접 하네스를 만듭니다
+   - ✅ ⑥-1. 내 하네스의 사용자와 작업 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/harness-user-and-task/) · 📊 [PPT](harness-user-and-task/harness-user-and-task.pptx)
+   - ✅ ⑥-2. 미완성 PRD와 설계 대화 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/incomplete-prd/) · 📊 [PPT](incomplete-prd/incomplete-prd.pptx)
+   - ✅ ⑥-3. 플랫폼과 언어 선택 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/platform-and-language/) · 📊 [PPT](platform-and-language/platform-and-language.pptx)
+   - ✅ ⑥-4. 기능 범위와 모델 제공자 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/scope-and-provider/) · 📊 [PPT](scope-and-provider/scope-and-provider.pptx)
+   - ✅ ⑥-5. 실행 흐름과 상태 설계 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/flow-and-state/) · 📊 [PPT](flow-and-state/flow-and-state.pptx)
+   - ✅ ⑥-6. API와 도구의 인터페이스 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/api-and-tool-interface/) · 📊 [PPT](api-and-tool-interface/api-and-tool-interface.pptx)
+   - ✅ ⑥-7. 완료 조건과 검증 시나리오 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/acceptance-criteria/) · 📊 [PPT](acceptance-criteria/acceptance-criteria.pptx)
+   - ✅ ⑥-8. 첫 작업부터 제품 기능까지 구현 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/first-vertical-build/) · 📊 [PPT](first-vertical-build/first-vertical-build.pptx)
+   - ✅ ⑥-9. 실행 가능한 Python 하네스 읽기 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/python-harness-read/) · 📊 [PPT](python-harness-read/python-harness-read.pptx)
+   - ✅ ⑥-10. 실제 벤치마크의 로컬 10문항 평가 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/benchmark-ten-tasks/) · 📊 [PPT](benchmark-ten-tasks/benchmark-ten-tasks.pptx)
+   - ✅ ⑥-11. 점수 모니터링과 비교 실험 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/score-and-compare/) · 📊 [PPT](score-and-compare/score-and-compare.pptx)
+   - ✅ ⑥-12. 실험 결과와 구현체 제출 — 🖥️ [웹 슬라이드](https://inseoklee-ai.github.io/study-room/submit-experiment/) · 📊 [PPT](submit-experiment/submit-experiment.pptx)
+
 > 🖥️ **웹 슬라이드** 조작법: `←` `→` 또는 화면 좌/우 클릭으로 이동 · `S` 학습노트 · `F` 전체화면 · 🌗 라이트/다크 테마(시스템 설정 자동 감지).
 >
 > ⚠️ **웹 슬라이드는 반드시 라이브 사이트에서 열어야 합니다.** GitHub 저장소 화면(github.com)에서 위 링크를 누르면 슬라이드가 아니라 소스 폴더로 갑니다. 아래 라이브 주소로 접속하세요:
@@ -469,6 +484,18 @@
 > - 대5-도구연결-⑤13 https://inseoklee-ai.github.io/study-room/google-oauth-sheets/
 > - 대5-도구연결-⑤14 https://inseoklee-ai.github.io/study-room/extend-own-task/
 > - 대5-도구연결-⑤15 https://inseoklee-ai.github.io/study-room/wikiskill-research/
+> - 대5-하네스제작-⑥1 https://inseoklee-ai.github.io/study-room/harness-user-and-task/
+> - 대5-하네스제작-⑥2 https://inseoklee-ai.github.io/study-room/incomplete-prd/
+> - 대5-하네스제작-⑥3 https://inseoklee-ai.github.io/study-room/platform-and-language/
+> - 대5-하네스제작-⑥4 https://inseoklee-ai.github.io/study-room/scope-and-provider/
+> - 대5-하네스제작-⑥5 https://inseoklee-ai.github.io/study-room/flow-and-state/
+> - 대5-하네스제작-⑥6 https://inseoklee-ai.github.io/study-room/api-and-tool-interface/
+> - 대5-하네스제작-⑥7 https://inseoklee-ai.github.io/study-room/acceptance-criteria/
+> - 대5-하네스제작-⑥8 https://inseoklee-ai.github.io/study-room/first-vertical-build/
+> - 대5-하네스제작-⑥9 https://inseoklee-ai.github.io/study-room/python-harness-read/
+> - 대5-하네스제작-⑥10 https://inseoklee-ai.github.io/study-room/benchmark-ten-tasks/
+> - 대5-하네스제작-⑥11 https://inseoklee-ai.github.io/study-room/score-and-compare/
+> - 대5-하네스제작-⑥12 https://inseoklee-ai.github.io/study-room/submit-experiment/
 > - 대4-① https://inseoklee-ai.github.io/study-room/prompt-engineering-intro/
 > - 대4-② https://inseoklee-ai.github.io/study-room/agent-structure/
 > - 대4-③ https://inseoklee-ai.github.io/study-room/model-inputs/

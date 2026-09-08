@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>완료 조건과 검증 시나리오 (하네스 만들기 ⑦)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 하네스 만들기 ⑦</span>
+    <h1 style="margin:18px 0">완료 조건과<br>검증 시나리오</h1>
+    <p class="sub">좋은 테스트 계획을 세웠다는 이유로 PASS를 적지는 않습니다</p>
+  </div>
+  <aside>"회의록을 읽고 정리했다"는 답변이 나타났다면 하네스가 완성된 것일까요?</aside>
+</section>
+
+<!-- 2 왜 먼저 -->
+<section class="slide" data-part="표지">
+  <h2>구현 전에 <span class="g">성공의 증거</span> 정하기</h2>
+  <ul class="pts">
+    <li><b class="r">모델이 파일을 읽지 않고 답했을 수도</b> 있고, <b class="r">읽기는 했지만 원문에 있는 담당자를 빠뜨렸을 수도</b> 있습니다</li>
+    <li>코드 수정도 <b class="r">파일 내용이 바뀌었다는 사실만으로는 충분하지 않습니다</b> — <b class="g">의도한 오류를 고쳤는지 검사</b>해야 합니다</li>
+    <li><b>완료 조건(인수 기준)</b> — <b class="g">만든 프로그램을 사용자의 기대에 맞는 결과로 받아들일 수 있는지 판단하는 기준</b></li>
+  </ul>
+  <div class="hl">📌 <code>ACCEPTANCE.md</code>에는 <b>A01~A12</b>가 준비되어 있고 각 항목은 PRD의 요구사항과 연결됩니다. 아직 실행하지 않았으므로 상태는 <code>NOT_RUN</code> — <b class="r">좋은 테스트 계획을 세웠다는 이유로 <code>PASS</code>를 적지는 않습니다</b></div>
+  <aside>어떤 상황에서 무엇을 관찰하면 요구사항을 충족했다고 볼지 정합니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">기대 결과와 실제 결과 구별</h2>
+  <p style="margin-top:11px">우연한 답변을 기대값으로 복사하지 않기</p><span class="who">⑦ 완료 조건</span></div>
+  <aside>기대 결과는 원문이나 요구사항에서 미리 정하고, 실제 결과는 구현한 프로그램을 실행한 뒤 관찰합니다.</aside>
+</section>
+
+<!-- 4 네 칸 -->
+<section class="slide" data-part="PART 1">
+  <h2>네 칸으로 <span class="g">나눕니다</span></h2>
+  <table class="t">
+    <tr><th>기록할 내용</th><th>예시</th></tr>
+    <tr><td>준비한 자료</td><td>담당자와 마감이 명시된 작은 <b>가상 회의록</b></td></tr>
+    <tr><td>사용자 행동</td><td>홍보 초안의 담당자와 마감을 찾아 달라고 요청</td></tr>
+    <tr><td><b class="g">기대 결과</b></td><td><b class="g">실제 파일을 읽고, 수진·금요일을 근거와 함께 전달</b></td></tr>
+    <tr><td>실제 결과</td><td>실행 후 <b>읽기 기록과 최종 답변</b>을 확인해 기록</td></tr>
+  </table>
+  <ul class="pts">
+    <li><b class="r">모델이 우연히 내놓은 답변을 기대값으로 복사하면 잘못된 동작도 통과</b>하게 만들 수 있습니다</li>
+    <li><b class="r">정답 문장의 표현까지 고정할 필요는 없습니다</b> — "담당 수진, 마감 금요일"과 <b class="g">같은 뜻이라면 문장이 달라도</b> 됩니다. 반면 <b class="r">없는 담당자를 만들거나 금요일을 행사 날짜로 잘못 해석했다면</b> 내용 기준 미충족</li>
+  </ul>
+  <div class="hl">📌 <b class="r">아직은 검사 계획을 작성하는 단계</b>이며 실행하지 않은 증거 칸은 비워 둡니다. AI가 제시한 검사에 대해 <b class="g">"이것이 통과하면 내가 원한 일이 된다고 말할 수 있는가"</b>를 학생이 판단합니다</div>
+  <aside>"ACCEPTANCE를 내 사용자 이야기와 연결하자. 기대 결과와 실제로 남겨야 할 증거를 나눠 적어 줘."</aside>
+</section>
+
+<!-- 5 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">모의 모델과 실제 모델의 검사</h2>
+  <p style="margin-top:11px">알 수 있는 것이 다릅니다</p><span class="who">⑦ 완료 조건</span></div>
+  <aside>모델에게 "도구를 세 번 호출해 줘"라고 부탁해도 정확히 그 응답이 온다는 보장은 없습니다.</aside>
+</section>
+
+<!-- 6 두 검사 -->
+<section class="slide" data-part="PART 2">
+  <h2>두 검사가 <span class="g">알려 주는 것</span></h2>
+  <table class="t">
+    <tr><th>검사</th><th>확인하는 것</th><th>이 검사만으로 알 수 없는 것</th></tr>
+    <tr><td><b>A02</b> 모의 도구 호출</td><td>인수 검사, 실제 도구 연결, 결과 반환, 종료</td><td><b class="r">실제 모델의 도구 선택 능력</b></td></tr>
+    <tr><td><b>A06</b> 반복하는 모의 응답</td><td>합의한 한도에서 멈추는지</td><td><b class="r">실제 모델이 반복할 빈도</b></td></tr>
+    <tr><td><b>A01</b> 실제 모델의 자료 작업</td><td>실제 연결과 읽기, <b class="g">최종 답의 근거 일치</b></td><td><b class="r">다른 모든 자료에서도 같은 품질인지</b></td></tr>
+  </table>
+  <ul class="pts">
+    <li><b>모의 모델</b>은 모델 대신 준비한 응답을 순서대로 반환하는 테스트용 구성 — <b class="g">호출 요청을 정확히 만들 수 있으므로 결과가 엉뚱한 요청에 붙거나 끝나지 않는 버그를 찾기 좋습니다.</b> <b class="r">하지만 이 결과를 "실제 모델 연결 성공"으로 기록하지 않습니다</b></li>
+    <li>실제 모델 검사는 <b>인증과 통신, 응답 형식, 도구 실행, 내용 품질</b>을 함께 보여 줍니다 — <b class="g">파일 읽기는 성공했지만 요약이 틀렸다면 두 사실을 나누어 기록</b>합니다. A01의 기준이 <b>근거에 맞는 결과까지 포함</b>한다면 <b class="r">연결 성공만으로 항목 전체를 통과시키지 않습니다</b></li>
+  </ul>
+  <aside>반복 한도처럼 특정 상황을 반드시 만들어야 하는 검사에 모의 모델을 사용합니다.</aside>
+</section>
+
+<!-- 7 코드 변경 -->
+<section class="slide" data-part="PART 2">
+  <h2>코드 변경의 <span class="b">검증 기준</span></h2>
+  <ul class="pts">
+    <li><b>픽스처(fixture)</b>는 <b class="g">검사를 반복할 수 있도록 준비한 입력·파일·상태</b> — 민감한 실제 프로젝트 대신 <b>결함과 기대 동작을 이해할 수 있는 코드 픽스처</b></li>
+    <li>예 — "참가자별 비용과 장소 고정 비용을 합한다"는 함수에서 <b>장소비를 인원수만큼 중복 계산</b>하는 결함. <b class="g">기대값은 함수의 현재 출력이 아니라 비용 규칙으로 계산</b>합니다: 2명 × 5,000원 + 장소비 100,000원 = <b>110,000원</b></li>
+  </ul>
+  <div class="steps">
+    <div class="st"><span class="n">1</span><span class="t">변경 전 검사에서 <b class="g">의도한 결함이 드러납니다</b></span></div>
+    <div class="st"><span class="n">2</span><span class="t">에이전트가 <b>제안한 변경 내용을 확인</b></span></div>
+    <div class="st"><span class="n">3</span><span class="t">합의한 <b>승인 절차 뒤</b> 변경을 적용</span></div>
+    <div class="st"><span class="n">4</span><span class="t"><b class="g">같은 검사를 다시 실행</b>하고 결과를 확인</span></div>
+    <div class="st"><span class="n">5</span><span class="t"><b class="r">요청과 무관한 변경이나 테스트의 기대값 조작이 없는지</b></span></div>
+  </div>
+  <div class="hl">⚠️ <b class="r">정해진 테스트를 통과해도 코드의 모든 입력이 옳다고 증명한 것은 아닙니다</b> — 검사하지 않은 경계 조건은 <b>한계로</b> 남깁니다. <b class="r">사람이 정답 코드를 넣어 테스트가 통과한 것과, 실제 에이전트가 변경을 찾아 완료한 것도 구분</b>합니다</div>
+  <aside>A03은 작은 결함이 있는 코드를 대상으로 합니다.</aside>
+</section>
+
+<!-- 8 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">실행되지 않아야 할 요청 검증</h2>
+  <p style="margin-top:11px">거절 문구만으로 충족되지 않습니다</p><span class="who">⑦ 완료 조건</span></div>
+  <aside>권한 요구사항은 실제로 파일을 읽지 않았거나 바꾸지 않았는지 확인해야 합니다.</aside>
+</section>
+
+<!-- 9 권한 검증 -->
+<section class="slide" data-part="PART 3">
+  <h2>세 가지 <span class="r">권한·오류</span> 검사</h2>
+  <table class="t">
+    <tr><th>항목</th><th>확인 방법</th></tr>
+    <tr><td><b>A04</b> 변경 거절</td><td>거절 뒤 <b class="g">파일 내용이 그대로인지 대조</b></td></tr>
+    <tr><td><b>A05</b> 경로 이탈</td><td><b>임시 작업 폴더 밖</b>에 가상 파일을 두고 <b class="g">코드의 검사에서 거절되는지</b> — <b class="r">진짜 개인 파일로 시험할 필요는 없고</b>, <b class="r">모델이 우연히 그 요청을 하지 않았다는 관찰만으로 경로 제한이 구현되었다고 판단하지도 않습니다</b></td></tr>
+    <tr><td><b>A07</b> 오류 상황</td><td><b>도구 인수 오류</b>는 실패를 모델에게 돌려주고 수정 기회를, <b>API 연결 실패</b>는 사용자에게 표시. 재시도를 허용한다면 <b>한도와 조건이 앞서 정한 상태 설계와</b> 맞아야</td></tr>
+  </table>
+  <div class="hl">⚠️ <b class="r">어느 경우에도 성공한 작업처럼 기록하지 않습니다</b></div>
+  <aside>거절 문구만 출력한다고 권한 요구가 충족되는 것은 아닙니다.</aside>
+</section>
+
+<!-- 10 상태와 범위 -->
+<section class="slide" data-part="PART 3">
+  <h2>검사 <span class="g">상태</span>와 선택 범위</h2>
+  <table class="t">
+    <tr><th>상태</th><th>의미</th></tr>
+    <tr><td><code>NOT_RUN</code></td><td>계획했지만 <b>아직 실행하지 않음</b></td></tr>
+    <tr><td><code>PASS</code></td><td><b class="g">실행 증거가 기대 결과를 충족</b></td></tr>
+    <tr><td><code>FAIL</code></td><td>실행했지만 기대 결과 미충족</td></tr>
+    <tr><td><code>DEFERRED</code></td><td>학생이 <b>합의한 선택 범위</b>에 따라 미룸</td></tr>
+  </table>
+  <ul class="pts">
+    <li><b class="r">공통 필수 항목이 어렵다는 이유로 <code>DEFERRED</code>로 바꾸지는 않습니다</b> — <b class="g">실패 원인과 남은 구현을 기록</b>합니다</li>
+    <li>반면 <b>D07에서 영속 저장을 선택하지 않았다면 A09</b>, <b>D08에서 추가 제공자를 미뤘다면 A10</b>을 <b class="g">결정 ID와 함께</b> 미룰 수 있습니다</li>
+    <li><b>A08</b>의 같은 세션 후속 요청은 선택한 대화 유지 범위에 맞게 — <b class="r">앱이 실행 중일 때 이어지는 대화와, 종료한 뒤 파일에서 복원하는 대화는 다른 기능</b>입니다. <b class="r">저장하지 않기로 했다면 재시작 후 이어진다고 설명해서는 안 됩니다</b></li>
+  </ul>
+  <aside>A11 기준 측정과 A12 변경 후 비교 실험은 벤치마크 요구 R08에 연결됩니다.</aside>
+</section>
+
+<!-- 11 자기 시나리오 -->
+<section class="slide" data-part="PART 3">
+  <h2>자기 시나리오 <span class="b">두 개</span> 추가</h2>
+  <div class="steps">
+    <div class="st"><span class="n">G</span><span class="t"><b>Given — 준비</b>: 어떤 자료와 상태에서 시작하는지</span></div>
+    <div class="st"><span class="n">W</span><span class="t"><b>When — 행동</b>: 사용자가 무엇을 요청하거나 결정하는지</span></div>
+    <div class="st"><span class="n">T</span><span class="t"><b class="g">Then — 관찰</b>: 무엇을 확인하면 기대한 동작이라고 볼지</span></div>
+  </div>
+  <ul class="pts">
+    <li><b>정상 사례</b> 예 — "담당자가 적힌 자료를 준비하고, 할 일 정리를 요청하면, <b class="g">실제 근거와 담당자를 함께 제시</b>한다"</li>
+    <li><b>실패 사례</b> 예 — "담당자가 없는 자료에서 담당자 확인을 요청하면, <b class="g">사람 이름을 만들지 않고 미정이라고 표시</b>한다"</li>
+    <li>검증 기록 계획 — <b>코드 버전, 제공자와 모델, 입력 자료, 도구 실행 결과, 최종 답과의 대조</b>. <b class="r">인증 키와 개인 자료는 증거에 넣지 않습니다</b></li>
+  </ul>
+  <div class="hl">⚠️ 벤치마크의 <b>A11·A12</b>는 로컬 파일 작업 검사가 끝나면 고정 10문항에서 확인합니다 — <b class="r">Oracle 환경 검사나 단위 테스트의 성공을 A11·A12의 실제 모델 평가 증거로 대신하지 않습니다</b></div>
+  <aside>"내 작업에서 정상 사례 하나와 실패 사례 하나를 골랐어. 기대 결과가 모호하지 않은지 같이 검토해 줘."</aside>
+</section>
+
+<!-- 12 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 기대값은 어디서 정하나?</div>
+    <div class="q a"><b>A1.</b> <b>원문이나 요구사항에서 미리.</b> 모델이 우연히 내놓은 답변을 복사하면 <b>잘못된 동작도 통과</b>한다.</div>
+    <div class="q"><b>Q2.</b> 모의 모델 검사로 알 수 없는 것은?</div>
+    <div class="q a"><b>A2.</b> <b>실제 모델의 도구 선택 능력과 반복 빈도.</b> 모의 성공을 "실제 모델 연결 성공"으로 기록하지 않는다.</div>
+    <div class="q"><b>Q3.</b> 필수 항목이 어려우면 <code>DEFERRED</code>로 바꿔도 되나?</div>
+    <div class="q a"><b>A3.</b> 안 된다. <b>실패 원인과 남은 구현을 기록</b>한다. 미루기는 <b>D07·D08 같은 결정 ID와 연결될 때</b>만.</div>
+  </div>
+  <aside>Q3이 자기 평가에서 가장 흔들리기 쉬운 지점입니다.</aside>
+</section>
+
+<!-- 13 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>무엇으로 확인할지 먼저 ✅</h1>
+    <div class="big" style="margin-top:26px">거절 문구가 아니라<br><span class="y">파일이 그대로인지</span>를 확인합니다</div>
+    <p class="sub" style="margin-top:24px">나만의 에이전트 하네스 ⑦ — 여기까지</p>
+  </div>
+  <aside>다음 소단원 ⑧에서 이 기준을 사용해 첫 읽기 작업부터 구현을 시작합니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

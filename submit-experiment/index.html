@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>실험 결과와 구현체 제출 (하네스 만들기 ⑫)</title>
+<style>
+  :root{
+    --bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;
+    --bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}}
+  :root[data-theme="dark"]{--bg:#17140f;--bg2:#201b14;--card:#221d16;--ink:#ece5d8;--soft:#a89e8c;
+    --line:#3a3126;--gr:#7fb3a2;--gr2:#5d9384;--gold:#d9b877;--red:#d68a6c;--bl:#7fa3d0;--bl2:#5f83b0;--pp:#b79bd6;--gy:#9c9486;
+    --sh:0 2px 6px rgba(0,0,0,.3),0 12px 34px rgba(0,0,0,.4);}
+  :root[data-theme="light"]{--bg:#faf8f4;--bg2:#f2ede4;--card:#fff;--ink:#2a2723;--soft:#6b6357;
+    --line:#e3dacb;--gr:#3f6b5f;--gr2:#2c4d44;--gold:#c8a15a;--red:#a65a3f;--bl:#3a5a8c;--bl2:#2b4570;--pp:#6b4d8c;--gy:#8a8378;
+    --sh:0 2px 6px rgba(60,50,30,.07),0 10px 30px rgba(60,50,30,.07);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .deck{height:100vh;display:grid;place-items:center;padding:54px 38px 74px}
+  .slide{display:none;width:100%;max-width:1020px;animation:in .25s ease}
+  .slide.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:clamp(1.9rem,4.8vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  h2{font-size:clamp(1.35rem,3.1vw,2.05rem);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.28}
+  h3{font-size:clamp(1rem,1.9vw,1.25rem);font-weight:750;margin-bottom:10px}
+  p{font-size:clamp(.94rem,1.5vw,1.1rem);color:var(--soft);margin-bottom:12px}
+  b{color:var(--ink)} i{color:var(--soft)}
+  .g{color:var(--gr);font-weight:750} .r{color:var(--red);font-weight:750} .b{color:var(--bl);font-weight:750} .p{color:var(--pp);font-weight:750}
+  small{font-size:.86em}
+
+  .cover{text-align:center}
+  .cover .kick{color:var(--gr);letter-spacing:.28em;font-size:.78rem;font-weight:700;text-transform:uppercase}
+  .cover .sub{margin-top:20px;color:var(--soft);font-size:1.02rem}
+  .part{text-align:center;padding:30px 0}
+  .part .pno{display:inline-grid;place-items:center;width:70px;height:70px;border-radius:21px;
+    background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;font-size:1.8rem;font-weight:800;margin-bottom:20px}
+  .part .who{margin-top:18px;display:inline-block;background:var(--bg2);border:1px solid var(--line);
+    border-radius:20px;padding:6px 17px;font-size:.87rem;color:var(--soft)}
+
+  ul.pts{list-style:none;display:grid;gap:11px}
+  ul.pts li{position:relative;padding-left:29px;font-size:clamp(.93rem,1.55vw,1.12rem);color:var(--soft)}
+  ul.pts li::before{content:"›";position:absolute;left:8px;color:var(--gr);font-weight:800;font-size:1.2em;line-height:1}
+  ul.pts li b{color:var(--ink)}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 21px;box-shadow:var(--sh)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .hl{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin-top:15px;font-size:clamp(.9rem,1.5vw,1.06rem)}
+  .hl b{color:var(--gr)}
+  .big{background:linear-gradient(135deg,var(--gr),var(--gr2));color:#fff;border-radius:18px;
+    padding:24px 26px;text-align:center;font-size:clamp(1.02rem,2.1vw,1.5rem);font-weight:750;line-height:1.5}
+  .big .y{color:var(--gold)}
+  .big small{opacity:.85;font-weight:400;display:block;margin-top:8px;font-size:.7em}
+
+  .chain{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;
+    text-align:center;box-shadow:var(--sh);min-width:90px;display:flex;flex-direction:column;justify-content:center}
+  .cell small{display:block;color:var(--soft);font-size:.7rem;margin-bottom:3px;font-weight:700}
+  .cell b{font-size:.9rem}
+  .ar{color:var(--gr);font-size:1.25rem;font-weight:700;display:flex;align-items:center}
+
+  .steps{display:grid;gap:9px}
+  .st{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:12px 16px;box-shadow:var(--sh)}
+  .st .n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gr);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:.8rem}
+  .st .t{font-size:clamp(.9rem,1.5vw,1.05rem)}
+
+  .qa{display:grid;gap:9px}
+  .qa .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gr);
+    border-radius:0 12px 12px 0;padding:11px 16px;font-size:clamp(.86rem,1.45vw,1.02rem)}
+  .qa .q b{color:var(--gr)}
+  .qa .q.a{border-left-color:var(--gold)}
+  .qa .q.a b{color:var(--gold)}
+
+  table.t{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.35vw,.98rem);margin-top:4px}
+  table.t th,table.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  table.t th{background:var(--bg2);color:var(--ink);font-weight:750}
+  table.t td{color:var(--soft)}
+  table.t td b,table.t th b{color:var(--ink)}
+  table.t tr td:first-child{color:var(--ink);font-weight:700}
+
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--gr);border-radius:0 10px 10px 0;
+    padding:13px 16px;margin-top:8px;overflow-x:auto;font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:clamp(.72rem,1.2vw,.9rem);line-height:1.5;color:var(--ink)}
+
+  .bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--gold));transition:width .25s;z-index:20}
+  .topL{position:fixed;top:13px;left:19px;font-size:.74rem;color:var(--soft);letter-spacing:.06em;z-index:15}
+  .topR{position:fixed;top:10px;right:17px;display:flex;gap:6px;z-index:15}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:16px;
+    padding:5px 12px;font-size:.73rem;cursor:pointer}
+  .btn:hover{border-color:var(--gr);color:var(--gr)}
+  .pg{position:fixed;bottom:13px;right:19px;font-size:.77rem;color:var(--soft);z-index:15}
+  .nav{position:fixed;bottom:10px;left:19px;display:flex;gap:6px;z-index:15}
+  .notes{position:fixed;left:0;right:0;bottom:0;background:var(--gr2);color:#fff;padding:13px 22px 15px;
+    font-size:.87rem;line-height:1.6;display:none;z-index:18;max-height:36vh;overflow-y:auto}
+  .notes.on{display:block}
+  .notes .lab{color:var(--gold);font-weight:800;font-size:.69rem;letter-spacing:.14em;display:block;margin-bottom:4px}
+  aside{display:none}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="topL" id="topL"></div>
+<div class="topR">
+  <button class="btn" onclick="tgN()">🗒 학습노트 (S)</button>
+  <button class="btn" onclick="tgT()">🌗</button>
+</div>
+<div class="nav"><button class="btn" onclick="go(-1)">←</button><button class="btn" onclick="go(1)">→</button></div>
+<div class="pg" id="pg"></div>
+
+<div class="deck" id="deck">
+
+
+<!-- 1 표지 -->
+<section class="slide" data-part="표지">
+  <div class="cover">
+    <span class="kick">대단원 5 · 에이전트 시스템 마스터 · 하네스 만들기 ⑫</span>
+    <h1 style="margin:18px 0">실험 결과와<br>구현체 제출</h1>
+    <p class="sub">제품 검증과 벤치마크 결과를 나누어 정리합니다</p>
+  </div>
+  <aside>마지막 소단원입니다. 만든 것과 잰 것을 함께 제출합니다.</aside>
+</section>
+
+<!-- 2 두 종류 -->
+<section class="slide" data-part="표지">
+  <h2>섞으면 안 되는 <span class="g">두 가지 결과</span></h2>
+  <table class="t">
+    <tr><th>구분</th><th>무엇을 확인했나</th><th>근거</th></tr>
+    <tr><td><b class="g">제품 검증</b></td><td>내 하네스가 <b>PRD의 완료 조건</b>을 만족하는가</td><td>⑦에서 정한 검증 시나리오 실행 결과</td></tr>
+    <tr><td><b class="b">벤치마크 결과</b></td><td>고정 10문항에서 <b>몇 개를 통과</b>했는가</td><td>원본 pytest 채점, <code>local-port</code></td></tr>
+  </table>
+  <div class="hl">📌 <b class="r">벤치마크 점수가 낮다고 제품이 실패한 것도, 점수가 높다고 완료 조건을 채운 것도 아닙니다.</b> <b class="g">두 결과를 각각의 표로</b> 제출합니다</div>
+  <aside>둘의 목적이 다르기 때문에 하나의 숫자로 합칠 수 없습니다.</aside>
+</section>
+
+<!-- 3 PART 1 -->
+<section class="slide" data-part="PART 1">
+  <div class="part"><div class="pno">1</div><h2 style="margin:0">실패를 추적하는 순서</h2>
+  <p style="margin-top:11px">관찰에서 재실행까지 여섯 단계</p><span class="who">⑫ 결과와 제출</span></div>
+  <aside>실패 하나를 끝까지 따라가는 절차입니다.</aside>
+</section>
+
+<!-- 4 추적 표 -->
+<section class="slide" data-part="PART 1">
+  <h2>여섯 <span class="g">단계</span></h2>
+  <table class="t">
+    <tr><th>단계</th><th>하는 일</th><th>남기는 것</th></tr>
+    <tr><td><b>1 관찰</b></td><td>어떤 문항이 어떤 상태로 끝났는지 확인</td><td>상태와 중단 원인</td></tr>
+    <tr><td><b>2 요구 확인</b></td><td>원본 작업 지시가 무엇을 요구했는지 다시 읽음</td><td>기대 산출물</td></tr>
+    <tr><td><b class="g">3 계약 확인</b></td><td><b class="g">도구 입출력·경로 계약</b>이 지켜졌는지 로그로 확인</td><td>어긋난 호출 기록</td></tr>
+    <tr><td><b>4 구현 수정</b></td><td>원인 한 곳만 고침</td><td>변경 내용</td></tr>
+    <tr><td><b class="g">5 검증 추가</b></td><td><b class="g">같은 실패를 다시 잡을 검사</b>를 테스트에 추가</td><td>회귀 검사</td></tr>
+    <tr><td><b>6 재실행</b></td><td>같은 조건으로 다시 돌려 비교</td><td>전·후 결과</td></tr>
+  </table>
+  <div class="hl">📌 <b class="g">5단계를 건너뛰면 같은 실패가 반복</b>됩니다 — 고친 사실보다 <b class="g">다시 잡을 장치를 남긴 사실</b>이 제출물에서 더 중요합니다</div>
+  <aside>3단계에서 대부분의 원인이 드러납니다.</aside>
+</section>
+
+<!-- 5 회귀 -->
+<section class="slide" data-part="PART 1">
+  <h2>회귀 <span class="b">검사</span></h2>
+  <ul class="pts">
+    <li><b>회귀(regression)</b>는 <b class="g">전에 되던 것이 다시 안 되는 것</b>. 한 곳을 고치다 다른 곳이 깨지는 상황</li>
+    <li>고칠 때마다 검사를 하나 추가해 두면, <b class="g">이후 변경에서 자동으로 다시 확인</b>됩니다</li>
+    <li>제출 전에 <b class="g">전체 검사를 한 번 통째로</b> 돌려 봅니다 — <b class="r">마지막 수정만 확인하고 끝내지 않습니다</b></li>
+  </ul>
+  <pre>uv run python -m pytest -q</pre>
+  <div class="hl">⚠️ 검사가 몇 개는 통과하고 몇 개는 실패한다면 — <b class="r">"대체로 된다"가 아니라 실패 목록을 그대로 적습니다.</b> <b class="g">숨긴 실패는 평가에서 더 크게 드러납니다</b></div>
+  <aside>테스트 파일 자체를 고쳐 통과시키는 것은 해결이 아닙니다.</aside>
+</section>
+
+<!-- 6 PART 2 -->
+<section class="slide" data-part="PART 2">
+  <div class="part"><div class="pno">2</div><h2 style="margin:0">잰 것과 안 잰 것</h2>
+  <p style="margin-top:11px">NOT_RUN을 그대로 적습니다</p><span class="who">⑫ 결과와 제출</span></div>
+  <aside>정직한 기록이 제출물의 신뢰도를 만듭니다.</aside>
+</section>
+
+<!-- 7 NOT_RUN -->
+<section class="slide" data-part="PART 2">
+  <h2>측정과 <span class="r">미측정</span></h2>
+  <table class="t">
+    <tr><th>기록</th><th>의미</th><th>쓰는 법</th></tr>
+    <tr><td><b class="g">측정값</b></td><td>실제로 돌려서 얻은 숫자</td><td>조건과 함께 적음</td></tr>
+    <tr><td><b class="r">NOT_RUN</b></td><td>시간·비용·환경 때문에 <b>돌리지 않음</b></td><td><b class="g">빈칸이나 0이 아니라 명시</b></td></tr>
+    <tr><td><b>error</b></td><td>돌렸으나 채점이 실패</td><td>실패 이유를 함께</td></tr>
+  </table>
+  <div class="hl">📌 <b class="r">돌리지 않은 항목을 0으로 채우면 성능이 나쁜 것처럼, 빈칸으로 두면 잰 것처럼</b> 보입니다 — <b class="g"><code>NOT_RUN</code>이라고 쓰는 것이 가장 정확</b>합니다. ⑪의 <code>usage_known=False</code>와 같은 원칙</div>
+  <aside>왜 돌리지 않았는지 한 줄 사유를 같이 적으면 더 좋습니다.</aside>
+</section>
+
+<!-- 8 개발용 세트 -->
+<section class="slide" data-part="PART 2">
+  <h2>개발용 세트의 <span class="b">한계</span></h2>
+  <ul class="pts">
+    <li>이 10문항은 <b class="g">개발하면서 반복해서 본 세트</b>입니다 — 여기에 맞춰 고치다 보면 <b class="r">이 10문항에만 잘 맞는 하네스</b>가 될 수 있습니다</li>
+    <li><b class="g">개발용 세트 점수는 일반 성능의 상한이 아니라 참고값</b>으로 씁니다</li>
+    <li>제출 문서에 <b class="g">"이 점수는 개발 과정에서 반복 사용한 세트의 결과"</b>라고 적습니다</li>
+  </ul>
+  <div class="hl">⚠️ <b class="r">특정 문항의 정답을 코드에 심어 통과시키는 것은 개선이 아닙니다.</b> 채점 통과는 <b class="g">일반적인 방법으로 문제를 푼 결과</b>여야 합니다</div>
+  <aside>같은 이유로 원본 정답과 채점 코드를 하네스 입력에 넣지 않습니다.</aside>
+</section>
+
+<!-- 9 PART 3 -->
+<section class="slide" data-part="PART 3">
+  <div class="part"><div class="pno">3</div><h2 style="margin:0">제출물 꾸리기</h2>
+  <p style="margin-top:11px">무엇을 넣고 무엇을 빼는가</p><span class="who">⑫ 결과와 제출</span></div>
+  <aside>마지막으로 제출 묶음을 정리합니다.</aside>
+</section>
+
+<!-- 10 넣을 것 -->
+<section class="slide" data-part="PART 3">
+  <h2>넣을 <span class="g">것</span></h2>
+  <ul class="pts">
+    <li><b class="g">PRD와 설계 문서</b> — 사용자·작업·완료 조건·플랫폼·제공자 결정</li>
+    <li><b class="g">구현 코드</b> — 실행 방법(설치·실행 명령)을 README에 명시</li>
+    <li><b class="g">제품 검증 결과</b> — ⑦의 시나리오별 통과/실패</li>
+    <li><b class="g">벤치마크 결과 표</b> — n/10, 난이도별 분해, 상태 분포</li>
+    <li><b class="g">실행 메타데이터</b> — <code>run-metadata.json</code>, <code>execution_mode: local-port</code></li>
+    <li><b class="g">비교 실험 기록</b> — 가설, 바꾼 변수 하나, 전·후 비교</li>
+    <li><b class="g">실패 추적 기록</b> — 관찰부터 회귀 검사 추가까지</li>
+  </ul>
+  <div class="hl">📌 <b class="g">다른 사람이 같은 명령으로 재현할 수 있는가</b>가 기준입니다 — 실행 명령이 빠진 코드는 검증할 수 없습니다</div>
+  <aside>재현 가능성이 제출물 평가의 핵심입니다.</aside>
+</section>
+
+<!-- 11 뺄 것 -->
+<section class="slide" data-part="PART 3">
+  <h2>뺄 <span class="r">것</span></h2>
+  <table class="t">
+    <tr><th>제외 대상</th><th>이유</th></tr>
+    <tr><td><b class="r"><code>benchmark/upstream/</code></b></td><td>원본 벤치마크 자료 — <b class="g">별도 저장소의 내용이므로 사본을 함께 배포하지 않음</b></td></tr>
+    <tr><td><b class="r"><code>.benchmark-cache/</code></b></td><td>내려받은 캐시 — 용량이 크고 재생성 가능</td></tr>
+    <tr><td><b class="r">API 키·토큰</b></td><td><b class="r">환경 변수·설정 파일·로그 어디에도 남기지 않음</b></td></tr>
+    <tr><td><b class="r">개인정보</b></td><td>실습 중 사용한 개인 파일·계정 정보</td></tr>
+  </table>
+  <div class="hl">⚠️ <b class="g">두 폴더를 빼더라도 실패 기록의 행은 그대로 남깁니다</b> — 어떤 문항이 왜 실패했는지는 <b class="g">제출물의 내용</b>이고, 원본 자료 사본과는 별개입니다</div>
+  <div class="hl">📌 제출 직전 <b class="g">복사본에서 키가 들어갈 만한 파일을 한 번 훑어보는</b> 절차를 넣으면 실수를 크게 줄일 수 있습니다</div>
+  <aside>세션 대화 파일에도 자료 내용이 남을 수 있어 함께 확인합니다.</aside>
+</section>
+
+<!-- 12 확인 -->
+<section class="slide" data-part="확인">
+  <h2>❓ 이해도 확인</h2>
+  <div class="qa">
+    <div class="q"><b>Q1.</b> 돌리지 않은 측정 항목은 어떻게 적나?</div>
+    <div class="q a"><b>A1.</b> <b><code>NOT_RUN</code></b>. 0으로 채우면 성능이 나쁜 것처럼, 빈칸이면 잰 것처럼 보인다.</div>
+    <div class="q"><b>Q2.</b> 실패를 고친 뒤 반드시 남겨야 할 것은?</div>
+    <div class="q a"><b>A2.</b> <b>같은 실패를 다시 잡을 회귀 검사.</b> 고친 사실보다 다시 잡을 장치가 더 중요하다.</div>
+    <div class="q"><b>Q3.</b> <code>benchmark/upstream/</code>을 빼면 실패 기록도 빼야 하나?</div>
+    <div class="q a"><b>A3.</b> 아니다. <b>실패 행은 그대로 남긴다.</b> 원본 자료 사본을 배포하지 않는 것과 내 결과를 기록하는 것은 별개다.</div>
+  </div>
+  <aside>Q3은 제출 직전에 자주 혼동되는 부분입니다.</aside>
+</section>
+
+<!-- 13 마무리 -->
+<section class="slide" data-part="마무리">
+  <div class="cover">
+    <h1>만든 것과 잰 것 🎓</h1>
+    <div class="big" style="margin-top:26px">완료 조건을 채웠는가와<br>10문항 중 몇 개인가는 <span class="y">다른 질문</span></div>
+    <p class="sub" style="margin-top:24px">나만의 에이전트 하네스 ⑫ — 중단원 완결</p>
+  </div>
+  <aside>대단원 5 중단원 ⑥ 「나만의 에이전트 하네스 만들기」를 모두 마쳤습니다.</aside>
+</section>
+</div>
+
+<div class="notes" id="notes"><span class="lab">학습 노트</span><div id="noteTxt"></div></div>
+
+<script>
+  var S=[].slice.call(document.querySelectorAll('.slide')), i=0;
+  function draw(){
+    S.forEach(function(s,n){s.classList.toggle('on',n===i)});
+    document.getElementById('bar').style.width=((i+1)/S.length*100)+'%';
+    document.getElementById('pg').textContent=(i+1)+' / '+S.length;
+    document.getElementById('topL').textContent=S[i].dataset.part||'';
+    var a=S[i].querySelector('aside');
+    document.getElementById('noteTxt').textContent=a?a.textContent:'(노트 없음)';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function go(d){i=Math.min(S.length-1,Math.max(0,i+d));draw()}
+  function tgN(){document.getElementById('notes').classList.toggle('on')}
+  function tgT(){var r=document.documentElement,d=r.getAttribute('data-theme');
+    var dark=d==='dark'||(!d&&matchMedia('(prefers-color-scheme:dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark')}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+    else if(e.key==='Home'){i=0;draw()} else if(e.key==='End'){i=S.length-1;draw()}
+    else if(e.key==='s'||e.key==='S'){tgN()}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.btn'))return;
+    go(e.clientX < innerWidth*0.32 ? -1 : 1);
+  });
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  if(h>0&&h<=S.length)i=h-1;
+  draw();
+</script>
+</body>
+</html>

@@ -51,7 +51,8 @@ const LESSONS = process.argv.slice(2).length
      "tool-context-burden","claude-tool-search","opencode-code-mode",
      "skill-domain-knowledge","first-team-report","save-as-skill",
      "reuse-skill-new-week","colab-mcp","google-oauth-sheets",
-     "extend-own-task","wikiskill-research"];
+     "extend-own-task","wikiskill-research",
+     "harness-user-and-task","incomplete-prd","platform-and-language","scope-and-provider","flow-and-state","api-and-tool-interface","acceptance-criteria","first-vertical-build","python-harness-read","benchmark-ten-tasks","score-and-compare","submit-experiment"];
 
 // ---- palette (deck light theme) ----
 const INK="2A2723", SOFT="6B6357", GR="3F6B5F", GR2="2C4D44", GOLD="C8A15A",
